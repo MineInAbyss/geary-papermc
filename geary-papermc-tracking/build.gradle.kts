@@ -2,6 +2,7 @@
 plugins {
     id(libs.plugins.mia.kotlin.asProvider().get().pluginId)
     id(libs.plugins.mia.papermc.get().pluginId)
+    id(libs.plugins.mia.publication.get().pluginId)
 }
 
 dependencies {

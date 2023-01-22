@@ -4,9 +4,15 @@ val idofrontVersion: String by project
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    `java-library`
+    alias(libs.plugins.mia.publication)
+    alias(libs.plugins.mia.kotlin)
     alias(libs.plugins.dokka)
     alias(libs.plugins.mia.autoversion)
+}
+
+dependencies {
+    api(project(":geary-papermc-tracking"))
 }
 
 allprojects {
