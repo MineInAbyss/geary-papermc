@@ -7,7 +7,7 @@ plugins {
     `java-library`
     alias(libs.plugins.mia.publication)
     alias(libs.plugins.mia.kotlin)
-    alias(libs.plugins.dokka)
+    alias(libs.plugins.dokka) apply false
     alias(libs.plugins.mia.autoversion)
 }
 
@@ -17,6 +17,7 @@ dependencies {
 
 allprojects {
     apply(plugin = "kotlin")
+    apply(plugin = "org.jetbrains.dokka")
 
     repositories {
         mavenCentral()

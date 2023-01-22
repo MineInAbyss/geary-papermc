@@ -1,0 +1,36 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: MineInAbyss/publish-action@latest
+        with:
+          maven-metadata-url: https://repo.mineinabyss.com/releases/com/mineinabyss/geary-papermc-core/maven-metadata.xml
+          pages-path: build/dokka/htmlMultiModule/
+          dokka: htmlMultiModule
+          release-files: |
+            geary-papermc-plugin/build/libs/geary-papermc-[0-9]*[0-9].jar
+
+  deploy:
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
