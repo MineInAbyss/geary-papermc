@@ -7,7 +7,6 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
 }
 
-// remove kotlin from implementations
 configurations {
     runtimeClasspath {
         exclude(group = "org.jetbrains.kotlin")
@@ -30,8 +29,6 @@ dependencies {
     compileOnly(libs.kotlinx.serialization.kaml)
     compileOnly(libs.kotlinx.coroutines)
     compileOnly(libs.minecraft.mccoroutine)
-
-    implementation(libs.bundles.idofront.core)
 }
 
 tasks {

@@ -39,6 +39,4 @@ class EntityWorldEventTracker : Listener {
     fun PlayerQuitEvent.onPlayerLogout() {
         player.toGearyOrNull()?.removeEntity()
     }
-
-    //TODO player dead component tracking
 }

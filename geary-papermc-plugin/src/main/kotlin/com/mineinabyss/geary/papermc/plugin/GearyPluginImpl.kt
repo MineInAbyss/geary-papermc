@@ -104,5 +104,3 @@ class GearyPluginImpl : GearyPlugin() {
         server.scheduler.cancelTasks(this)
     }
 }
-
-//TODO remove dep on ktor

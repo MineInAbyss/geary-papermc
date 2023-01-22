@@ -55,7 +55,6 @@ fun <T : GearyComponent> PersistentDataContainer.encode(
  * Decodes a component of type [T] from this [PersistentDataContainer], where serializer and key are automatically
  * found via [Formats].
  */
-//TODO use context when compiler fixed
 inline fun <reified T : GearyComponent> PersistentDataContainer.decode(): T? {
     return decode(
         serializer = serializers.getSerializerFor(T::class) ?: return null,
@@ -151,7 +150,6 @@ var PersistentDataContainer.hasComponentsEncoded: Boolean
     get() = has(COMPONENTS_KEY, PersistentDataType.BYTE)
     set(value) {
         when {
-            //TODO are there any empty marker keys?
             value -> if (!hasComponentsEncoded) set(COMPONENTS_KEY, PersistentDataType.BYTE, 1)
             else -> remove(COMPONENTS_KEY)
         }
