@@ -13,11 +13,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: MineInAbyss/publish-action@latest
+      - uses: MineInAbyss/publish-action@master
         with:
           maven-metadata-url: https://repo.mineinabyss.com/releases/com/mineinabyss/geary-papermc-core/maven-metadata.xml
           pages-path: build/dokka/htmlMultiModule/
-          dokka: htmlMultiModule
+          dokka: dokkaHtmlMultiModule
+          maven-username: ${{ secrets.MAVEN_PUBLISH_USERNAME }}
+          maven-password: ${{ secrets.MAVEN_PUBLISH_PASSWORD }}
           release-files: |
             geary-papermc-plugin/build/libs/geary-papermc-[0-9]*[0-9].jar
 
