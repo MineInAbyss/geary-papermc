@@ -2,6 +2,11 @@
 
 # Geary papermc
 
+[![Build](https://github.com/MineInAbyss/geary-papermc/actions/workflows/build.yml/badge.svg)](https://github.com/MineInAbyss/geary-papermc/actions/workflows/build.yml)
+[![Package](https://img.shields.io/maven-metadata/v?metadataUrl=https://repo.mineinabyss.com/releases/com/mineinabyss/geary-papermc-core/maven-metadata.xml)](https://repo.mineinabyss.com/#/releases/com/mineinabyss/geary-papermc-core)
+[![Wiki](https://img.shields.io/badge/-Project%20Wiki-blueviolet?logo=Wikipedia&labelColor=gray)](https://wiki.mineinabyss.com/geary)
+[![Contribute](https://shields.io/badge/Contribute-e57be5?logo=github%20sponsors&style=flat&logoColor=white)](https://wiki.mineinabyss.com/contribute)
+
 </div>
 
 Geary papermc is a papermc plugin that lets you interact with Minecraft through [Geary](https://github.com/MineInAbyss/Geary).
