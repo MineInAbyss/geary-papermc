@@ -36,4 +36,8 @@ tasks {
         archiveClassifier.set("")
         minimize()
     }
+
+    build {
+        dependsOn(shadowJar)
+    }
 }
