@@ -9,21 +9,22 @@
 
 </div>
 
-Geary papermc is a papermc plugin that lets you interact with Minecraft through [Geary](https://github.com/MineInAbyss/Geary).
+Geary papermc is a papermc plugin that lets you interact with Minecraft through [Geary](https://github.com/MineInAbyss/Geary). 
 
 ## Features
 
 - Loads prefabs from `plugins/Geary/<namespace>` folders
 - Support for persisting data via persistent data containers
 - ECS bukkit entities
-- (soon to be moved here) ECS inventory items and basic support for blocks
-
+- ECS items in player inventories
+- Basic support for blocks will be moved here soon
+- Many systems and components that may in the `geary-papermc-features` module.
 
 ## Plugins using geary
 
-We have other projects to further extend upon the basic tracking provided here.
+We have other config-driven projects to help you create things without having to code!
 
-- [Mobzy](https://github.com/MineInAbyss/Mobzy) - Bindings for defining custom mobs. Includes pathfinding, attributes, and spawning
-- [Looty](https://github.com/MineInAbyss/Looty) - Custom items and item interactions
+- [Mobzy](https://github.com/MineInAbyss/Mobzy) - Custom mobs. Includes pathfinding, attributes, and a spawning system
+- [Looty](https://github.com/MineInAbyss/Looty) - Custom items, recipes, and migration support as your config changes
 - [Blocky](https://github.com/MineInAbyss/Blocky) - Custom blocks, furniture and more
 - [Chatty](https://github.com/MineInAbyss/Chatty) - Customizes chat messages with MiniMessage support
