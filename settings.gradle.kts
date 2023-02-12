@@ -10,6 +10,7 @@ pluginManagement {
 
 dependencyResolutionManagement {
     val idofrontVersion: String by settings
+    val gearyVersion: String by settings
 
     repositories {
         maven("https://repo.mineinabyss.com/releases")
@@ -18,12 +19,11 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs").from("com.mineinabyss:catalog:$idofrontVersion")
         create("myLibs").from(files("gradle/myLibs.versions.toml"))
+        create("gearyLibs").from("com.mineinabyss:geary-catalog:$gearyVersion")
     }
 }
 
 include(
-//    "geary-commons",
-//    "geary-papermc-bindings",
     "geary-papermc-core",
     "geary-papermc-datastore",
     "geary-papermc-plugin",

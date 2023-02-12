@@ -1,12 +1,2 @@
-[versions]
-geary = "0.22.6"
-
 [libraries]
-geary-core = { module = "com.mineinabyss:geary-core", version.ref = "geary" }
-geary-papermc-bindings = { module = "com.mineinabyss:geary-papermc-bindings", version.ref = "geary" }
-geary-serialization = { module = "com.mineinabyss:geary-serialization", version.ref = "geary" }
-geary-prefabs = { module = "com.mineinabyss:geary-prefabs", version.ref = "geary" }
-geary-uuid = { module = "com.mineinabyss:geary-uuid", version.ref = "geary" }
-geary-autoscan = { module = "com.mineinabyss:geary-autoscan", version.ref = "geary" }
-
 plugman = "com.rylinaux:PlugMan:2.2.5"

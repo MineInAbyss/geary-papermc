@@ -12,6 +12,7 @@ import com.mineinabyss.geary.papermc.GearyPaperModule
 import com.mineinabyss.geary.papermc.GearyPlugin
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
+import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.geary.serialization.dsl.FileSystemAddon
 import com.mineinabyss.geary.serialization.dsl.serialization
@@ -62,6 +63,7 @@ class GearyPluginImpl : GearyPlugin() {
             install(UUIDTracking)
 
             if(paperModule.config.trackEntities) install(EntityTracking)
+            if(paperModule.config.trackItems) install(ItemTracking)
 
             serialization {
                 format("yml", ::YamlFormat)
