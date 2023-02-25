@@ -10,7 +10,7 @@ import com.mineinabyss.geary.helpers.NO_ENTITY
 import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemReference.*
-import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
+import com.mineinabyss.geary.papermc.tracking.items.cache.GearyItemCache
 import com.mineinabyss.geary.systems.RepeatingSystem
 import com.mineinabyss.geary.systems.accessors.TargetScope
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
@@ -36,7 +36,7 @@ import java.util.*
  */
 class InventoryTrackerSystem : RepeatingSystem(interval = 1.ticks) {
     private val TargetScope.player by get<Player>()
-    private val TargetScope.itemCache by get<PlayerItemCache>()
+    private val TargetScope.itemCache by get<GearyItemCache>()
 
 
     override fun TargetScope.tick() {
@@ -47,15 +47,15 @@ class InventoryTrackerSystem : RepeatingSystem(interval = 1.ticks) {
         private val logger get() = geary.logger
 
         // Avoids bukkit items since ItemMeta does a lot of copying which adds overhead
-        fun refresh(player: Player, cache: PlayerItemCache) {
+        fun refresh(player: Player, cache: GearyItemCache) {
             val nmsInv = player.toNMS().inventory
 
             // Map of entity id to bitset of slots that entity was in (this is necessary for prefabs where the same entity may exist in many slots)
             val toRemoveFromCache = Long2LongOpenHashMap()
             // Entities on items in inventory that do not match the entity in cache
-            val checkForMove = Array<Exists.Entity?>(PlayerItemCache.MAX_SIZE) { null }
+            val checkForMove = Array<Exists.Entity?>(GearyItemCache.MAX_SIZE) { null }
             // Remaining items that must create new entities
-            val toLoad = Array<NotLoaded?>(PlayerItemCache.MAX_SIZE) { null }
+            val toLoad = Array<NotLoaded?>(GearyItemCache.MAX_SIZE) { null }
 
             // Go through all slots and check for changes with cache
             nmsInv.forEachSlot { item, slot ->
@@ -151,7 +151,7 @@ class InventoryTrackerSystem : RepeatingSystem(interval = 1.ticks) {
                 }
             }
             // Include cursor as last slot
-            action(player.containerMenu.carried, PlayerItemCache.CURSOR_SLOT)
+            action(player.containerMenu.carried, GearyItemCache.CURSOR_SLOT)
         }
     }
 }

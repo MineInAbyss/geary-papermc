@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.tracking.items.cache
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.NO_ENTITY
 import com.mineinabyss.geary.papermc.tracking.items.components.PlayerInstancedItem
+import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
 import org.bukkit.persistence.PersistentDataContainer
 
@@ -41,7 +42,7 @@ sealed class ItemReference {
 
         /** Reference to a [PlayerInstancedItem] exists but is not loaded yet. */
         class PlayerInstanced(
-            val prefab: GearyEntity,
+            val prefab: PrefabKey,
             override val item: NMSItemStack
         ) : NotLoaded()
     }

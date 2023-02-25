@@ -4,10 +4,10 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * > looty:player_instanced_item
+ * > geary:player_instanced_item
  *
- * Indicates a Looty item entity should exist once per player instead of once for each ItemStack in the inventory.
+ * Indicates a Geary item entity should exist once per player instead of once for each ItemStack in the inventory.
  */
 @Serializable
-@SerialName("looty:player_instanced_item")
+@SerialName("geary:player_instanced_item")
 class PlayerInstancedItem

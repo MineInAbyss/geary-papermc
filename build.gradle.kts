@@ -7,8 +7,8 @@ plugins {
     `java-library`
     alias(libs.plugins.mia.publication)
     alias(libs.plugins.mia.kotlin.jvm)
-    alias(libs.plugins.dokka) apply false
     alias(libs.plugins.mia.autoversion)
+    alias(libs.plugins.dokka) apply false
 }
 
 dependencies {

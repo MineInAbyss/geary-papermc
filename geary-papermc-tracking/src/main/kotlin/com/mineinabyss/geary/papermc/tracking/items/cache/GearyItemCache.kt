@@ -1,26 +1,26 @@
 package com.mineinabyss.geary.papermc.tracking.items.cache
 
 import com.mineinabyss.geary.datatypes.GearyEntity
+import com.mineinabyss.geary.datatypes.GearyEntityType
 import com.mineinabyss.geary.helpers.NO_ENTITY
+import com.mineinabyss.geary.helpers.addParent
+import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.helpers.toGeary
-import com.mineinabyss.geary.papermc.datastore.decode
-import com.mineinabyss.geary.papermc.datastore.decodePrefabs
-import com.mineinabyss.geary.papermc.datastore.hasComponentsEncoded
-import com.mineinabyss.geary.papermc.datastore.remove
+import com.mineinabyss.geary.papermc.datastore.*
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemReference.*
 import com.mineinabyss.geary.papermc.tracking.items.components.PlayerInstancedItem
 import com.mineinabyss.geary.papermc.tracking.items.itemTracking
+import com.mineinabyss.geary.prefabs.PrefabKey
+import com.mineinabyss.geary.uuid.components.RegenerateUUIDOnClash
 import com.mineinabyss.geary.uuid.uuid2Geary
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
 import com.mineinabyss.idofront.nms.nbt.fastPDC
 import net.minecraft.world.item.Items
 import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack
 import org.bukkit.inventory.ItemStack
-import org.bukkit.persistence.PersistentDataContainer
 import java.util.*
 
-// TODO bad pattern, passing entity into component, move into event
-class PlayerItemCache(val parent: GearyEntity) {
+internal class GearyItemCache(val parent: GearyEntity) {
     /** Entity associated with an inventory slot */
     private val entities = ULongArray(64)
 
@@ -65,7 +65,7 @@ class PlayerItemCache(val parent: GearyEntity) {
         if (entity.id == 0uL) return false
         entities[slot] = 0uL
         cachedItems[slot] = null
-        return if (entity.has<PlayerInstancedItem>())
+        return if (entity in playerInstanced)
             playerInstanced.unsetSlot(entity, slot, removeEntity)
         else if (removeEntity) {
             entity.removeEntity()
@@ -130,7 +130,7 @@ class PlayerItemCache(val parent: GearyEntity) {
         slot: Int,
         reference: NotLoaded,
     ): GearyEntity {
-        val created = itemTracking.provider.newItemEntityOrPrefab(parent, reference)
+        val created = itemTracking.provider.load(parent, reference)
         set(slot, created)
         return created.entity
     }
@@ -152,19 +152,49 @@ class PlayerItemCache(val parent: GearyEntity) {
 
         // Try to get a PlayerInstancedItem
         if (prefabs.size == 1) {
-            val prefab = prefabs.first().toEntityOrNull() ?: return None(item)
+            val prefabKey = prefabs.first()
+            val prefab = prefabKey.toEntityOrNull() ?: return None(item)
             if (prefab.has<PlayerInstancedItem>()) {
                 pdc.remove<UUID>() // in case of migration
                 val existing = playerInstanced[prefab]
                 return if (existing != null) {
                     Exists.PlayerInstanced(existing, item)
-                } else NotLoaded.PlayerInstanced(prefab, item)
+                } else NotLoaded.PlayerInstanced(prefabKey, item)
             }
         }
 
         // If item doesn't have a UUID encoded or the UUID doesn't match a loaded entity, return NotLoaded
         val entity = pdc.decode<UUID>()?.let { uuid2Geary[it] } ?: return NotLoaded.Entity(pdc, item)
         return Exists.Entity(entity, pdc, item)
+    }
+
+    /** Gets or creates a [GearyEntity] based on a given item and the context it is in. */
+    private fun load(
+        holder: GearyEntity,
+        reference: NotLoaded
+    ): Exists = when (reference) {
+        is NotLoaded.Entity -> {
+            val decoded = reference.pdc.decodeComponents()
+            Exists.Entity(
+                entity {
+                    addParent(holder)
+                    add<RegenerateUUIDOnClash>()
+                    loadComponentsFrom(decoded)
+                    getOrSetPersisting<UUID> { UUID.randomUUID() }
+                    encodeComponentsTo(reference.pdc)
+                    logger.d("Loaded new instance of prefab ${get<PrefabKey>()} on $holder")
+                },
+                reference.pdc,
+                reference.item,
+            )
+        }
+
+        is NotLoaded.PlayerInstanced -> {
+            Exists.PlayerInstanced(
+                reference.prefab,
+                reference.item,
+            )
+        }
     }
 
     companion object {
