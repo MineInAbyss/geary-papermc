@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.tracking.entities
 import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.tracking.entities.systems.AttemptSpawnListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.EntityWorldEventTracker
 import com.mineinabyss.geary.papermc.tracking.entities.systems.TrackOnSetBukkitComponent
 import com.mineinabyss.geary.papermc.tracking.entities.systems.UntrackOnRemoveBukkitComponent
@@ -21,7 +22,11 @@ interface EntityTracking {
 
         override fun EntityTracking.install() {
             gearyPaper.plugin.listeners(EntityWorldEventTracker())
-            geary.pipeline.addSystems(TrackOnSetBukkitComponent(), UntrackOnRemoveBukkitComponent())
+            geary.pipeline.addSystems(
+                TrackOnSetBukkitComponent(),
+                UntrackOnRemoveBukkitComponent(),
+                AttemptSpawnListener()
+            )
         }
     }
 }

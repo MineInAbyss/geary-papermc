@@ -1,4 +1,4 @@
-package com.mineinabyss.geary.papermc.tracking.items.creation
+package com.mineinabyss.geary.papermc.tracking.items
 
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.addParent
@@ -6,8 +6,11 @@ import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.datastore.*
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemReference.*
+import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.uuid.components.RegenerateUUIDOnClash
+import org.bukkit.Material
+import org.bukkit.inventory.ItemStack
 import java.util.*
 
 /**
@@ -17,35 +20,21 @@ class GearyItemProvider {
     val logger get() = geary.logger
 
     /** Creates an ItemStack from a [prefabKey], encoding relevant information to it. */
-//    fun createFromPrefab(
-//        prefabKey: PrefabKey,
-//    ): ItemStack? {
-//        val item = ItemStack(Material.AIR)
-//        updateItemFromPrefab(item, prefabKey)
-//        return item.takeIf { it.type != Material.AIR }
-//    }
-//
-//    fun updateItemFromPrefab(item: ItemStack, prefabKey: PrefabKey) {
-//        val prefab = prefabKey.toEntityOrNull() ?: return
-//        prefab.get<LootyType>()?.item?.toItemStack(item)
-//        item.editMeta {
-//            it.persistentDataContainer.encodePrefabs(listOf(prefabKey))
-//        }
-//    }
+    fun createFromPrefab(
+        prefabKey: PrefabKey,
+    ): ItemStack? {
+        val item = ItemStack(Material.AIR)
+        updateFromPrefab(item, prefabKey)
+        return item.takeIf { it.type != Material.AIR }
+    }
 
-//    private fun updateOldLootyItem(pdc: PersistentDataContainer, prefabs: Set<PrefabKey>, item: NMSItemStack) {
-//        val tag = item.tag ?: return
-//        if (!tag.contains("CustomModelData")) return
-//        if (prefabs.isEmpty()) {
-//            val prefab = CustomModelDataToPrefabMap[CustomItem(
-//                CraftMagicNumbers.getMaterial(item.item),
-//                tag.getInt("CustomModelData")
-//            )] ?: return
-//            pdc.encodeComponents(setOf(), GearyEntityType())
-//            pdc.encodePrefabs(listOf(prefab))
-//        }
-//    }
-
+    fun updateFromPrefab(item: ItemStack, prefabKey: PrefabKey) {
+        val prefab = prefabKey.toEntityOrNull() ?: return
+        prefab.get<SetItem>()?.item?.toItemStack(item)
+        item.editMeta {
+            it.persistentDataContainer.encodePrefabs(listOf(prefabKey))
+        }
+    }
 
     //TODO return the instance of prefab for PlayerInstanced
     /** Gets or creates a [GearyEntity] based on a given item and the context it is in. */

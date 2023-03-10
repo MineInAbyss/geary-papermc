@@ -1,12 +1,11 @@
 package com.mineinabyss.geary.papermc.tracking.items.cache
 
 import com.mineinabyss.geary.datatypes.GearyEntity
+import com.mineinabyss.geary.datatypes.GearyEntityType
 import com.mineinabyss.geary.helpers.NO_ENTITY
 import com.mineinabyss.geary.helpers.toGeary
-import com.mineinabyss.geary.papermc.datastore.decode
-import com.mineinabyss.geary.papermc.datastore.decodePrefabs
-import com.mineinabyss.geary.papermc.datastore.hasComponentsEncoded
-import com.mineinabyss.geary.papermc.datastore.remove
+import com.mineinabyss.geary.papermc.datastore.*
+import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemReference.*
 import com.mineinabyss.geary.papermc.tracking.items.components.PlayerInstancedItem
 import com.mineinabyss.geary.papermc.tracking.items.itemTracking
@@ -15,6 +14,7 @@ import com.mineinabyss.idofront.nms.aliases.NMSItemStack
 import com.mineinabyss.idofront.nms.nbt.fastPDC
 import net.minecraft.world.item.Items
 import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_19_R2.util.CraftMagicNumbers
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 import java.util.*
@@ -116,20 +116,19 @@ class PlayerItemCache(val parent: GearyEntity) {
                 set(slot, state)
                 state.entity
             }
+
             is Exists.Entity -> {
                 // Entity does not match cache but already exists => either moved or duplicated
                 // We cannot easily check moved here, so we assume a duplicate and let the tracker remove the old one next tick
                 createAndSet(slot, NotLoaded.Entity(state.pdc, state.item))
             }
+
             is NotLoaded -> return createAndSet(slot, state)
         }
     }
 
     /** Creates an entity from an unloaded [reference] and sets it in [slot]. */
-    fun createAndSet(
-        slot: Int,
-        reference: NotLoaded,
-    ): GearyEntity {
+    fun createAndSet(slot: Int, reference: NotLoaded): GearyEntity {
         val created = itemTracking.provider.newItemEntityOrPrefab(parent, reference)
         set(slot, created)
         return created.entity
@@ -137,18 +136,13 @@ class PlayerItemCache(val parent: GearyEntity) {
 
     /**
      * Gets the item reference encoded in this [item]
-     *
      */
     fun getItemReference(item: NMSItemStack): ItemReference {
         val pdc = item.fastPDC ?: return None(item)
+        if (item.item == Items.AIR) return None(item)
+        if (!pdc.hasComponentsEncoded && !itemTracking.migration.encodePrefabsFromCustomModelData(pdc, item)) return None(item)
 
-        if (pdc == null || item.item == Items.AIR || !pdc.hasComponentsEncoded) return None(item)
         val prefabs = pdc.decodePrefabs()
-
-        // TODO reimplement migration logic
-//            if (lootyConfig.migrateByCustomModelData) {
-//                updateOldLootyItem(pdc, prefabs, item)
-//            }
 
         // Try to get a PlayerInstancedItem
         if (prefabs.size == 1) {

@@ -4,6 +4,7 @@ plugins {
     id(libs.plugins.mia.papermc.get().pluginId)
     id(libs.plugins.mia.nms.get().pluginId)
     id(libs.plugins.mia.publication.get().pluginId)
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 dependencies {
