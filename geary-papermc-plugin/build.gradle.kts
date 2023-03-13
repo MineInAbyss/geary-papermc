@@ -18,6 +18,7 @@ configurations {
 dependencies {
     implementation(project(":geary-papermc-tracking"))
     implementation(gearyLibs.uuid)
+    implementation(gearyLibs.autoscan)
 
     // Plugins
     compileOnly(myLibs.plugman)
@@ -34,7 +35,6 @@ tasks {
     shadowJar {
         archiveBaseName.set("geary-papermc")
         archiveClassifier.set("")
-        minimize()
     }
 
     build {

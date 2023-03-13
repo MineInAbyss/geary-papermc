@@ -8,8 +8,8 @@ plugins {
 }
 
 dependencies {
-    compileOnly(gearyLibs.uuid)
-    compileOnly(libs.idofront.nms)
+    implementation(gearyLibs.uuid)
+    implementation(libs.idofront.nms)
     api(project(":geary-papermc-datastore"))
     api(project(":geary-papermc-core"))
 }
