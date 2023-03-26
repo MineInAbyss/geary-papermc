@@ -4,7 +4,6 @@ val idofrontVersion: String by project
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    `java-library`
     alias(libs.plugins.mia.publication)
     alias(libs.plugins.mia.kotlin.jvm)
     alias(libs.plugins.dokka) apply false
@@ -24,6 +23,7 @@ allprojects {
         maven("https://repo.mineinabyss.com/releases")
         maven("https://raw.githubusercontent.com/TheBlackEntity/PlugMan/repository/")
         maven("https://jitpack.io")
+        maven("https://repo.codemc.io/repository/nms/")
     }
 
     dependencies {
@@ -32,9 +32,12 @@ allprojects {
     }
 
     tasks {
-        withType<KotlinCompile>() {
+        withType<KotlinCompile> {
             kotlinOptions {
-                freeCompilerArgs += "-opt-in=kotlinx.serialization.ExperimentalSerializationApi"
+                freeCompilerArgs += listOf(
+                    "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+                    "-opt-in=kotlin.ExperimentalUnsignedTypes",
+                )
             }
         }
     }

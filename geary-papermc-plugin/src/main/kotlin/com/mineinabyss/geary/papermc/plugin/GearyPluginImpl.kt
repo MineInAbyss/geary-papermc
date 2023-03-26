@@ -1,9 +1,11 @@
 package com.mineinabyss.geary.papermc.plugin
 
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.StaticConfig
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.addons.GearyPhase.ENABLE
-import com.mineinabyss.geary.engine.Engine
+import com.mineinabyss.geary.autoscan.autoscan
+import com.mineinabyss.geary.engine.archetypes.ArchetypeEngine
 import com.mineinabyss.geary.helpers.withSerialName
 import com.mineinabyss.geary.modules.GearyArchetypeModule
 import com.mineinabyss.geary.modules.GearyModule
@@ -17,6 +19,7 @@ import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.geary.serialization.dsl.FileSystemAddon
 import com.mineinabyss.geary.serialization.dsl.serialization
 import com.mineinabyss.geary.uuid.UUIDTracking
+import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.platforms.Platforms
 import com.mineinabyss.idofront.plugin.listeners
 import com.mineinabyss.idofront.serialization.UUIDSerializer
@@ -40,14 +43,18 @@ class GearyPluginImpl : GearyPlugin() {
 
     override fun onEnable() {
         saveDefaultConfig()
+
         // Register DI
-        val gearyModule = object : GearyModule by GearyArchetypeModule(tickDuration = 1.ticks) {
-            override val engine: Engine = PaperMCEngine()
+        val gearyModule = object : GearyArchetypeModule(tickDuration = 1.ticks) {
+            override val engine: ArchetypeEngine = PaperMCEngine()
+            override val logger = Logger(StaticConfig(logWriterList = listOf(PaperWriter(this@GearyPluginImpl))))
         }
         val paperModule = GearyPaperModule(this)
 
+        DI.add<GearyModule>(gearyModule)
+        DI.add<GearyArchetypeModule>(gearyModule)
+        DI.add<GearyPaperModule>(paperModule)
         gearyModule.inject()
-        paperModule.inject()
 
         // Auto register Bukkit listeners when they are added as a system
         geary.pipeline.interceptSystemAddition { system ->
@@ -62,8 +69,8 @@ class GearyPluginImpl : GearyPlugin() {
             install(FileSystemAddon, FileSystem.SYSTEM)
             install(UUIDTracking)
 
-            if(paperModule.config.trackEntities) install(EntityTracking)
-            if(paperModule.config.trackItems) install(ItemTracking)
+            if (paperModule.config.trackEntities) install(EntityTracking)
+            if (paperModule.config.trackItems) install(ItemTracking)
 
             serialization {
                 format("yml", ::YamlFormat)
@@ -71,6 +78,10 @@ class GearyPluginImpl : GearyPlugin() {
                 components {
                     component(UUID::class, UUIDSerializer.withSerialName("geary:uuid"))
                 }
+            }
+
+            autoscan(classLoader, "com.mineinabyss.geary") {
+                components()
             }
 
             // Load prefabs in Geary folder, each subfolder is considered its own namespace

@@ -12,8 +12,4 @@ class GearyPaperModule(
         plugin.fromPluginPath()
         mergeUpdates = true
     }
-
-    fun inject() {
-        DI.add(this)
-    }
 }

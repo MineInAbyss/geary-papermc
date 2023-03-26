@@ -1,11 +1,9 @@
 package com.mineinabyss.geary.papermc.tracking.items.cache
 
 import com.mineinabyss.geary.datatypes.GearyEntity
-import com.mineinabyss.geary.datatypes.GearyEntityType
 import com.mineinabyss.geary.helpers.NO_ENTITY
 import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.papermc.datastore.*
-import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemReference.*
 import com.mineinabyss.geary.papermc.tracking.items.components.PlayerInstancedItem
 import com.mineinabyss.geary.papermc.tracking.items.itemTracking
@@ -14,9 +12,7 @@ import com.mineinabyss.idofront.nms.aliases.NMSItemStack
 import com.mineinabyss.idofront.nms.nbt.fastPDC
 import net.minecraft.world.item.Items
 import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack
-import org.bukkit.craftbukkit.v1_19_R2.util.CraftMagicNumbers
 import org.bukkit.inventory.ItemStack
-import org.bukkit.persistence.PersistentDataContainer
 import java.util.*
 
 // TODO bad pattern, passing entity into component, move into event
@@ -140,7 +136,11 @@ class PlayerItemCache(val parent: GearyEntity) {
     fun getItemReference(item: NMSItemStack): ItemReference {
         val pdc = item.fastPDC ?: return None(item)
         if (item.item == Items.AIR) return None(item)
-        if (!pdc.hasComponentsEncoded && !itemTracking.migration.encodePrefabsFromCustomModelData(pdc, item)) return None(item)
+        if (!pdc.hasComponentsEncoded && !itemTracking.migration.encodePrefabsFromCustomModelData(
+                pdc,
+                item
+            )
+        ) return None(item)
 
         val prefabs = pdc.decodePrefabs()
 
