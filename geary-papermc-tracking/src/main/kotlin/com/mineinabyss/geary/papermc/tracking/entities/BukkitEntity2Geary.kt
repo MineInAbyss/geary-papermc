@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.tracking.entities
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.helpers.toGeary
+import com.mineinabyss.idofront.nms.aliases.toNMS
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap
 import kotlin.collections.set
@@ -27,7 +28,7 @@ class BukkitEntity2Geary {
     }
 
     fun getOrCreate(bukkit: BukkitEntity): GearyEntity {
-        require(bukkit.isValid) { "Tried to access Geary entity for an entity that no longer exists: $bukkit" }
+        require(bukkit.toNMS().valid) { "Tried to access Geary entity for an entity that was not valid: $bukkit" }
         return get(bukkit) ?: entity { set(bukkit) }
     }
 }

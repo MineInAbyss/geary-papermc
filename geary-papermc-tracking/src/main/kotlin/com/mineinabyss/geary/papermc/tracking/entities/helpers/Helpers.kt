@@ -19,7 +19,7 @@ fun Location.spawnFromPrefab(prefab: GearyEntity): Result<BukkitEntity> {
     return runCatching {
         entity {
             addPrefab(prefab)
-            set(AttemptSpawn(this@spawnFromPrefab))
+            callEvent(AttemptSpawn(this@spawnFromPrefab))
         }.get<BukkitEntity>() ?: error("Entity was not created when spawning from prefab")
     }
 }
