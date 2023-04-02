@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.plugin
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.StaticConfig
 import com.github.shynixn.mccoroutine.bukkit.launch
+import com.mineinabyss.geary.addons.GearyPhase
 import com.mineinabyss.geary.addons.GearyPhase.ENABLE
 import com.mineinabyss.geary.autoscan.autoscan
 import com.mineinabyss.geary.engine.archetypes.ArchetypeEngine
@@ -13,13 +14,16 @@ import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.GearyPaperModule
 import com.mineinabyss.geary.papermc.GearyPlugin
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
+import com.mineinabyss.geary.papermc.tracking.entities.entityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
+import com.mineinabyss.geary.papermc.tracking.items.itemTracking
 import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.geary.serialization.dsl.FileSystemAddon
 import com.mineinabyss.geary.serialization.dsl.serialization
 import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.di.DI
+import com.mineinabyss.idofront.messaging.logSuccess
 import com.mineinabyss.idofront.platforms.Platforms
 import com.mineinabyss.idofront.plugin.listeners
 import com.mineinabyss.idofront.serialization.UUIDSerializer
@@ -100,6 +104,10 @@ class GearyPluginImpl : GearyPlugin() {
             on(ENABLE) {
                 gearyModule.start()
                 Bukkit.getOnlinePlayers().forEach { it.toGeary() }
+
+                logSuccess("Loaded mob types: ${entityTracking.mobPrefabs.getKeys().joinToString()}")
+                // TODO list items
+//                logSuccess("Loaded item types: ${itemTracking.mobPrefabs.getKeys().joinToString()}")
             }
         }
 

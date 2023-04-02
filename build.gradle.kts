@@ -42,3 +42,10 @@ allprojects {
         }
     }
 }
+
+// Build server jar when used as a composite project
+tasks {
+    build {
+        dependsOn(project(":geary-papermc-plugin").tasks.build)
+    }
+}

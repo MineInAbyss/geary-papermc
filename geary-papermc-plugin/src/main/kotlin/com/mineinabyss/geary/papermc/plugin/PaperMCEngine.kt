@@ -6,7 +6,6 @@ import com.mineinabyss.geary.engine.archetypes.ArchetypeEngine
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.systems.RepeatingSystem
 import com.mineinabyss.idofront.time.ticks
-import kotlinx.coroutines.yield
 import org.bukkit.Bukkit
 
 class PaperMCEngine : ArchetypeEngine(tickDuration = 1.ticks) {
@@ -25,11 +24,10 @@ class PaperMCEngine : ArchetypeEngine(tickDuration = 1.ticks) {
 
     override fun scheduleSystemTicking() {
         //tick all systems every interval ticks
-        plugin.launch {
-            while (true) {
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, {
+            plugin.launch {
                 tick(Bukkit.getServer().currentTick.toLong())
-                yield()
             }
-        }
+        }, 0, 1)
     }
 }
