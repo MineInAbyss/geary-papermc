@@ -9,8 +9,11 @@ import com.mineinabyss.geary.datatypes.toIntArray
 import com.mineinabyss.geary.helpers.NO_ENTITY
 import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.papermc.datastore.encodeComponents
+import com.mineinabyss.geary.papermc.datastore.encodePrefabs
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemReference.*
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
+import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.systems.RepeatingSystem
 import com.mineinabyss.geary.systems.accessors.TargetScope
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
@@ -19,7 +22,9 @@ import com.mineinabyss.idofront.nms.aliases.toNMS
 import com.mineinabyss.idofront.time.ticks
 import com.soywiz.kds.iterators.fastForEachWithIndex
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap
+import org.bukkit.craftbukkit.v1_19_R2.util.CraftMagicNumbers
 import org.bukkit.entity.Player
+import org.bukkit.persistence.PersistentDataContainer
 import java.util.*
 
 /**

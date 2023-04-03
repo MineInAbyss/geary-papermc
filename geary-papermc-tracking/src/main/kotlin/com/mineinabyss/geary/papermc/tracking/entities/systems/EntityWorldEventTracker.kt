@@ -2,7 +2,6 @@ package com.mineinabyss.geary.papermc.tracking.entities.systems
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
-import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import org.bukkit.entity.Player
@@ -18,7 +17,7 @@ class EntityWorldEventTracker : Listener {
     fun EntityAddToWorldEvent.onBukkitEntityAdd() {
         // Only remove player from ECS on disconnect, not death
         if (entity is Player) return
-        entity.toGeary()
+        entity.toGeary().set(entity.world)
     }
     /** Remove entities from ECS when they are removed from Bukkit for any reason (Uses PaperMC event) */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

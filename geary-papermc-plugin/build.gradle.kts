@@ -3,6 +3,7 @@ plugins {
     id(libs.plugins.mia.copyjar.get().pluginId)
     id(libs.plugins.mia.kotlin.jvm.get().pluginId)
     id(libs.plugins.mia.papermc.get().pluginId)
+    id(libs.plugins.mia.nms.reobfuscate.get().pluginId)
     alias(libs.plugins.kotlinx.serialization)
 }
 
@@ -17,6 +18,9 @@ configurations {
 
 dependencies {
     implementation(project(":geary-papermc-tracking"))
+    implementation(gearyLibs.autoscan)
+    implementation(gearyLibs.prefabs)
+    implementation(gearyLibs.serialization)
     implementation(gearyLibs.uuid)
 
     // Plugins
@@ -30,14 +34,6 @@ dependencies {
     compileOnly(libs.minecraft.mccoroutine)
 }
 
-tasks {
-    shadowJar {
-        archiveBaseName.set("geary-papermc")
-        archiveClassifier.set("")
-        minimize()
-    }
-
-    build {
-        dependsOn(shadowJar)
-    }
+copyJar {
+    jarName.set("geary-$version.jar")
 }
