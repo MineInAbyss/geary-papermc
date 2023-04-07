@@ -21,7 +21,7 @@ jobs:
           maven-username: ${{ secrets.MAVEN_PUBLISH_USERNAME }}
           maven-password: ${{ secrets.MAVEN_PUBLISH_PASSWORD }}
           release-files: |
-            geary-papermc-plugin/build/libs/geary-papermc-[0-9]*.jar
+            ${{ github.workspace }}/publish/*.jar
 
   deploy:
     permissions:
