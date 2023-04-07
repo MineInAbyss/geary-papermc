@@ -4,6 +4,7 @@ val idofrontVersion: String by project
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
+    java
     alias(libs.plugins.mia.publication)
     alias(libs.plugins.mia.kotlin.jvm)
     alias(libs.plugins.dokka) apply false
