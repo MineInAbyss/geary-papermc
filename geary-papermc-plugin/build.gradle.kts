@@ -12,16 +12,11 @@ configurations {
         exclude(group = "org.jetbrains.kotlin")
         exclude(group = "org.jetbrains.kotlinx")
         exclude(group = "org.snakeyaml")
-        exclude(group = "com.charleskorn.kaml")
     }
 }
 
 dependencies {
-    implementation(project(":geary-papermc-tracking"))
-    implementation(gearyLibs.autoscan)
-    implementation(gearyLibs.prefabs)
-    implementation(gearyLibs.serialization)
-    implementation(gearyLibs.uuid)
+    implementation(project(":"))
 
     // Plugins
     compileOnly(myLibs.plugman)
