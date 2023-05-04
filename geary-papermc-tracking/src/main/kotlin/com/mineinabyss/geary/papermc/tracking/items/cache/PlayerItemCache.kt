@@ -1,15 +1,20 @@
 package com.mineinabyss.geary.papermc.tracking.items.cache
 
 import com.mineinabyss.geary.datatypes.GearyEntity
+import com.mineinabyss.geary.datatypes.GearyEntityType
 import com.mineinabyss.geary.helpers.NO_ENTITY
 import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.papermc.datastore.*
-import com.mineinabyss.geary.papermc.tracking.items.cache.ItemReference.*
+import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.*
 import com.mineinabyss.geary.papermc.tracking.items.components.PlayerInstancedItem
 import com.mineinabyss.geary.papermc.tracking.items.itemTracking
-import com.mineinabyss.geary.uuid.uuid2Geary
+import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
 import com.mineinabyss.idofront.nms.nbt.fastPDC
+import com.soywiz.kds.iterators.fastForEachWithIndex
+import it.unimi.dsi.fastutil.ints.IntArrayList
+import it.unimi.dsi.fastutil.longs.LongArrayList
+import net.minecraft.util.SortedArraySet
 import net.minecraft.world.item.Items
 import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack
 import org.bukkit.inventory.ItemStack
@@ -95,6 +100,54 @@ class PlayerItemCache(val parent: GearyEntity) {
 
     operator fun get(slot: Int): GearyEntity = entities[slot].toGeary()
 
+    fun getCachedItem(slot: Int): NMSItemStack? {
+        return cachedItems[slot]
+    }
+
+
+    /** Updates cache to match passed [inventory] */
+    fun updateToMatch(inventory: Array<NMSItemStack?>) {
+        val diffRemoved = mutableSetOf<ULong>()
+        val diffAdded = mutableSetOf<ULong>()
+
+        val prefabsAdded = mutableSetOf<PrefabKey>()
+
+        inventory.fastForEachWithIndex { slot, item ->
+            if (item === cachedItems[slot]) return@fastForEachWithIndex
+            cachedItems[slot] = item
+
+            val cachedEntity = entities[slot]
+            diffRemoved.add(cachedEntity)
+
+            if (item != null) {
+                val itemInfo = readItemInfo(item)
+                when (itemInfo) {
+                    is EntityEncoded -> {
+                        entities[slot] = itemInfo.entity.id
+                        diffAdded.add(itemInfo.entity.id)
+                    }
+
+                    is PlayerInstanced -> {
+
+                        playerInstanced.setSlot()
+                    }
+                    ErrorDecoding -> {}
+
+                    NothingEncoded -> {}
+                }
+                // check if
+            }
+
+        }
+
+        val diffMoved = diffAdded.intersect(diffRemoved)
+
+        diffMoved.forEach { entity ->
+            diffRemoved.remove(entities[slot])
+            entities[slot] = encodedEntity
+        }
+    }
+
     /**
      * Gets the entity in [slot] or updates it based in data in [item] if it doesn't match the cached item.
      *
@@ -106,7 +159,7 @@ class PlayerItemCache(val parent: GearyEntity) {
     ): GearyEntity? {
         if (item === cachedItems[slot]) return get(slot)
 
-        return when (val state = getItemReference(item)) {
+        return when (val state = readItemInfo(item)) {
             is None -> null
             is Exists.PlayerInstanced -> {
                 set(slot, state)
@@ -124,41 +177,45 @@ class PlayerItemCache(val parent: GearyEntity) {
     }
 
     /** Creates an entity from an unloaded [reference] and sets it in [slot]. */
-    fun createAndSet(slot: Int, reference: NotLoaded): GearyEntity {
-        val created = itemTracking.provider.newItemEntityOrPrefab(parent, reference)
-        set(slot, created)
-        return created.entity
+//    fun createAndSet(slot: Int, reference: NotLoaded): GearyEntity {
+//        val created = itemTracking.provider.newItemEntityOrPrefab(parent, reference)
+//        set(slot, created)
+//        return created.entity
+//    }
+
+    fun getEntity(item: NMSItemStack): GearyEntity? {
+        TODO()
     }
 
     /**
      * Gets the item reference encoded in this [item]
      */
-    fun getItemReference(item: NMSItemStack): ItemReference {
-        val pdc = item.fastPDC ?: return None(item)
-        if (item.item == Items.AIR) return None(item)
-        if (!pdc.hasComponentsEncoded && !itemTracking.migration.encodePrefabsFromCustomModelData(
-                pdc,
-                item
-            )
-        ) return None(item)
+    fun readItemInfo(item: NMSItemStack): ItemInfo {
+        val pdc = item.fastPDC ?: return NothingEncoded
+        if (item.item == Items.AIR) return NothingEncoded
 
-        val prefabs = pdc.decodePrefabs()
+        //TODO move out of here
+        val didMigration = !itemTracking.migration.encodePrefabsFromCustomModelDataIfPresent(pdc, item)
 
-        // Try to get a PlayerInstancedItem
-        if (prefabs.size == 1) {
-            val prefab = prefabs.first().toEntityOrNull() ?: return None(item)
-            if (prefab.has<PlayerInstancedItem>()) {
-                pdc.remove<UUID>() // in case of migration
-                val existing = playerInstanced[prefab]
-                return if (existing != null) {
-                    Exists.PlayerInstanced(existing, item)
-                } else NotLoaded.PlayerInstanced(prefab, item)
-            }
-        }
+        if (!pdc.hasComponentsEncoded && !didMigration) return NothingEncoded
+
+        val prefabs = pdc.decodePrefabs().map { it.toEntityOrNull() ?: return ErrorDecoding }.toSet()
+
+//        if (prefabs.any { it.has<PlayerInstancedItem>() }) {
+//            pdc.remove<UUID>() // in case of migration
+//            val existing = playerInstanced[prefabs]
+//            return if (existing != null) {
+//                Exists.PlayerInstanced(existing, item)
+//            } else NotLoaded.PlayerInstanced(prefabs, item)
+//        }
+
+        val uuid = pdc.decode<UUID>()
+
+        return EntityEncoded(uuid, prefabs)
 
         // If item doesn't have a UUID encoded or the UUID doesn't match a loaded entity, return NotLoaded
-        val entity = pdc.decode<UUID>()?.let { uuid2Geary[it] } ?: return NotLoaded.Entity(pdc, item)
-        return Exists.Entity(entity, pdc, item)
+//        val entity = pdc.decode<UUID>()?.let { uuid2Geary[it] } ?: return EntityEncoded(uuid)
+//        return Exists.Entity(entity, pdc, item)
     }
 
     companion object {

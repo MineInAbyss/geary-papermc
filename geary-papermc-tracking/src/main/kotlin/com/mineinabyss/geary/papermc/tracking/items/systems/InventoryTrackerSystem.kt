@@ -4,16 +4,11 @@ package com.mineinabyss.geary.papermc.tracking.items.systems
 
 import com.mineinabyss.geary.datatypes.forEachBit
 import com.mineinabyss.geary.datatypes.pop1
-import com.mineinabyss.geary.datatypes.setBit
 import com.mineinabyss.geary.datatypes.toIntArray
-import com.mineinabyss.geary.helpers.NO_ENTITY
 import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.modules.geary
-import com.mineinabyss.geary.papermc.datastore.encodeComponents
-import com.mineinabyss.geary.papermc.datastore.encodePrefabs
-import com.mineinabyss.geary.papermc.tracking.items.cache.ItemReference.*
+import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.*
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
-import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.systems.RepeatingSystem
 import com.mineinabyss.geary.systems.accessors.TargetScope
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
@@ -22,10 +17,7 @@ import com.mineinabyss.idofront.nms.aliases.toNMS
 import com.mineinabyss.idofront.time.ticks
 import com.soywiz.kds.iterators.fastForEachWithIndex
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap
-import org.bukkit.craftbukkit.v1_19_R2.util.CraftMagicNumbers
 import org.bukkit.entity.Player
-import org.bukkit.persistence.PersistentDataContainer
-import java.util.*
 
 /**
  * ItemStack instances are super disposable, they don't represent real items. Additionally, tracking items is
@@ -53,25 +45,21 @@ class InventoryTrackerSystem : RepeatingSystem(interval = 1.ticks) {
 
         // Avoids bukkit items since ItemMeta does a lot of copying which adds overhead
         fun refresh(player: Player, cache: PlayerItemCache) {
-            val nmsInv = player.toNMS().inventory
-
-            // Map of entity id to bitset of slots that entity was in (this is necessary for prefabs where the same entity may exist in many slots)
-            val toRemoveFromCache = Long2LongOpenHashMap()
-            // Entities on items in inventory that do not match the entity in cache
-            val checkForMove = Array<Exists.Entity?>(PlayerItemCache.MAX_SIZE) { null }
-            // Remaining items that must create new entities
-            val toLoad = Array<NotLoaded?>(PlayerItemCache.MAX_SIZE) { null }
+            val inventory = player.toNMS().inventory
 
             // Go through all slots and check for changes with cache
-            nmsInv.forEachSlot { item, slot ->
-                val itemReference = cache.getItemReference(item)
+            cache.updateToMatch(TODO())
+            inventory.forEachSlot { item, slot ->
+                if(item === cache.getCachedItem(slot)) return@forEachSlot
+
+                val itemReference = cache.readItemInfo(item)
                 val currEntity = cache[slot]
 
-                fun queueRemoveForCurrent() {
-                    if (currEntity != NO_ENTITY) return
-                    val currId = currEntity.id.toLong()
-                    toRemoveFromCache[currId] = toRemoveFromCache[currId].setBit(slot)
-                }
+//                fun queueRemoveForCurrent() {
+//                    if (currEntity != NO_ENTITY) return
+//                    val currId = currEntity.id.toLong()
+//                    toRemoveFromCache[currId] = toRemoveFromCache[currId].setBit(slot)
+//                }
 
                 // Track mismatches with the cache
                 when (itemReference) {

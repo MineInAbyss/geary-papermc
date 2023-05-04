@@ -9,12 +9,16 @@ import org.bukkit.persistence.PersistentDataContainer
 class ItemMigration {
     val map = mutableMapOf<Int, PrefabKey>()
 
-    fun encodePrefabsFromCustomModelData(pdc: PersistentDataContainer, item: NMSItemStack): Boolean {
+    fun encodePrefabsFromCustomModelDataIfPresent(pdc: PersistentDataContainer, item: NMSItemStack): Boolean {
         if (!gearyPaper.config.migrateItemCustomModelDataToPrefab) return false
         val tag = item.tag ?: return false
-        if (!tag.contains("CustomModelData")) return false
-        val prefab = map[tag.getInt("CustomModelData")] ?: return false
+        if (!tag.contains(CUSTOM_MODEL_DATA)) return false
+        val prefab = map[tag.getInt(CUSTOM_MODEL_DATA)] ?: return false
         pdc.encodePrefabs(listOf(prefab))
         return true
+    }
+
+    companion object {
+        const val CUSTOM_MODEL_DATA = "CustomModelData"
     }
 }

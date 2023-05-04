@@ -14,7 +14,7 @@ import com.mineinabyss.idofront.plugin.listeners
 val itemTracking by DI.observe<ItemTracking>()
 
 interface ItemTracking {
-    val provider: GearyItemProvider
+//    val provider: GearyItemProvider
     val migration: ItemMigration
 
     companion object : GearyAddonWithDefault<ItemTracking> {

@@ -5,10 +5,12 @@ import com.mineinabyss.geary.helpers.addParent
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.datastore.*
-import com.mineinabyss.geary.papermc.tracking.items.cache.ItemReference.*
+import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.*
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.uuid.components.RegenerateUUIDOnClash
+import com.mineinabyss.idofront.nms.aliases.NMSItemStack
+import com.mineinabyss.idofront.nms.nbt.fastPDC
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import java.util.*
@@ -20,49 +22,33 @@ class GearyItemProvider {
     val logger get() = geary.logger
 
     /** Creates an ItemStack from a [prefabKey], encoding relevant information to it. */
-    fun createFromPrefab(
-        prefabKey: PrefabKey,
-    ): ItemStack? {
-        val item = ItemStack(Material.AIR)
-        updateFromPrefab(item, prefabKey)
-        return item.takeIf { it.type != Material.AIR }
-    }
-
-    fun updateFromPrefab(item: ItemStack, prefabKey: PrefabKey) {
-        val prefab = prefabKey.toEntityOrNull() ?: return
+    fun serializePrefabToItemStack(prefabKey: PrefabKey, existing: ItemStack? = null): ItemStack? {
+        val item = existing ?: ItemStack(Material.AIR)
+        val prefab = prefabKey.toEntityOrNull() ?: return null
         prefab.get<SetItem>()?.item?.toItemStack(item)
         item.editMeta {
             it.persistentDataContainer.encodePrefabs(listOf(prefabKey))
         }
+        return item.takeIf { it.type != Material.AIR }
     }
 
     //TODO return the instance of prefab for PlayerInstanced
-    /** Gets or creates a [GearyEntity] based on a given item and the context it is in. */
-    fun newItemEntityOrPrefab(
-        holder: GearyEntity,
-        reference: NotLoaded
-    ): Exists = when (reference) {
-        is NotLoaded.Entity -> {
-            val decoded = reference.pdc.decodeComponents()
-            Exists.Entity(
-                entity {
-                    addParent(holder)
-                    add<RegenerateUUIDOnClash>()
-                    loadComponentsFrom(decoded)
-                    getOrSetPersisting<UUID> { UUID.randomUUID() }
-                    encodeComponentsTo(reference.pdc)
-                    logger.d("Loaded new instance of prefab ${get<PrefabKey>()} on $holder")
-                },
-                reference.pdc,
-                reference.item,
-            )
-        }
-
-        is NotLoaded.PlayerInstanced -> {
-            Exists.PlayerInstanced(
-                reference.prefab,
-                reference.item,
-            )
+    /**
+     * Creates a new entity from an ItemStack with data encoded to its PDC.
+     * This will always create a new entity
+     */
+    fun deserializeItemStackToEntity(
+        reference: NMSItemStack
+    ): GearyEntity {
+        val pdc = reference.fastPDC
+        return entity {
+            pdc.decodePrefabs()
+//            addParent(holder)
+            add<RegenerateUUIDOnClash>()
+//            loadComponentsFrom(decoded)
+            getOrSetPersisting<UUID> { UUID.randomUUID() }
+            encodeComponentsTo(reference.pdc)
+            logger.d("Loaded new instance of prefab ${get<PrefabKey>()} on $holder")
         }
     }
 }
