@@ -24,7 +24,6 @@ interface ItemTracking {
         }
 
         override fun ItemTracking.install() {
-            DI.add(this)
             gearyPaper.plugin.listeners(LoginListener())
             geary.pipeline.addSystems(
                 InventoryTrackerSystem(),

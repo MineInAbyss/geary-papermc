@@ -24,7 +24,6 @@ interface EntityTracking {
         }
 
         override fun EntityTracking.install() {
-            DI.add(this)
             gearyPaper.plugin.listeners(EntityWorldEventTracker())
             geary.pipeline.addSystems(
                 TrackOnSetBukkitComponent(),

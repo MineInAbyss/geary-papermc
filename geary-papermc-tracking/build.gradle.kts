@@ -16,6 +16,5 @@ dependencies {
     api(project(":geary-papermc-datastore"))
     api(project(":geary-papermc-core"))
 
-    testImplementation(paperweight.paperDevBundle(libs.versions.minecraft.get()))
     testImplementation(libs.minecraft.mockbukkit)
 }

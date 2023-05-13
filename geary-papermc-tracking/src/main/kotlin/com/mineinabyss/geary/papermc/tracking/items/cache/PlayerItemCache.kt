@@ -3,14 +3,10 @@ package com.mineinabyss.geary.papermc.tracking.items.cache
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.helpers.toGeary
-import com.mineinabyss.geary.papermc.datastore.*
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.*
 import com.mineinabyss.geary.prefabs.helpers.addPrefab
-import com.mineinabyss.idofront.nms.aliases.NMSItemStack
-import com.mineinabyss.idofront.nms.aliases.NMSPlayerInventory
 import com.soywiz.kds.iterators.fastForEachWithIndex
 import org.bukkit.inventory.ItemStack
-import java.util.*
 
 // TODO bad pattern, passing entity into component, move into event
 class PlayerItemCache<T>(
@@ -181,34 +177,15 @@ class PlayerItemCache<T>(
      *
      * @param item The item currently in the slot in the inventory.
      */
-//    fun getOrUpdate(
-//        slot: Int,
-//        inventory: NMSPlayerInventory,
-//        item: NMSItemStack? = inventory.getItem(slot)
-//    ): GearyEntity? {
-//        if (item !== cachedItems[slot]) {
-//            updateToMatch(inventory.toArray())
-//        }
-//        return get(slot)
-//    }
-
-    /**
-     * Gets the item reference encoded in this [item]
-     */
-
-
-    private fun NMSPlayerInventory.toArray(): Array<NMSItemStack?> {
-        val array = Array<NMSItemStack?>(MAX_SIZE) { null }
-        var slot = 0
-        compartments.forEach { comp ->
-            comp.forEach { item ->
-                array[slot] = item
-                slot++
-            }
+    fun getOrUpdate(
+        slot: Int,
+        item: T?,
+        readInventoryContents: () -> Array<T?>,
+    ): GearyEntity? {
+        if (item !== cachedItems[slot]) {
+            updateToMatch(readInventoryContents())
         }
-        // Include cursor as last slot
-        array[CURSOR_SLOT] = player.containerMenu.carried
-        return array
+        return get(slot)
     }
 
     companion object {

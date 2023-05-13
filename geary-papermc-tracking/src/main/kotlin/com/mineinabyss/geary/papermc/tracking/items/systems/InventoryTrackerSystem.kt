@@ -2,23 +2,13 @@
 
 package com.mineinabyss.geary.papermc.tracking.items.systems
 
-import com.mineinabyss.geary.datatypes.forEachBit
-import com.mineinabyss.geary.datatypes.pop1
-import com.mineinabyss.geary.datatypes.toIntArray
-import com.mineinabyss.geary.helpers.toGeary
-import com.mineinabyss.geary.modules.geary
-import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.*
+import com.mineinabyss.geary.papermc.tracking.items.GearyPlayerInventory
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.systems.RepeatingSystem
 import com.mineinabyss.geary.systems.accessors.TargetScope
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
-import com.mineinabyss.idofront.nms.aliases.NMSPlayerInventory
-import com.mineinabyss.idofront.nms.aliases.toNMS
 import com.mineinabyss.idofront.time.ticks
-import com.soywiz.kds.iterators.fastForEachWithIndex
-import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 
 /**
  * ItemStack instances are super disposable, they don't represent real items. Additionally, tracking items is
@@ -37,7 +27,6 @@ class InventoryTrackerSystem : RepeatingSystem(interval = 1.ticks) {
     private val TargetScope.itemCache by get<PlayerItemCache<NMSItemStack>>()
 
     override fun TargetScope.tick() {
-        TODO()
-//        itemCache.updateToMatch(player.toNMS().inventory)
+        itemCache.updateToMatch(GearyPlayerInventory.toArray(player.inventory))
     }
 }

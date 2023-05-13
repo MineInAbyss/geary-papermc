@@ -3,6 +3,7 @@ plugins {
     id(libs.plugins.mia.copyjar.get().pluginId)
     id(libs.plugins.mia.kotlin.jvm.get().pluginId)
     id(libs.plugins.mia.papermc.get().pluginId)
+    id(libs.plugins.mia.nms.get().pluginId)
     alias(libs.plugins.kotlinx.serialization)
 }
 
