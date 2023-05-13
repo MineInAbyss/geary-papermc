@@ -13,12 +13,12 @@ class PaperMCEngine : ArchetypeEngine(tickDuration = 1.ticks) {
 
     override suspend fun RepeatingSystem.runSystem() {
         // Adds a line in timings report showing which systems take up more time.
-        val timing = Timings.ofStart(plugin, javaClass.name)
+//        val timing = Timings.ofStart(plugin, javaClass.name)
         runCatching {
             doTick()
         }.apply {
             // We want to stop the timing no matter what, but still propagate error up
-            timing.stopTiming()
+//            timing.stopTiming()
         }.getOrThrow()
     }
 

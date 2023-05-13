@@ -4,8 +4,10 @@ import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.addParent
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.geary
-import com.mineinabyss.geary.papermc.datastore.*
-import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.*
+import com.mineinabyss.geary.papermc.datastore.decodePrefabs
+import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
+import com.mineinabyss.geary.papermc.datastore.encodePrefabs
+import com.mineinabyss.geary.papermc.datastore.loadComponentsFrom
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.uuid.components.RegenerateUUIDOnClash
@@ -38,17 +40,18 @@ class GearyItemProvider {
      * This will always create a new entity
      */
     fun deserializeItemStackToEntity(
-        reference: NMSItemStack
-    ): GearyEntity {
-        val pdc = reference.fastPDC
+        reference: NMSItemStack,
+        holder: GearyEntity? = null,
+    ): GearyEntity? {
+        val pdc = reference.fastPDC ?: return null
         return entity {
             pdc.decodePrefabs()
-//            addParent(holder)
+            if (holder != null) addParent(holder)
             add<RegenerateUUIDOnClash>()
-//            loadComponentsFrom(decoded)
+            loadComponentsFrom(pdc)
             getOrSetPersisting<UUID> { UUID.randomUUID() }
-            encodeComponentsTo(reference.pdc)
-            logger.d("Loaded new instance of prefab ${get<PrefabKey>()} on $holder")
+            encodeComponentsTo(pdc)
+            logger.d("Loaded new instance of prefab ${get<PrefabKey>()}")
         }
     }
 }

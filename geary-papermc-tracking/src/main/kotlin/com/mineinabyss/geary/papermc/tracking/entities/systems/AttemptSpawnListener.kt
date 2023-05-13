@@ -33,7 +33,7 @@ class AttemptSpawnListener : GearyListener() {
             // We set the entity here so that we don't create a separate Geary entity in EntityWorldEventTracker
             // This is called before adding to the world.
             { mob -> entity.set(mob.toBukkit()) },
-            BlockPos(loc.x, loc.y, loc.z),
+            BlockPos(loc.x.toInt(), loc.y.toInt(), loc.z.toInt()),
             MobSpawnType.COMMAND,
             false,
             false,

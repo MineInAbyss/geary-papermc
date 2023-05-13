@@ -1,10 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.items.cache
 
 import com.mineinabyss.geary.datatypes.GearyEntity
-import com.mineinabyss.geary.papermc.tracking.items.components.PlayerInstancedItem
 import com.mineinabyss.geary.prefabs.PrefabKey
-import com.mineinabyss.idofront.nms.aliases.NMSItemStack
-import org.bukkit.persistence.PersistentDataContainer
 import java.util.UUID
 
 /**
@@ -13,7 +10,7 @@ import java.util.UUID
 sealed class ItemInfo {
 //    abstract val item: NMSItemStack
 
-    class EntityEncoded(val id: GearyEntity) : ItemInfo()
+    class EntityEncoded(val uuid: UUID?) : ItemInfo()
 
     class PlayerInstanced(val prefabs: Set<PrefabKey>) : ItemInfo()
 
