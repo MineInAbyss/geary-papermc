@@ -11,9 +11,9 @@ import org.bukkit.inventory.ItemStack
 // TODO bad pattern, passing entity into component, move into event
 class PlayerItemCache<T>(
     maxSize: Int = 64,
-    val readItemInfo: (T) -> ItemInfo,
-    val cacheConverter: (T) -> ItemStack,
-    val deserializeItem: (T) -> GearyEntity?,
+    private val readItemInfo: (T) -> ItemInfo,
+    private val cacheConverter: (T) -> ItemStack,
+    private val deserializeItem: (T) -> GearyEntity?,
 ) {
     /** Entity associated with an inventory slot */
     private val entities = ULongArray(maxSize)
@@ -29,6 +29,10 @@ class PlayerItemCache<T>(
             entities[slot].takeIf { it != 0uL }?.toGeary()?.removeEntity()
         }
         entities[slot] = 0uL
+    }
+
+    fun getEntities(): List<GearyEntity?> {
+        return entities.map { it.takeIf { it != 0uL }?.toGeary() }.toList()
     }
 //    fun swap(firstSlot: Int, secondSlot: Int) {
 //        val firstEntity = entities[firstSlot].toGeary()

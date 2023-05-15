@@ -29,5 +29,3 @@ include(
     "geary-papermc-plugin",
     "geary-papermc-tracking",
 )
-
-includeBuild("../geary")

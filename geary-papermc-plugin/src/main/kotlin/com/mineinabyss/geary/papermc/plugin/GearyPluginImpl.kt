@@ -89,8 +89,7 @@ class GearyPluginImpl : GearyPlugin() {
                 Bukkit.getOnlinePlayers().forEach { it.toGeary() }
 
                 logSuccess("Loaded mob types: ${entityTracking.mobPrefabs.getKeys().joinToString()}")
-                // TODO list items
-//                logSuccess("Loaded item types: ${itemTracking.mobPrefabs.getKeys().joinToString()}")
+                logSuccess("Loaded item types: ${entityTracking.itemPrefabs.getKeys().joinToString()}")
             }
         }
 

@@ -46,7 +46,7 @@ class PlayerItemCacheTest {
     fun `should create entities correctly for regular items`() {
         // arrange
         val cache = mockItemCache()
-        val inventory = Array<MockItem?>(64) { null }
+        val inventory = arrayOfNulls<MockItem>(64)
         inventory[0] = MockItem(EntityEncoded(UUID.randomUUID()))
         inventory[1] = MockItem(EntityEncoded(UUID.randomUUID()))
 
@@ -64,7 +64,7 @@ class PlayerItemCacheTest {
     fun `should create entities correctly for player-instanced items`() {
         // arrange
         val cache = mockItemCache()
-        val inventory = Array<MockItem?>(64) { null }
+        val inventory = arrayOfNulls<MockItem>(64)
         inventory[0] = MockItem(PlayerInstanced(setOf(prefabKey1)))
         inventory[1] = MockItem(PlayerInstanced(setOf(prefabKey1)))
         inventory[6] = MockItem(PlayerInstanced(setOf(prefabKey2)))
@@ -90,7 +90,7 @@ class PlayerItemCacheTest {
     fun `should re-create item when moved in inventory`() {
         // arrange
         val cache = mockItemCache()
-        val inventory = Array<MockItem?>(64) { null }
+        val inventory = arrayOfNulls<MockItem>(64)
         inventory[0] = MockItem(EntityEncoded(UUID.randomUUID()))
 
         // act
@@ -111,7 +111,7 @@ class PlayerItemCacheTest {
     fun `should keep player instance until all items of type are removed`() {
         // arrange
         val cache = mockItemCache()
-        val inventory = Array<MockItem?>(64) { null }
+        val inventory = arrayOfNulls<MockItem>(64)
         inventory[0] = MockItem(PlayerInstanced(setOf(prefabKey1)))
         inventory[1] = MockItem(PlayerInstanced(setOf(prefabKey1)))
 
@@ -127,6 +127,24 @@ class PlayerItemCacheTest {
         playerInstancedEntity.shouldNotBeNull()
         cache[0].shouldBe(playerInstancedEntity)
         cache[2].shouldBe(playerInstancedEntity)
+    }
+
+    @Test
+    fun `should remove entity when removed from cache`() {
+        // assert
+        val cache = mockItemCache()
+
+        val inventory = arrayOfNulls<MockItem>(64)
+        inventory[0] = MockItem(PlayerInstanced(setOf(prefabKey1)))
+
+        // act
+        cache.updateToMatch(inventory)
+        val entity = cache[0]
+        cache.updateToMatch(arrayOfNulls(64))
+
+        // assert
+        cache[0].shouldBeNull()
+        entity
     }
 
 //    @Test
