@@ -10,6 +10,7 @@ import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.PlayerInstanc
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.Prefabs
 import com.mineinabyss.geary.prefabs.helpers.prefabs
+import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -22,7 +23,7 @@ import java.util.*
 
 class PlayerItemCacheTest {
     init {
-        geary(TestEngineModule) {
+        geary(TestEngineModule, TestEngineModule(reuseIDsAfterRemoval = false)) {
             install(Prefabs)
         }
         MockBukkit.mock()
@@ -144,7 +145,9 @@ class PlayerItemCacheTest {
 
         // assert
         cache[0].shouldBeNull()
-        entity
+        entity.shouldNotBeNull()
+        // TODO entity.isRemoved
+        shouldThrowAny { entity.set("") }
     }
 
 //    @Test
