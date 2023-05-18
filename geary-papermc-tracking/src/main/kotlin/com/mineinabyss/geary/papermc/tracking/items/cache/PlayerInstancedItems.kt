@@ -26,19 +26,16 @@ class PlayerInstancedItems {
         }
     }
 
-    /**
-     * @return Whether any entities were removed from the ECS
-     */
-    fun removeAnyKind(slot: Int): Boolean {
-        var removed = false
-        prefab2SlotsMap.forEach { (key, bits) ->
+    fun hasInstance(instance: GearyEntity): Boolean = prefab2InstanceMap.containsValue(instance)
+
+    fun removeAnyKind(slot: Int) {
+        prefab2SlotsMap.toMap().forEach { (key, bits) ->
             bits.clear(slot)
             if (bits.isEmpty()) {
-                removed = true
                 prefab2InstanceMap[key]?.removeEntity()
+                prefab2InstanceMap.remove(key)
                 prefab2SlotsMap.remove(key)
             }
         }
-        return removed
     }
 }

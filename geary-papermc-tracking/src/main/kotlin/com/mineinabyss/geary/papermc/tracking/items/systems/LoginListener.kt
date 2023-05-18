@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.items.systems
 
+import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.papermc.datastore.decode
 import com.mineinabyss.geary.papermc.datastore.decodePrefabs
 import com.mineinabyss.geary.papermc.datastore.hasComponentsEncoded
@@ -16,38 +17,51 @@ import net.minecraft.world.item.Items
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.inventory.ItemStack
 import java.util.*
 
+class NMSItemCache: PlayerItemCache<NMSItemStack>(64) {
+    override fun readItemInfo(item: NMSItemStack): ItemInfo {
+        return LoginListener.readItemInfo(item)
+    }
+
+    override fun convertToItemStack(item: NMSItemStack): ItemStack {
+        return item.toBukkit()
+    }
+
+    override fun deserializeItem(item: NMSItemStack): GearyEntity? {
+        return itemTracking.provider.deserializeItemStackToEntity(item)
+    }
+
+    override fun skipUpdate(slot: Int, newItem: NMSItemStack?): Boolean {
+        return getCachedItem(slot) === newItem && !(get(slot) != null && newItem?.isEmpty == true)
+    }
+
+}
 class LoginListener : Listener {
     @EventHandler
     fun PlayerJoinEvent.track() {
         val entity = player.toGeary()
-        entity.set(PlayerItemCache(
-            64,
-            readItemInfo = ::readItemInfo,
-            deserializeItem = { itemTracking.provider.deserializeItemStackToEntity(it) },
-            cacheConverter = { it.toBukkit() }
-        ))
+        entity.set<PlayerItemCache<*>>(NMSItemCache())
     }
 
-    fun readItemInfo(item: NMSItemStack): ItemInfo {
-        val pdc = item.fastPDC ?: return ItemInfo.NothingEncoded
-        if (item.item == Items.AIR) return ItemInfo.NothingEncoded
+    companion object {
+        fun readItemInfo(item: NMSItemStack): ItemInfo {
+            val pdc = item.fastPDC ?: return ItemInfo.NothingEncoded
+            if (item.item == Items.AIR) return ItemInfo.NothingEncoded
 
-        //TODO move out of here
-        val didMigration = !itemTracking.migration.encodePrefabsFromCustomModelDataIfPresent(pdc, item)
+            if (!pdc.hasComponentsEncoded) return ItemInfo.NothingEncoded
 
-        if (!pdc.hasComponentsEncoded && !didMigration) return ItemInfo.NothingEncoded
+            val prefabKeys = pdc.decodePrefabs()
+            val prefabs = prefabKeys.map { it.toEntityOrNull() ?: return ItemInfo.ErrorDecoding }.toSet()
 
-        val prefabKeys = pdc.decodePrefabs()
-        val prefabs = prefabKeys.map { it.toEntityOrNull() ?: return ItemInfo.ErrorDecoding }.toSet()
+            if (prefabs.any { it.has<PlayerInstancedItem>() }) {
+                pdc.remove<UUID>() // in case of migration
+                return ItemInfo.PlayerInstanced(prefabKeys)
+            }
 
-        if (prefabs.any { it.has<PlayerInstancedItem>() }) {
-            pdc.remove<UUID>() // in case of migration
-            return ItemInfo.PlayerInstanced(prefabKeys)
+            val uuid = pdc.decode<UUID>()
+            return ItemInfo.EntityEncoded(uuid)
         }
-
-        val uuid = pdc.decode<UUID>()
-        return ItemInfo.EntityEncoded(uuid)
     }
 }

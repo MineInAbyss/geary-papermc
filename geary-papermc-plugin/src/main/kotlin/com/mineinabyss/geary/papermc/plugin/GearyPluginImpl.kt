@@ -44,8 +44,6 @@ class GearyPluginImpl : GearyPlugin() {
 
         DI.add<GearyPaperConfigModule>(configModule)
 
-        Logger.setMinSeverity(configModule.config.logLevel)
-
         geary(PaperEngineModule, PaperEngineModule(this)) {
             // Install default addons
             install(FileSystemAddon, FileSystem.SYSTEM)

@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.items.cache
 
 import be.seeseemelk.mockbukkit.MockBukkit
+import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.TestEngineModule
 import com.mineinabyss.geary.modules.geary
@@ -22,6 +23,24 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 class PlayerItemCacheTest {
+    class MockItemCache: PlayerItemCache<MockItem>(64) {
+        override fun readItemInfo(item: MockItem): ItemInfo {
+            return item.info
+        }
+
+        override fun convertToItemStack(item: MockItem): ItemStack {
+            return ItemStack(Material.STONE)
+        }
+
+        override fun deserializeItem(item: MockItem): GearyEntity? {
+            return entity()
+        }
+
+        override fun skipUpdate(slot: Int, newItem: MockItem?): Boolean {
+            return getCachedItem(slot) === newItem
+        }
+
+    }
     init {
         geary(TestEngineModule, TestEngineModule(reuseIDsAfterRemoval = false)) {
             install(Prefabs)
@@ -34,19 +53,11 @@ class PlayerItemCacheTest {
     val prefab1 = entity { set(prefabKey1) }
     val prefab2 = entity { set(prefabKey2) }
 
-    fun mockItemCache(): PlayerItemCache<MockItem> {
-        return PlayerItemCache(
-            maxSize = 64,
-            cacheConverter = { ItemStack(Material.STONE) },
-            deserializeItem = { entity() },
-            readItemInfo = { it.info },
-        )
-    }
 
     @Test
     fun `should create entities correctly for regular items`() {
         // arrange
-        val cache = mockItemCache()
+        val cache = MockItemCache()
         val inventory = arrayOfNulls<MockItem>(64)
         inventory[0] = MockItem(EntityEncoded(UUID.randomUUID()))
         inventory[1] = MockItem(EntityEncoded(UUID.randomUUID()))
@@ -64,7 +75,7 @@ class PlayerItemCacheTest {
     @Test
     fun `should create entities correctly for player-instanced items`() {
         // arrange
-        val cache = mockItemCache()
+        val cache = MockItemCache()
         val inventory = arrayOfNulls<MockItem>(64)
         inventory[0] = MockItem(PlayerInstanced(setOf(prefabKey1)))
         inventory[1] = MockItem(PlayerInstanced(setOf(prefabKey1)))
@@ -90,7 +101,7 @@ class PlayerItemCacheTest {
     @Test
     fun `should re-create item when moved in inventory`() {
         // arrange
-        val cache = mockItemCache()
+        val cache = MockItemCache()
         val inventory = arrayOfNulls<MockItem>(64)
         inventory[0] = MockItem(EntityEncoded(UUID.randomUUID()))
 
@@ -111,7 +122,7 @@ class PlayerItemCacheTest {
     @Test
     fun `should keep player instance until all items of type are removed`() {
         // arrange
-        val cache = mockItemCache()
+        val cache = MockItemCache()
         val inventory = arrayOfNulls<MockItem>(64)
         inventory[0] = MockItem(PlayerInstanced(setOf(prefabKey1)))
         inventory[1] = MockItem(PlayerInstanced(setOf(prefabKey1)))
@@ -133,7 +144,7 @@ class PlayerItemCacheTest {
     @Test
     fun `should remove entity when removed from cache`() {
         // assert
-        val cache = mockItemCache()
+        val cache = MockItemCache()
 
         val inventory = arrayOfNulls<MockItem>(64)
         inventory[0] = MockItem(PlayerInstanced(setOf(prefabKey1)))

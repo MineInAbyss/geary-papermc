@@ -7,6 +7,7 @@ import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.systems.RepeatingSystem
 import com.mineinabyss.geary.systems.accessors.TargetScope
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
+import com.mineinabyss.idofront.nms.aliases.toNMS
 import com.mineinabyss.idofront.time.ticks
 import org.bukkit.entity.Player
 
@@ -27,6 +28,6 @@ class InventoryTrackerSystem : RepeatingSystem(interval = 1.ticks) {
     private val TargetScope.itemCache by get<PlayerItemCache<NMSItemStack>>()
 
     override fun TargetScope.tick() {
-        itemCache.updateToMatch(GearyPlayerInventory.toArray(player.inventory))
+        itemCache.updateToMatch(GearyPlayerInventory.toArray(player.inventory.toNMS()))
     }
 }
