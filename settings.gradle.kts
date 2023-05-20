@@ -30,5 +30,3 @@ include(
     "geary-papermc-tracking",
     "geary-papermc-bridge"
 )
-
-includeBuild("../geary")

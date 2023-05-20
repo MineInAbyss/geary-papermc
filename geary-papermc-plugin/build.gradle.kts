@@ -7,9 +7,16 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
 }
 
+configurations {
+    runtimeClasspath {
+        exclude(group = "org.jetbrains.kotlin")
+        exclude(group = "org.jetbrains.kotlinx")
+        exclude(group = "org.snakeyaml")
+    }
+}
+
 dependencies {
     implementation(project(":"))
-    implementation(project(":geary-papermc-bridge"))
 
     // Plugins
     compileOnly(myLibs.plugman)
