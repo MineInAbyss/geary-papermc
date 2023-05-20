@@ -8,6 +8,7 @@ import com.mineinabyss.idofront.nms.aliases.NMSPlayerInventory
 import com.mineinabyss.idofront.nms.aliases.toNMS
 import net.minecraft.world.entity.player.Inventory
 import org.bukkit.entity.HumanEntity
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.PlayerInventory
 
 
@@ -22,6 +23,20 @@ class GearyPlayerInventory(
      */
     fun get(slot: Int): GearyEntity? {
         return cache.getOrUpdate(slot, nmsInv.getItem(slot)) { toArray(inventory.toNMS()) }
+    }
+
+    /**
+     * Gets or loads a Geary entity associated with the item in equipmentSlot [equipmentSlot] of this player's inventory.
+     */
+    fun get(equipmentSlot: EquipmentSlot): GearyEntity? {
+        return when (equipmentSlot) {
+            EquipmentSlot.HAND -> itemInMainHand
+            EquipmentSlot.OFF_HAND -> itemInOffhand
+            EquipmentSlot.HEAD -> itemInHelmet
+            EquipmentSlot.CHEST -> itemInChestplate
+            EquipmentSlot.LEGS -> itemInLeggings
+            EquipmentSlot.FEET -> itemInBoots
+        }
     }
 
     // We use custom cursor slot so can't just call get
