@@ -7,6 +7,8 @@ import com.mineinabyss.geary.helpers.withSerialName
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.GearyPaperConfigModule
 import com.mineinabyss.geary.papermc.GearyPlugin
+import com.mineinabyss.geary.papermc.bridge.PaperBridge
+import com.mineinabyss.geary.papermc.configlang.ConfigLang
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.entityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
@@ -51,6 +53,8 @@ class GearyPluginImpl : GearyPlugin() {
 
             if (configModule.config.trackEntities) install(EntityTracking)
             if (configModule.config.trackItems) install(ItemTracking)
+            if (configModule.config.bridgeEvents) install(PaperBridge)
+            if (configModule.config.configLang) install(ConfigLang)
 
             serialization {
                 format("yml", ::YamlFormat)

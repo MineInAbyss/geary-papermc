@@ -13,6 +13,7 @@ plugins {
 
 dependencies {
     api(project(":geary-papermc-tracking"))
+    api(project(":geary-papermc-bridge"))
     api(gearyLibs.core)
     api(gearyLibs.autoscan)
     api(gearyLibs.prefabs)

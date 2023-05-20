@@ -8,6 +8,7 @@ import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.itemTracking
 import com.mineinabyss.geary.prefabs.PrefabKey
+import com.mineinabyss.geary.prefabs.helpers.inheritPrefabs
 import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.idofront.commands.arguments.intArg
 import com.mineinabyss.idofront.commands.arguments.optionArg
@@ -106,8 +107,10 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                             prefabLoader.loadFromPath(
                                 namespace,
                                 plugin.dataFolder.resolve(namespace).resolve(path).toOkioPath()
-                            ).onSuccess { sender.success("Read prefab $namespace:$path") }
-                                .onFailure { sender.error("Failed to read prefab $namespace:$path:\n${it.message}") }
+                            ).onSuccess {
+                                it.inheritPrefabs()
+                                sender.success("Read prefab $namespace:$path")
+                            }.onFailure { sender.error("Failed to read prefab $namespace:$path:\n${it.message}") }
                         }
                     }
                 }
