@@ -28,7 +28,6 @@ class BukkitEntity2Geary {
     }
 
     fun getOrCreate(bukkit: BukkitEntity): GearyEntity {
-        require(!bukkit.toNMS().isRemoved) { "Tried to access Geary entity for an entity that was removed: $bukkit" }
         return get(bukkit) ?: entity { set(bukkit) }
     }
 }
