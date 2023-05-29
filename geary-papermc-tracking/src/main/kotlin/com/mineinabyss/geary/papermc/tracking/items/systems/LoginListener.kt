@@ -1,48 +1,36 @@
 package com.mineinabyss.geary.papermc.tracking.items.systems
 
-import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.papermc.datastore.decode
 import com.mineinabyss.geary.papermc.datastore.decodePrefabs
 import com.mineinabyss.geary.papermc.datastore.hasComponentsEncoded
 import com.mineinabyss.geary.papermc.datastore.remove
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
+import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo
+import com.mineinabyss.geary.papermc.tracking.items.cache.NMSItemCache
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.components.PlayerInstancedItem
-import com.mineinabyss.geary.papermc.tracking.items.itemTracking
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
-import com.mineinabyss.idofront.nms.aliases.toBukkit
 import com.mineinabyss.idofront.nms.nbt.fastPDC
 import net.minecraft.world.item.Items
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.inventory.ItemStack
+import org.bukkit.event.player.PlayerQuitEvent
 import java.util.*
 
-class NMSItemCache: PlayerItemCache<NMSItemStack>(64) {
-    override fun readItemInfo(item: NMSItemStack): ItemInfo {
-        return LoginListener.readItemInfo(item)
-    }
-
-    override fun convertToItemStack(item: NMSItemStack): ItemStack {
-        return item.toBukkit()
-    }
-
-    override fun deserializeItem(item: NMSItemStack): GearyEntity? {
-        return itemTracking.provider.deserializeItemStackToEntity(item)
-    }
-
-    override fun skipUpdate(slot: Int, newItem: NMSItemStack?): Boolean {
-        return getCachedItem(slot) === newItem && !(get(slot) != null && newItem?.isEmpty == true)
-    }
-
-}
 class LoginListener : Listener {
     @EventHandler
     fun PlayerJoinEvent.track() {
         val entity = player.toGeary()
         entity.set<PlayerItemCache<*>>(NMSItemCache())
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    fun PlayerQuitEvent.clearCacheOnPlayerQuit() {
+        val cache = player.toGearyOrNull()?.get<PlayerItemCache<*>>() ?: return
+        cache.clear()
     }
 
     companion object {

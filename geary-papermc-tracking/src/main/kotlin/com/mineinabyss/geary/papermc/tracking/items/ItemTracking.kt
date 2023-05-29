@@ -27,7 +27,7 @@ interface ItemTracking {
             gearyPaper.plugin.listeners(LoginListener())
             geary.pipeline.addSystems(
                 InventoryTrackerSystem(),
-                PeriodicSaveSystem(),
+//                PeriodicSaveSystem(),
                 CustomModelDataToPrefabTracker()
             )
         }

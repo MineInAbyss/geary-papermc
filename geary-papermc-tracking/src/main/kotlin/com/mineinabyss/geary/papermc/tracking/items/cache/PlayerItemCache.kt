@@ -4,6 +4,7 @@ import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.EntityEncoded
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.PlayerInstanced
 import com.mineinabyss.geary.prefabs.PrefabKey
@@ -13,7 +14,7 @@ import com.soywiz.kds.iterators.fastForEachWithIndex
 import org.bukkit.inventory.ItemStack
 
 // TODO bad pattern, passing entity into component, move into event
-abstract class PlayerItemCache<T>(maxSize: Int = 64) {
+abstract class PlayerItemCache<T>(val maxSize: Int = 64) {
     private val logger get() = geary.logger
 
     /** Entity associated with an inventory slot */
@@ -26,12 +27,14 @@ abstract class PlayerItemCache<T>(maxSize: Int = 64) {
     private val playerInstanced = PlayerInstancedItems()
 
     private fun removeEntity(slot: Int) {
+        val entity = entities[slot].takeIf { it != 0uL }?.toGeary() ?: return
         logger.d("Removing ${entities[slot]} in slot $slot")
-        val entity = entities[slot]
-        if(playerInstanced.hasInstance(entity.toGeary())){
+        if (playerInstanced.hasInstance(entity)) {
             playerInstanced.removeAnyKind(slot)
         } else {
-            entities[slot].takeIf { it != 0uL }?.toGeary()?.removeEntity()
+            val pdc = entity.get<ItemStack>()?.itemMeta?.persistentDataContainer
+            if (pdc != null) entity.encodeComponentsTo(pdc)
+            entity.removeEntity()
         }
         entities[slot] = 0uL
     }
@@ -78,6 +81,10 @@ abstract class PlayerItemCache<T>(maxSize: Int = 64) {
                 else -> removeEntity(slot)
             }
         }
+    }
+
+    fun clear() {
+        repeat(maxSize) { removeEntity(it) }
     }
 
     /**
