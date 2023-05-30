@@ -1,11 +1,11 @@
 package com.mineinabyss.geary.papermc.tracking.items.cache
 
 import be.seeseemelk.mockbukkit.MockBukkit
-import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.TestEngineModule
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.mocks.MockItem
+import com.mineinabyss.geary.papermc.mocks.MockItemCache
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.EntityEncoded
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.PlayerInstanced
 import com.mineinabyss.geary.prefabs.PrefabKey
@@ -17,30 +17,10 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import org.bukkit.Material
-import org.bukkit.inventory.ItemStack
 import org.junit.jupiter.api.Test
 import java.util.*
 
 class PlayerItemCacheTest {
-    class MockItemCache: PlayerItemCache<MockItem>(64) {
-        override fun readItemInfo(item: MockItem): ItemInfo {
-            return item.info
-        }
-
-        override fun convertToItemStack(item: MockItem): ItemStack {
-            return ItemStack(Material.STONE)
-        }
-
-        override fun deserializeItem(item: MockItem): GearyEntity? {
-            return entity()
-        }
-
-        override fun skipUpdate(slot: Int, newItem: MockItem?): Boolean {
-            return getCachedItem(slot) === newItem
-        }
-
-    }
     init {
         geary(TestEngineModule, TestEngineModule(reuseIDsAfterRemoval = false)) {
             install(Prefabs)

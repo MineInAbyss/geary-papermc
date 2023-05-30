@@ -1,20 +1,18 @@
-import org.gradle.kotlin.dsl.libs
-
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id(libs.plugins.mia.kotlin.jvm.get().pluginId)
     id(libs.plugins.mia.papermc.get().pluginId)
     id(libs.plugins.mia.nms.get().pluginId)
     id(libs.plugins.mia.publication.get().pluginId)
-    id(libs.plugins.mia.testing.get().pluginId)
     alias(libs.plugins.kotlinx.serialization)
 }
 
+repositories {
+    mavenCentral()
+}
 dependencies {
     implementation(gearyLibs.uuid)
     implementation(libs.idofront.nms)
     api(project(":geary-papermc-datastore"))
     api(project(":geary-papermc-core"))
-
-    testImplementation(libs.minecraft.mockbukkit)
 }

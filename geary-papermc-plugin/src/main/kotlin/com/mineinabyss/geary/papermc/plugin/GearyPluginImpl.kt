@@ -1,12 +1,12 @@
 package com.mineinabyss.geary.papermc.plugin
 
-import co.touchlab.kermit.Logger
 import com.mineinabyss.geary.addons.GearyPhase.ENABLE
 import com.mineinabyss.geary.autoscan.autoscan
 import com.mineinabyss.geary.helpers.withSerialName
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.GearyPaperConfigModule
 import com.mineinabyss.geary.papermc.GearyPlugin
+import com.mineinabyss.geary.papermc.GearyProductionPaperConfigModule
 import com.mineinabyss.geary.papermc.bridge.PaperBridge
 import com.mineinabyss.geary.papermc.configlang.ConfigLang
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
@@ -42,7 +42,7 @@ class GearyPluginImpl : GearyPlugin() {
         saveDefaultConfig()
 
         // Register DI
-        val configModule = GearyPaperConfigModule(this)
+        val configModule = GearyProductionPaperConfigModule(this)
 
         DI.add<GearyPaperConfigModule>(configModule)
 

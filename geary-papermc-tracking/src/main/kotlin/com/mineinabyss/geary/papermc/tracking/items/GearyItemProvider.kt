@@ -34,7 +34,6 @@ class GearyItemProvider {
         return item.takeIf { it.type != Material.AIR }
     }
 
-    //TODO return the instance of prefab for PlayerInstanced
     /**
      * Creates a new entity from an ItemStack with data encoded to its PDC.
      * This will always create a new entity
