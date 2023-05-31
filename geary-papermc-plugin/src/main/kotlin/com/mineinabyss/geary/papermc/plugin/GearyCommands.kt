@@ -15,6 +15,7 @@ import com.mineinabyss.idofront.commands.arguments.optionArg
 import com.mineinabyss.idofront.commands.arguments.stringArg
 import com.mineinabyss.idofront.commands.execution.IdofrontCommandExecutor
 import com.mineinabyss.idofront.commands.extensions.actions.playerAction
+import com.mineinabyss.idofront.messaging.broadcastVal
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.info
 import com.mineinabyss.idofront.messaging.success
@@ -24,7 +25,9 @@ import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 import org.bukkit.plugin.Plugin
+import java.io.FileFilter
 import kotlin.io.path.Path
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.nameWithoutExtension
 
 internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
@@ -156,13 +159,25 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
             }
 
             "prefabs" -> when (if (args.size == 2) return listOf("read", "reread") else args[1]) {
-                "reread" -> prefabManager.keys.filter {
+                "reread" -> return prefabManager.keys.filter {
                     val arg = args[2].lowercase()
                     it.key.startsWith(arg) || it.full.startsWith(arg)
                 }.map { it.toString() }
 
-                "read" -> listOf()
-                else -> listOf()
+                "read" -> return when(args.size) {
+                    3 -> plugin.dataFolder.listFiles()?.filter {
+                        it.isDirectory && it.name.startsWith(args[2].lowercase())
+                    }?.map { it.name } ?: listOf()
+                    4 -> plugin.dataFolder.resolve(args[2]).walkTopDown().toList().filter {
+                        it.isFile && it.extension == "yml" && it.nameWithoutExtension.startsWith(args[3].lowercase())
+                                && "${args[2]}:${it.nameWithoutExtension}" !in prefabManager.keys.map(PrefabKey::full)
+                    }.map {
+                        it.absolutePath.split(plugin.dataFolder.absolutePath + "\\" + args[2] + "\\")[1]
+                            .replace("\\", "/")
+                    }
+                    else -> return listOf()
+                }
+                else -> return listOf()
             }
         }
         return emptyList()
