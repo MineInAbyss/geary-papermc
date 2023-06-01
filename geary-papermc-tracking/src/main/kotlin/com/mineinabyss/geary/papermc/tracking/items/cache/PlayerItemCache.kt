@@ -13,8 +13,9 @@ import com.mineinabyss.geary.prefabs.helpers.prefabs
 import com.soywiz.kds.iterators.fastForEachWithIndex
 import org.bukkit.inventory.ItemStack
 
-// TODO bad pattern, passing entity into component, move into event
-abstract class PlayerItemCache<T>(val maxSize: Int = 64) {
+abstract class PlayerItemCache<T>(
+    val maxSize: Int = 64
+) {
     private val logger get() = geary.logger
 
     /** Entity associated with an inventory slot */

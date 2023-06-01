@@ -8,6 +8,7 @@ import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.datastore.decode
 import com.mineinabyss.geary.papermc.helpers.MockedServerTest
 import com.mineinabyss.geary.papermc.helpers.SomeData
+import com.mineinabyss.geary.papermc.helpers.withTestSerializers
 import com.mineinabyss.geary.serialization.dsl.serialization
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import io.kotest.matchers.nulls.shouldBeNull
@@ -23,9 +24,7 @@ class EntityTrackingTests: MockedServerTest() {
     init {
         geary(TestEngineModule) {
             serialization {
-                components {
-                    component(SomeData.serializer())
-                }
+                withTestSerializers()
             }
             install(EntityTracking)
         }

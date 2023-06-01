@@ -3,7 +3,7 @@ package com.mineinabyss.geary.papermc.bridge.systems
 import com.mineinabyss.geary.papermc.bridge.components.*
 import com.mineinabyss.geary.papermc.bridge.helpers.setBukkitEvent
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
-import com.mineinabyss.geary.papermc.tracking.items.toGeary
+import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.idofront.entities.leftClicked
 import com.mineinabyss.idofront.entities.rightClicked
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap
