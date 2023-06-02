@@ -3,8 +3,8 @@ package com.mineinabyss.geary.papermc.tracking.items
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.papermc.tracking.items.cache.BukkitItemCache
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
+import com.mineinabyss.geary.papermc.tracking.items.inventory.BukkitInventoryCacheWrapper
 import com.mineinabyss.geary.papermc.tracking.items.inventory.InventoryCacheWrapper
-import com.mineinabyss.geary.papermc.tracking.items.inventory.InventoryToCacheViaBukkit
 import com.mineinabyss.geary.papermc.tracking.items.migration.ItemMigration
 import com.mineinabyss.geary.papermc.tracking.items.systems.LoginListener
 import org.bukkit.inventory.ItemStack
@@ -16,6 +16,6 @@ class BukkitBackedItemTracking : ItemTracking {
 
     override fun getCacheWrapper(entity: GearyEntity): InventoryCacheWrapper? {
         val cache = entity.get<PlayerItemCache<ItemStack>>() ?: return null
-        return InventoryToCacheViaBukkit(cache)
+        return BukkitInventoryCacheWrapper(cache)
     }
 }

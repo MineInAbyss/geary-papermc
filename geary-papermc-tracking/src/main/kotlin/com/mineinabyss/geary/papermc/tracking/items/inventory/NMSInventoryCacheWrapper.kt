@@ -9,7 +9,7 @@ import com.mineinabyss.idofront.nms.aliases.toNMS
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.PlayerInventory
 
-class InventoryToCacheViaNMS(override val cache: PlayerItemCache<NMSItemStack>) : InventoryCacheWrapper {
+class NMSInventoryCacheWrapper(override val cache: PlayerItemCache<NMSItemStack>) : InventoryCacheWrapper {
     override fun updateToMatch(inventory: Inventory) {
         require(inventory is PlayerInventory) { "Inventory must be a player inventory" }
         require(cache is NMSItemCache) { "Cache must be an NMS cache" }

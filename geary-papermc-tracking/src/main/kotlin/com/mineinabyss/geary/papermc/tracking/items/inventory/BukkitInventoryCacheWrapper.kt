@@ -6,7 +6,7 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.PlayerInventory
 
-class InventoryToCacheViaBukkit(override val cache: PlayerItemCache<ItemStack>) : InventoryCacheWrapper {
+class BukkitInventoryCacheWrapper(override val cache: PlayerItemCache<ItemStack>) : InventoryCacheWrapper {
     override fun updateToMatch(inventory: Inventory) {
         cache.updateToMatch(inventory.toArray())
     }

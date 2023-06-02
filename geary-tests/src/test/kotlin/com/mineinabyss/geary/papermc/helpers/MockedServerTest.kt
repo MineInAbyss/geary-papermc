@@ -4,6 +4,7 @@ import be.seeseemelk.mockbukkit.MockBukkit
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.GearyPaperConfigModule
 import com.mineinabyss.idofront.di.DI
+import org.junit.jupiter.api.AfterAll
 
 abstract class MockedServerTest {
     val server = MockBukkit.mock()
@@ -15,5 +16,11 @@ abstract class MockedServerTest {
             override val plugin = this@MockedServerTest.plugin
             override val config = GearyPaperConfig()
         })
+    }
+
+    @AfterAll
+    fun clearMocks() {
+        MockBukkit.unmock()
+        DI.clear()
     }
 }
