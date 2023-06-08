@@ -11,7 +11,6 @@ import com.mineinabyss.geary.papermc.configlang.ConfigLang
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.entityTracking
-import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.prefabs
@@ -25,7 +24,6 @@ import com.mineinabyss.idofront.plugin.listeners
 import com.mineinabyss.serialization.formats.YamlFormat
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import kotlin.io.path.isDirectory
@@ -85,7 +83,11 @@ class GearyPluginImpl : GearyPlugin() {
 
             // Start engine ticking
             on(ENABLE) {
-                Bukkit.getOnlinePlayers().forEach { it.toGeary() }
+                server.worlds.forEach { world ->
+                    world.entities.forEach entities@{ entity ->
+                        entityTracking.bukkit2Geary.getOrCreate(entity)
+                    }
+                }
 
                 logSuccess("Loaded mob types: ${entityTracking.mobPrefabs.getKeys().joinToString()}")
                 logSuccess("Loaded item types: ${entityTracking.itemPrefabs.getKeys().joinToString()}")
