@@ -76,7 +76,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                         parseErrorMessage = { "No such entity: $passed" }
                     }
                     playerAction {
-                        val item = itemTracking.provider.serializePrefabToItemStack(PrefabKey.of(prefabKey)) ?: run {
+                        val item = itemTracking.itemProvider.serializePrefabToItemStack(PrefabKey.of(prefabKey)) ?: run {
                             sender.error("Failed to spawn $prefabKey")
                             return@playerAction
                         }

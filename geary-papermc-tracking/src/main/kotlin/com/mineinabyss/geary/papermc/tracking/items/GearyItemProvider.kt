@@ -11,10 +11,9 @@ import com.mineinabyss.geary.papermc.datastore.loadComponentsFrom
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.uuid.components.RegenerateUUIDOnClash
-import com.mineinabyss.idofront.nms.aliases.NMSItemStack
-import com.mineinabyss.idofront.nms.nbt.fastPDC
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataContainer
 import java.util.*
 
 /**
@@ -34,16 +33,15 @@ class GearyItemProvider {
         return item.takeIf { it.type != Material.AIR }
     }
 
-    //TODO return the instance of prefab for PlayerInstanced
     /**
      * Creates a new entity from an ItemStack with data encoded to its PDC.
      * This will always create a new entity
      */
     fun deserializeItemStackToEntity(
-        reference: NMSItemStack,
+        pdc: PersistentDataContainer?,
         holder: GearyEntity? = null,
     ): GearyEntity? {
-        val pdc = reference.fastPDC ?: return null
+        if (pdc == null) return null
         return entity {
             pdc.decodePrefabs()
             if (holder != null) addParent(holder)
