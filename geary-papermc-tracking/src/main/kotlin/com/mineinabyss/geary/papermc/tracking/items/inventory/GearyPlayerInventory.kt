@@ -1,28 +1,27 @@
-package com.mineinabyss.geary.papermc.tracking.items
+package com.mineinabyss.geary.papermc.tracking.items.inventory
 
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
-import com.mineinabyss.idofront.nms.aliases.NMSItemStack
-import com.mineinabyss.idofront.nms.aliases.NMSPlayerInventory
-import com.mineinabyss.idofront.nms.aliases.toNMS
+import com.mineinabyss.geary.papermc.tracking.items.itemTracking
 import net.minecraft.world.entity.player.Inventory
-import org.bukkit.entity.HumanEntity
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.PlayerInventory
 
 
 class GearyPlayerInventory(
     val inventory: PlayerInventory,
-    val holder: HumanEntity,
-    val cache: PlayerItemCache<NMSItemStack>
+    val converter: InventoryCacheWrapper
 ) {
-    val nmsInv = inventory.toNMS()
     /**
      * Gets or loads a Geary entity associated with the item in slot [slot] of this player's inventory.
      */
     fun get(slot: Int): GearyEntity? {
-        return cache.getOrUpdate(slot, nmsInv.getItem(slot)) { toArray(inventory.toNMS()) }
+        return converter.getOrUpdate(inventory, slot)
+    }
+
+    fun forceRefresh() {
+        converter.updateToMatch(inventory)
     }
 
     /**
@@ -40,8 +39,7 @@ class GearyPlayerInventory(
     }
 
     // We use custom cursor slot so can't just call get
-    val itemOnCursor: GearyEntity?
-        get() = cache.getOrUpdate(PlayerItemCache.CURSOR_SLOT, holder.itemOnCursor.toNMS()) { toArray(inventory.toNMS()) }
+    val itemOnCursor: GearyEntity? get() = get(PlayerItemCache.CURSOR_SLOT)
 
     val itemInMainHand: GearyEntity?
         get() = get(inventory.heldItemSlot)
@@ -58,26 +56,10 @@ class GearyPlayerInventory(
     val itemInLeggings get() = get(inventory.size - 4)
 
     val itemInBoots get() = get(inventory.size - 5)
-
-    companion object {
-        fun toArray(inventory: NMSPlayerInventory): Array<NMSItemStack?> {
-            val array = Array<NMSItemStack?>(PlayerItemCache.MAX_SIZE) { null }
-            var slot = 0
-            inventory.compartments.forEach { comp ->
-                comp.forEach { item ->
-                    array[slot] = item
-                    slot++
-                }
-            }
-            // Include cursor as last slot
-            array[PlayerItemCache.CURSOR_SLOT] = inventory.player.containerMenu.carried
-            return array
-        }
-    }
 }
 
 fun PlayerInventory.toGeary(): GearyPlayerInventory? {
     val player = holder ?: return null
-    val cache = player.toGeary().get<PlayerItemCache<NMSItemStack>>() ?: return null
-    return GearyPlayerInventory(this, player, cache)
+    val wrap = itemTracking.getCacheWrapper(player.toGeary()) ?: return null
+    return GearyPlayerInventory(this, wrap)
 }

@@ -1,17 +1,16 @@
 package com.mineinabyss.geary.papermc.plugin
 
-import co.touchlab.kermit.Logger
 import com.mineinabyss.geary.addons.GearyPhase.ENABLE
 import com.mineinabyss.geary.autoscan.autoscan
-import com.mineinabyss.geary.helpers.withSerialName
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.GearyPaperConfigModule
 import com.mineinabyss.geary.papermc.GearyPlugin
+import com.mineinabyss.geary.papermc.GearyProductionPaperConfigModule
 import com.mineinabyss.geary.papermc.bridge.PaperBridge
 import com.mineinabyss.geary.papermc.configlang.ConfigLang
+import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.entityTracking
-import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.prefabs
@@ -22,14 +21,11 @@ import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.messaging.logSuccess
 import com.mineinabyss.idofront.platforms.Platforms
 import com.mineinabyss.idofront.plugin.listeners
-import com.mineinabyss.idofront.serialization.UUIDSerializer
 import com.mineinabyss.serialization.formats.YamlFormat
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
-import java.util.*
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
@@ -44,7 +40,7 @@ class GearyPluginImpl : GearyPlugin() {
         saveDefaultConfig()
 
         // Register DI
-        val configModule = GearyPaperConfigModule(this)
+        val configModule = GearyProductionPaperConfigModule(this)
 
         DI.add<GearyPaperConfigModule>(configModule)
 
@@ -60,10 +56,7 @@ class GearyPluginImpl : GearyPlugin() {
 
             serialization {
                 format("yml", ::YamlFormat)
-
-                components {
-                    component(UUID::class, UUIDSerializer.withSerialName("geary:uuid"))
-                }
+                withUUIDSerializer()
             }
 
             autoscan(classLoader, "com.mineinabyss.geary") {
@@ -90,7 +83,11 @@ class GearyPluginImpl : GearyPlugin() {
 
             // Start engine ticking
             on(ENABLE) {
-                Bukkit.getOnlinePlayers().forEach { it.toGeary() }
+                server.worlds.forEach { world ->
+                    world.entities.forEach entities@{ entity ->
+                        entityTracking.bukkit2Geary.getOrCreate(entity)
+                    }
+                }
 
                 logSuccess("Loaded mob types: ${entityTracking.mobPrefabs.getKeys().joinToString()}")
                 logSuccess("Loaded item types: ${entityTracking.itemPrefabs.getKeys().joinToString()}")

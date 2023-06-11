@@ -17,7 +17,7 @@ class EntityWorldEventTracker : Listener {
     fun EntityAddToWorldEvent.onBukkitEntityAdd() {
         // Only remove player from ECS on disconnect, not death
         if (entity is Player) return
-        entityTracking.bukkit2Geary.getOrCreate(entity).set(entity.world)
+        entityTracking.bukkit2Geary.getOrCreate(entity)
     }
 
     /** Remove entities from ECS when they are removed from Bukkit for any reason (Uses PaperMC event) */

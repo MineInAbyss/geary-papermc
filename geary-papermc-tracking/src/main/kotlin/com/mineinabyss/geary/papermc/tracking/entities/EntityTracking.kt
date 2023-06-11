@@ -3,12 +3,12 @@ package com.mineinabyss.geary.papermc.tracking.entities
 import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
-import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyItemPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.entities.systems.AttemptSpawnListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.EntityWorldEventTracker
 import com.mineinabyss.geary.papermc.tracking.entities.systems.TrackOnSetBukkitComponent
 import com.mineinabyss.geary.papermc.tracking.entities.systems.UntrackOnRemoveBukkitComponent
+import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.plugin.listeners
 

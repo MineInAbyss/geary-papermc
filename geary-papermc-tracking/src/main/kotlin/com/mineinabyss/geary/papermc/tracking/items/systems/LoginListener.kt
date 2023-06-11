@@ -7,24 +7,28 @@ import com.mineinabyss.geary.papermc.datastore.remove
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo
-import com.mineinabyss.geary.papermc.tracking.items.cache.NMSItemCache
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.components.PlayerInstancedItem
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
 import com.mineinabyss.idofront.nms.nbt.fastPDC
 import net.minecraft.world.item.Items
+import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataContainer
 import java.util.*
 
-class LoginListener : Listener {
+class LoginListener(
+    val cacheImpl: () -> PlayerItemCache<*>
+) : Listener {
     @EventHandler
     fun PlayerJoinEvent.track() {
         val entity = player.toGeary()
-        entity.set<PlayerItemCache<*>>(NMSItemCache())
+        entity.set<PlayerItemCache<*>>(cacheImpl())
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -35,9 +39,18 @@ class LoginListener : Listener {
 
     companion object {
         fun readItemInfo(item: NMSItemStack): ItemInfo {
-            val pdc = item.fastPDC ?: return ItemInfo.NothingEncoded
             if (item.item == Items.AIR) return ItemInfo.NothingEncoded
+            val pdc = item.fastPDC ?: return ItemInfo.NothingEncoded
+            return readItemInfo(pdc)
+        }
 
+        fun readItemInfo(item: ItemStack): ItemInfo {
+            if (item.type == Material.AIR) return ItemInfo.NothingEncoded
+            val pdc = item.itemMeta.persistentDataContainer
+            return readItemInfo(pdc)
+        }
+
+        fun readItemInfo(pdc: PersistentDataContainer): ItemInfo {
             if (!pdc.hasComponentsEncoded) return ItemInfo.NothingEncoded
 
             val prefabKeys = pdc.decodePrefabs()
