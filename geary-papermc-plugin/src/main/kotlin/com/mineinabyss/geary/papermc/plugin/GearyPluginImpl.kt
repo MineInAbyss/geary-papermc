@@ -9,6 +9,8 @@ import com.mineinabyss.geary.papermc.GearyProductionPaperConfigModule
 import com.mineinabyss.geary.papermc.bridge.PaperBridge
 import com.mineinabyss.geary.papermc.configlang.ConfigLang
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
+import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
+import com.mineinabyss.geary.papermc.tracking.blocks.gearyBlocks
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
@@ -51,6 +53,7 @@ class GearyPluginImpl : GearyPlugin() {
 
             if (configModule.config.trackEntities) install(EntityTracking)
             if (configModule.config.trackItems) install(ItemTracking)
+            if (configModule.config.trackBlocks) install(BlockTracking)
             if (configModule.config.bridgeEvents) install(PaperBridge)
             if (configModule.config.configLang) install(ConfigLang)
 
@@ -90,6 +93,7 @@ class GearyPluginImpl : GearyPlugin() {
                 }
 
                 logSuccess("Loaded mob types: ${gearyMobs.mobPrefabs.getKeys().joinToString()}")
+                logSuccess("Loaded block types: ${gearyBlocks.blockPrefabs.getKeys().joinToString()}")
                 logSuccess("Loaded item types: ${gearyMobs.itemPrefabs.getKeys().joinToString()}")
             }
         }
