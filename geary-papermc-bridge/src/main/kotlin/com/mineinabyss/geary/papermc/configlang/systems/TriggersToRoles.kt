@@ -14,7 +14,7 @@ class TriggersToRoles : GearyListener() {
 
     @Handler
     fun TargetScope.convert() {
-        try {
+//        try {
             conditions.expressions.forEach { expression ->
                 val (cause, effect) = expression.split(" ?-> ?".toRegex()).takeIf { it.size == 2 }
                     ?: error("Expression $expression needs to be formatted as 'cause -> effect'")
@@ -49,8 +49,8 @@ class TriggersToRoles : GearyListener() {
                     else entity.setRelation(TriggerWhenTarget(runEvents = effectEntities, runAsSource), causeEntity)
                 }
             }
-        } finally {
+//        } finally {
             entity.remove<EventTriggers>()
-        }
+//        }
     }
 }

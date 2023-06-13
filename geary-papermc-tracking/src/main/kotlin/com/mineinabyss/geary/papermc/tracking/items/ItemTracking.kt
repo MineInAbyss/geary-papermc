@@ -14,7 +14,7 @@ import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.plugin.listeners
 import org.bukkit.inventory.ItemStack
 
-val itemTracking by DI.observe<ItemTracking>()
+val gearyItems by DI.observe<ItemTracking>()
 
 interface ItemTracking {
     val itemProvider: GearyItemProvider

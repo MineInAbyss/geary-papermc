@@ -9,7 +9,7 @@ fun BukkitEntity.toGeary(): GearyEntity {
 }
 
 fun BukkitEntity.toGearyOrNull(): GearyEntity? =
-    entityTracking.bukkit2Geary[this]
+    gearyMobs.bukkit2Geary[this]
 
 fun GearyEntity.toBukkit(): BukkitEntity? = get()
 

@@ -2,11 +2,11 @@ package com.mineinabyss.geary.papermc.plugin
 
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
-import com.mineinabyss.geary.papermc.tracking.entities.entityTracking
+import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.spawnFromPrefab
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
-import com.mineinabyss.geary.papermc.tracking.items.itemTracking
+import com.mineinabyss.geary.papermc.tracking.items.gearyItems
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.helpers.inheritPrefabs
 import com.mineinabyss.geary.prefabs.prefabs
@@ -15,7 +15,6 @@ import com.mineinabyss.idofront.commands.arguments.optionArg
 import com.mineinabyss.idofront.commands.arguments.stringArg
 import com.mineinabyss.idofront.commands.execution.IdofrontCommandExecutor
 import com.mineinabyss.idofront.commands.extensions.actions.playerAction
-import com.mineinabyss.idofront.messaging.broadcastVal
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.info
 import com.mineinabyss.idofront.messaging.success
@@ -25,9 +24,7 @@ import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 import org.bukkit.plugin.Plugin
-import java.io.FileFilter
 import kotlin.io.path.Path
-import kotlin.io.path.absolutePathString
 import kotlin.io.path.nameWithoutExtension
 
 internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
@@ -52,7 +49,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
             }
             ("spawn" / "s") {
                 "mob" {
-                    val mobKey by optionArg(options = entityTracking.mobPrefabs.run { map { it.key.toString() } }) {
+                    val mobKey by optionArg(options = gearyMobs.mobPrefabs.run { map { it.key.toString() } }) {
                         parseErrorMessage = { "No such entity: $passed" }
                     }
                     val numOfSpawns by intArg {
@@ -72,11 +69,11 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                     }
                 }
                 "item" {
-                    val prefabKey by optionArg(options = entityTracking.itemPrefabs.run { map { it.key.toString() } }) {
+                    val prefabKey by optionArg(options = gearyMobs.itemPrefabs.run { map { it.key.toString() } }) {
                         parseErrorMessage = { "No such entity: $passed" }
                     }
                     playerAction {
-                        val item = itemTracking.itemProvider.serializePrefabToItemStack(PrefabKey.of(prefabKey)) ?: run {
+                        val item = gearyItems.itemProvider.serializePrefabToItemStack(PrefabKey.of(prefabKey)) ?: run {
                             sender.error("Failed to spawn $prefabKey")
                             return@playerAction
                         }
@@ -145,7 +142,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
             "spawn", "s" -> when (if (args.size == 2) return listOf("mob", "item") else args[1]) {
                 "mob" -> {
                     if (args.size == 3) {
-                        return entityTracking.mobPrefabs.getKeys().filterPrefabs(args[2]).toList()
+                        return gearyMobs.mobPrefabs.getKeys().filterPrefabs(args[2]).toList()
                     } else if (args.size == 4) {
                         val min = args[3].toIntOrNull()?.coerceAtLeast(1) ?: 1
                         return (min - 1 until min + 100).map { it.toString() }
@@ -153,7 +150,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                 }
                 "item" -> {
                     if (args.size == 3) {
-                        return entityTracking.itemPrefabs.getKeys().filterPrefabs(args[2]).toList()
+                        return gearyMobs.itemPrefabs.getKeys().filterPrefabs(args[2]).toList()
                     }
                 }
             }

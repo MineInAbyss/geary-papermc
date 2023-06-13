@@ -12,7 +12,7 @@ import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.plugin.listeners
 
-val entityTracking by DI.observe<EntityTracking>()
+val gearyMobs by DI.observe<EntityTracking>()
 
 interface EntityTracking {
     val bukkit2Geary: BukkitEntity2Geary

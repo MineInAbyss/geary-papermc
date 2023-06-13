@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.items.cache
 
 import com.mineinabyss.geary.datatypes.GearyEntity
-import com.mineinabyss.geary.papermc.tracking.items.itemTracking
+import com.mineinabyss.geary.papermc.tracking.items.gearyItems
 import com.mineinabyss.geary.papermc.tracking.items.systems.LoginListener
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
 import com.mineinabyss.idofront.nms.aliases.toBukkit
@@ -18,7 +18,7 @@ class NMSItemCache : PlayerItemCache<NMSItemStack>(64) {
     }
 
     override fun deserializeItem(item: NMSItemStack): GearyEntity? {
-        return itemTracking.itemProvider.deserializeItemStackToEntity(item.fastPDC)
+        return gearyItems.itemProvider.deserializeItemStackToEntity(item.fastPDC)
     }
 
     override fun skipUpdate(slot: Int, newItem: NMSItemStack?): Boolean {

@@ -10,7 +10,7 @@ import com.mineinabyss.geary.papermc.bridge.PaperBridge
 import com.mineinabyss.geary.papermc.configlang.ConfigLang
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
-import com.mineinabyss.geary.papermc.tracking.entities.entityTracking
+import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.prefabs
@@ -85,12 +85,12 @@ class GearyPluginImpl : GearyPlugin() {
             on(ENABLE) {
                 server.worlds.forEach { world ->
                     world.entities.forEach entities@{ entity ->
-                        entityTracking.bukkit2Geary.getOrCreate(entity)
+                        gearyMobs.bukkit2Geary.getOrCreate(entity)
                     }
                 }
 
-                logSuccess("Loaded mob types: ${entityTracking.mobPrefabs.getKeys().joinToString()}")
-                logSuccess("Loaded item types: ${entityTracking.itemPrefabs.getKeys().joinToString()}")
+                logSuccess("Loaded mob types: ${gearyMobs.mobPrefabs.getKeys().joinToString()}")
+                logSuccess("Loaded item types: ${gearyMobs.itemPrefabs.getKeys().joinToString()}")
             }
         }
 

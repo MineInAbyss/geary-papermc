@@ -54,7 +54,7 @@ class ItemTrackingTest : MockedServerTest() {
         @Test
         fun `should only encode prefab to PDC when creating item`() {
             // act
-            val item = itemTracking.createItem(prefabKey)
+            val item = gearyItems.createItem(prefabKey)
 
             // assert
             item.shouldNotBeNull()
@@ -84,7 +84,7 @@ class ItemTrackingTest : MockedServerTest() {
     fun `should get up-to-date entity with ItemStack component when item added to inventory`() {
         // arrange
         val player = server.addPlayer()
-        val item = itemTracking.createItem(prefabKey).shouldNotBeNull()
+        val item = gearyItems.createItem(prefabKey).shouldNotBeNull()
         val inventory = player.inventory
         val gearyInv = inventory.toGeary().shouldNotBeNull()
 

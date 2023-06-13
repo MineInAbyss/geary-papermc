@@ -3,7 +3,7 @@ package com.mineinabyss.geary.papermc.tracking.entities.systems
 import com.mineinabyss.geary.annotations.Handler
 import com.mineinabyss.geary.papermc.datastore.hasComponentsEncoded
 import com.mineinabyss.geary.papermc.datastore.loadComponentsFrom
-import com.mineinabyss.geary.papermc.tracking.entities.entityTracking
+import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
 import com.mineinabyss.geary.systems.GearyListener
 import com.mineinabyss.geary.systems.accessors.TargetScope
 import com.mineinabyss.idofront.typealiases.BukkitEntity
@@ -13,7 +13,7 @@ class TrackOnSetBukkitComponent : GearyListener() {
 
     @Handler
     fun TargetScope.loadEntity() {
-        entityTracking.bukkit2Geary[bukkit] = entity
+        gearyMobs.bukkit2Geary[bukkit] = entity
 
         // Load persisted components
         val pdc = bukkit.persistentDataContainer
