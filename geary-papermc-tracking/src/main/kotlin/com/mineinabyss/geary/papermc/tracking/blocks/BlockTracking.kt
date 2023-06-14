@@ -3,12 +3,14 @@ package com.mineinabyss.geary.papermc.tracking.blocks
 import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.tracking.blocks.helpers.GearyBlockPrefabQuery
+import com.mineinabyss.geary.papermc.tracking.blocks.systems.TrackOnSetBlockComponent
 import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.idofront.di.DI
 import org.bukkit.Instrument
 import org.bukkit.Material
 import org.bukkit.Note
+import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.data.BlockData
 import org.bukkit.block.data.type.*
@@ -31,6 +33,9 @@ interface BlockTracking {
         }
 
         override fun BlockTracking.install() {
+            geary.pipeline.addSystems(
+                TrackOnSetBlockComponent()
+            )
         }
 
         private fun createBlockMap(): Map<BlockData, Int> {

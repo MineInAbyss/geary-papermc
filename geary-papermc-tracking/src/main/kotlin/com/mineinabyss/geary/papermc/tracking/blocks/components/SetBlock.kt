@@ -8,7 +8,6 @@ import kotlinx.serialization.Serializable
 class SetBlock (
     val blockType: BlockType,
     val blockId: Int,
-    val blockModel: String? = null,
 ) {
     enum class BlockType {
         NOTEBLOCK, WIRE, CAVEVINE, SLAB, STAIR
