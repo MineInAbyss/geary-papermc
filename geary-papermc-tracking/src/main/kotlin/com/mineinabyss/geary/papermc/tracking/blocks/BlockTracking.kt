@@ -4,16 +4,16 @@ import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.tracking.blocks.helpers.GearyBlockPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.blocks.systems.TrackOnSetBlockComponent
-import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.idofront.di.DI
 import org.bukkit.Instrument
 import org.bukkit.Material
 import org.bukkit.Note
-import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.data.BlockData
-import org.bukkit.block.data.type.*
+import org.bukkit.block.data.type.CaveVines
+import org.bukkit.block.data.type.NoteBlock
+import org.bukkit.block.data.type.Tripwire
 
 val gearyBlocks by DI.observe<BlockTracking>()
 interface BlockTracking {
@@ -38,7 +38,7 @@ interface BlockTracking {
             )
         }
 
-        private fun createBlockMap(): Map<BlockData, Int> {
+        private fun createBlockMap(): MutableMap<BlockData, Int> {
             return mutableMapOf<BlockData, Int>().apply {
                 // Calculates tripwire states
                 for (i in 0..127) {
