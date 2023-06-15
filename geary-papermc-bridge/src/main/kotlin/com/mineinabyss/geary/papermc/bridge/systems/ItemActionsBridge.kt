@@ -68,7 +68,7 @@ class ItemActionsBridge : Listener {
 
     @EventHandler(ignoreCancelled = true)
     fun PlayerItemConsumeEvent.onConsume() {
-        player.toGeary().callEvent(source = player.inventory.toGeary()?.itemInMainHand) {
+        player.inventory.toGeary()?.itemInMainHand?.callEvent(source = player.toGeary()) {
             add<Ingested>()
             add<Touched>()
             setBukkitEvent(this@onConsume)
