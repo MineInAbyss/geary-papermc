@@ -4,7 +4,7 @@ import com.mineinabyss.geary.papermc.tracking.blocks.gearyBlocks
 import org.bukkit.block.Block
 import org.bukkit.block.data.BlockData
 
-val Block.prefabKey get() = gearyBlocks.blockProvider.deserializeBlockDataToPrefab(blockData)
-val BlockData.prefabKey get() = gearyBlocks.blockProvider.deserializeBlockDataToPrefab(this)
-fun Block.toGearyOrNull() = gearyBlocks.blockProvider.deserializeBlockDataToPrefab(blockData)?.toEntityOrNull()
-fun BlockData.toGearyOrNull() = gearyBlocks.blockProvider.deserializeBlockDataToPrefab(this)?.toEntityOrNull()
+val Block.prefabKey get() = gearyBlocks.block2Prefab[blockData]
+val BlockData.prefabKey get() = gearyBlocks.block2Prefab[this]
+fun Block.toGearyOrNull() = gearyBlocks.block2Prefab[blockData]?.toEntityOrNull()
+fun BlockData.toGearyOrNull() = gearyBlocks.block2Prefab[this]?.toEntityOrNull()
