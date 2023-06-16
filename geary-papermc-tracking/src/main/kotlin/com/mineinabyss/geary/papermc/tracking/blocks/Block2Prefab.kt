@@ -40,8 +40,7 @@ class Block2Prefab {
                     if (i shr 4 and 1 == 1) tripWireData.isPowered = true
                     if (i shr 5 and 1 == 1) tripWireData.isDisarmed = true
                     if (i shr 6 and 1 == 1) tripWireData.isAttached = true
-
-                    set(i, tripWireData)
+                    add(i, tripWireData)
                 }
             }.toTypedArray().let { put(SetBlock.BlockType.WIRE, it) }
 
@@ -55,27 +54,25 @@ class Block2Prefab {
 
                     noteBlockData.note = Note((j % 25))
                     noteBlockData.isPowered = j / 25 % 2 == 1
-
-                    set(j - 49, noteBlockData)
+                    add(j - 50, noteBlockData)
                 }
 
                 // Restore functionality bs
-                for (j in 1..49) {
+                for (j in 0..49) {
                     noteBlockData.instrument = Instrument.PIANO
                     noteBlockData.note = Note((j % 25))
                     noteBlockData.isPowered = j / 25 % 2 == 1
-
-                    set(j + 750, noteBlockData)
+                    add(j + 750, noteBlockData)
                 }
             }.toTypedArray().let { put(SetBlock.BlockType.NOTEBLOCK, it) }
 
             // Calculates cave-vine states
             arrayListOf<BlockData>().apply {
-                for (m in 1..50) {
+                for (m in 0..49) {
                     val vineData = Material.CAVE_VINES.createBlockData() as CaveVines
                     vineData.isBerries = m > 25
                     vineData.age = if (m > 25) m - 25 else m
-                    set(m, vineData)
+                    add(m, vineData)
                 }
             }.toTypedArray().let { put(SetBlock.BlockType.CAVEVINE, it) }
         }
