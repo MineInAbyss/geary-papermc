@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.items.inventory
 
 import com.mineinabyss.geary.datatypes.GearyEntity
-import com.mineinabyss.geary.papermc.tracking.entities.toGeary
+import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.gearyItems
 import net.minecraft.world.entity.player.Inventory
@@ -60,6 +60,6 @@ class GearyPlayerInventory(
 
 fun PlayerInventory.toGeary(): GearyPlayerInventory? {
     val player = holder ?: return null
-    val wrap = gearyItems.getCacheWrapper(player.toGeary()) ?: return null
+    val wrap = gearyItems.getCacheWrapper(player.toGearyOrNull() ?: return null) ?: return null
     return GearyPlayerInventory(this, wrap)
 }

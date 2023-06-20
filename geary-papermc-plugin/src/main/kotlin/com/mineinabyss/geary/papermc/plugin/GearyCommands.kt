@@ -63,7 +63,8 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
 
                         repeat(cappedSpawns) {
                             player.location.spawnFromPrefab(key).onFailure {
-                                sender.error("Failed to spawn $key:\n${it.stackTraceToString()}")
+                                sender.error("Failed to spawn $key")
+                                it.printStackTrace()
                             }
                         }
                     }
