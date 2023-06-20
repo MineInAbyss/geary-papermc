@@ -5,11 +5,11 @@ import com.mineinabyss.idofront.typealiases.BukkitEntity
 import org.bukkit.entity.Entity
 
 fun BukkitEntity.toGeary(): GearyEntity {
-    return entityTracking.bukkit2Geary.getOrCreate(this@toGeary)
+    return toGearyOrNull() ?: error("Entity $this is not being tracked by Geary!")
 }
 
 fun BukkitEntity.toGearyOrNull(): GearyEntity? =
-    entityTracking.bukkit2Geary[this]
+    gearyMobs.bukkit2Geary[this]
 
 fun GearyEntity.toBukkit(): BukkitEntity? = get()
 

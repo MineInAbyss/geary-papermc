@@ -28,7 +28,6 @@ class BukkitEntity2Geary {
     }
 
     fun getOrCreate(bukkit: BukkitEntity): GearyEntity {
-        require(bukkit.toNMS().valid) { "Tried to access Geary entity for an entity that was not valid: $bukkit" }
         return get(bukkit) ?: entity { set(bukkit) }
     }
 }

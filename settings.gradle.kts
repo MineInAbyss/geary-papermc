@@ -14,10 +14,14 @@ dependencyResolutionManagement {
 
     repositories {
         maven("https://repo.mineinabyss.com/releases")
+        maven("https://repo.mineinabyss.com/snapshots")
     }
 
     versionCatalogs {
-        create("libs").from("com.mineinabyss:catalog:$idofrontVersion")
+        create("libs") {
+            from("com.mineinabyss:catalog:$idofrontVersion")
+            version("mockbukkit", "3.1.0")
+        }
         create("myLibs").from(files("gradle/myLibs.versions.toml"))
         create("gearyLibs").from("com.mineinabyss:geary-catalog:$gearyVersion")
     }
@@ -28,4 +32,6 @@ include(
     "geary-papermc-datastore",
     "geary-papermc-plugin",
     "geary-papermc-tracking",
+    "geary-papermc-bridge",
+    "geary-tests"
 )

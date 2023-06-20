@@ -4,7 +4,7 @@ import com.mineinabyss.geary.annotations.Handler
 import com.mineinabyss.geary.components.events.EntityRemoved
 import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
-import com.mineinabyss.geary.papermc.tracking.entities.entityTracking
+import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
 import com.mineinabyss.geary.systems.GearyListener
 import com.mineinabyss.geary.systems.accessors.EventScope
 import com.mineinabyss.geary.systems.accessors.TargetScope
@@ -16,7 +16,7 @@ class UntrackOnRemoveBukkitComponent : GearyListener() {
 
     @Handler
     fun TargetScope.persistComponents() {
-        entityTracking.bukkit2Geary.remove(bukkit.entityId)
+        gearyMobs.bukkit2Geary.remove(bukkit.entityId)
         entity.encodeComponentsTo(bukkit)
     }
 }

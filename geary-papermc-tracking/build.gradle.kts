@@ -2,11 +2,14 @@
 plugins {
     id(libs.plugins.mia.kotlin.jvm.get().pluginId)
     id(libs.plugins.mia.papermc.get().pluginId)
-    id(libs.plugins.mia.nms.deobfuscated.get().pluginId)
+    id(libs.plugins.mia.nms.get().pluginId)
     id(libs.plugins.mia.publication.get().pluginId)
     alias(libs.plugins.kotlinx.serialization)
 }
 
+repositories {
+    mavenCentral()
+}
 dependencies {
     implementation(gearyLibs.uuid)
     implementation(libs.idofront.nms)

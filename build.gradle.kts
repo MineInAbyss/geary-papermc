@@ -13,6 +13,7 @@ plugins {
 
 dependencies {
     api(project(":geary-papermc-tracking"))
+    api(project(":geary-papermc-bridge"))
     api(gearyLibs.core)
     api(gearyLibs.autoscan)
     api(gearyLibs.prefabs)
@@ -28,6 +29,7 @@ allprojects {
     repositories {
         mavenCentral()
         maven("https://repo.mineinabyss.com/releases")
+        maven("https://repo.mineinabyss.com/snapshots")
         maven("https://raw.githubusercontent.com/TheBlackEntity/PlugMan/repository/")
         maven("https://jitpack.io")
         maven("https://repo.codemc.io/repository/nms/")

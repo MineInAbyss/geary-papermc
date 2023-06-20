@@ -15,3 +15,4 @@ class GearyMobPrefabQuery : GearyQuery() {
     }
     fun getKeys(): Sequence<PrefabKey> = asSequence().run { map { it.key } }
 }
+
