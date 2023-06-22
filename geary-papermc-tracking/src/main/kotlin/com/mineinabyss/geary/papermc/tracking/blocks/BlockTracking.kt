@@ -12,13 +12,13 @@ val gearyBlocks by DI.observe<BlockTracking>()
 
 interface BlockTracking {
     val block2Prefab: Block2Prefab
-    val blockPrefabs: GearyBlockPrefabQuery
+    val prefabs: GearyBlockPrefabQuery
 
     fun createBlockData(prefabKey: PrefabKey): BlockData? = block2Prefab[prefabKey]
 
     companion object : GearyAddonWithDefault<BlockTracking> {
         override fun default(): BlockTracking = object : BlockTracking {
-            override val blockPrefabs = GearyBlockPrefabQuery()
+            override val prefabs = GearyBlockPrefabQuery()
             override val block2Prefab = Block2Prefab()
         }
 

@@ -4,6 +4,7 @@ import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.items.inventory.InventoryCacheWrapper
 import com.mineinabyss.geary.papermc.tracking.items.migration.CustomModelDataToPrefabTracker
 import com.mineinabyss.geary.papermc.tracking.items.migration.ItemMigration
@@ -20,6 +21,7 @@ interface ItemTracking {
     val itemProvider: GearyItemProvider
     val migration: ItemMigration
     val loginListener: LoginListener
+    val prefabs: GearyItemPrefabQuery
     fun getCacheWrapper(entity: GearyEntity): InventoryCacheWrapper?
 
     fun createItem(

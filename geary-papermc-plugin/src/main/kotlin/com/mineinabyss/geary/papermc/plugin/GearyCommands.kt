@@ -49,7 +49,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
             }
             ("spawn" / "s") {
                 "mob" {
-                    val mobKey by optionArg(options = gearyMobs.mobPrefabs.run { map { it.key.toString() } }) {
+                    val mobKey by optionArg(options = gearyMobs.prefabs.run { map { it.key.toString() } }) {
                         parseErrorMessage = { "No such entity: $passed" }
                     }
                     val numOfSpawns by intArg {
@@ -70,7 +70,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                     }
                 }
                 "item" {
-                    val prefabKey by optionArg(options = gearyMobs.itemPrefabs.run { map { it.key.toString() } }) {
+                    val prefabKey by optionArg(options = gearyItems.prefabs.run { map { it.key.toString() } }) {
                         parseErrorMessage = { "No such entity: $passed" }
                     }
                     playerAction {
@@ -116,14 +116,6 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                     }
                 }
             }
-//            "fullreload" {
-//                action {
-//                    val depends = getGearyDependants()
-//                    depends.forEach { PluginUtil.unload(it) }
-//                    PluginUtil.reload(plugin)
-//                    depends.forEach { PluginUtil.load(it.name) }
-//                }
-//            }
         }
     }
 
@@ -143,7 +135,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
             "spawn", "s" -> when (if (args.size == 2) return listOf("mob", "item") else args[1]) {
                 "mob" -> {
                     if (args.size == 3) {
-                        return gearyMobs.mobPrefabs.getKeys().filterPrefabs(args[2]).toList()
+                        return gearyMobs.prefabs.getKeys().filterPrefabs(args[2]).toList()
                     } else if (args.size == 4) {
                         val min = args[3].toIntOrNull()?.coerceAtLeast(1) ?: 1
                         return (min - 1 until min + 100).map { it.toString() }
@@ -151,7 +143,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                 }
                 "item" -> {
                     if (args.size == 3) {
-                        return gearyMobs.itemPrefabs.getKeys().filterPrefabs(args[2]).toList()
+                        return gearyItems.prefabs.getKeys().filterPrefabs(args[2]).toList()
                     }
                 }
             }

@@ -8,7 +8,6 @@ import com.mineinabyss.geary.papermc.tracking.entities.systems.AttemptSpawnListe
 import com.mineinabyss.geary.papermc.tracking.entities.systems.EntityWorldEventTracker
 import com.mineinabyss.geary.papermc.tracking.entities.systems.TrackOnSetBukkitComponent
 import com.mineinabyss.geary.papermc.tracking.entities.systems.UntrackOnRemoveBukkitComponent
-import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.plugin.listeners
 
@@ -16,14 +15,12 @@ val gearyMobs by DI.observe<EntityTracking>()
 
 interface EntityTracking {
     val bukkit2Geary: BukkitEntity2Geary
-    val mobPrefabs: GearyMobPrefabQuery
-    val itemPrefabs: GearyItemPrefabQuery
+    val prefabs: GearyMobPrefabQuery
 
     companion object : GearyAddonWithDefault<EntityTracking> {
         override fun default(): EntityTracking = object : EntityTracking {
             override val bukkit2Geary = BukkitEntity2Geary()
-            override val mobPrefabs = GearyMobPrefabQuery()
-            override val itemPrefabs = GearyItemPrefabQuery()
+            override val prefabs = GearyMobPrefabQuery()
         }
 
         override fun EntityTracking.install() {
