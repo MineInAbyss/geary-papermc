@@ -8,6 +8,7 @@ import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.items.inventory.InventoryCacheWrapper
 import com.mineinabyss.geary.papermc.tracking.items.migration.CustomModelDataToPrefabTracker
 import com.mineinabyss.geary.papermc.tracking.items.migration.ItemMigration
+import com.mineinabyss.geary.papermc.tracking.items.migration.SetItemMigrationSystem
 import com.mineinabyss.geary.papermc.tracking.items.systems.InventoryTrackerSystem
 import com.mineinabyss.geary.papermc.tracking.items.systems.LoginListener
 import com.mineinabyss.geary.prefabs.PrefabKey
@@ -36,7 +37,8 @@ interface ItemTracking {
             gearyPaper.plugin.listeners(loginListener)
             geary.pipeline.addSystems(
                 InventoryTrackerSystem(),
-                CustomModelDataToPrefabTracker()
+                CustomModelDataToPrefabTracker(),
+                SetItemMigrationSystem()
             )
         }
     }

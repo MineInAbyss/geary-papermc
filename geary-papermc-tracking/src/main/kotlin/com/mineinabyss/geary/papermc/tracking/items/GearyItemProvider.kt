@@ -10,6 +10,7 @@ import com.mineinabyss.geary.papermc.datastore.encodePrefabs
 import com.mineinabyss.geary.papermc.datastore.loadComponentsFrom
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.prefabs.PrefabKey
+import com.mineinabyss.geary.prefabs.helpers.addPrefab
 import com.mineinabyss.geary.uuid.components.RegenerateUUIDOnClash
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
@@ -26,7 +27,7 @@ class GearyItemProvider {
     fun serializePrefabToItemStack(prefabKey: PrefabKey, existing: ItemStack? = null): ItemStack? {
         val item = existing ?: ItemStack(Material.AIR)
         val prefab = prefabKey.toEntityOrNull() ?: return null
-        prefab.get<SetItem>()?.item?.toItemStack(item)
+        prefab.get<SetItem>()?.item?.toItemStack(applyTo = item)
         item.editMeta {
             it.persistentDataContainer.encodePrefabs(listOf(prefabKey))
         }
@@ -43,7 +44,7 @@ class GearyItemProvider {
     ): GearyEntity? {
         if (pdc == null) return null
         return entity {
-            pdc.decodePrefabs()
+            pdc.decodePrefabs().forEach { addPrefab(it.toEntity()) }
             if (holder != null) addParent(holder)
             add<RegenerateUUIDOnClash>()
             loadComponentsFrom(pdc)

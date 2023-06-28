@@ -21,6 +21,10 @@ class NMSItemCache : PlayerItemCache<NMSItemStack>(64) {
         return gearyItems.itemProvider.deserializeItemStackToEntity(item.fastPDC)
     }
 
+    /**
+     * The underlying item pointer does not get updated when throwing an item out of inventory,
+     * it's just emptied, so we do an extra check to see if an item has been emptied, but isn't empty in the cache
+     */
     override fun skipUpdate(slot: Int, newItem: NMSItemStack?): Boolean {
         return getCachedItem(slot) === newItem && !(get(slot) != null && newItem?.isEmpty == true)
     }
