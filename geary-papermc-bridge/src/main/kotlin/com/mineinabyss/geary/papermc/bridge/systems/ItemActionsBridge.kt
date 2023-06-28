@@ -23,8 +23,8 @@ class ItemActionsBridge : Listener {
     @EventHandler
     fun PlayerInteractEvent.onClick() {
         player.inventory.toGeary()?.itemInMainHand?.callEvent(source = player.toGeary()) {
-            add<Interacted>()
             if (leftClicked) add<LeftClicked>()
+            else add<Interacted>()
 
             // Right click gets fired twice, so we manually prevent two right-clicks within several ticks of each other.
             val currTick = Bukkit.getServer().currentTick

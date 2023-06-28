@@ -1,5 +1,7 @@
 package com.mineinabyss.geary.papermc.plugin
 
+import com.mineinabyss.geary.helpers.entity
+import com.mineinabyss.geary.modules.archetypes
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
@@ -35,6 +37,18 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
 
     override val commands = commands(plugin) {
         "geary" {
+            "stats" {
+                action {
+                    val tempEntity = entity()
+
+                    sender.info("""
+                        |Archetype count: ${archetypes.archetypeProvider.count}
+                        |Next entity ID: ${tempEntity.id}
+                        |""".trimMargin())
+
+                    tempEntity.removeEntity()
+                }
+            }
             "debug" {
                 "inventory" {
                     playerAction {
@@ -131,7 +145,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
         fun Sequence<PrefabKey>.filterPrefabs(arg: String) =
             filter { it.key.startsWith(arg) || it.full.startsWith(arg) }.map { it.toString() }.take(20)
 
-        when (if (args.size == 1) return listOf("spawn", "s", "prefabs") else args[0]) {
+        when (if (args.size == 1) return listOf("spawn", "s", "prefabs", "stats") else args[0]) {
             "spawn", "s" -> when (if (args.size == 2) return listOf("mob", "item") else args[1]) {
                 "mob" -> {
                     if (args.size == 3) {
