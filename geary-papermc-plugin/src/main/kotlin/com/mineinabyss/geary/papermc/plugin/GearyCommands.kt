@@ -96,8 +96,8 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                     }
                 }
             }
-            "prefabs" {
-                "reread" {
+            "prefab" {
+                "reload" {
                     val prefab by stringArg()
                     action {
                         engine.launch {
@@ -107,7 +107,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                         }
                     }
                 }
-                "read" {
+                "load" {
                     val namespace by stringArg()
                     val path by stringArg()
                     action {
@@ -162,13 +162,13 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                 }
             }
 
-            "prefabs" -> when (if (args.size == 2) return listOf("read", "reread") else args[1]) {
-                "reread" -> return prefabManager.keys.filter {
+            "prefabs" -> when (if (args.size == 2) return listOf("load", "reload") else args[1]) {
+                "reload" -> return prefabManager.keys.filter {
                     val arg = args[2].lowercase()
                     it.key.startsWith(arg) || it.full.startsWith(arg)
                 }.map { it.toString() }
 
-                "read" -> return when(args.size) {
+                "load" -> return when(args.size) {
                     3 -> plugin.dataFolder.listFiles()?.filter {
                         it.isDirectory && it.name.startsWith(args[2].lowercase())
                     }?.map { it.name } ?: listOf()
