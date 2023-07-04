@@ -6,7 +6,6 @@ import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.datastore.encode
 import com.mineinabyss.geary.papermc.helpers.MockedServerTest
 import com.mineinabyss.geary.papermc.helpers.withMockTracking
-import com.mineinabyss.geary.papermc.tracking.items.components.PlayerInstancedItem
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItemIgnoredProperties
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
@@ -40,14 +39,6 @@ class SetItemMigrationTest : MockedServerTest() {
             set(prefabKey1)
         }
         yield(prefabKey1)
-
-        val prefabKey2 = PrefabKey.of("test:player_instanced")
-        entity {
-            set(SetItem(SerializableItemStack(type = Material.GLASS)))
-            add<PlayerInstancedItem>()
-            set(prefabKey2)
-        }
-        yield(prefabKey2)
     }.asStream()
 
     @ParameterizedTest

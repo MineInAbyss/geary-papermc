@@ -12,7 +12,6 @@ import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItemIgnoredProperties
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.helpers.addPrefab
-import com.mineinabyss.geary.uuid.components.RegenerateUUIDOnClash
 import com.mineinabyss.idofront.serialization.SerializableItemStack
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
@@ -53,9 +52,7 @@ class GearyItemProvider {
         return entity {
             pdc.decodePrefabs().forEach { addPrefab(it.toEntity()) }
             if (holder != null) addParent(holder)
-            add<RegenerateUUIDOnClash>()
             loadComponentsFrom(pdc)
-            getOrSetPersisting<UUID> { UUID.randomUUID() }
             encodeComponentsTo(pdc)
             logger.d("Loaded new instance of prefab ${get<PrefabKey>()}")
         }
