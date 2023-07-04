@@ -16,7 +16,7 @@ class SetItemMigrationSystem : GearyListener() {
 
     @Handler
     fun TargetScope.handle() {
-        val ignoredProperties = overrides?.ignore ?: EnumSet.noneOf(SerializableItemStack.Properties::class.java)
+        val ignoredProperties = overrides?.ignoreAsEnumSet() ?: EnumSet.noneOf(SerializableItemStack.Properties::class.java)
         setItem.item.toItemStack(applyTo = item, ignoredProperties)
     }
 }

@@ -31,7 +31,7 @@ class GearyItemProvider {
 
         prefab.get<SetItem>()?.item?.toItemStack(
             applyTo = item,
-            ignoreProperties = prefab.get<SetItemIgnoredProperties>()?.ignore
+            ignoreProperties = prefab.get<SetItemIgnoredProperties>()?.ignoreAsEnumSet()
                 ?: EnumSet.noneOf(SerializableItemStack.Properties::class.java)
         )
         item.editMeta {

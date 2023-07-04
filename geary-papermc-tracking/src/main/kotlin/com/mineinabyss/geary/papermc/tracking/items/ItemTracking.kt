@@ -8,6 +8,7 @@ import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.items.inventory.InventoryCacheWrapper
 import com.mineinabyss.geary.papermc.tracking.items.migration.CustomModelDataToPrefabTracker
 import com.mineinabyss.geary.papermc.tracking.items.migration.ItemMigration
+import com.mineinabyss.geary.papermc.tracking.items.migration.SetItemIgnoredPropertyListener
 import com.mineinabyss.geary.papermc.tracking.items.migration.SetItemMigrationSystem
 import com.mineinabyss.geary.papermc.tracking.items.systems.InventoryTrackerSystem
 import com.mineinabyss.geary.papermc.tracking.items.systems.LoginListener
@@ -34,7 +35,10 @@ interface ItemTracking {
         override fun default(): ItemTracking = NMSBackedItemTracking()
 
         override fun ItemTracking.install() {
-            gearyPaper.plugin.listeners(loginListener)
+            gearyPaper.plugin.listeners(
+                loginListener,
+                SetItemIgnoredPropertyListener()
+            )
             geary.pipeline.addSystems(
                 InventoryTrackerSystem(),
                 CustomModelDataToPrefabTracker(),
