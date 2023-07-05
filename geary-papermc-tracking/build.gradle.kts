@@ -9,8 +9,10 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven("https://mvn.lumine.io/repository/maven-public/")
 }
 dependencies {
+    compileOnly(libs.minecraft.plugin.mythic.dist)
     implementation(gearyLibs.uuid)
     implementation(libs.idofront.nms)
     api(project(":geary-papermc-datastore"))

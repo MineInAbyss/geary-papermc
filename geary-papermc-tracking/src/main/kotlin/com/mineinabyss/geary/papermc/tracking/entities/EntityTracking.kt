@@ -6,11 +6,9 @@ import com.mineinabyss.geary.helpers.componentId
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery
-import com.mineinabyss.geary.papermc.tracking.entities.systems.AttemptSpawnListener
-import com.mineinabyss.geary.papermc.tracking.entities.systems.EntityWorldEventTracker
-import com.mineinabyss.geary.papermc.tracking.entities.systems.TrackOnSetBukkitComponent
-import com.mineinabyss.geary.papermc.tracking.entities.systems.UntrackOnRemoveBukkitComponent
+import com.mineinabyss.geary.papermc.tracking.entities.systems.*
 import com.mineinabyss.idofront.di.DI
+import com.mineinabyss.idofront.plugin.Plugins
 import com.mineinabyss.idofront.plugin.listeners
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 
@@ -35,6 +33,9 @@ interface EntityTracking {
                 UntrackOnRemoveBukkitComponent(),
                 AttemptSpawnListener(),
             )
+            if (Plugins.isEnabled("MythicMobs")) {
+                geary.pipeline.addSystems(AttemptSpawnMythicMob())
+            }
         }
     }
 }
