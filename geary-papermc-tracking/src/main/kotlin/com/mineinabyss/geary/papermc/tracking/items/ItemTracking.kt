@@ -12,6 +12,7 @@ import com.mineinabyss.geary.papermc.tracking.items.migration.SetItemIgnoredProp
 import com.mineinabyss.geary.papermc.tracking.items.migration.SetItemMigrationSystem
 import com.mineinabyss.geary.papermc.tracking.items.systems.InventoryTrackerSystem
 import com.mineinabyss.geary.papermc.tracking.items.systems.LoginListener
+import com.mineinabyss.geary.papermc.tracking.items.systems.MythicMobDropSystem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.plugin.listeners
@@ -37,7 +38,8 @@ interface ItemTracking {
         override fun ItemTracking.install() {
             gearyPaper.plugin.listeners(
                 loginListener,
-                SetItemIgnoredPropertyListener()
+                SetItemIgnoredPropertyListener(),
+                MythicMobDropSystem()
             )
             geary.pipeline.addSystems(
                 InventoryTrackerSystem(),
