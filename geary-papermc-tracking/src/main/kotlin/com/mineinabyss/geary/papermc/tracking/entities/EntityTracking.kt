@@ -8,7 +8,6 @@ import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.entities.systems.*
 import com.mineinabyss.idofront.di.DI
-import com.mineinabyss.idofront.plugin.Plugins
 import com.mineinabyss.idofront.plugin.listeners
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 
@@ -32,10 +31,8 @@ interface EntityTracking {
                 TrackOnSetBukkitComponent(),
                 UntrackOnRemoveBukkitComponent(),
                 AttemptSpawnListener(),
+                AttemptSpawnMythicMob()
             )
-            if (Plugins.isEnabled("MythicMobs")) {
-                geary.pipeline.addSystems(AttemptSpawnMythicMob())
-            }
         }
     }
 }
