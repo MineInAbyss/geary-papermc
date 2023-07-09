@@ -96,8 +96,13 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                     }
                 }
             }
-            "prefabs" {
-                "reread" {
+            "reload" {
+                action {
+                    gearyPaper.configHolder.reload()
+                }
+            }
+            "prefab" {
+                "reload" {
                     val prefab by stringArg()
                     action {
                         engine.launch {
@@ -107,7 +112,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                         }
                     }
                 }
-                "read" {
+                "load" {
                     val namespace by stringArg()
                     val path by stringArg()
                     action {
@@ -145,7 +150,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
         fun Sequence<PrefabKey>.filterPrefabs(arg: String) =
             filter { it.key.startsWith(arg) || it.full.startsWith(arg) }.map { it.toString() }.take(20)
 
-        when (if (args.size == 1) return listOf("spawn", "s", "prefabs", "stats") else args[0]) {
+        when (if (args.size == 1) return listOf("spawn", "s", "prefab", "stats", "reload") else args[0]) {
             "spawn", "s" -> when (if (args.size == 2) return listOf("mob", "item") else args[1]) {
                 "mob" -> {
                     if (args.size == 3) {
@@ -162,13 +167,13 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                 }
             }
 
-            "prefabs" -> when (if (args.size == 2) return listOf("read", "reread") else args[1]) {
-                "reread" -> return prefabManager.keys.filter {
+            "prefabs" -> when (if (args.size == 2) return listOf("load", "reload") else args[1]) {
+                "reload" -> return prefabManager.keys.filter {
                     val arg = args[2].lowercase()
                     it.key.startsWith(arg) || it.full.startsWith(arg)
                 }.map { it.toString() }
 
-                "read" -> return when(args.size) {
+                "load" -> return when(args.size) {
                     3 -> plugin.dataFolder.listFiles()?.filter {
                         it.isDirectory && it.name.startsWith(args[2].lowercase())
                     }?.map { it.name } ?: listOf()

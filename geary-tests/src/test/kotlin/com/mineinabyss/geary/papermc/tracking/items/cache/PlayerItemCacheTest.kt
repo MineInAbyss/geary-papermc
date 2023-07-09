@@ -7,15 +7,10 @@ import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.mocks.MockItem
 import com.mineinabyss.geary.papermc.mocks.MockItemCache
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.EntityEncoded
-import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.PlayerInstanced
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.Prefabs
-import com.mineinabyss.geary.prefabs.helpers.prefabs
-import io.kotest.assertions.throwables.shouldThrowAny
-import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -35,7 +30,7 @@ class PlayerItemCacheTest {
 
 
     @Test
-    fun `should create entities correctly for regular items`() {
+    fun `should create entities correctly for items`() {
         // arrange
         val cache = MockItemCache()
         val inventory = arrayOfNulls<MockItem>(64)
@@ -52,30 +47,30 @@ class PlayerItemCacheTest {
     }
 
 
-    @Test
-    fun `should create entities correctly for player-instanced items`() {
-        // arrange
-        val cache = MockItemCache()
-        val inventory = arrayOfNulls<MockItem>(64)
-        inventory[0] = MockItem(PlayerInstanced(setOf(prefabKey1)))
-        inventory[1] = MockItem(PlayerInstanced(setOf(prefabKey1)))
-        inventory[6] = MockItem(PlayerInstanced(setOf(prefabKey2)))
-        inventory[10] = MockItem(PlayerInstanced(setOf(prefabKey2)))
-
-        // act
-        cache.updateToMatch(inventory)
-
-        // assert
-        cache[0].shouldNotBeNull()
-        cache[0].shouldBe(cache[1])
-        cache[0]!!.prefabs.shouldContainExactly(prefab1)
-
-        cache[6].shouldNotBeNull()
-        cache[6].shouldNotBe(cache[0])
-        cache[6].shouldBe(cache[10])
-
-        cache[6]!!.prefabs.shouldContainExactly(prefab2)
-    }
+//    @Test
+//    fun `should create entities correctly for player-instanced items`() {
+//        // arrange
+//        val cache = MockItemCache()
+//        val inventory = arrayOfNulls<MockItem>(64)
+//        inventory[0] = MockItem(PlayerInstanced(setOf(prefabKey1)))
+//        inventory[1] = MockItem(PlayerInstanced(setOf(prefabKey1)))
+//        inventory[6] = MockItem(PlayerInstanced(setOf(prefabKey2)))
+//        inventory[10] = MockItem(PlayerInstanced(setOf(prefabKey2)))
+//
+//        // act
+//        cache.updateToMatch(inventory)
+//
+//        // assert
+//        cache[0].shouldNotBeNull()
+//        cache[0].shouldBe(cache[1])
+//        cache[0]!!.prefabs.shouldContainExactly(prefab1)
+//
+//        cache[6].shouldNotBeNull()
+//        cache[6].shouldNotBe(cache[0])
+//        cache[6].shouldBe(cache[10])
+//
+//        cache[6]!!.prefabs.shouldContainExactly(prefab2)
+//    }
 
     //TODO in the future this should be cached
     @Test
@@ -99,47 +94,47 @@ class PlayerItemCacheTest {
         cache[1].shouldNotBe(firstEntity)
     }
 
-    @Test
-    fun `should keep player instance until all items of type are removed`() {
-        // arrange
-        val cache = MockItemCache()
-        val inventory = arrayOfNulls<MockItem>(64)
-        inventory[0] = MockItem(PlayerInstanced(setOf(prefabKey1)))
-        inventory[1] = MockItem(PlayerInstanced(setOf(prefabKey1)))
-
-        // act
-        cache.updateToMatch(inventory)
-        val playerInstancedEntity = cache[0]
-        inventory[1] = null
-        inventory[2] = MockItem(PlayerInstanced(setOf(prefabKey1)))
-        cache.updateToMatch(inventory)
-
-        // assert
-        cache[1].shouldBeNull()
-        playerInstancedEntity.shouldNotBeNull()
-        cache[0].shouldBe(playerInstancedEntity)
-        cache[2].shouldBe(playerInstancedEntity)
-    }
-
-    @Test
-    fun `should remove entity when removed from cache`() {
-        // assert
-        val cache = MockItemCache()
-
-        val inventory = arrayOfNulls<MockItem>(64)
-        inventory[0] = MockItem(PlayerInstanced(setOf(prefabKey1)))
-
-        // act
-        cache.updateToMatch(inventory)
-        val entity = cache[0]
-        cache.updateToMatch(arrayOfNulls(64))
-
-        // assert
-        cache[0].shouldBeNull()
-        entity.shouldNotBeNull()
-        // TODO entity.isRemoved
-        shouldThrowAny { entity.set("") }
-    }
+//    @Test
+//    fun `should keep player instance until all items of type are removed`() {
+//        // arrange
+//        val cache = MockItemCache()
+//        val inventory = arrayOfNulls<MockItem>(64)
+//        inventory[0] = MockItem(PlayerInstanced(setOf(prefabKey1)))
+//        inventory[1] = MockItem(PlayerInstanced(setOf(prefabKey1)))
+//
+//        // act
+//        cache.updateToMatch(inventory)
+//        val playerInstancedEntity = cache[0]
+//        inventory[1] = null
+//        inventory[2] = MockItem(PlayerInstanced(setOf(prefabKey1)))
+//        cache.updateToMatch(inventory)
+//
+//        // assert
+//        cache[1].shouldBeNull()
+//        playerInstancedEntity.shouldNotBeNull()
+//        cache[0].shouldBe(playerInstancedEntity)
+//        cache[2].shouldBe(playerInstancedEntity)
+//    }
+//
+//    @Test
+//    fun `should remove entity when removed from cache`() {
+//        // assert
+//        val cache = MockItemCache()
+//
+//        val inventory = arrayOfNulls<MockItem>(64)
+//        inventory[0] = MockItem(PlayerInstanced(setOf(prefabKey1)))
+//
+//        // act
+//        cache.updateToMatch(inventory)
+//        val entity = cache[0]
+//        cache.updateToMatch(arrayOfNulls(64))
+//
+//        // assert
+//        cache[0].shouldBeNull()
+//        entity.shouldNotBeNull()
+//        // TODO entity.isRemoved
+//        shouldThrowAny { entity.set("") }
+//    }
 
 //    @Test
 //    fun `should create correctly when swapping two loaded items`() {

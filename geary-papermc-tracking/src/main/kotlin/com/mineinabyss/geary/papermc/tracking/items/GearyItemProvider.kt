@@ -9,9 +9,10 @@ import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.encodePrefabs
 import com.mineinabyss.geary.papermc.datastore.loadComponentsFrom
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
+import com.mineinabyss.geary.papermc.tracking.items.components.SetItemIgnoredProperties
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.helpers.addPrefab
-import com.mineinabyss.geary.uuid.components.RegenerateUUIDOnClash
+import com.mineinabyss.idofront.serialization.SerializableItemStack
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
@@ -27,7 +28,12 @@ class GearyItemProvider {
     fun serializePrefabToItemStack(prefabKey: PrefabKey, existing: ItemStack? = null): ItemStack? {
         val item = existing ?: ItemStack(Material.AIR)
         val prefab = prefabKey.toEntityOrNull() ?: return null
-        prefab.get<SetItem>()?.item?.toItemStack(applyTo = item)
+
+        prefab.get<SetItem>()?.item?.toItemStack(
+            applyTo = item,
+            ignoreProperties = prefab.get<SetItemIgnoredProperties>()?.ignoreAsEnumSet()
+                ?: EnumSet.noneOf(SerializableItemStack.Properties::class.java)
+        )
         item.editMeta {
             it.persistentDataContainer.encodePrefabs(listOf(prefabKey))
         }
@@ -46,9 +52,7 @@ class GearyItemProvider {
         return entity {
             pdc.decodePrefabs().forEach { addPrefab(it.toEntity()) }
             if (holder != null) addParent(holder)
-            add<RegenerateUUIDOnClash>()
             loadComponentsFrom(pdc)
-            getOrSetPersisting<UUID> { UUID.randomUUID() }
             encodeComponentsTo(pdc)
             logger.d("Loaded new instance of prefab ${get<PrefabKey>()}")
         }
