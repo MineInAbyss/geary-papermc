@@ -150,7 +150,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
         fun Sequence<PrefabKey>.filterPrefabs(arg: String) =
             filter { it.key.startsWith(arg) || it.full.startsWith(arg) }.map { it.toString() }.take(20)
 
-        when (if (args.size == 1) return listOf("spawn", "s", "prefab", "stats", "reload") else args[0]) {
+        when (if (args.size == 1) return listOf("spawn", "prefab", "stats", "reload") else args[0]) {
             "spawn", "s" -> when (if (args.size == 2) return listOf("mob", "item") else args[1]) {
                 "mob" -> {
                     if (args.size == 3) {
