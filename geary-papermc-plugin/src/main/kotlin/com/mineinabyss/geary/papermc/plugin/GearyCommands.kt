@@ -167,7 +167,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                 }
             }
 
-            "prefabs" -> when (if (args.size == 2) return listOf("load", "reload") else args[1]) {
+            "prefab" -> when (if (args.size == 2) return listOf("load", "reload") else args[1]) {
                 "reload" -> return prefabManager.keys.filter {
                     val arg = args[2].lowercase()
                     it.key.startsWith(arg) || it.full.startsWith(arg)
