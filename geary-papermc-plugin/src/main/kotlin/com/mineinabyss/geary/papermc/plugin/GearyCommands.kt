@@ -4,6 +4,7 @@ import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.archetypes
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.plugin.commands.locate
 import com.mineinabyss.geary.papermc.plugin.commands.query
 import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.spawnFromPrefab
@@ -138,6 +139,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                     }
                 }
             }
+            locate()
         }
     }
 
@@ -160,8 +162,9 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
             "remove",
             "prefab",
             "stats",
+            "locate",
             "reload"
-        ) else args[0]) {
+        ).filter { it.startsWith(args[0]) } else args[0]) {
             "spawn", "s" ->
                 if (args.size == 2) {
                     return gearyMobs.prefabs.getKeys().filterPrefabs(args[1]).toList()
@@ -199,7 +202,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
 
             }
 
-            "remove", "rm", "info", "i" -> if (args.size == 2) {
+            "remove", "rm", "info", "i", "locate" -> if (args.size == 2) {
                 val query = args[1].lowercase()
                 val parts = query.split("+")
                 val withoutLast = query.substringBeforeLast("+", missingDelimiterValue = "").let {
