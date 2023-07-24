@@ -7,6 +7,9 @@ import com.mineinabyss.idofront.commands.Command
 import com.mineinabyss.idofront.commands.arguments.intArg
 import com.mineinabyss.idofront.commands.arguments.optionArg
 import com.mineinabyss.idofront.commands.extensions.actions.playerAction
+import com.mineinabyss.idofront.destructure.component1
+import com.mineinabyss.idofront.destructure.component2
+import com.mineinabyss.idofront.destructure.component3
 import com.mineinabyss.idofront.messaging.info
 import org.bukkit.Bukkit
 
@@ -24,15 +27,15 @@ fun Command.locate() {
             if (radius <= 0) {
                 Bukkit.getWorlds().forEach { world ->
                     world.entities.filter { it.toGeary().deepInstanceOf(key.toEntity()) }.forEach { entity ->
-                        val loc = entity.location
-                        player.info("Found ${key.key} at <click:run_command:/teleport ${loc.blockX} ${loc.blockY} ${loc.blockZ}>${entity.location}>${entity.location} in ${entity.world.name}")
+                        val (x,y,z) = entity.location.toBlockLocation().toVector()
+                        player.info("<gold>Found <yellow>${key.key}</yellow> at <click:run_command:/teleport $x $y $z><aqua>$x,$y,$z</aqua> in ${entity.world.name}")
                     }
                 }
             } else {
                 player.location.getNearbyEntities(radius.toDouble(), radius.toDouble(), radius.toDouble())
                     .filter { it.toGeary().deepInstanceOf(key.toEntity()) }.forEach { entity ->
-                        val loc = entity.location
-                        player.info("Found ${key.key} at <click:run_command:/teleport ${loc.blockX} ${loc.blockY} ${loc.blockZ}>${entity.location}")
+                        val (x,y,z) = entity.location.toBlockLocation().toVector()
+                        player.info("<gold>Found <yellow>${key.key}</yellow> at <click:run_command:/teleport $x $y $z><aqua>$x,$y,$z")
                     }
             }
         }
