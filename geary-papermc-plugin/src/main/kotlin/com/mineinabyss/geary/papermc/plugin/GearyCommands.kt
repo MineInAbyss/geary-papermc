@@ -53,7 +53,6 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                     tempEntity.removeEntity()
                 }
             }
-            query()
             "debug" {
                 "inventory" {
                     playerAction {
@@ -67,38 +66,44 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                     }
                 }
             }
-            ("give") {
-                val prefabKey by optionArg(options = gearyItems.prefabs.run { map { it.key.toString() } }) {
-                    parseErrorMessage = { "No such entity: $passed" }
-                }
-                playerAction {
-                    val item = gearyItems.createItem(PrefabKey.of(prefabKey)) ?: run {
-                        sender.error("Failed to spawn $prefabKey")
-                        return@playerAction
+            ("items") {
+                ("give") {
+                    val prefabKey by optionArg(options = gearyItems.prefabs.run { map { it.key.toString() } }) {
+                        parseErrorMessage = { "No such entity: $passed" }
                     }
-                    player.inventory.addItem(item)
+                    playerAction {
+                        val item = gearyItems.createItem(PrefabKey.of(prefabKey)) ?: run {
+                            sender.error("Failed to spawn $prefabKey")
+                            return@playerAction
+                        }
+                        player.inventory.addItem(item)
+                    }
                 }
             }
-            ("spawn" / "s") {
-                val mobKey by optionArg(options = gearyMobs.prefabs.run { map { it.key.toString() } }) {
-                    parseErrorMessage = { "No such entity: $passed" }
-                }
-                val numOfSpawns by intArg {
-                    name = "number of spawns"
-                    default = 1
-                }
+            ("mobs" / "m") {
+                ("spawn" / "s") {
+                    val mobKey by optionArg(options = gearyMobs.prefabs.run { map { it.key.toString() } }) {
+                        parseErrorMessage = { "No such entity: $passed" }
+                    }
+                    val numOfSpawns by intArg {
+                        name = "number of spawns"
+                        default = 1
+                    }
 
-                playerAction {
-                    val cappedSpawns = numOfSpawns//.coerceAtMost(mobzySpawning.config.maxCommandSpawns)
-                    val key = PrefabKey.of(mobKey)
+                    playerAction {
+                        val cappedSpawns = numOfSpawns//.coerceAtMost(mobzySpawning.config.maxCommandSpawns)
+                        val key = PrefabKey.of(mobKey)
 
-                    repeat(cappedSpawns) {
-                        player.location.spawnFromPrefab(key).onFailure {
-                            sender.error("Failed to spawn $key")
-                            it.printStackTrace()
+                        repeat(cappedSpawns) {
+                            player.location.spawnFromPrefab(key).onFailure {
+                                sender.error("Failed to spawn $key")
+                                it.printStackTrace()
+                            }
                         }
                     }
                 }
+                locate()
+                query()
             }
             "reload" {
                 action {
@@ -139,7 +144,6 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                     }
                 }
             }
-            locate()
         }
     }
 
@@ -156,27 +160,36 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
             filter { it.key.startsWith(arg) || it.full.startsWith(arg) }.map { it.toString() }.take(20)
 
         when (if (args.size == 1) return listOf(
-            "spawn",
-            "give",
-            "info",
-            "remove",
+            "mobs",
+            "items",
             "prefab",
             "stats",
-            "locate",
             "reload"
         ).filter { it.startsWith(args[0]) } else args[0]) {
-            "spawn", "s" ->
-                if (args.size == 2) {
-                    return gearyMobs.prefabs.getKeys().filterPrefabs(args[1]).toList()
-                } else if (args.size == 3) {
-                    val min = args[2].toIntOrNull()?.coerceAtLeast(1) ?: 1
-                    return (min - 1 until min + 100).map { it.toString() }
+            "mobs", "m" -> when (if (args.size == 2) return listOf("spawn", "remove", "locate", "info") else args[1]) {
+                "spawn", "s" -> if (args.size == 3) {
+                        return gearyMobs.prefabs.getKeys().filterPrefabs(args[2]).toList()
+                    } else if (args.size == 4) {
+                        val min = args[3].toIntOrNull()?.coerceAtLeast(1) ?: 1
+                        return (min - 1 until min + 100).map { it.toString() }
+                    }
+                "remove", "rm", "info", "i", "locate" -> if (args.size == 3) {
+                    val query = args[2].lowercase()
+                    val parts = query.split("+")
+                    val withoutLast = query.substringBeforeLast("+", missingDelimiterValue = "").let {
+                        if (parts.size > 1) "$it+" else it
+                    }
+                    return mobs.asSequence().filter {
+                        it !in parts && (it.startsWith(parts.last()) ||
+                                it.substringAfter(":").startsWith(parts.last()))
+                    }.take(20).map { "$withoutLast$it" }.toList()
                 }
-
-            "give" ->
-                return if (args.size == 2) {
-                    gearyItems.prefabs.getKeys().filterPrefabs(args[1]).toList()
-                } else listOf()
+            }
+            "items" -> when (if (args.size == 2) return listOf("give") else args[1]) {
+                "give" -> if (args.size == 3) {
+                    return gearyItems.prefabs.getKeys().filterPrefabs(args[2]).toList()
+                }
+            }
 
             "prefab" -> when (if (args.size == 2) return listOf("load", "reload") else args[1]) {
                 "reload" -> return prefabManager.keys.filter {
@@ -200,18 +213,6 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                     else -> return listOf()
                 }
 
-            }
-
-            "remove", "rm", "info", "i", "locate" -> if (args.size == 2) {
-                val query = args[1].lowercase()
-                val parts = query.split("+")
-                val withoutLast = query.substringBeforeLast("+", missingDelimiterValue = "").let {
-                    if (parts.size > 1) "$it+" else it
-                }
-                return mobs.asSequence().filter {
-                    it !in parts && (it.startsWith(parts.last()) ||
-                            it.substringAfter(":").startsWith(parts.last()))
-                }.take(20).map { "$withoutLast$it" }.toList()
             }
 
             else -> return listOf()
