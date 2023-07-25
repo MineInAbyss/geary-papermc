@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.tracking.entities.systems
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
+import com.mineinabyss.geary.papermc.tracking.entities.components.AddedToWorld
 import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import org.bukkit.entity.Player
@@ -17,11 +18,12 @@ class EntityWorldEventTracker : Listener {
     fun EntityAddToWorldEvent.onBukkitEntityAdd() {
         // Only remove player from ECS on disconnect, not death
         if (entity is Player) return
-        gearyMobs.bukkit2Geary.getOrCreate(entity)
+        val gearyEntity = gearyMobs.bukkit2Geary.getOrCreate(entity)
+        gearyEntity.add<AddedToWorld>()
     }
 
     /** Remove entities from ECS when they are removed from Bukkit for any reason (Uses PaperMC event) */
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST)
     fun EntityRemoveFromWorldEvent.onBukkitEntityRemove() {
         // Only remove player from ECS on disconnect, not death
         if (entity is Player) return
