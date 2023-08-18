@@ -11,8 +11,8 @@ fun BukkitEntity.toGeary(): GearyEntity {
 fun BukkitEntity.toGearyOrNull(): GearyEntity? =
     gearyMobs.bukkit2Geary[this]
 
-fun GearyEntity.toBukkit(): BukkitEntity? = get()
+fun GearyEntity.toBukkit(): BukkitEntity? = get(gearyMobs.bukkitEntityComponent) as? BukkitEntity
 
 @JvmName("toBukkitAndCast")
 inline fun <reified T : Entity> GearyEntity.toBukkit(): T? =
-    get<Entity>() as? T
+    get(gearyMobs.bukkitEntityComponent) as? T

@@ -1,29 +1,28 @@
 package com.mineinabyss.geary.papermc.tracking.entities
 
 import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
+import com.mineinabyss.geary.datatypes.ComponentId
+import com.mineinabyss.geary.helpers.componentId
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery
-import com.mineinabyss.geary.papermc.tracking.entities.systems.AttemptSpawnListener
-import com.mineinabyss.geary.papermc.tracking.entities.systems.EntityWorldEventTracker
-import com.mineinabyss.geary.papermc.tracking.entities.systems.TrackOnSetBukkitComponent
-import com.mineinabyss.geary.papermc.tracking.entities.systems.UntrackOnRemoveBukkitComponent
-import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery
+import com.mineinabyss.geary.papermc.tracking.entities.systems.*
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.plugin.listeners
+import com.mineinabyss.idofront.typealiases.BukkitEntity
 
 val gearyMobs by DI.observe<EntityTracking>()
 
 interface EntityTracking {
+    val bukkitEntityComponent: ComponentId
     val bukkit2Geary: BukkitEntity2Geary
-    val mobPrefabs: GearyMobPrefabQuery
-    val itemPrefabs: GearyItemPrefabQuery
+    val prefabs: GearyMobPrefabQuery
 
     companion object : GearyAddonWithDefault<EntityTracking> {
         override fun default(): EntityTracking = object : EntityTracking {
+            override val bukkitEntityComponent = componentId<BukkitEntity>()
             override val bukkit2Geary = BukkitEntity2Geary()
-            override val mobPrefabs = GearyMobPrefabQuery()
-            override val itemPrefabs = GearyItemPrefabQuery()
+            override val prefabs = GearyMobPrefabQuery()
         }
 
         override fun EntityTracking.install() {
@@ -32,6 +31,7 @@ interface EntityTracking {
                 TrackOnSetBukkitComponent(),
                 UntrackOnRemoveBukkitComponent(),
                 AttemptSpawnListener(),
+                AttemptSpawnMythicMob()
             )
         }
     }

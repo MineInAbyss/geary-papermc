@@ -2,7 +2,6 @@ package com.mineinabyss.geary.papermc.tracking.blocks.helpers
 
 import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.papermc.tracking.blocks.components.SetBlock
-import com.mineinabyss.geary.papermc.tracking.entities.components.SetEntityType
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
 import com.mineinabyss.geary.systems.accessors.TargetScope

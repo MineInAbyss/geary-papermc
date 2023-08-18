@@ -26,15 +26,14 @@ class AttemptSpawnListener : GearyListener() {
     @Handler
     fun TargetScope.handle(event: EventScope) {
         val loc = event.attemptSpawn.location
-        val world = loc.world.toNMS()
         mobType.entityTypeFromRegistry.spawn(
-            world,
+            loc.world.toNMS(),
             null,
             // We set the entity here so that we don't create a separate Geary entity in EntityWorldEventTracker
             // This is called before adding to the world.
             { mob -> entity.set(mob.toBukkit()) },
-            BlockPos(loc.x.toInt(), loc.y.toInt(), loc.z.toInt()),
-            MobSpawnType.COMMAND,
+            BlockPos(loc.blockX, loc.blockY, loc.blockZ),
+            MobSpawnType.NATURAL,
             false,
             false,
             CreatureSpawnEvent.SpawnReason.COMMAND

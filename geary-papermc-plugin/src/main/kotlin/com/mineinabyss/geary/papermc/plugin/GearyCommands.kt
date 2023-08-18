@@ -1,7 +1,11 @@
 package com.mineinabyss.geary.papermc.plugin
 
+import com.mineinabyss.geary.helpers.entity
+import com.mineinabyss.geary.modules.archetypes
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.plugin.commands.locate
+import com.mineinabyss.geary.papermc.plugin.commands.query
 import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.spawnFromPrefab
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
@@ -35,11 +39,26 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
 
     override val commands = commands(plugin) {
         "geary" {
+            "stats" {
+                action {
+                    val tempEntity = entity()
+
+                    sender.info(
+                        """
+                        |Archetype count: ${archetypes.archetypeProvider.count}
+                        |Next entity ID: ${tempEntity.id}
+                        |""".trimMargin()
+                    )
+
+                    tempEntity.removeEntity()
+                }
+            }
             "debug" {
                 "inventory" {
                     playerAction {
                         repeat(64) {
-                            val entities = player.toGeary().get<PlayerItemCache<*>>()?.getEntities() ?: return@playerAction
+                            val entities =
+                                player.toGeary().get<PlayerItemCache<*>>()?.getEntities() ?: return@playerAction
                             player.info(entities
                                 .mapIndexedNotNull { slot, entity -> entity?.getAll()?.map { it::class }?.to(slot) }
                                 .joinToString(separator = "\n") { (components, slot) -> "$slot: $components" })
@@ -47,9 +66,23 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                     }
                 }
             }
-            ("spawn" / "s") {
-                "mob" {
-                    val mobKey by optionArg(options = gearyMobs.mobPrefabs.run { map { it.key.toString() } }) {
+            ("items") {
+                ("give") {
+                    val prefabKey by optionArg(options = gearyItems.prefabs.run { map { it.key.toString() } }) {
+                        parseErrorMessage = { "No such entity: $passed" }
+                    }
+                    playerAction {
+                        val item = gearyItems.createItem(PrefabKey.of(prefabKey)) ?: run {
+                            sender.error("Failed to spawn $prefabKey")
+                            return@playerAction
+                        }
+                        player.inventory.addItem(item)
+                    }
+                }
+            }
+            ("mobs" / "m") {
+                ("spawn" / "s") {
+                    val mobKey by optionArg(options = gearyMobs.prefabs.run { map { it.key.toString() } }) {
                         parseErrorMessage = { "No such entity: $passed" }
                     }
                     val numOfSpawns by intArg {
@@ -69,21 +102,16 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                         }
                     }
                 }
-                "item" {
-                    val prefabKey by optionArg(options = gearyMobs.itemPrefabs.run { map { it.key.toString() } }) {
-                        parseErrorMessage = { "No such entity: $passed" }
-                    }
-                    playerAction {
-                        val item = gearyItems.itemProvider.serializePrefabToItemStack(PrefabKey.of(prefabKey)) ?: run {
-                            sender.error("Failed to spawn $prefabKey")
-                            return@playerAction
-                        }
-                        player.inventory.addItem(item)
-                    }
+                locate()
+                query()
+            }
+            "reload" {
+                action {
+                    gearyPaper.configHolder.reload()
                 }
             }
-            "prefabs" {
-                "reread" {
+            "prefab" {
+                "reload" {
                     val prefab by stringArg()
                     action {
                         engine.launch {
@@ -93,7 +121,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                         }
                     }
                 }
-                "read" {
+                "load" {
                     val namespace by stringArg()
                     val path by stringArg()
                     action {
@@ -116,14 +144,6 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                     }
                 }
             }
-//            "fullreload" {
-//                action {
-//                    val depends = getGearyDependants()
-//                    depends.forEach { PluginUtil.unload(it) }
-//                    PluginUtil.reload(plugin)
-//                    depends.forEach { PluginUtil.load(it.name) }
-//                }
-//            }
         }
     }
 
@@ -139,33 +159,49 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
         fun Sequence<PrefabKey>.filterPrefabs(arg: String) =
             filter { it.key.startsWith(arg) || it.full.startsWith(arg) }.map { it.toString() }.take(20)
 
-        when (if (args.size == 1) return listOf("spawn", "s", "prefabs") else args[0]) {
-            "spawn", "s" -> when (if (args.size == 2) return listOf("mob", "item") else args[1]) {
-                "mob" -> {
-                    if (args.size == 3) {
-                        return gearyMobs.mobPrefabs.getKeys().filterPrefabs(args[2]).toList()
+        when (if (args.size == 1) return listOf(
+            "mobs",
+            "items",
+            "prefab",
+            "stats",
+            "reload"
+        ).filter { it.startsWith(args[0]) } else args[0]) {
+            "mobs", "m" -> when (if (args.size == 2) return listOf("spawn", "remove", "locate", "info") else args[1]) {
+                "spawn", "s" -> if (args.size == 3) {
+                        return gearyMobs.prefabs.getKeys().filterPrefabs(args[2]).toList()
                     } else if (args.size == 4) {
                         val min = args[3].toIntOrNull()?.coerceAtLeast(1) ?: 1
                         return (min - 1 until min + 100).map { it.toString() }
                     }
-                }
-                "item" -> {
-                    if (args.size == 3) {
-                        return gearyMobs.itemPrefabs.getKeys().filterPrefabs(args[2]).toList()
+                "remove", "rm", "info", "i", "locate" -> if (args.size == 3) {
+                    val query = args[2].lowercase()
+                    val parts = query.split("+")
+                    val withoutLast = query.substringBeforeLast("+", missingDelimiterValue = "").let {
+                        if (parts.size > 1) "$it+" else it
                     }
+                    return mobs.asSequence().filter {
+                        it !in parts && (it.startsWith(parts.last()) ||
+                                it.substringAfter(":").startsWith(parts.last()))
+                    }.take(20).map { "$withoutLast$it" }.toList()
+                }
+            }
+            "items" -> when (if (args.size == 2) return listOf("give") else args[1]) {
+                "give" -> if (args.size == 3) {
+                    return gearyItems.prefabs.getKeys().filterPrefabs(args[2]).toList()
                 }
             }
 
-            "prefabs" -> when (if (args.size == 2) return listOf("read", "reread") else args[1]) {
-                "reread" -> return prefabManager.keys.filter {
+            "prefab" -> when (if (args.size == 2) return listOf("load", "reload") else args[1]) {
+                "reload" -> return prefabManager.keys.filter {
                     val arg = args[2].lowercase()
                     it.key.startsWith(arg) || it.full.startsWith(arg)
                 }.map { it.toString() }
 
-                "read" -> return when(args.size) {
+                "load" -> return when (args.size) {
                     3 -> plugin.dataFolder.listFiles()?.filter {
                         it.isDirectory && it.name.startsWith(args[2].lowercase())
                     }?.map { it.name } ?: listOf()
+
                     4 -> plugin.dataFolder.resolve(args[2]).walkTopDown().toList().filter {
                         it.isFile && it.extension == "yml" && it.nameWithoutExtension.startsWith(args[3].lowercase())
                                 && "${args[2]}:${it.nameWithoutExtension}" !in prefabManager.keys.map(PrefabKey::full)
@@ -173,11 +209,21 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                         it.absolutePath.split(plugin.dataFolder.absolutePath + "\\" + args[2] + "\\")[1]
                             .replace("\\", "/")
                     }
+
                     else -> return listOf()
                 }
-                else -> return listOf()
+
             }
+
+            else -> return listOf()
         }
         return emptyList()
+    }
+
+    private val mobs: List<String> by lazy {
+        buildList {
+            addAll(listOf("custom", "important", "mob", "renamed", "passive", "hostile", "flying"))
+            addAll(gearyMobs.prefabs.getKeys().map { it.toString() })
+        }
     }
 }

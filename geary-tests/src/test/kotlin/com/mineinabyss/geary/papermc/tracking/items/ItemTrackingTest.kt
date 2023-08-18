@@ -5,18 +5,14 @@ import com.mineinabyss.geary.modules.TestEngineModule
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.datastore.decode
 import com.mineinabyss.geary.papermc.datastore.decodePrefabs
-import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
 import com.mineinabyss.geary.papermc.helpers.MockedServerTest
 import com.mineinabyss.geary.papermc.helpers.SomeData
-import com.mineinabyss.geary.papermc.helpers.withTestSerializers
-import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
+import com.mineinabyss.geary.papermc.helpers.withMockTracking
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
-import com.mineinabyss.geary.prefabs.Prefabs
-import com.mineinabyss.geary.serialization.dsl.serialization
 import com.mineinabyss.idofront.serialization.SerializableItemStack
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
@@ -31,15 +27,8 @@ import org.junit.jupiter.api.Test
 class ItemTrackingTest : MockedServerTest() {
     init {
         geary(TestEngineModule) {
-            serialization {
-                withUUIDSerializer()
-                withTestSerializers()
-            }
-            install(EntityTracking)
-            install(ItemTracking, BukkitBackedItemTracking())
-            install(Prefabs)
+            withMockTracking()
         }
-        geary.pipeline.runStartupTasks()
     }
 
     val prefabKey = PrefabKey.of("test:prefab")

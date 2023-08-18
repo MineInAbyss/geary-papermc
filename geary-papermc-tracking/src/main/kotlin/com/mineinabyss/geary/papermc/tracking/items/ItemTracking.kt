@@ -4,11 +4,15 @@ import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.items.inventory.InventoryCacheWrapper
 import com.mineinabyss.geary.papermc.tracking.items.migration.CustomModelDataToPrefabTracker
 import com.mineinabyss.geary.papermc.tracking.items.migration.ItemMigration
+import com.mineinabyss.geary.papermc.tracking.items.migration.SetItemIgnoredPropertyListener
+import com.mineinabyss.geary.papermc.tracking.items.migration.SetItemMigrationSystem
 import com.mineinabyss.geary.papermc.tracking.items.systems.InventoryTrackerSystem
 import com.mineinabyss.geary.papermc.tracking.items.systems.LoginListener
+import com.mineinabyss.geary.papermc.tracking.items.systems.MythicMobDropSystem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.plugin.listeners
@@ -20,6 +24,7 @@ interface ItemTracking {
     val itemProvider: GearyItemProvider
     val migration: ItemMigration
     val loginListener: LoginListener
+    val prefabs: GearyItemPrefabQuery
     fun getCacheWrapper(entity: GearyEntity): InventoryCacheWrapper?
 
     fun createItem(
@@ -31,10 +36,15 @@ interface ItemTracking {
         override fun default(): ItemTracking = NMSBackedItemTracking()
 
         override fun ItemTracking.install() {
-            gearyPaper.plugin.listeners(loginListener)
+            gearyPaper.plugin.listeners(
+                loginListener,
+                SetItemIgnoredPropertyListener(),
+                MythicMobDropSystem()
+            )
             geary.pipeline.addSystems(
                 InventoryTrackerSystem(),
-                CustomModelDataToPrefabTracker()
+                CustomModelDataToPrefabTracker(),
+                SetItemMigrationSystem()
             )
         }
     }

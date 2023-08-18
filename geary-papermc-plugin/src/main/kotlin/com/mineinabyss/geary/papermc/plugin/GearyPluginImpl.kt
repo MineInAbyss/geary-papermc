@@ -15,6 +15,7 @@ import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
+import com.mineinabyss.geary.papermc.tracking.items.gearyItems
 import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.geary.serialization.dsl.FileSystemAddon
 import com.mineinabyss.geary.serialization.dsl.serialization
@@ -92,9 +93,9 @@ class GearyPluginImpl : GearyPlugin() {
                     }
                 }
 
-                logSuccess("Loaded mob types: ${gearyMobs.mobPrefabs.getKeys().joinToString()}")
-                logSuccess("Loaded block types: ${gearyBlocks.blockPrefabs.getKeys().joinToString()}")
-                logSuccess("Loaded item types: ${gearyMobs.itemPrefabs.getKeys().joinToString()}")
+                logSuccess("Loaded mob types: ${gearyMobs.prefabs.getKeys().joinToString()}")
+                logSuccess("Loaded block types: ${gearyBlocks.prefabs.getKeys().joinToString()}")
+                logSuccess("Loaded item types: ${gearyItems.prefabs.getKeys().joinToString()}")
             }
         }
 
