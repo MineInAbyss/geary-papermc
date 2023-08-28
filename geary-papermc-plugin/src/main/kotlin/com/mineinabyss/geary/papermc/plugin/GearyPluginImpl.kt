@@ -87,9 +87,11 @@ class GearyPluginImpl : GearyPlugin() {
 
             // Start engine ticking
             on(ENABLE) {
-                server.worlds.forEach { world ->
-                    world.entities.forEach entities@{ entity ->
-                        gearyMobs.bukkit2Geary.getOrCreate(entity)
+                if (configModule.config.trackEntities) {
+                    server.worlds.forEach { world ->
+                        world.entities.forEach entities@{ entity ->
+                            gearyMobs.bukkit2Geary.getOrCreate(entity)
+                        }
                     }
                 }
 
