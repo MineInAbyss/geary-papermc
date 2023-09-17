@@ -1,18 +1,16 @@
 package com.mineinabyss.geary.papermc.bridge.conditions.checkers
 
-import com.mineinabyss.geary.annotations.Handler
+import com.mineinabyss.geary.events.CheckingListener
 import com.mineinabyss.geary.papermc.bridge.conditions.PlayerConditions
-import com.mineinabyss.geary.systems.GearyListener
-import com.mineinabyss.geary.systems.accessors.TargetScope
+import com.mineinabyss.geary.systems.accessors.Pointers
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
-class PlayerConditionsChecker : GearyListener() {
-    private val TargetScope.player by get<Player>()
-    private val TargetScope.conditions by get<PlayerConditions>()
+class PlayerConditionsChecker : CheckingListener() {
+    private val Pointers.player by get<Player>().on(target)
+    private val Pointers.conditions by get<PlayerConditions>().on(event)
 
-    @Handler
-    fun TargetScope.check(): Boolean = player.isOnline && // Just to align syntax below
+    override fun Pointers.check(): Boolean = player.isOnline && // Just to align syntax below
             conditions.isSneaking nullOrEquals player.isSneaking &&
             conditions.isSprinting nullOrEquals player.isSprinting &&
             conditions.isBlocking nullOrEquals player.isBlocking &&

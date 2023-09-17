@@ -1,15 +1,14 @@
 package com.mineinabyss.geary.papermc.bridge.conditions.checkers
 
-import com.mineinabyss.geary.annotations.Handler
+import com.mineinabyss.geary.events.CheckingListener
 import com.mineinabyss.geary.papermc.bridge.conditions.Chance
-import com.mineinabyss.geary.systems.GearyListener
-import com.mineinabyss.geary.systems.accessors.EventScope
+import com.mineinabyss.geary.systems.accessors.Pointers
 import kotlin.random.Random
 
-class ChanceChecker : GearyListener() {
-    val EventScope.chance by get<Chance>()
+class ChanceChecker : CheckingListener() {
+    val Pointers.chance by get<Chance>().on(event)
 
-    @Handler
-    fun check(eventScope: EventScope): Boolean =
-        Random.nextDouble() < eventScope.chance.percentage
+    override fun Pointers.check(): Boolean {
+        return Random.nextDouble() < chance.percentage
+    }
 }

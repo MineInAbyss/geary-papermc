@@ -1,17 +1,18 @@
 package com.mineinabyss.geary.papermc.configlang.systems
 
-import com.mineinabyss.geary.annotations.Handler
+import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
 import com.mineinabyss.geary.papermc.commons.events.configurable.components.Apply
 import com.mineinabyss.geary.papermc.commons.events.configurable.components.ApplyBuilder
 import com.mineinabyss.geary.papermc.configlang.helpers.parseEntity
 import com.mineinabyss.geary.systems.GearyListener
-import com.mineinabyss.geary.systems.accessors.TargetScope
+import com.mineinabyss.geary.systems.accessors.Pointers
 
 class ParseApply : GearyListener() {
-    private val TargetScope.apply by onSet<ApplyBuilder>()
+    private val Pointers.apply by get<ApplyBuilder>().whenSetOnTarget()
 
-    @Handler
-    private fun TargetScope.convertToRelation() {
+    @OptIn(UnsafeAccessors::class)
+    override fun Pointers.handle() {
+        val entity = target.entity
         try {
             entity.addRelation<Apply>(entity.parseEntity(apply.entityExpression))
         } finally {

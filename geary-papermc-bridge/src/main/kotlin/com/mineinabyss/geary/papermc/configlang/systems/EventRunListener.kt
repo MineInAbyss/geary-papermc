@@ -1,17 +1,18 @@
 package com.mineinabyss.geary.papermc.configlang.systems
 
-import com.mineinabyss.geary.annotations.Handler
+import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
 import com.mineinabyss.geary.papermc.commons.events.configurable.components.EventRun
 import com.mineinabyss.geary.systems.GearyListener
-import com.mineinabyss.geary.systems.accessors.EventScope
-import com.mineinabyss.geary.systems.accessors.SourceScope
-import com.mineinabyss.geary.systems.accessors.TargetScope
+import com.mineinabyss.geary.systems.accessors.Pointers
 
 class EventRunListener : GearyListener() {
-    val EventScope.run by getRelations<EventRun?, Any?>()
+    val Pointers.run by getRelationsWithData<EventRun?, Any?>().on(event)
 
-    @Handler
-    fun handle(source: SourceScope, target: TargetScope, event: EventScope) {
-        target.entity.callEvent(event.run.target, source = source.entity)
+    @OptIn(UnsafeAccessors::class)
+    override fun Pointers.handle() {
+        val source = source ?: return
+        run.forEach { run ->
+            target.entity.callEvent(run.target, source = source.entity)
+        }
     }
 }

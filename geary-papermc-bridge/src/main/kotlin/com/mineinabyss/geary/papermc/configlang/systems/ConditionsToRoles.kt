@@ -1,17 +1,18 @@
 package com.mineinabyss.geary.papermc.configlang.systems
 
-import com.mineinabyss.geary.annotations.Handler
+import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
 import com.mineinabyss.geary.papermc.commons.events.configurable.components.EventCondition
 import com.mineinabyss.geary.papermc.commons.events.configurable.components.EventConditions
 import com.mineinabyss.geary.papermc.configlang.helpers.parseEntity
 import com.mineinabyss.geary.systems.GearyListener
-import com.mineinabyss.geary.systems.accessors.TargetScope
+import com.mineinabyss.geary.systems.accessors.Pointers
 
 class ConditionsToRoles : GearyListener() {
-    val TargetScope.triggers by onSet<EventConditions>()
+    val Pointers.triggers by get<EventConditions>().whenSetOnTarget()
 
-    @Handler
-    fun TargetScope.convert() {
+    @OptIn(UnsafeAccessors::class)
+    override fun Pointers.handle() {
+        val entity = target.entity
         try {
             triggers.expressions.forEach { expression ->
                 val (cause, condition, effect) = expression.replace(" ", "").split("->").takeIf { it.size == 3 }

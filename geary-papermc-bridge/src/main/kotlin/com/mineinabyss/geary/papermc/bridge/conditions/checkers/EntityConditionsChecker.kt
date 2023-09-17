@@ -1,19 +1,18 @@
 package com.mineinabyss.geary.papermc.bridge.conditions.checkers
 
-import com.mineinabyss.geary.annotations.Handler
+import com.mineinabyss.geary.events.CheckingListener
 import com.mineinabyss.geary.papermc.bridge.conditions.EntityConditions
-import com.mineinabyss.geary.systems.GearyListener
-import com.mineinabyss.geary.systems.accessors.TargetScope
+import com.mineinabyss.geary.systems.accessors.Pointers
 import org.bukkit.Material
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 
-class EntityConditionsChecker : GearyListener() {
-    private val TargetScope.livingEntity by get<LivingEntity>()
-    private val TargetScope.conditions by get<EntityConditions>()
+class EntityConditionsChecker : CheckingListener() {
+    private val Pointers.livingEntity by get<LivingEntity>().on(target)
 
-    @Handler
-    fun TargetScope.check(): Boolean = livingEntity !is Player &&
+    private val Pointers.conditions by get<EntityConditions>().on(event)
+
+    override fun Pointers.check(): Boolean = livingEntity !is Player &&
             conditions.isSleeping nullOrEquals livingEntity.isSleeping &&
             conditions.isSwimming nullOrEquals livingEntity.isSwimming &&
             conditions.isClimbing nullOrEquals livingEntity.isClimbing &&

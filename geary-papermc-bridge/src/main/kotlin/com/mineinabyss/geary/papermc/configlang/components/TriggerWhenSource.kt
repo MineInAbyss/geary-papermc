@@ -1,4 +1,4 @@
-package com.mineinabyss.geary.papermc.commons.events.configurable.components
+package com.mineinabyss.geary.papermc.configlang.components
 
 import com.mineinabyss.geary.datatypes.GearyEntityType
 
