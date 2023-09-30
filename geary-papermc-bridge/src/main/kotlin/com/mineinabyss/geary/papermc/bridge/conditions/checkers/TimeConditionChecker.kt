@@ -1,20 +1,17 @@
 package com.mineinabyss.geary.papermc.bridge.conditions.checkers
 
-import com.mineinabyss.geary.annotations.Handler
+import com.mineinabyss.geary.events.CheckingListener
 import com.mineinabyss.geary.papermc.bridge.conditions.location.TimeCondition
-import com.mineinabyss.geary.systems.GearyListener
-import com.mineinabyss.geary.systems.accessors.EventScope
-import com.mineinabyss.geary.systems.accessors.TargetScope
+import com.mineinabyss.geary.systems.accessors.Pointers
 import org.bukkit.Location
 
-class TimeConditionChecker : GearyListener() {
-    private val TargetScope.condition by get<TimeCondition>()
+class TimeConditionChecker : CheckingListener() {
+    private val Pointers.condition by get<TimeCondition>().on(target)
 
-    val EventScope.location by get<Location>()
+    val Pointers.location by get<Location>().on(event)
 
-    @Handler
-    fun TargetScope.check(event: EventScope): Boolean {
-        val time = event.location.world.time
+    override fun Pointers.check(): Boolean {
+        val time = location.world.time
 
         // support these two possibilities
         // ====max-----min====

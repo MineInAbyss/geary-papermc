@@ -5,7 +5,7 @@ package com.mineinabyss.geary.papermc.tracking.items.systems
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.geary.systems.RepeatingSystem
-import com.mineinabyss.geary.systems.accessors.TargetScope
+import com.mineinabyss.geary.systems.accessors.Pointer
 import com.mineinabyss.idofront.time.ticks
 import org.bukkit.entity.Player
 
@@ -22,10 +22,10 @@ import org.bukkit.entity.Player
  * - All valid items get re-serialized TODO in the future there should be some form of dirty tag so we aren't unnecessarily serializing things
  */
 class InventoryTrackerSystem : RepeatingSystem(interval = 1.ticks) {
-    private val TargetScope.player by get<Player>()
-    private val TargetScope.itemCache by get<PlayerItemCache<*>>()
+    private val Pointer.player by get<Player>()
+    private val Pointer.itemCache by get<PlayerItemCache<*>>()
 
-    override fun TargetScope.tick() {
+    override fun Pointer.tick() {
         player.inventory.toGeary()?.forceRefresh()
     }
 }

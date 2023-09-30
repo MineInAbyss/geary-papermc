@@ -1,12 +1,11 @@
 package com.mineinabyss.geary.papermc.tracking.entities.systems
 
-import com.mineinabyss.geary.annotations.Handler
+import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
 import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.papermc.tracking.entities.components.AttemptSpawn
 import com.mineinabyss.geary.papermc.tracking.entities.components.SetEntityType
 import com.mineinabyss.geary.systems.GearyListener
-import com.mineinabyss.geary.systems.accessors.EventScope
-import com.mineinabyss.geary.systems.accessors.TargetScope
+import com.mineinabyss.geary.systems.accessors.Pointers
 import com.mineinabyss.idofront.nms.aliases.toBukkit
 import com.mineinabyss.idofront.nms.aliases.toNMS
 import com.mineinabyss.idofront.typealiases.BukkitEntity
@@ -15,23 +14,23 @@ import net.minecraft.world.entity.MobSpawnType
 import org.bukkit.event.entity.CreatureSpawnEvent
 
 class AttemptSpawnListener : GearyListener() {
-    private val TargetScope.mobType by get<SetEntityType>()
-    private val EventScope.attemptSpawn by get<AttemptSpawn>()
+    private val Pointers.mobType by get<SetEntityType>().on(target)
+    private val Pointers.attemptSpawn by get<AttemptSpawn>().on(event)
 
-    val TargetScope.family by family {
+    val Pointers.family by family {
         not { has<BukkitEntity>() }
-    }
+    }.on(target)
 
 
-    @Handler
-    fun TargetScope.handle(event: EventScope) {
-        val loc = event.attemptSpawn.location
+    @OptIn(UnsafeAccessors::class)
+    override fun Pointers.handle() {
+        val loc = attemptSpawn.location
         mobType.entityTypeFromRegistry.spawn(
             loc.world.toNMS(),
             null,
             // We set the entity here so that we don't create a separate Geary entity in EntityWorldEventTracker
             // This is called before adding to the world.
-            { mob -> entity.set(mob.toBukkit()) },
+            { mob -> target.entity.set(mob.toBukkit()) },
             BlockPos(loc.blockX, loc.blockY, loc.blockZ),
             MobSpawnType.NATURAL,
             false,

@@ -1,12 +1,13 @@
 package com.mineinabyss.geary.papermc.bridge.systems
 
+import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
 import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.game.components.CooldownManager
 import com.mineinabyss.geary.helpers.parent
 import com.mineinabyss.geary.helpers.with
 import com.mineinabyss.geary.papermc.tracking.items.components.SlotType
 import com.mineinabyss.geary.systems.RepeatingSystem
-import com.mineinabyss.geary.systems.accessors.TargetScope
+import com.mineinabyss.geary.systems.accessors.Pointer
 import net.kyori.adventure.text.Component
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
@@ -18,10 +19,11 @@ import kotlin.time.Duration.Companion.seconds
 private val INTERVAL = 1.seconds
 
 class CooldownDisplaySystem : RepeatingSystem(interval = INTERVAL) {
-    private val TargetScope.cooldownManager by get<CooldownManager>()
-    private val TargetScope.held by family { has<SlotType.Held>() }
+    private val Pointer.cooldownManager by get<CooldownManager>()
+    private val Pointer.held by family { has<SlotType.Held>() }
 
-    override fun TargetScope.tick() {
+    @OptIn(UnsafeAccessors::class)
+    override fun Pointer.tick() {
         entity.parent?.with { player: Player ->
             player.sendActionBar(Component.text(cooldownManager.incompleteCooldowns.entries.joinToString("\n") { (key, cooldown) ->
                 val length = cooldown.length.milliseconds

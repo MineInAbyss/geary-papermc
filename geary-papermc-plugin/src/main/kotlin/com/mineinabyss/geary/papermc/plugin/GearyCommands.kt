@@ -68,7 +68,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
             }
             ("items") {
                 ("give") {
-                    val prefabKey by optionArg(options = gearyItems.prefabs.run { map { it.key.toString() } }) {
+                    val prefabKey by optionArg(options = gearyItems.prefabs.run { toList { it.key.toString() } }) {
                         parseErrorMessage = { "No such entity: $passed" }
                     }
                     playerAction {
@@ -82,7 +82,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
             }
             ("mobs" / "m") {
                 ("spawn" / "s") {
-                    val mobKey by optionArg(options = gearyMobs.prefabs.run { map { it.key.toString() } }) {
+                    val mobKey by optionArg(options = gearyMobs.prefabs.run { toList { it.key.toString() } }) {
                         parseErrorMessage = { "No such entity: $passed" }
                     }
                     val numOfSpawns by intArg {
@@ -156,7 +156,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
         alias: String,
         args: Array<out String>
     ): List<String> {
-        fun Sequence<PrefabKey>.filterPrefabs(arg: String) =
+        fun Collection<PrefabKey>.filterPrefabs(arg: String) =
             filter { it.key.startsWith(arg) || it.full.startsWith(arg) }.map { it.toString() }.take(20)
 
         when (if (args.size == 1) return listOf(

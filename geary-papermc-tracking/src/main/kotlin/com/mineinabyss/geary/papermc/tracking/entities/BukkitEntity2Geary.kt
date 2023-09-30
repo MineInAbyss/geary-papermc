@@ -3,7 +3,6 @@ package com.mineinabyss.geary.papermc.tracking.entities
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.helpers.toGeary
-import com.mineinabyss.idofront.nms.aliases.toNMS
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap
 import kotlin.collections.set
