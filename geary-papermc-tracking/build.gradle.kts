@@ -13,8 +13,8 @@ repositories {
 }
 dependencies {
     compileOnly(libs.minecraft.plugin.mythic.dist)
+    compileOnly(libs.idofront.nms)
     implementation(gearyLibs.uuid)
-    implementation(libs.idofront.nms)
     api(project(":geary-papermc-datastore"))
     api(project(":geary-papermc-core"))
 }

@@ -16,6 +16,4 @@ dependencies {
     implementation(project(":"))
 
     testImplementation(libs.minecraft.mockbukkit)
-//    testImplementation(libs.minecraft.papermc)
-
 }
