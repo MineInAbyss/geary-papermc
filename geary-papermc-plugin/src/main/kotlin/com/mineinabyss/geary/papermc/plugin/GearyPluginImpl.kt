@@ -22,7 +22,6 @@ import com.mineinabyss.geary.serialization.dsl.serialization
 import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.messaging.logSuccess
-import com.mineinabyss.idofront.platforms.Platforms
 import com.mineinabyss.idofront.plugin.listeners
 import com.mineinabyss.serialization.formats.YamlFormat
 import okio.FileSystem
@@ -35,10 +34,6 @@ import kotlin.io.path.name
 
 
 class GearyPluginImpl : GearyPlugin() {
-    override fun onLoad() {
-        Platforms.load(this, "mineinabyss")
-    }
-
     override fun onEnable() {
         saveDefaultConfig()
 

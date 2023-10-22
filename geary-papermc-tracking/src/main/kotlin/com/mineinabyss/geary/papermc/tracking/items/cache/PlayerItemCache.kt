@@ -7,7 +7,7 @@ import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.EntityEncoded
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.helpers.prefabs
-import com.soywiz.kds.iterators.fastForEachWithIndex
+import korlibs.datastructure.iterators.fastForEachWithIndex
 import org.bukkit.inventory.ItemStack
 
 abstract class PlayerItemCache<T>(
