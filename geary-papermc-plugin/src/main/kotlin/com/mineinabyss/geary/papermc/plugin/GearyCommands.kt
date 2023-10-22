@@ -168,11 +168,12 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
         ).filter { it.startsWith(args[0]) } else args[0]) {
             "mobs", "m" -> when (if (args.size == 2) return listOf("spawn", "remove", "locate", "info") else args[1]) {
                 "spawn", "s" -> if (args.size == 3) {
-                        return gearyMobs.prefabs.getKeys().filterPrefabs(args[2]).toList()
-                    } else if (args.size == 4) {
-                        val min = args[3].toIntOrNull()?.coerceAtLeast(1) ?: 1
-                        return (min - 1 until min + 100).map { it.toString() }
-                    }
+                    return gearyMobs.prefabs.getKeys().filterPrefabs(args[2]).toList()
+                } else if (args.size == 4) {
+                    val min = args[3].toIntOrNull()?.coerceAtLeast(1) ?: 1
+                    return (min - 1 until min + 100).map { it.toString() }
+                }
+
                 "remove", "rm", "info", "i", "locate" -> if (args.size == 3) {
                     val query = args[2].lowercase()
                     val parts = query.split("+")
@@ -185,6 +186,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                     }.take(20).map { "$withoutLast$it" }.toList()
                 }
             }
+
             "items" -> when (if (args.size == 2) return listOf("give") else args[1]) {
                 "give" -> if (args.size == 3) {
                     return gearyItems.prefabs.getKeys().filterPrefabs(args[2]).toList()

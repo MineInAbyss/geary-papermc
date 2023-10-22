@@ -37,7 +37,8 @@ allprojects {
 
     dependencies {
         val libs = rootProject.libs
-        implementation(libs.bundles.idofront.core)
+        compileOnly(libs.bundles.idofront.core)
+        testImplementation(libs.bundles.idofront.core)
     }
 
     tasks {
