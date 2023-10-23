@@ -35,8 +35,6 @@ import kotlin.io.path.name
 
 class GearyPluginImpl : GearyPlugin() {
     override fun onEnable() {
-        saveDefaultConfig()
-
         // Register DI
         val configModule = GearyProductionPaperConfigModule(this)
 
