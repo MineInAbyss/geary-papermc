@@ -45,9 +45,8 @@ player.setPersisting(Coins(10))
 ## Usage
 
 - Install from our [releases](https://github.com/MineInAbyss/geary-papermc/releases/latest)
-  Depend on `Geary` in your plugin's `plugin.yml`.
-- Install our plugin dependencies as explained [here](https://wiki.mineinabyss.com/idofront/platforms/) (info for devs is also there)
-  - We'll eventually simplify this with new paper plugin features.
+  Depend on `Geary` in your plugin's `plugin.yml`
+- We depend on [Idofront](https://github.com/MineInAbyss/Idofront/releases), install it into your plugins folder
 - For full ECS usage, see the [Geary wiki](https://wiki.mineinabyss.com/geary/)
 
 ### Gradle
