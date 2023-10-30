@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.plugin
 
 import com.mineinabyss.geary.addons.GearyPhase.ENABLE
 import com.mineinabyss.geary.autoscan.autoscan
+import com.mineinabyss.geary.modules.ArchetypeEngineModule
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.GearyPaperConfigModule
 import com.mineinabyss.geary.papermc.GearyPlugin
@@ -34,7 +35,7 @@ import kotlin.io.path.name
 
 
 class GearyPluginImpl : GearyPlugin() {
-    override fun onEnable() {
+    override fun onLoad() {
         // Register DI
         val configModule = GearyProductionPaperConfigModule(this)
 
@@ -96,6 +97,10 @@ class GearyPluginImpl : GearyPlugin() {
 
         // Register commands
         GearyCommands()
+    }
+
+    override fun onEnable() {
+        ArchetypeEngineModule.start(DI.get<PaperEngineModule>())
     }
 
     override fun onDisable() {

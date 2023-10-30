@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.items
 
+import com.mineinabyss.geary.addons.GearyPhase
 import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.modules.geary
@@ -36,16 +37,19 @@ interface ItemTracking {
         override fun default(): ItemTracking = NMSBackedItemTracking()
 
         override fun ItemTracking.install() {
-            gearyPaper.plugin.listeners(
-                loginListener,
-                SetItemIgnoredPropertyListener(),
-                MythicMobDropSystem()
-            )
             geary.pipeline.addSystems(
                 InventoryTrackerSystem(),
                 CustomModelDataToPrefabTracker(),
                 SetItemMigrationSystem()
             )
+
+            geary.pipeline.runOnOrAfter(GearyPhase.ENABLE) {
+                gearyPaper.plugin.listeners(
+                    loginListener,
+                    SetItemIgnoredPropertyListener(),
+                    MythicMobDropSystem()
+                )
+            }
         }
     }
 }

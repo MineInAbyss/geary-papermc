@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.bridge
 
+import com.mineinabyss.geary.addons.GearyPhase
 import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.bridge.actions.ExplosionSystem
@@ -18,12 +19,6 @@ import com.mineinabyss.idofront.plugin.listeners
 class PaperBridge {
     companion object : GearyAddonWithDefault<PaperBridge> {
         override fun PaperBridge.install() {
-            gearyPaper.plugin.listeners(
-                DeathBridge(),
-                ItemActionsBridge(),
-                MobActionsBridge(),
-            )
-
             geary.pipeline.addSystems(
                 CooldownDisplaySystem(),
                 ApplyAttribute(),
@@ -39,6 +34,14 @@ class PaperBridge {
                 TimeConditionChecker(),
                 ExplosionSystem(),
             )
+
+            geary.pipeline.runOnOrAfter(GearyPhase.ENABLE) {
+                gearyPaper.plugin.listeners(
+                    DeathBridge(),
+                    ItemActionsBridge(),
+                    MobActionsBridge(),
+                )
+            }
         }
 
         override fun default() = PaperBridge()
