@@ -17,6 +17,7 @@ import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.gearyItems
+import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.geary.serialization.dsl.FileSystemAddon
 import com.mineinabyss.geary.serialization.dsl.serialization
@@ -24,11 +25,13 @@ import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.messaging.logSuccess
 import com.mineinabyss.idofront.plugin.listeners
+import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
 import com.mineinabyss.serialization.formats.YamlFormat
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
+import org.bukkit.inventory.ItemStack
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
@@ -94,6 +97,15 @@ class GearyPluginImpl : GearyPlugin() {
                 logSuccess("Loaded item types: ${gearyItems.prefabs.getKeys().joinToString()}")
             }
         }
+
+
+        DI.add<SerializablePrefabItemService>(
+            object : SerializablePrefabItemService {
+                override fun encodeFromPrefab(item: ItemStack, prefabName: String) {
+                    val result = gearyItems.createItem(PrefabKey.of(prefabName), item)
+                    require(result != null) { "Failed to create serializable ItemStack from $prefabName, does the prefab exist and have a geary:set.item component?" }
+                }
+            })
 
         // Register commands
         GearyCommands()
