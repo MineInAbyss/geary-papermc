@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.entities
 
+import com.mineinabyss.geary.addons.GearyPhase
 import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
 import com.mineinabyss.geary.datatypes.ComponentId
 import com.mineinabyss.geary.helpers.componentId
@@ -26,13 +27,15 @@ interface EntityTracking {
         }
 
         override fun EntityTracking.install() {
-            gearyPaper.plugin.listeners(EntityWorldEventTracker())
             geary.pipeline.addSystems(
                 TrackOnSetBukkitComponent(),
                 UntrackOnRemoveBukkitComponent(),
                 AttemptSpawnListener(),
                 AttemptSpawnMythicMob()
             )
+            geary.pipeline.runOnOrAfter(GearyPhase.ENABLE) {
+                gearyPaper.plugin.listeners(EntityWorldEventTracker())
+            }
         }
     }
 }
