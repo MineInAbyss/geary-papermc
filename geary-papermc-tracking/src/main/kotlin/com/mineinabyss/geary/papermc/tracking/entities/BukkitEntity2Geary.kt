@@ -5,12 +5,14 @@ import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap
+import org.spigotmc.AsyncCatcher
 import kotlin.collections.set
 
-class BukkitEntity2Geary {
+class BukkitEntity2Geary(val forceMainThread: Boolean = true) {
     private val entityMap = Int2LongOpenHashMap().apply { defaultReturnValue(-1) }
 
     operator fun get(bukkit: BukkitEntity): GearyEntity? {
+        if (forceMainThread) AsyncCatcher.catchOp("Async geary entity access for $bukkit")
         val id = entityMap.get(bukkit.entityId)
         if (id == -1L) return null
         return id.toGeary()
@@ -27,6 +29,9 @@ class BukkitEntity2Geary {
     }
 
     fun getOrCreate(bukkit: BukkitEntity): GearyEntity {
-        return get(bukkit) ?: entity { set(bukkit) }
+        return get(bukkit) ?: run {
+            if (forceMainThread) AsyncCatcher.catchOp("Async geary entity creation for $bukkit")
+            entity { set(bukkit) }
+        }
     }
 }

@@ -7,6 +7,7 @@ import com.mineinabyss.geary.papermc.tracking.items.gearyItems
 import net.minecraft.world.entity.player.Inventory
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.PlayerInventory
+import org.spigotmc.AsyncCatcher
 
 
 class GearyPlayerInventory(
@@ -59,6 +60,11 @@ class GearyPlayerInventory(
 }
 
 fun PlayerInventory.toGeary(): GearyPlayerInventory? {
+    try {
+        AsyncCatcher.catchOp("Async geary inventory access for $holder")
+    } catch (_: NoClassDefFoundError) {
+        // Allow running in tests
+    }
     val player = holder ?: return null
     val wrap = gearyItems.getCacheWrapper(player.toGearyOrNull() ?: return null) ?: return null
     return GearyPlayerInventory(this, wrap)

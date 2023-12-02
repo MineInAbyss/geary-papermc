@@ -11,8 +11,8 @@ import com.mineinabyss.geary.papermc.commons.events.configurable.components.Even
 import com.mineinabyss.geary.papermc.configlang.ConfigLang
 import com.mineinabyss.geary.papermc.helpers.MockedServerTest
 import com.mineinabyss.geary.papermc.helpers.SomeData
+import com.mineinabyss.geary.papermc.helpers.TestEntityTracking
 import com.mineinabyss.geary.papermc.helpers.withTestSerializers
-import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.BukkitBackedItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
@@ -33,7 +33,7 @@ class EventTriggersTests : MockedServerTest() {
 
     init {
         geary(TestEngineModule) {
-            install(EntityTracking)
+            install(TestEntityTracking)
             install(ItemTracking, BukkitBackedItemTracking())
             install(ConfigLang)
             install(PaperBridge)
