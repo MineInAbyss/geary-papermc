@@ -36,4 +36,4 @@ include(
     "geary-tests"
 )
 
-includeBuild("../geary")
+//includeBuild("../geary")
