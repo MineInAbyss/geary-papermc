@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.items.inventory
 
 import com.mineinabyss.geary.datatypes.GearyEntity
+import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.gearyItems
@@ -61,7 +62,8 @@ class GearyPlayerInventory(
 
 fun PlayerInventory.toGeary(): GearyPlayerInventory? {
     try {
-        AsyncCatcher.catchOp("Async geary inventory access for $holder")
+        if (gearyPaper.config.catchAsyncEntityConversion)
+            AsyncCatcher.catchOp("Async geary inventory access for $holder")
     } catch (_: NoClassDefFoundError) {
         // Allow running in tests
     }

@@ -22,7 +22,7 @@ interface EntityTracking {
     companion object : GearyAddonWithDefault<EntityTracking> {
         override fun default(): EntityTracking = object : EntityTracking {
             override val bukkitEntityComponent = componentId<BukkitEntity>()
-            override val bukkit2Geary = BukkitEntity2Geary()
+            override val bukkit2Geary = BukkitEntity2Geary(gearyPaper.config.catchAsyncEntityConversion)
             override val prefabs = GearyMobPrefabQuery()
         }
 

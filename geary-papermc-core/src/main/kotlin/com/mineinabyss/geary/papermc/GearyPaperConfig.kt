@@ -18,5 +18,11 @@ class GearyPaperConfig(
     val configLang: Boolean = true,
     @YamlComment("If an item has no prefabs encoded, try to find its prefab by matching custom model data.")
     val migrateItemCustomModelDataToPrefab: Boolean = true,
+    @YamlComment("Whether to throw an error when an entity read operation occurs outside of the server thread.")
+    val catchAsyncRead: Boolean = false,
+    @YamlComment("Whether to throw an error when an entity write operation occurs outside of the server thread.")
+    val catchAsyncWrite: Boolean = true,
+    @YamlComment("Whether to throw an error when converting bukkit concepts to geary entities outside of the server thread.")
+    val catchAsyncEntityConversion: Boolean = false,
     val logLevel: Severity = Severity.Warn,
 )
