@@ -12,7 +12,6 @@ class BukkitEntity2Geary(val forceMainThread: Boolean = true) {
     private val entityMap = Int2LongOpenHashMap().apply { defaultReturnValue(-1) }
 
     operator fun get(bukkit: BukkitEntity): GearyEntity? {
-        if (forceMainThread) AsyncCatcher.catchOp("Async geary entity access for $bukkit")
         val id = entityMap.get(bukkit.entityId)
         if (id == -1L) return null
         return id.toGeary()

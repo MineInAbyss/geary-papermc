@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.plugin
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.StaticConfig
 import com.mineinabyss.geary.engine.archetypes.ArchetypeEngine
+import com.mineinabyss.geary.engine.archetypes.EntityByArchetypeProvider
 import com.mineinabyss.geary.engine.archetypes.operations.ArchetypeMutateOperations
 import com.mineinabyss.geary.engine.archetypes.operations.ArchetypeReadOperations
 import com.mineinabyss.geary.modules.ArchetypeEngineModule
@@ -20,7 +21,12 @@ class PaperEngineModule(
     override val engine: ArchetypeEngine = PaperMCEngine()
     override val logger =
         Logger(StaticConfig(logWriterList = listOf(PaperWriter(plugin)), minSeverity = gearyPaper.config.logLevel))
-
+    override val entityProvider: EntityByArchetypeProvider
+        get() {
+            if (gearyPaper.config.catchAsyncWrite)
+                AsyncCatcher.catchOp("Async entityProvider access!")
+            return super.entityProvider
+        }
     override val read: ArchetypeReadOperations
         get() {
             if (gearyPaper.config.catchAsyncRead)
