@@ -5,6 +5,7 @@ import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
+import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.helpers.prefabs
 import com.mineinabyss.idofront.commands.Command
@@ -29,8 +30,9 @@ fun Command.query() {
             val types = query.split("+")
 
             for (world in worlds) for (entity in world.entities) {
-                val geary = entity.toGeary()
-                if (!geary.has<PrefabKey>()) continue
+                val geary = entity.toGearyOrNull() ?: continue
+                // Only select entities that are instanced from a prefab
+                if (geary.prefabs.isEmpty()) continue
 
                 if (types.any { type ->
                         fun excludeDefault() = entity.customName() == null
