@@ -27,14 +27,14 @@ fun Command.locate() {
             if (radius <= 0) {
                 Bukkit.getWorlds().forEach { world ->
                     world.entities.filter { it.toGeary().deepInstanceOf(key.toEntity()) }.forEach { entity ->
-                        val (x,y,z) = entity.location.toBlockLocation().toVector()
+                        val (x, y, z) = entity.location.toBlockLocation().toVector()
                         player.info("<gold>Found <yellow>${key.key}</yellow> at <click:run_command:/teleport $x $y $z><aqua>$x,$y,$z</aqua> in ${entity.world.name}")
                     }
                 }
             } else {
                 player.location.getNearbyEntities(radius.toDouble(), radius.toDouble(), radius.toDouble())
                     .filter { it.toGeary().deepInstanceOf(key.toEntity()) }.forEach { entity ->
-                        val (x,y,z) = entity.location.toBlockLocation().toVector()
+                        val (x, y, z) = entity.location.toBlockLocation().toVector()
                         player.info("<gold>Found <yellow>${key.key}</yellow> at <click:run_command:/teleport $x $y $z><aqua>$x,$y,$z")
                     }
             }
