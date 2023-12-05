@@ -4,7 +4,6 @@ import com.mineinabyss.geary.components.relations.InstanceOf
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.papermc.gearyPaper
-import com.mineinabyss.geary.papermc.tracking.entities.components.SetEntityType
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.helpers.prefabs
@@ -30,23 +29,13 @@ fun Command.query() {
             val types = query.split("+")
 
             for (world in worlds) for (entity in world.entities) {
-//                val nmsEntity = entity.toNMS()
                 val geary = entity.toGeary()
-                if (!geary.has<SetEntityType>()) continue
-
+                if (!geary.has<PrefabKey>()) continue
 
                 if (types.any { type ->
-                        fun excludeDefault() =
-                            /*!geary.has<Important>() && */entity.customName() == null// && !geary.has<Tamed>()
+                        fun excludeDefault() = entity.customName() == null
                         when (type) {
                             "custom" -> excludeDefault()
-//                            "passive" -> nmsEntity is Animal && excludeDefault()
-//                            "hostile" -> nmsEntity is Monster && excludeDefault()
-//                            "renamed" -> entity.customName() != null && nmsEntity !is NPC
-                            //"tamed" -> geary.has<Tamed>()
-                            //"important" -> geary.has<Important>() && entity.customName() == null
-//                            "flying" -> nmsEntity is FlyingMob && excludeDefault()
-//                            "fish" -> nmsEntity is AbstractFish && excludeDefault()
                             else -> {
                                 val prefab = runCatching { PrefabKey.of(type).toEntityOrNull() }.getOrNull()
                                     ?: this@commandGroup.stopCommand("No such prefab or selector $type")

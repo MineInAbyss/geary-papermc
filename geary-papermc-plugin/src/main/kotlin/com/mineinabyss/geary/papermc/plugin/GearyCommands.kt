@@ -226,7 +226,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
 
     private val mobs: List<String> by lazy {
         buildList {
-            addAll(listOf("custom", "important", "mob", "renamed", "passive", "hostile", "flying"))
+            addAll(listOf("custom"))
             addAll(gearyMobs.prefabs.getKeys().map { it.toString() })
         }
     }
