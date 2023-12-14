@@ -45,7 +45,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
 
                     sender.info(
                         """
-                        |Archetype count: ${archetypes.archetypeProvider.count}
+                        |Archetype count: ${archetypes.queryManager.archetypeCount}
                         |Next entity ID: ${tempEntity.id}
                         |""".trimMargin()
                     )
