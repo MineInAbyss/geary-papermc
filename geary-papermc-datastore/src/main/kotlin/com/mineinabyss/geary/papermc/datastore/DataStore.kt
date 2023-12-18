@@ -147,7 +147,7 @@ fun PersistentDataContainer.decodeComponents(): DecodedEntityData =
 
 /** Verifies a [PersistentDataContainer] has a tag identifying it as containing Geary components. */
 var PersistentDataContainer.hasComponentsEncoded: Boolean
-    get() = has(COMPONENTS_KEY, PersistentDataType.BYTE)
+    get() = has(COMPONENTS_KEY, PersistentDataType.BYTE) || has(PREFABS_KEY, PersistentDataType.BYTE_ARRAY)
     set(value) {
         when {
             value -> if (!hasComponentsEncoded) set(COMPONENTS_KEY, PersistentDataType.BYTE, 1)
