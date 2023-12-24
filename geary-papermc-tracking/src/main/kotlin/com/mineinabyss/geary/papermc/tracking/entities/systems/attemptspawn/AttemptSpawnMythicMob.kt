@@ -1,4 +1,4 @@
-package com.mineinabyss.geary.papermc.tracking.entities.systems
+package com.mineinabyss.geary.papermc.tracking.entities.systems.attemptspawn
 
 import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
 import com.mineinabyss.geary.datatypes.family.family
@@ -10,6 +10,7 @@ import com.mineinabyss.idofront.typealiases.BukkitEntity
 import io.lumine.mythic.api.mobs.entities.SpawnReason
 import io.lumine.mythic.bukkit.BukkitAdapter
 import io.lumine.mythic.bukkit.MythicBukkit
+import kotlin.jvm.optionals.getOrNull
 
 
 class AttemptSpawnMythicMob : GearyListener() {
@@ -22,9 +23,10 @@ class AttemptSpawnMythicMob : GearyListener() {
 
     @OptIn(UnsafeAccessors::class)
     override fun Pointers.handle() {
-        val mythicMob = MythicBukkit.inst().mobManager.getMythicMob(mobType.id).orElse(null) ?: return
+        val mythicMob = MythicBukkit.inst().mobManager.getMythicMob(mobType.id).getOrNull() ?: return
         mythicMob.spawn(BukkitAdapter.adapt(attemptSpawn.location), 1.0, SpawnReason.NATURAL) { mob ->
             target.entity.set(mob)
+            target.entity.set(mythicMob)
         }
     }
 }

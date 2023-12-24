@@ -2,9 +2,10 @@ package com.mineinabyss.geary.papermc.tracking.entities.systems
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
-import com.mineinabyss.geary.papermc.tracking.entities.components.AddedToWorld
+import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -18,8 +19,7 @@ class EntityWorldEventTracker : Listener {
     fun EntityAddToWorldEvent.onBukkitEntityAdd() {
         // Only remove player from ECS on disconnect, not death
         if (entity is Player) return
-        val gearyEntity = gearyMobs.bukkit2Geary.getOrCreate(entity)
-        gearyEntity.add<AddedToWorld>()
+        gearyMobs.bukkit2Geary.getOrCreate(entity)
     }
 
     /** Remove entities from ECS when they are removed from Bukkit for any reason (Uses PaperMC event) */
@@ -29,12 +29,15 @@ class EntityWorldEventTracker : Listener {
         if (entity is Player) return
         // We remove the geary entity one tick after the Bukkit one has been removed to ensure nothing
         // else that tries to access the geary entity from Bukkit will create a new entity.
-        entity.toGearyOrNull()?.removeEntity()
+        Bukkit.getScheduler().scheduleSyncDelayedTask(gearyPaper.plugin, {
+            if(entity.isValid) return@scheduleSyncDelayedTask
+            entity.toGearyOrNull()?.removeEntity()
+        }, 10)
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun PlayerJoinEvent.onPlayerLogin() {
-        gearyMobs.bukkit2Geary.getOrCreate(player).set(player.world)
+        gearyMobs.bukkit2Geary.getOrCreate(player)
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

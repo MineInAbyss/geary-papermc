@@ -1,4 +1,4 @@
-package com.mineinabyss.geary.papermc.tracking.entities.systems
+package com.mineinabyss.geary.papermc.tracking.entities.systems.attemptspawn
 
 import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
 import com.mineinabyss.geary.datatypes.family.family

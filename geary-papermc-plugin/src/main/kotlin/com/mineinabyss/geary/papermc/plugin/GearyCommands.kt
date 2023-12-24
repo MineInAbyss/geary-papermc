@@ -2,7 +2,6 @@ package com.mineinabyss.geary.papermc.plugin
 
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.archetypes
-import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.plugin.commands.locate
 import com.mineinabyss.geary.papermc.plugin.commands.query
@@ -22,7 +21,6 @@ import com.mineinabyss.idofront.commands.extensions.actions.playerAction
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.info
 import com.mineinabyss.idofront.messaging.success
-import kotlinx.coroutines.launch
 import okio.Path.Companion.toOkioPath
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
@@ -35,7 +33,6 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
     private val plugin get() = gearyPaper.plugin
     private val prefabLoader get() = prefabs.loader
     private val prefabManager get() = prefabs.manager
-    private val engine get() = geary.engine
 
     override val commands = commands(plugin) {
         "geary" {
@@ -116,33 +113,29 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                 "reload" {
                     val prefab by stringArg()
                     action {
-                        engine.launch {
-                            runCatching { prefabLoader.reread(PrefabKey.of(prefab).toEntity()) }
-                                .onSuccess { sender.success("Reread prefab $prefab") }
-                                .onFailure { sender.error("Failed to reread prefab $prefab:\n${it.message}") }
-                        }
+                        runCatching { prefabLoader.reread(PrefabKey.of(prefab).toEntity()) }
+                            .onSuccess { sender.success("Reread prefab $prefab") }
+                            .onFailure { sender.error("Failed to reread prefab $prefab:\n${it.message}") }
                     }
                 }
                 "load" {
                     val namespace by stringArg()
                     val path by stringArg()
                     action {
-                        engine.launch {
-                            // Ensure not already registered
-                            if (prefabManager[PrefabKey.of(namespace, Path(path).nameWithoutExtension)] != null) {
-                                sender.error("Prefab $namespace:$path already exists")
-                                return@launch
-                            }
-
-                            // Try to load from file
-                            prefabLoader.loadFromPath(
-                                namespace,
-                                plugin.dataFolder.resolve(namespace).resolve(path).toOkioPath()
-                            ).onSuccess {
-                                it.inheritPrefabs()
-                                sender.success("Read prefab $namespace:$path")
-                            }.onFailure { sender.error("Failed to read prefab $namespace:$path:\n${it.message}") }
+                        // Ensure not already registered
+                        if (prefabManager[PrefabKey.of(namespace, Path(path).nameWithoutExtension)] != null) {
+                            sender.error("Prefab $namespace:$path already exists")
+                            return@action
                         }
+
+                        // Try to load from file
+                        prefabLoader.loadFromPath(
+                            namespace,
+                            plugin.dataFolder.resolve(namespace).resolve(path).toOkioPath()
+                        ).onSuccess {
+                            it.inheritPrefabs()
+                            sender.success("Read prefab $namespace:$path")
+                        }.onFailure { sender.error("Failed to read prefab $namespace:$path:\n${it.message}") }
                     }
                 }
             }
@@ -195,28 +188,29 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                 }
             }
 
-            "prefab" -> when (if (args.size == 2) return listOf("load", "reload") else args[1]) {
-                "reload" -> return prefabManager.keys.filter {
-                    val arg = args[2].lowercase()
-                    it.key.startsWith(arg) || it.full.startsWith(arg)
-                }.map { it.toString() }
+            "prefab" -> {
+                if (!sender.hasPermission("geary.prefab")) return emptyList()
+                when (if (args.size == 2) return listOf("load", "reload") else args[1]) {
+                    "reload" -> return prefabManager.keys.filter {
+                        val arg = args[2].lowercase()
+                        it.key.startsWith(arg) || it.full.startsWith(arg)
+                    }.map { it.toString() }
 
-                "load" -> return when (args.size) {
-                    3 -> plugin.dataFolder.listFiles()?.filter {
-                        it.isDirectory && it.name.startsWith(args[2].lowercase())
-                    }?.map { it.name } ?: listOf()
+                    "load" -> return when (args.size) {
+                        3 -> plugin.dataFolder.listFiles()?.filter {
+                            it.isDirectory && it.name.startsWith(args[2].lowercase())
+                        }?.map { it.name } ?: listOf()
 
-                    4 -> plugin.dataFolder.resolve(args[2]).walkTopDown().toList().filter {
-                        it.isFile && it.extension == "yml" && it.nameWithoutExtension.startsWith(args[3].lowercase())
-                                && "${args[2]}:${it.nameWithoutExtension}" !in prefabManager.keys.map(PrefabKey::full)
-                    }.map {
-                        it.absolutePath.split(plugin.dataFolder.absolutePath + "\\" + args[2] + "\\")[1]
-                            .replace("\\", "/")
+                        4 -> plugin.dataFolder.resolve(args[2]).walkTopDown().toList().filter {
+                            it.isFile && it.extension == "yml" && it.nameWithoutExtension.startsWith(args[3].lowercase())
+                                    && "${args[2]}:${it.nameWithoutExtension}" !in prefabManager.keys.map(PrefabKey::full)
+                        }.map {
+                            it.relativeTo(plugin.dataFolder.resolve(args[2])).toString()
+                        }
+
+                        else -> return listOf()
                     }
-
-                    else -> return listOf()
                 }
-
             }
 
             else -> return listOf()
