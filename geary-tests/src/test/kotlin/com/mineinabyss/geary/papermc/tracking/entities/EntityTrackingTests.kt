@@ -17,6 +17,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.bukkit.entity.Pig
 import org.bukkit.entity.Player
+import org.bukkit.event.world.EntitiesUnloadEvent
 import org.bukkit.persistence.PersistentDataContainer
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -91,7 +92,7 @@ class EntityTrackingTests: MockedServerTest() {
         }
 
         @Test
-        fun `should persist components on player disconnect`() {
+        fun `should persist components when player disconnects`() {
             val player = server.addPlayer()
 
             testPersistence(
@@ -101,19 +102,17 @@ class EntityTrackingTests: MockedServerTest() {
             )
         }
 
-        //TODO this test wouldn't reflect data actually being written to NBT, maybe the event calls too late to save!
-//        @Test
-//        fun `should persist components on entities`() {
-//            val pig = world.spawn(world.spawnLocation, Pig::class.java)
-//            EntityAddToWorldEvent(pig).callEvent()
-//
-//            testPersistence(
-//                pig.toGeary(),
-//                pig.persistentDataContainer
-//            ) {
-//                pig.remove()
-//                EntityRemoveFromWorldEvent(pig).callEvent()
-//            }
-//        }
+        @Test
+        fun `should persist components on entities when chunk unloaded`() {
+            val pig = world.spawn(world.spawnLocation, Pig::class.java)
+            EntityAddToWorldEvent(pig).callEvent()
+
+            testPersistence(
+                pig.toGeary(),
+                pig.persistentDataContainer
+            ) {
+                EntitiesUnloadEvent(pig.location.chunk, listOf(pig)).callEvent()
+            }
+        }
     }
 }

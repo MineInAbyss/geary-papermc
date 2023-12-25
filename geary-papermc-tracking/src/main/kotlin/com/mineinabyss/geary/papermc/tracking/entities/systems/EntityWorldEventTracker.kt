@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.tracking.entities.systems
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
+import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
@@ -12,6 +13,7 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.world.EntitiesUnloadEvent
 
 class EntityWorldEventTracker : Listener {
     /** Remove entities from ECS when they are removed from Bukkit for any reason (Uses PaperMC event) */
@@ -27,12 +29,20 @@ class EntityWorldEventTracker : Listener {
     fun EntityRemoveFromWorldEvent.onBukkitEntityRemove() {
         // Only remove player from ECS on disconnect, not death
         if (entity is Player) return
-        // We remove the geary entity one tick after the Bukkit one has been removed to ensure nothing
-        // else that tries to access the geary entity from Bukkit will create a new entity.
+
+        // We remove the geary entity a bit later because paper has a bug where stored entities call load/unload/load
         Bukkit.getScheduler().scheduleSyncDelayedTask(gearyPaper.plugin, {
-            if(entity.isValid) return@scheduleSyncDelayedTask
+            if (entity.isValid) return@scheduleSyncDelayedTask // If the entity is still valid, it's the paper bug
             entity.toGearyOrNull()?.removeEntity()
         }, 10)
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun EntitiesUnloadEvent.onEntitiesUnload() {
+        entities.forEach {
+            val gearyEntity = it.toGearyOrNull() ?: return@forEach
+            gearyEntity.encodeComponentsTo(it)
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -42,6 +52,8 @@ class EntityWorldEventTracker : Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerQuitEvent.onPlayerLogout() {
-        player.toGearyOrNull()?.removeEntity()
+        val gearyEntity = player.toGearyOrNull() ?: return
+        gearyEntity.encodeComponentsTo(player)
+        gearyEntity.removeEntity()
     }
 }
