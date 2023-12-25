@@ -9,6 +9,7 @@ import com.mineinabyss.geary.papermc.GearyPlugin
 import com.mineinabyss.geary.papermc.GearyProductionPaperConfigModule
 import com.mineinabyss.geary.papermc.bridge.PaperBridge
 import com.mineinabyss.geary.papermc.configlang.ConfigLang
+import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
 import com.mineinabyss.geary.papermc.tracking.blocks.gearyBlocks
@@ -29,7 +30,6 @@ import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
 import com.mineinabyss.serialization.formats.YamlFormat
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
-import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemStack
 import kotlin.io.path.isDirectory
@@ -118,8 +118,9 @@ class GearyPluginImpl : GearyPlugin() {
     override fun onDisable() {
         server.worlds.forEach { world ->
             world.entities.forEach entities@{ entity ->
-                if (entity is Player) return@entities
-                entity.toGearyOrNull()?.removeEntity()
+                val gearyEntity = entity.toGearyOrNull() ?: return@entities
+                gearyEntity.encodeComponentsTo(entity)
+                gearyEntity.removeEntity()
             }
         }
         server.scheduler.cancelTasks(this)

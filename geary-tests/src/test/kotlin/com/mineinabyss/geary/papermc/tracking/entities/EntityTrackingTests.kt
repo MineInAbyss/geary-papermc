@@ -1,7 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.entities
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent
-import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.modules.TestEngineModule
 import com.mineinabyss.geary.modules.geary
@@ -11,12 +10,14 @@ import com.mineinabyss.geary.papermc.helpers.SomeData
 import com.mineinabyss.geary.papermc.helpers.TestEntityTracking
 import com.mineinabyss.geary.papermc.helpers.withTestSerializers
 import com.mineinabyss.geary.serialization.dsl.serialization
+import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.bukkit.entity.Pig
 import org.bukkit.entity.Player
+import org.bukkit.event.world.EntitiesUnloadEvent
 import org.bukkit.persistence.PersistentDataContainer
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -28,6 +29,7 @@ class EntityTrackingTests: MockedServerTest() {
                 withTestSerializers()
             }
             install(TestEntityTracking)
+            install(UUIDTracking)
         }
         geary.pipeline.runStartupTasks()
     }
@@ -90,7 +92,7 @@ class EntityTrackingTests: MockedServerTest() {
         }
 
         @Test
-        fun `should persist components on player disconnect`() {
+        fun `should persist components when player disconnects`() {
             val player = server.addPlayer()
 
             testPersistence(
@@ -101,7 +103,7 @@ class EntityTrackingTests: MockedServerTest() {
         }
 
         @Test
-        fun `should persist components on entities`() {
+        fun `should persist components on entities when chunk unloaded`() {
             val pig = world.spawn(world.spawnLocation, Pig::class.java)
             EntityAddToWorldEvent(pig).callEvent()
 
@@ -109,8 +111,7 @@ class EntityTrackingTests: MockedServerTest() {
                 pig.toGeary(),
                 pig.persistentDataContainer
             ) {
-                pig.remove()
-                EntityRemoveFromWorldEvent(pig).callEvent()
+                EntitiesUnloadEvent(pig.location.chunk, listOf(pig)).callEvent()
             }
         }
     }
