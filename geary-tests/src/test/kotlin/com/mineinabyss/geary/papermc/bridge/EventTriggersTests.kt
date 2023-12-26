@@ -6,9 +6,9 @@ import com.mineinabyss.geary.modules.TestEngineModule
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.bridge.actions.components.PotionEffects
 import com.mineinabyss.geary.papermc.bridge.components.Touched
-import com.mineinabyss.geary.papermc.commons.events.configurable.components.ApplyBuilder
 import com.mineinabyss.geary.papermc.commons.events.configurable.components.EventTriggers
 import com.mineinabyss.geary.papermc.configlang.ConfigLang
+import com.mineinabyss.geary.papermc.configlang.components.ApplyBuilder
 import com.mineinabyss.geary.papermc.helpers.MockedServerTest
 import com.mineinabyss.geary.papermc.helpers.SomeData
 import com.mineinabyss.geary.papermc.helpers.TestEntityTracking
@@ -57,7 +57,7 @@ class EventTriggersTests : MockedServerTest() {
                     mapOf(
                         "poison" to listOf(
                             SomeData("testing"),
-                            ApplyBuilder("geary:potion_effects")
+                            ApplyBuilder("geary:potionEffects")
                         )
                     )
                 )
@@ -80,7 +80,7 @@ class EventTriggersTests : MockedServerTest() {
                     mapOf(
                         "poison" to listOf(
                             PotionEffects(listOf(PotionEffect(PotionEffectType.POISON, 10, 1, true))),
-                            ApplyBuilder("geary:potion_effects")
+                            ApplyBuilder("geary:potionEffects")
                         )
                     )
                 )

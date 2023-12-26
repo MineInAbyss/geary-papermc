@@ -9,5 +9,5 @@ import kotlinx.serialization.Serializable
 value class EventRunBuilder(val expression: String)
 
 @Serializable
-@SerialName("geary:event.run_relation")
+@SerialName("geary:event.runRelation")
 sealed class EventRun

@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  * @param damage The damage amount.
  */
 @Serializable
-@SerialName("geary:deal_damage")
+@SerialName("geary:dealDamage")
 data class DealDamage(
     val damage: @Serializable(with = DoubleRangeSerializer::class) DoubleRange,
     val minHealth: Double = 0.0,

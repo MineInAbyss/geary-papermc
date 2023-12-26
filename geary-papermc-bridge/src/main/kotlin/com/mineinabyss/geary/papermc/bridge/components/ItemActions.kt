@@ -4,15 +4,15 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("geary:event.left_clicked")
+@SerialName("geary:event.leftClicked")
 sealed class LeftClicked
 
 @Serializable
-@SerialName("geary:event.right_clicked")
+@SerialName("geary:event.rightClicked")
 sealed class RightClicked
 
 @Serializable
-@SerialName("geary:event.item_interacted")
+@SerialName("geary:event.itemInteracted")
 sealed class Interacted
 
 sealed class ItemBroke

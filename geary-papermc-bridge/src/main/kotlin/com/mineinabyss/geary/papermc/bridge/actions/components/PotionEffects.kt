@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 import org.bukkit.potion.PotionEffect
 
 @Serializable
-@SerialName("geary:potion_effects")
+@SerialName("geary:potionEffects")
 class PotionEffects(
     val effects: List<@Serializable(with = PotionEffectSerializer::class) PotionEffect>
 )

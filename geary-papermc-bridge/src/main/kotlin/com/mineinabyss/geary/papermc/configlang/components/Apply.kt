@@ -1,10 +1,10 @@
-package com.mineinabyss.geary.papermc.commons.events.configurable.components
+package com.mineinabyss.geary.papermc.configlang.components
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("geary:apply_relation")
+@SerialName("geary:applyRelation")
 sealed class Apply
 
 @JvmInline

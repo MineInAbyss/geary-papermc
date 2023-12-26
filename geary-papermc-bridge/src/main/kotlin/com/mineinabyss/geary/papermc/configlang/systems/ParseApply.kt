@@ -1,8 +1,8 @@
 package com.mineinabyss.geary.papermc.configlang.systems
 
 import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
-import com.mineinabyss.geary.papermc.commons.events.configurable.components.Apply
-import com.mineinabyss.geary.papermc.commons.events.configurable.components.ApplyBuilder
+import com.mineinabyss.geary.papermc.configlang.components.Apply
+import com.mineinabyss.geary.papermc.configlang.components.ApplyBuilder
 import com.mineinabyss.geary.papermc.configlang.helpers.parseEntity
 import com.mineinabyss.geary.systems.GearyListener
 import com.mineinabyss.geary.systems.accessors.Pointers

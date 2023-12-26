@@ -5,11 +5,10 @@ import kotlinx.serialization.Serializable
 
 
 /**
- * `geary:cancel_bukkit_event`
  * Cancels any bukkit event added to an event entity when added to that same entity.
  *
  * TODO implement
  */
 @Serializable
-@SerialName("geary:cancel_bukkit_event")
+@SerialName("geary:cancelBukkitEvent")
 sealed class CancelBukkitEvent
