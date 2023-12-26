@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.bridge.systems.apply
 
 import com.mineinabyss.geary.papermc.bridge.actions.components.DealDamage
-import com.mineinabyss.geary.papermc.configlang.components.Apply
+import com.mineinabyss.geary.papermc.commons.events.configurable.components.Apply
 import com.mineinabyss.geary.systems.GearyListener
 import com.mineinabyss.geary.systems.accessors.Pointers
 import com.mineinabyss.idofront.typealiases.BukkitEntity

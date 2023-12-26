@@ -11,7 +11,7 @@ import org.bukkit.entity.LivingEntity
  * Deals the given damage in a square of the specified size
  */
 @Serializable
-@SerialName("geary:areaDamage")
+@SerialName("geary:area_damage")
 class AreaDamage(
     val damage: Double,
     val size: Double,
