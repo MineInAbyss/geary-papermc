@@ -92,9 +92,11 @@ class GearyPluginImpl : GearyPlugin() {
                     }
                 }
 
-                logSuccess("Loaded mob types: ${gearyMobs.prefabs.getKeys().joinToString()}")
-                logSuccess("Loaded block types: ${gearyBlocks.prefabs.getKeys().joinToString()}")
-                logSuccess("Loaded item types: ${gearyItems.prefabs.getKeys().joinToString()}")
+                logSuccess(
+                    "Loaded types: ${gearyMobs.prefabs.getKeys().size} mobs, ${
+                        gearyBlocks.prefabs.getKeys().size
+                    } blocks, ${gearyItems.prefabs.getKeys().size} items"
+                )
             }
         }
 
