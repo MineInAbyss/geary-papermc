@@ -9,6 +9,7 @@ plugins {
 dependencies {
     implementation(project(":geary-papermc-tracking"))
     implementation(gearyLibs.common.features)
+    implementation(gearyLibs.serialization)
 
     // Plugins
     compileOnly(myLibs.plugman)

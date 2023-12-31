@@ -33,6 +33,7 @@ allprojects {
         maven("https://raw.githubusercontent.com/TheBlackEntity/PlugMan/repository/")
         maven("https://jitpack.io")
         maven("https://repo.codemc.io/repository/nms/")
+        mavenLocal()
     }
 
     dependencies {

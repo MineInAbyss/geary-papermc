@@ -5,7 +5,6 @@ import com.mineinabyss.geary.components.relations.Persists
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.component
 import com.mineinabyss.geary.helpers.toGeary
-import com.mineinabyss.geary.prefabs.helpers.addPrefab
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataHolder
@@ -44,7 +43,7 @@ fun GearyEntity.loadComponentsFrom(decodedEntityData: DecodedEntityData) {
     // Components written to this entity's PDC will override the ones defined in type
     setAllPersisting(components)
     //TODO this should just add the id and a listener handle what addPrefab currently does
-    type.forEach { addPrefab(it.toGeary()) }
+    type.forEach { extend(it.toGeary()) }
 }
 
 fun PersistentDataHolder.decodeComponents(): DecodedEntityData =

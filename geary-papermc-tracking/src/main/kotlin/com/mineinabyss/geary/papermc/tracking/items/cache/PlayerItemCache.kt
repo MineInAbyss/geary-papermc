@@ -6,7 +6,6 @@ import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.EntityEncoded
 import com.mineinabyss.geary.prefabs.PrefabKey
-import com.mineinabyss.geary.prefabs.helpers.prefabs
 import korlibs.datastructure.iterators.fastForEachWithIndex
 import org.bukkit.inventory.ItemStack
 

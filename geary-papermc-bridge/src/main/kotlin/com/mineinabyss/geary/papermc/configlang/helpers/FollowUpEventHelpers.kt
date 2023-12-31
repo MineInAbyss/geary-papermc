@@ -6,7 +6,6 @@ import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.datatypes.GearyEntityType
 import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.papermc.commons.events.configurable.components.EventCondition
-import com.mineinabyss.geary.prefabs.helpers.addPrefab
 
 fun GearyEntityType.runFollowUp(runAsSource: Boolean, current: GearyEntity, other: GearyEntity) {
     val withSource = if (runAsSource) current else other
@@ -15,7 +14,7 @@ fun GearyEntityType.runFollowUp(runAsSource: Boolean, current: GearyEntity, othe
         val triggerEntity = it.toGeary()
         val conditionEntity = withSource.getRelation<EventCondition>(triggerEntity)?.entity
         if (conditionEntity == null || withTarget.callCheck(source = current) {
-                addPrefab(conditionEntity.toGeary())
+                extend(conditionEntity.toGeary())
             }) {
             withTarget.callEvent(triggerEntity, source = withSource)
         }
