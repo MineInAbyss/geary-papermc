@@ -37,5 +37,3 @@ include(
     "geary-papermc-bridge",
     "geary-tests"
 )
-
-includeBuild("../geary")
