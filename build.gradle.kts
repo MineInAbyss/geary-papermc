@@ -17,7 +17,6 @@ dependencies {
     api(gearyLibs.core)
     api(gearyLibs.autoscan)
     api(gearyLibs.prefabs)
-    api(gearyLibs.common.features)
     api(gearyLibs.serialization)
     api(gearyLibs.uuid)
 }

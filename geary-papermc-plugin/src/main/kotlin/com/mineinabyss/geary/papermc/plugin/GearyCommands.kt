@@ -71,7 +71,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                     val amount by intArg { default = 1 }
                     playerAction {
                         val item = gearyItems.createItem(PrefabKey.of(prefabKey)) ?: run {
-                            sender.error("Failed to spawn $prefabKey")
+                            sender.error("Failed to create $prefabKey")
                             return@playerAction
                         }
                         item.amount = amount.coerceIn(1, 64)

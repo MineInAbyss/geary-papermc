@@ -16,7 +16,7 @@ class ParseSkills : GearyListener() {
                 setAll(skill.run)
             }
             if (skill.eventComponent.data != null)
-                skillEntity.setRelation(skill.eventComponent.type, target.entity.id, skill.eventComponent.data)
+                target.entity.setRelation(skill.eventComponent.type, skillEntity.id, skill.eventComponent.data)
             else target.entity.addRelation(skill.eventComponent.type, skillEntity.id)
         }
         skillsComp = null

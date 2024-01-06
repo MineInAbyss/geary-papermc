@@ -1,8 +1,8 @@
 package com.mineinabyss.geary.papermc.bridge.config
 
 import com.mineinabyss.geary.datatypes.GearyComponent
-import com.mineinabyss.geary.prefabs.serializers.PolymorphicListAsMapSerializer
 import com.mineinabyss.geary.serialization.serializers.InnerSerializer
+import com.mineinabyss.geary.serialization.serializers.PolymorphicListAsMapSerializer
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.Serializable
 

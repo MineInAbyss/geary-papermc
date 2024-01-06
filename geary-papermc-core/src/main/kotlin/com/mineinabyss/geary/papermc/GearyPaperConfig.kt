@@ -14,8 +14,6 @@ class GearyPaperConfig(
     val trackBlocks: Boolean = true,
     @YamlComment("Convert bukkit events to data in Geary (deprecated)")
     val bridgeEvents: Boolean = true,
-    @YamlComment("Enable components for our config scripting language (deprecated)")
-    val configLang: Boolean = true,
     @YamlComment("If an item has no prefabs encoded, try to find its prefab by matching custom model data.")
     val migrateItemCustomModelDataToPrefab: Boolean = true,
     @YamlComment("Whether to throw an error when an entity read operation occurs outside of the server thread.")
