@@ -23,8 +23,6 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             from("com.mineinabyss:catalog:$idofrontVersion")
-            version("kotlin", "1.9.21")
-            version("serialization", "1.6.2")
         }
         create("myLibs").from(files("gradle/myLibs.versions.toml"))
         create("gearyLibs").from("com.mineinabyss:geary-catalog:$gearyVersion")
