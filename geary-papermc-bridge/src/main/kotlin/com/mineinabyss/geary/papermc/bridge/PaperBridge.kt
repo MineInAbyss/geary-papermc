@@ -7,9 +7,11 @@ import com.mineinabyss.geary.papermc.GearyPaperConfigModule
 import com.mineinabyss.geary.papermc.bridge.actions.DoSpawnSystem
 import com.mineinabyss.geary.papermc.bridge.actions.ExplosionSystem
 import com.mineinabyss.geary.papermc.bridge.actions.SetPotionEffectsSystem
-import com.mineinabyss.geary.papermc.bridge.conditions.CooldownChecker
-import com.mineinabyss.geary.papermc.bridge.conditions.PlayerConditionsChecker
-import com.mineinabyss.geary.papermc.bridge.conditions.checkers.*
+import com.mineinabyss.geary.papermc.bridge.conditions.*
+import com.mineinabyss.geary.papermc.bridge.conditions.location.BlockConditionChecker
+import com.mineinabyss.geary.papermc.bridge.conditions.location.HeightConditionChecker
+import com.mineinabyss.geary.papermc.bridge.conditions.location.LightConditionChecker
+import com.mineinabyss.geary.papermc.bridge.conditions.location.TimeConditionChecker
 import com.mineinabyss.geary.papermc.bridge.config.parsers.CreateDefaultSkills
 import com.mineinabyss.geary.papermc.bridge.config.parsers.ParseSkills
 import com.mineinabyss.geary.papermc.bridge.events.entities.*

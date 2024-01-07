@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.bridge.conditions
 
 import com.mineinabyss.geary.events.CheckingListener
-import com.mineinabyss.geary.papermc.bridge.conditions.checkers.nullOrEquals
+import com.mineinabyss.geary.papermc.bridge.helpers.nullOrEquals
 import com.mineinabyss.geary.systems.accessors.Pointers
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

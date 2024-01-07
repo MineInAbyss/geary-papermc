@@ -17,7 +17,7 @@ class Cooldown(
 class CooldownStarted(val time: Long)
 
 class CooldownChecker : CheckingListener() {
-    val Pointers.cooldownDefinition by get<Cooldown>().on(source)
+    private val Pointers.cooldownDefinition by get<Cooldown>().on(source)
 
     @OptIn(UnsafeAccessors::class)
     override fun Pointers.check(): Boolean {

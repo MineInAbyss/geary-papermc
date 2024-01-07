@@ -1,4 +1,4 @@
-package com.mineinabyss.geary.papermc.bridge.conditions.checkers
+package com.mineinabyss.geary.papermc.bridge.helpers
 
 internal infix fun <T> T?.nullOrEquals(other: T?): Boolean =
     this == null || this == other
