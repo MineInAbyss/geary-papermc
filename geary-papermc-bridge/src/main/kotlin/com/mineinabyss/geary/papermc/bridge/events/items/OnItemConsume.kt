@@ -20,7 +20,7 @@ sealed class Consumer
 class ItemConsumeBridge: Listener {
     @EventHandler(ignoreCancelled = true)
     fun PlayerItemConsumeEvent.onConsume() {
-        val heldItem = player.inventory.toGeary()?.itemInMainHand ?: return
+        val heldItem = player.inventory.toGeary()?.get(hand) ?: return
         EventHelpers.runSkill<OnItemConsume>(heldItem) {
             addRelation<Consumer>(player.toGeary())
         }

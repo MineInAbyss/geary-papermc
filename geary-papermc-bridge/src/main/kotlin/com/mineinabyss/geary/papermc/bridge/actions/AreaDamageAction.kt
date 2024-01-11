@@ -20,22 +20,22 @@ class AreaDamage(
     val scaleKnockBackWithDistance: Boolean = true,
 )
 
-fun GearyEntity.damageInArea(damage: AreaDamage, entity: BukkitEntity? = get()): Boolean {
-    entity ?: return false
-
-    entity.getNearbyEntities(damage.size, damage.size, damage.size)
-        .filterIsInstance<LivingEntity>()
-        .forEach { targetEntity ->
-            targetEntity.damage(damage.damage)
-            targetEntity.toGeary().knockBack(
-                from = entity.location,
-                conf = KnockBackFromLocation(
-                    damage.knockBackPower,
-                    damage.knockBackYAngle,
-                    damage.scaleKnockBackWithDistance,
-                    false
-                )
-            )
-        }
-    return true
-}
+//fun GearyEntity.damageInArea(damage: AreaDamage, entity: BukkitEntity? = get()): Boolean {
+//    entity ?: return false
+//
+//    entity.getNearbyEntities(damage.size, damage.size, damage.size)
+//        .filterIsInstance<LivingEntity>()
+//        .forEach { targetEntity ->
+//            targetEntity.damage(damage.damage)
+//            targetEntity.toGeary().knockBack(
+//                from = entity.location,
+//                conf = DoKnockback(
+//                    damage.knockBackPower,
+//                    damage.knockBackYAngle,
+//                    damage.scaleKnockBackWithDistance,
+//                    false
+//                )
+//            )
+//        }
+//    return true
+//}

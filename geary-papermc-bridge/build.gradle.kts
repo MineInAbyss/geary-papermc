@@ -13,6 +13,7 @@ dependencies {
 
     // Plugins
     compileOnly(myLibs.plugman)
+    compileOnly(libs.minecraft.plugin.mythic.dist)
 
     // MineInAbyss platform
     compileOnly(libs.kotlin.stdlib)

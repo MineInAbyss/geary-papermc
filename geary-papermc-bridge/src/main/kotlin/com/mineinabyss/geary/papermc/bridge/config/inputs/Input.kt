@@ -15,23 +15,35 @@ import kotlinx.serialization.Serializable
 sealed interface Input<T> {
     val type: ComponentId
 
-    fun get(pointers: Pointers): T
-
-    class Value<T : Any>(val value: T) : Input<T> {
-        override val type = componentId(value::class)
-        override fun get(pointers: Pointers): T = value
-    }
+    fun get(entities: Variables.Entities): T
 
     @OptIn(UnsafeAccessors::class)
+    fun get(pointers: Pointers): T = get(
+        Variables.Entities(
+            pointers.target.entity,
+            pointers.event.entity,
+            pointers.source?.entity ?: error("Cannot get input value, source entity not found")
+        )
+    )
+
+    fun evaluate(entities: Variables.Entities): Value<T> = Value(type, get(entities))
+
+    class Value<T>(
+        override val type: ComponentId,
+        val value: T
+    ) : Input<T> {
+        override fun get(entities: Variables.Entities): T = value
+    }
+
     class Derived<T>(
         override val type: ComponentId,
         val readingEntity: GearyEntity
     ) : Input<T> {
-        override fun get(pointers: Pointers): T {
+        override fun get(entities: Variables.Entities): T {
             temporaryEntity { source ->
                 source.extend(readingEntity)
                 // TODO support set.target
-                val target = pointers.target.entity
+                val target = entities.target
                 temporaryEntity { event ->
                     target.callEvent(event, source = source)
                     return event.get(type) as? T
@@ -41,21 +53,20 @@ sealed interface Input<T> {
         }
     }
 
-    @OptIn(UnsafeAccessors::class)
     class VariableReference<T>(
         override val type: ComponentId,
         val expression: String
     ) : Input<T> {
-        override fun get(pointers: Pointers): T {
+        override fun get(entities: Variables.Entities): T {
             if (expression.startsWith("lookup")) {
-                if(type != componentId(GearyEntity::class)) error("Lookup can only be used with GearyEntity type")
+                if (type != componentId(GearyEntity::class)) error("Lookup can only be used with GearyEntity type")
                 val lookup = expression.removePrefix("lookup(").removeSuffix(")")
-                return pointers.source?.entity?.lookup(lookup) as? T ?: error("Failed to lookup entity: $lookup")
+                return entities.source.lookup(lookup) as? T ?: error("Failed to lookup entity: $lookup")
             }
-            val foundValue = (pointers.event.entity.get<Variables>()
+            val foundValue = (entities.event.get<Variables>()
                 ?.entries?.get(expression) ?: error("Failed to find variable $expression"))
             check(foundValue.type == type) { "Variable $expression is of type ${foundValue.type.readableString()} but expected ${type.readableString()}" }
-            return foundValue.get(pointers) as T
+            return foundValue.get(entities) as T
         }
     }
 

@@ -1,7 +1,8 @@
 package com.mineinabyss.geary.papermc.bridge.config.parsers
 
 import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
-import com.mineinabyss.geary.helpers.entity
+import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.papermc.bridge.config.EventComponent
 import com.mineinabyss.geary.papermc.bridge.config.Skills
 import com.mineinabyss.geary.systems.GearyListener
 import com.mineinabyss.geary.systems.accessors.Pointers
@@ -12,12 +13,14 @@ class ParseSkills : GearyListener() {
     @OptIn(UnsafeAccessors::class)
     override fun Pointers.handle() {
         skillsComp?.skills?.forEach { skill ->
-            val skillEntity = entity {
-                setAll(skill.run)
+            val skillEntity = skill.entity
+            val eventComponent = skillEntity.get<EventComponent>() ?: run {
+                geary.logger.w("Skill defined without an event component. It won't trigger!")
+                return
             }
-            if (skill.eventComponent.data != null)
-                target.entity.setRelation(skill.eventComponent.type, skillEntity.id, skill.eventComponent.data)
-            else target.entity.addRelation(skill.eventComponent.type, skillEntity.id)
+            if (eventComponent.data != null)
+                target.entity.setRelation(eventComponent.type, skillEntity.id, eventComponent.data)
+            else target.entity.addRelation(eventComponent.type, skillEntity.id)
         }
         skillsComp = null
     }

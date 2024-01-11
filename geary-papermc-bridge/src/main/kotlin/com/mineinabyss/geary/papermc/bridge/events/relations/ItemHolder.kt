@@ -4,5 +4,5 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("geary:trigger")
-sealed class Trigger
+@SerialName("geary:item_holder")
+sealed class ItemHolder

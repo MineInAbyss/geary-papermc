@@ -22,9 +22,6 @@ class SetPotionEffects(
     )
 }
 
-/**
- * Handles being exposed to potion effects
- */
 class SetPotionEffectsSystem : GearyListener() {
     val Pointers.bukkit by get<BukkitEntity>().on(target)
     val Pointers.potions by get<SetPotionEffects>().on(source)

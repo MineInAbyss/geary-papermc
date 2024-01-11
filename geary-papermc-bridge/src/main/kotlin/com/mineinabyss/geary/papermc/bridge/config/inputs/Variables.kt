@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.bridge.config.inputs
 
+import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.serialization.serializers.PolymorphicListAsMapSerializer
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.PolymorphicSerializer
@@ -13,6 +14,21 @@ import kotlinx.serialization.encoding.Encoder
 class Variables(
     val entries: Map<String, Input<*>>
 ) {
+    class Entities(
+        val target: GearyEntity,
+        val event: GearyEntity,
+        val source: GearyEntity,
+    )
+
+    fun plus(other: Variables): Variables {
+        return Variables(entries + other.entries)
+    }
+
+    fun evaluated(entities: Entities): Variables {
+        return Variables(entries
+            .mapValues { (_, input) -> input.evaluate(entities) })
+    }
+
     class Serializer : KSerializer<Variables> {
         private val polymorphicSerializer = object : PolymorphicListAsMapSerializer<Any>(
             PolymorphicSerializer(Any::class)

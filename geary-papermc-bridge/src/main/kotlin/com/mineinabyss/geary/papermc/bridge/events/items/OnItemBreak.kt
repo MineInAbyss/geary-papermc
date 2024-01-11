@@ -15,7 +15,7 @@ class OnItemBreak
 class ItemBreakBridge: Listener {
     @EventHandler(ignoreCancelled = true)
     fun PlayerItemBreakEvent.onItemBreak() {
-        val heldItem = player.inventory.toGeary()?.itemInMainHand ?: return
+        val heldItem = player.inventory.toGeary()?.find(brokenItem) ?: return
         EventHelpers.runSkill<OnItemBreak>(heldItem)
     }
 }

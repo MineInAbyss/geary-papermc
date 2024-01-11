@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.bridge.events.items
 
 import com.mineinabyss.geary.papermc.bridge.events.EventHelpers
-import com.mineinabyss.geary.papermc.bridge.events.relations.Trigger
+import com.mineinabyss.geary.papermc.bridge.events.relations.ItemHolder
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.idofront.entities.leftClicked
@@ -21,34 +21,51 @@ class OnItemInteract(
     val rightClicked: Boolean? = null,
 )
 
+@Serializable
+@SerialName("geary:on.item_left_click")
+sealed class OnItemLeftClick
+
+@Serializable
+@SerialName("geary:on.item_right_click")
+sealed class OnItemRightClick
+
 class ItemInteractBridge : Listener {
     private val rightClickCooldowns = Int2IntOpenHashMap()
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler
     fun PlayerInteractEvent.onClick() {
         val gearyPlayer = player.toGearyOrNull() ?: return
-        val heldItem = player.inventory.toGeary()?.itemInMainHand ?: return
+        val heldItem = player.inventory.toGeary()?.get(hand ?: return) ?: return
 
+        // Right click gets fired twice, so we manually prevent two right-clicks within several ticks of each other.
+        fun rightClicked(): Boolean {
+            val currTick = Bukkit.getServer().currentTick
+            val eId = player.entityId
+            val cooldownRightClicked = rightClicked && currTick - rightClickCooldowns[eId] > 3
+            if (cooldownRightClicked) {
+                rightClickCooldowns[eId] = currTick
+            }
+            return cooldownRightClicked
+        }
+
+        if (leftClicked) EventHelpers.runSkill<OnItemLeftClick>(heldItem) {
+            addRelation<ItemHolder>(gearyPlayer)
+        }
+        if (rightClicked()) EventHelpers.runSkill<OnItemRightClick>(heldItem) {
+            addRelation<ItemHolder>(gearyPlayer)
+        }
         EventHelpers.runSkill<OnItemInteract>(heldItem,
             conditions = {
-                if(it.leftClicked != null) {
-                    if(leftClicked != it.leftClicked) return@runSkill false
+                if (it.leftClicked != null) {
+                    if (leftClicked != it.leftClicked) return@runSkill false
                 }
-                if(it.rightClicked != null) {
-                    // Right click gets fired twice, so we manually prevent two right-clicks within several ticks of each other.
-                    val currTick = Bukkit.getServer().currentTick
-                    val eId = player.entityId
-                    val cooldownRightClicked = rightClicked && currTick - rightClickCooldowns[eId] > 3
-                    if (cooldownRightClicked) {
-                        rightClickCooldowns[eId] = currTick
-                    }
-
-                    if(cooldownRightClicked != it.rightClicked) return@runSkill false
+                if (it.rightClicked != null) {
+                    if (rightClicked() != it.rightClicked) return@runSkill false
                 }
                 true
             }
         ) {
-            addRelation<Trigger>(gearyPlayer)
+            addRelation<ItemHolder>(gearyPlayer)
         }
     }
 }

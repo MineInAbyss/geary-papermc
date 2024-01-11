@@ -8,9 +8,10 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration
 
+@JvmInline
 @Serializable
 @SerialName("geary:cooldown")
-class Cooldown(
+value class Cooldown(
     val length: @Serializable(with = DurationSerializer::class) Duration
 )
 

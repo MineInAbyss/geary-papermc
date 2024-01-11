@@ -2,11 +2,11 @@ package com.mineinabyss.geary.papermc.bridge
 
 import com.mineinabyss.geary.addons.GearyPhase
 import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
+import com.mineinabyss.geary.autoscan.autoScanner
+import com.mineinabyss.geary.autoscan.autoscan
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.GearyPaperConfigModule
-import com.mineinabyss.geary.papermc.bridge.actions.DoSpawnSystem
-import com.mineinabyss.geary.papermc.bridge.actions.ExplosionSystem
-import com.mineinabyss.geary.papermc.bridge.actions.SetPotionEffectsSystem
+import com.mineinabyss.geary.papermc.bridge.actions.*
 import com.mineinabyss.geary.papermc.bridge.conditions.*
 import com.mineinabyss.geary.papermc.bridge.conditions.location.BlockConditionChecker
 import com.mineinabyss.geary.papermc.bridge.conditions.location.HeightConditionChecker
@@ -17,8 +17,11 @@ import com.mineinabyss.geary.papermc.bridge.config.parsers.ParseSkills
 import com.mineinabyss.geary.papermc.bridge.events.entities.*
 import com.mineinabyss.geary.papermc.bridge.events.items.ItemBreakBridge
 import com.mineinabyss.geary.papermc.bridge.events.items.ItemConsumeBridge
-import com.mineinabyss.geary.papermc.bridge.events.items.ItemDropBridge
 import com.mineinabyss.geary.papermc.bridge.events.items.ItemInteractBridge
+import com.mineinabyss.geary.papermc.bridge.mythicmobs.DoMMSkillSystem
+import com.mineinabyss.geary.papermc.bridge.readers.ReadLocationSystem
+import com.mineinabyss.geary.papermc.bridge.readers.ReadTargetBlockSystem
+import com.mineinabyss.geary.papermc.bridge.targetselectors.NearbyEntitiesSelector
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.plugin.listeners
@@ -26,6 +29,11 @@ import com.mineinabyss.idofront.plugin.listeners
 class PaperBridge {
     companion object : GearyAddonWithDefault<PaperBridge> {
         override fun PaperBridge.install() {
+            geary {
+                autoscan(gearyPaper.plugin.javaClass.classLoader, "com.mineinabyss.geary.papermc.bridge") {
+                    systems()
+                }
+            }
             geary.pipeline.addSystems(
                 SetPotionEffectsSystem(),
                 BlockConditionChecker(),
@@ -39,6 +47,12 @@ class PaperBridge {
                 ParseSkills(),
                 CreateDefaultSkills(),
                 DoSpawnSystem(),
+                ReadTargetBlockSystem(),
+                DoMMSkillSystem(),
+                DoDamageSystem(),
+                NearbyEntitiesSelector(),
+                ReadLocationSystem(),
+                DoKnockbackSystem(),
             )
             geary.pipeline.addSystems(
                 CooldownChecker(),
@@ -50,7 +64,6 @@ class PaperBridge {
                 gearyPaper.plugin.listeners(
                     ItemBreakBridge(),
                     ItemConsumeBridge(),
-                    ItemDropBridge(),
                     ItemInteractBridge(),
                     EntitySpawnBridge(),
                 )

@@ -63,6 +63,7 @@ class InputSerializer<T : Any>(val serializer: KSerializer<T>) : KSerializer<Inp
         val composite = decoder.beginStructure(serializer.descriptor)
 
         return Input.Value(
+            type,
             composite.decodeSerializableElement(
                 serializer.descriptor,
                 0,

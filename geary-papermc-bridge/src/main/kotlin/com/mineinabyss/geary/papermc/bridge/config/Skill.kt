@@ -1,21 +1,16 @@
 package com.mineinabyss.geary.papermc.bridge.config
 
-import com.mineinabyss.geary.datatypes.GearyComponent
+import com.mineinabyss.geary.serialization.serializers.GearyEntitySerializer
 import com.mineinabyss.geary.serialization.serializers.InnerSerializer
-import com.mineinabyss.geary.serialization.serializers.PolymorphicListAsMapSerializer
-import kotlinx.serialization.PolymorphicSerializer
+import com.mineinabyss.geary.serialization.serializers.SerializableGearyEntity
 import kotlinx.serialization.Serializable
 
 @Serializable(with = Skill.Serializer::class)
-class Skill(val run: List<GearyComponent>) {
-    val eventComponent: EventComponent = (run
-        .firstOrNull { component -> component is EventComponent }
-        ?: error("Skill must contain an event component")) as EventComponent
-
-    class Serializer : InnerSerializer<List<GearyComponent>, Skill>(
+class Skill(val entity: SerializableGearyEntity) {
+    class Serializer : InnerSerializer<SerializableGearyEntity, Skill>(
         "geary:skill",
-        PolymorphicListAsMapSerializer.of(PolymorphicSerializer(GearyComponent::class)),
+        GearyEntitySerializer,
         { Skill(it) },
-        { it.run },
+        { it.entity },
     )
 }

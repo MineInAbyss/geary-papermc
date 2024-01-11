@@ -24,7 +24,7 @@ class EventComponent(val type: ComponentId, val data: GearyComponent?) {
         override val descriptor: SerialDescriptor =
             buildSerialDescriptor("geary:event", SerialKind.CONTEXTUAL)
 
-        private val polymorphicListAsMapSerializer = PolymorphicListAsMapSerializer.of(PolymorphicSerializer(GearyComponent::class))
+        private val polymorphicListAsMapSerializer = PolymorphicListAsMapSerializer.ofComponents()
 
         override fun deserialize(decoder: Decoder): EventComponent {
             val composite = runCatching { (decoder as YamlInput).beginStructure(String.serializer().descriptor) }.getOrNull()
@@ -44,6 +44,5 @@ class EventComponent(val type: ComponentId, val data: GearyComponent?) {
         override fun serialize(encoder: Encoder, value: EventComponent) {
             TODO("Not yet implemented")
         }
-
     }
 }
