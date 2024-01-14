@@ -27,7 +27,7 @@ class DoSound(
 
 @AutoScan
 class DoPlaySoundSystem : GearyListener() {
-    private val Pointers.bukkit by get<BukkitEntity>().on(source)
+    private val Pointers.bukkit by get<BukkitEntity>().on(target)
     private val Pointers.sound by get<DoSound>().on(source)
 
     override fun Pointers.handle() {

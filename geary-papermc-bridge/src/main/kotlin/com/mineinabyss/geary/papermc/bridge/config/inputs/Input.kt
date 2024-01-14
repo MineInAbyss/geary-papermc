@@ -19,7 +19,6 @@ sealed interface Input<T> {
     class Entities(
         val target: GearyEntity,
         val event: GearyEntity,
-        val skill: Skill,
     )
 
     fun get(entities: Entities): T
@@ -29,7 +28,6 @@ sealed interface Input<T> {
         Entities(
             pointers.target.entity,
             pointers.event.entity,
-            pointers.source?.entity?.get<Skill>() ?: error("Cannot get input value, source entity not found")
         )
     )
 
@@ -65,12 +63,7 @@ sealed interface Input<T> {
         val expression: String
     ) : Input<T> {
         override fun get(entities: Entities): T {
-            if (expression.startsWith("lookup")) {
-                if (type != componentId(GearyEntity::class)) error("Lookup can only be used with GearyEntity type")
-                val lookup = expression.removePrefix("lookup(").removeSuffix(")")
-                return entities.skill.execute?.lookup(lookup) as? T ?: error("Failed to lookup entity: $lookup")
-            }
-            val foundValue = (entities.event.get<Variables>()
+            val foundValue = (entities.event.get<Variables.Evaluated>()
                 ?.entries?.get(expression) ?: error("Failed to find variable $expression"))
             check(foundValue.type == type) { "Variable $expression is of type ${foundValue.type.readableString()} but expected ${type.readableString()}" }
             return foundValue.get(entities) as T

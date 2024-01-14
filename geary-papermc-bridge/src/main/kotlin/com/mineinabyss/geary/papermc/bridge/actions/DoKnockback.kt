@@ -25,10 +25,10 @@ import kotlin.math.cos
 @Serializable
 @SerialName("geary:knockback")
 class DoKnockback(
-    val power: Double,
+    val power: Double = 1.0,
     val yAngle: Double,
-    val scaleWithDistance: Boolean,
-    val cancelCurrentVelocity: Boolean,
+    val scaleWithDistance: Boolean = true,
+    val cancelCurrentVelocity: Boolean = true,
     val center: Input<@Contextual Location>
 )
 

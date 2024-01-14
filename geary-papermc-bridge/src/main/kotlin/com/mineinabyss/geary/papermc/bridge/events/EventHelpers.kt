@@ -37,28 +37,27 @@ object EventHelpers {
 
     fun runSkill(target: GearyEntity, event: GearyEntity, skill: Skill) {
         val runOn = skill.using?.let { findTargets(target, event, it) } ?: listOf(target)
-
-        // All variables are evaluated upon event call
-        val appendVariables = skill.vars
-        if (appendVariables != null) {
-            val variables = event.get<Variables>()
-            val evaluatedVariables = appendVariables.evaluated(Input.Entities(target, event, skill))
-            if (variables == null) event.set(evaluatedVariables)
-            else event.set(variables.plus(evaluatedVariables))
-        }
-
-        // Run condition checks
-        val conditions = skill.conditions
-        if (conditions != null) {
-            event.add<RequestCheck>()
-            conditions.forEach {
-                target.callEvent(event = event, source = it)
-                if (event.has<FailedCheck>()) return
-            }
-            event.remove<RequestCheck>()
-        }
-
         runOn.forEach { chosenTarget ->
+            // All variables are evaluated upon event call
+            val appendVariables = skill.vars
+                ?.fold(event.get<Variables.Evaluated>() ?: Variables.Evaluated()) { acc, variables ->
+                    val inputTarget = (variables.using?.let { findTargets(target, event, it) } ?: listOf(chosenTarget))
+                        .firstOrNull() ?: error("Must have exactly one target to read variables from")
+                    acc + variables.evaluated(Input.Entities(inputTarget, event))
+                }
+            if (appendVariables != null) event.set(appendVariables)
+
+            // Run condition checks
+            val conditions = skill.conditions
+            if (conditions != null) {
+                event.add<RequestCheck>()
+                conditions.forEach {
+                    chosenTarget.callEvent(event = event, source = it)
+                    if (event.has<FailedCheck>()) return
+                }
+                event.remove<RequestCheck>()
+            }
+
             skill.run?.skills?.forEach { subskill ->
                 runSkill(chosenTarget, event, subskill)
             }

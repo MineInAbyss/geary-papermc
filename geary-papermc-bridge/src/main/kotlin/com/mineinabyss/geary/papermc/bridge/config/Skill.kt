@@ -22,7 +22,7 @@ import kotlinx.serialization.encoding.Encoder
 class Skill(
     val event: EventComponent? = null,
     val using: SetTarget? = null,
-    val vars: Variables? = null,
+    val vars: List<Variables>? = null,
     val conditions: List<GearyEntity>? = null,
     val run: Skills? = null,
     val execute: GearyEntity? = null,
@@ -39,7 +39,7 @@ class Skill(
         override fun deserialize(decoder: Decoder): Skill {
             var event: EventComponent? = null
             var using: SetTarget? = null
-            var vars: Variables? = null
+            var vars: List<Variables>? = null
             var conditions: List<SerializableGearyEntity>? = null
             var run: Skills? = null
             val execute = mutableListOf<Any>()
@@ -50,7 +50,7 @@ class Skill(
                     when (key) {
                         "event" -> event = compositeDecoder.decodeMapValue(EventComponent.serializer())
                         "using" -> using = compositeDecoder.decodeMapValue(SetTarget.serializer())
-                        "vars" -> vars = compositeDecoder.decodeMapValue(Variables.serializer())
+                        "vars" -> vars = compositeDecoder.decodeMapValue(ListSerializer(Variables.serializer()))
                         "conditions" -> conditions =
                             compositeDecoder.decodeMapValue(ListSerializer(GearyEntitySerializer))
 
