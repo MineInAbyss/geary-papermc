@@ -7,6 +7,7 @@ import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.componentId
 import com.mineinabyss.geary.helpers.readableString
 import com.mineinabyss.geary.helpers.temporaryEntity
+import com.mineinabyss.geary.papermc.bridge.config.Skill
 import com.mineinabyss.geary.systems.accessors.Pointers
 import kotlinx.serialization.Serializable
 
@@ -15,31 +16,37 @@ import kotlinx.serialization.Serializable
 sealed interface Input<T> {
     val type: ComponentId
 
-    fun get(entities: Variables.Entities): T
+    class Entities(
+        val target: GearyEntity,
+        val event: GearyEntity,
+        val skill: Skill,
+    )
+
+    fun get(entities: Entities): T
 
     @OptIn(UnsafeAccessors::class)
     fun get(pointers: Pointers): T = get(
-        Variables.Entities(
+        Entities(
             pointers.target.entity,
             pointers.event.entity,
-            pointers.source?.entity ?: error("Cannot get input value, source entity not found")
+            pointers.source?.entity?.get<Skill>() ?: error("Cannot get input value, source entity not found")
         )
     )
 
-    fun evaluate(entities: Variables.Entities): Value<T> = Value(type, get(entities))
+    fun evaluate(entities: Entities): Value<T> = Value(type, get(entities))
 
     class Value<T>(
         override val type: ComponentId,
         val value: T
     ) : Input<T> {
-        override fun get(entities: Variables.Entities): T = value
+        override fun get(entities: Entities): T = value
     }
 
     class Derived<T>(
         override val type: ComponentId,
         val readingEntity: GearyEntity
     ) : Input<T> {
-        override fun get(entities: Variables.Entities): T {
+        override fun get(entities: Entities): T {
             temporaryEntity { source ->
                 source.extend(readingEntity)
                 // TODO support set.target
@@ -57,11 +64,11 @@ sealed interface Input<T> {
         override val type: ComponentId,
         val expression: String
     ) : Input<T> {
-        override fun get(entities: Variables.Entities): T {
+        override fun get(entities: Entities): T {
             if (expression.startsWith("lookup")) {
                 if (type != componentId(GearyEntity::class)) error("Lookup can only be used with GearyEntity type")
                 val lookup = expression.removePrefix("lookup(").removeSuffix(")")
-                return entities.source.lookup(lookup) as? T ?: error("Failed to lookup entity: $lookup")
+                return entities.skill.execute?.lookup(lookup) as? T ?: error("Failed to lookup entity: $lookup")
             }
             val foundValue = (entities.event.get<Variables>()
                 ?.entries?.get(expression) ?: error("Failed to find variable $expression"))

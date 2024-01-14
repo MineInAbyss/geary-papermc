@@ -8,8 +8,8 @@ import com.mineinabyss.geary.helpers.temporaryEntity
 import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.papermc.bridge.config.OnEvent
 import com.mineinabyss.geary.papermc.bridge.config.SetTarget
-import com.mineinabyss.geary.papermc.bridge.config.Subskills
-import com.mineinabyss.geary.papermc.bridge.config.conditions.Conditions
+import com.mineinabyss.geary.papermc.bridge.config.Skill
+import com.mineinabyss.geary.papermc.bridge.config.inputs.Input
 import com.mineinabyss.geary.papermc.bridge.config.inputs.Variables
 import com.mineinabyss.geary.papermc.bridge.targetselectors.EmittedTargets
 import kotlin.reflect.KClass
@@ -23,48 +23,47 @@ object EventHelpers {
         }
     }
 
-    private fun callEventWithOriginalTarget(target: GearyEntity, event: GearyEntity, skill: GearyEntity) {
-        val setTarget = skill.get<SetTarget>()
-        if (setTarget != null) {
-            val data = setTarget.inner.data
-            if (data == null)
-                event.getRelations(setTarget.inner.type, componentId<Any>()).forEach {
-                    callEvent(it.target.toGeary(), event, skill)
-                }
-            else {
-                target.callEvent(event, setTarget.readerEntity)
-                val targets = event.get<EmittedTargets>() ?: return
-                event.remove<EmittedTargets>()
-                targets.targets.forEach { callEvent(it, event, skill) }
-            }
-        } else {
-            callEvent(target, event, skill)
+    fun findTargets(currentTarget: GearyEntity, event: GearyEntity, using: SetTarget): List<GearyEntity> {
+        val data = using.inner.data
+        if (data == null)
+            return event.getRelations(using.inner.type, componentId<Any>()).map { it.target.toGeary() }
+        else {
+            currentTarget.callEvent(event, using.readerEntity)
+            val targets = event.get<EmittedTargets>() ?: return emptyList()
+            event.remove<EmittedTargets>()
+            return targets.targets
         }
     }
 
-    private fun callEvent(target: GearyEntity, event: GearyEntity, skill: GearyEntity) {
+    fun runSkill(target: GearyEntity, event: GearyEntity, skill: Skill) {
+        val runOn = skill.using?.let { findTargets(target, event, it) } ?: listOf(target)
+
         // All variables are evaluated upon event call
-        val appendVariables = skill.get<Variables>()
+        val appendVariables = skill.vars
         if (appendVariables != null) {
             val variables = event.get<Variables>()
-            val evaluatedVariables = appendVariables.evaluated(Variables.Entities(target, event, skill))
+            val evaluatedVariables = appendVariables.evaluated(Input.Entities(target, event, skill))
             if (variables == null) event.set(evaluatedVariables)
             else event.set(variables.plus(evaluatedVariables))
         }
 
-        val check = skill.get<Conditions>()?.check
-        check?.let {
+        // Run condition checks
+        val conditions = skill.conditions
+        if (conditions != null) {
             event.add<RequestCheck>()
-            target.callEvent(event = event, source = it)
-            if (event.has<FailedCheck>()) return
+            conditions.forEach {
+                target.callEvent(event = event, source = it)
+                if (event.has<FailedCheck>()) return
+            }
             event.remove<RequestCheck>()
         }
 
-        target.callEvent(event = event, source = skill)
-        skill.get<Subskills>()?.skills?.forEach { subSkill ->
-            temporaryEntity { subEvent ->
-                subEvent.extend(event)
-                callEventWithOriginalTarget(target, subEvent, subSkill.entity)
+        runOn.forEach { chosenTarget ->
+            skill.run?.skills?.forEach { subskill ->
+                runSkill(chosenTarget, event, subskill)
+            }
+            if (skill.execute != null) {
+                chosenTarget.callEvent(event = event, source = skill.execute)
             }
         }
     }
@@ -81,7 +80,7 @@ object EventHelpers {
             temporaryEntity { event ->
                 val source = relation.target.toGeary()
                 event.onEvent()
-                callEventWithOriginalTarget(target, event, source)
+                runSkill(target, event, source.get<Skill>() ?: return@forEach)
             }
         }
     }

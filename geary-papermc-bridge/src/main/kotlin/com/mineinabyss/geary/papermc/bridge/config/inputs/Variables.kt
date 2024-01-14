@@ -1,9 +1,8 @@
 package com.mineinabyss.geary.papermc.bridge.config.inputs
 
-import com.mineinabyss.geary.datatypes.GearyEntity
+import com.mineinabyss.geary.serialization.serializers.CustomMapSerializer
 import com.mineinabyss.geary.serialization.serializers.PolymorphicListAsMapSerializer
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.CompositeDecoder
@@ -14,41 +13,38 @@ import kotlinx.serialization.encoding.Encoder
 class Variables(
     val entries: Map<String, Input<*>>
 ) {
-    class Entities(
-        val target: GearyEntity,
-        val event: GearyEntity,
-        val source: GearyEntity,
-    )
 
     fun plus(other: Variables): Variables {
         return Variables(entries + other.entries)
     }
 
-    fun evaluated(entities: Entities): Variables {
+    fun evaluated(entities: Input.Entities): Variables {
         return Variables(entries
             .mapValues { (_, input) -> input.evaluate(entities) })
     }
 
     class Serializer : KSerializer<Variables> {
-        private val polymorphicSerializer = object : PolymorphicListAsMapSerializer<Any>(
-            PolymorphicSerializer(Any::class)
-        ) {
-            override fun decodeEntry(key: String, compositeDecoder: CompositeDecoder, namespaces: List<String>): Any {
-                val derived = key.startsWith("derived")
-                val (type, name) = key.removePrefix("derived ").split(" ")
-                val serializer = findSerializerFor(compositeDecoder.serializersModule, namespaces, type)
-                val inputSerializer = InputSerializer(serializer).apply {
-                    forceDerived = derived
-                }
-                return name to compositeDecoder.decodeMapValue(inputSerializer)
-            }
-        }
-
-        override val descriptor = SerialDescriptor("geary:variables", polymorphicSerializer.descriptor)
+        val polymorphic = PolymorphicListAsMapSerializer.ofComponents()
+        override val descriptor = SerialDescriptor("geary:variables", polymorphic.descriptor)
 
         override fun deserialize(decoder: Decoder): Variables {
-            val input = polymorphicSerializer.deserialize(decoder) as List<Pair<String, Input<*>>>
-            return Variables(input.toMap())
+            val module = decoder.serializersModule
+            val namespaces = polymorphic.getNamespaces(module)
+            val inputs = mutableMapOf<String, Input<*>>()
+
+            val mapSerializer = object : CustomMapSerializer() {
+                override fun decode(key: String, compositeDecoder: CompositeDecoder) {
+                    val derived = key.startsWith("derived")
+                    val (type, name) = key.removePrefix("derived ").split(" ")
+                    val serializer = polymorphic.findSerializerFor(module, namespaces, type)
+                    val inputSerializer = InputSerializer(serializer).apply {
+                        forceDerived = derived
+                    }
+                    inputs[name] = compositeDecoder.decodeMapValue(inputSerializer)
+                }
+            }
+            mapSerializer.deserialize(decoder)
+            return Variables(inputs)
         }
 
         override fun serialize(encoder: Encoder, value: Variables) {
