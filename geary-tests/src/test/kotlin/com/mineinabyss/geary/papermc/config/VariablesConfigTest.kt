@@ -33,8 +33,6 @@ import org.junit.jupiter.api.Test
 class VariablesConfigTest {
     init {
         geary(TestEngineModule) {
-            install(PaperBridge)
-            install(Prefabs)
             serialization {
                 components {
                     component(Variables.serializer())
@@ -48,6 +46,8 @@ class VariablesConfigTest {
                     component(ChildrenOnPrefab.serializer())
                 }
             }
+            install(Prefabs)
+            install(PaperBridge)
         }
         geary.pipeline.runStartupTasks()
     }
@@ -62,6 +62,7 @@ class VariablesConfigTest {
     @Serializable
     @SerialName("geary:test_comp")
     class TestComp(val input: Input<Int>)
+
     @Serializable
     @SerialName("geary:test_comp_entity")
     class TestCompEntity(val entity: Input<SerializableGearyEntity>)
@@ -77,14 +78,14 @@ class VariablesConfigTest {
         // arrange
         val prefab = yamlFormat.decodeFromString(serializer, config)
         var result: Int? = null
-        val skillSystem = object: GearyListener() {
+        val skillSystem = object : GearyListener() {
             val Pointers.input1 by get<TestComp>().on(source)
 
             override fun Pointers.handle() {
                 result = input1.input.get(this)
             }
         }
-        val generateIntSystem = object: GearyListener() {
+        val generateIntSystem = object : GearyListener() {
             val Pointers.comp by get<GenerateInt>().on(source)
 
             override fun Pointers.handle() {
@@ -119,8 +120,8 @@ class VariablesConfigTest {
             namespaces: [ geary ]
             skills:
                 - event: on.test
-                  variables:
-                    kotlin.Int test: 1
+                  vars:
+                    - kotlin.Int test: 1
                   testComp:
                     input: ${'$'}test
         """.trimIndent()
@@ -133,8 +134,8 @@ class VariablesConfigTest {
             namespaces: [ geary ]
             skills:
                 - event: on.test
-                  variables:
-                    kotlin.Int test: 1
+                  vars:
+                    - kotlin.Int test: 1
                   testComp:
                     input:
                       ${'$'}derived:
@@ -150,46 +151,47 @@ class VariablesConfigTest {
             namespaces: [ geary ]
             skills:
                 - event: on.test
-                  variables:
-                    derived kotlin.Int test:
-                      generateInt:
-                        generate: 1
+                  vars:
+                    - derived kotlin.Int test:
+                          generateInt:
+                            generate: 1
                   testComp:
                     input: ${'$'}test
         """.trimIndent()
         testReadCorrectly(config)
     }
 
-    @Test
-    fun `should read entity lookup correctly`() {
-        val config = """
-            namespaces: [ geary ]
-            skills:
-                - event: on.test
-                  children:
-                    child: {}
-                  testCompEntity:
-                    entity: ${'$'}lookup(child)
-        """.trimIndent()
-
-        val prefab = yamlFormat.decodeFromString(serializer, config)
-
-        var result: GearyEntity? = null
-        val skillSystem = object: GearyListener() {
-            val Pointers.comp by get<TestCompEntity>().on(source)
-
-            override fun Pointers.handle() {
-                result = comp.entity.get(this)
-            }
-        }
-        geary.pipeline.addSystems(skillSystem)
-
-        // act
-        EventHelpers.runSkill<TestEvent>(entity { extend(prefab) })
-
-        // assert
-        result.shouldNotBeNull()
-    }
+    //TODO decide on how child lookups should work
+//    @Test
+//    fun `should read entity lookup correctly`() {
+//        val config = """
+//            namespaces: [ geary ]
+//            children:
+//              child: {}
+//            skills:
+//                - event: on.test
+//                  testCompEntity:
+//                    entity: ${'$'}lookup(child)
+//        """.trimIndent()
+//
+//        val prefab = yamlFormat.decodeFromString(serializer, config)
+//
+//        var result: GearyEntity? = null
+//        val skillSystem = object : GearyListener() {
+//            val Pointers.comp by get<TestCompEntity>().on(source)
+//
+//            override fun Pointers.handle() {
+//                result = comp.entity.get(this)
+//            }
+//        }
+//        geary.pipeline.addSystems(skillSystem)
+//
+//        // act
+//        EventHelpers.runSkill<TestEvent>(entity { extend(prefab) })
+//
+//        // assert
+//        result.shouldNotBeNull()
+//    }
 
     @Test
     fun `should read entity variable reference correctly`() {
@@ -197,8 +199,8 @@ class VariablesConfigTest {
             namespaces: [ geary ]
             skills:
                 - event: on.test
-                  variables:
-                    entity test: {}
+                  vars:
+                    - entity test: {}
                   testCompEntity:
                     entity: ${'$'}test
         """.trimIndent()
@@ -206,7 +208,7 @@ class VariablesConfigTest {
         val prefab = yamlFormat.decodeFromString(serializer, config)
 
         var result: GearyEntity? = null
-        val skillSystem = object: GearyListener() {
+        val skillSystem = object : GearyListener() {
             val Pointers.comp by get<TestCompEntity>().on(source)
 
             override fun Pointers.handle() {

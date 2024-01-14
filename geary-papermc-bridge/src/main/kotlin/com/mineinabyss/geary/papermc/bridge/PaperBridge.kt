@@ -30,7 +30,7 @@ class PaperBridge {
     companion object : GearyAddonWithDefault<PaperBridge> {
         override fun PaperBridge.install() {
             geary {
-                autoscan(gearyPaper.plugin.javaClass.classLoader, "com.mineinabyss.geary.papermc.bridge") {
+                autoscan(this::class.java.classLoader, "com.mineinabyss.geary.papermc.bridge") {
                     systems()
                 }
             }
