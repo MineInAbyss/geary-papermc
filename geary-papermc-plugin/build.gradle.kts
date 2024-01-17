@@ -12,6 +12,7 @@ configurations {
         exclude(group = "org.jetbrains.kotlin")
         exclude(group = "org.jetbrains.kotlinx")
         exclude(group = "org.snakeyaml")
+        exclude(group = "it.unimi.dsi")
     }
 }
 
