@@ -53,7 +53,11 @@ object EventHelpers {
                 event.add<RequestCheck>()
                 conditions.forEach {
                     chosenTarget.callEvent(event = event, source = it)
-                    if (event.has<FailedCheck>()) return
+                    if (event.has<FailedCheck>()) {
+                        skill.onFail?.skills?.forEach { subskill ->
+                            runSkill(chosenTarget, event, subskill)
+                        }
+                    }
                 }
                 event.remove<RequestCheck>()
             }

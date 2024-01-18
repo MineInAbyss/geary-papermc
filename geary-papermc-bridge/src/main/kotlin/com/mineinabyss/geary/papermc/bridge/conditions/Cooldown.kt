@@ -4,15 +4,17 @@ import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
 import com.mineinabyss.geary.events.CheckingListener
 import com.mineinabyss.geary.systems.accessors.Pointers
 import com.mineinabyss.idofront.serialization.DurationSerializer
+import com.mineinabyss.idofront.serialization.MiniMessageSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import net.kyori.adventure.text.Component
 import kotlin.time.Duration
 
-@JvmInline
 @Serializable
 @SerialName("geary:cooldown")
-value class Cooldown(
-    val length: @Serializable(with = DurationSerializer::class) Duration
+class Cooldown(
+    val length: @Serializable(with = DurationSerializer::class) Duration,
+    val displayName: @Serializable(with = MiniMessageSerializer::class) Component,
 )
 
 class CooldownStarted(val time: Long)
