@@ -28,7 +28,6 @@ class Skill(
     val onFail: Skills? = null,
     val execute: GearyEntity? = null,
 ) {
-    //TODO how do we handle creating children and lookup for variables, separate entry or on execute?
     class Serializer : KSerializer<Skill> {
         val polymorphic = PolymorphicListAsMapSerializer.ofComponents()
         override val descriptor: SerialDescriptor =

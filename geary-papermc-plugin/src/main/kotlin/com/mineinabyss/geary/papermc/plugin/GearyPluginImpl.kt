@@ -22,13 +22,13 @@ import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.geary.serialization.dsl.FileSystemAddon
 import com.mineinabyss.geary.serialization.dsl.serialization
+import com.mineinabyss.geary.serialization.formats.YamlFormat
 import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.messaging.logSuccess
 import com.mineinabyss.idofront.plugin.listeners
 import com.mineinabyss.idofront.serialization.LocationSerializer
 import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
-import com.mineinabyss.serialization.formats.YamlFormat
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.bukkit.Location
