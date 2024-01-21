@@ -25,9 +25,9 @@ class Skill(
     val vars: List<Variables>? = null,
     val conditions: List<GearyEntity>? = null,
     val run: Skills? = null,
+    val onFail: Skills? = null,
     val execute: GearyEntity? = null,
 ) {
-    //TODO how do we handle creating children and lookup for variables, separate entry or on execute?
     class Serializer : KSerializer<Skill> {
         val polymorphic = PolymorphicListAsMapSerializer.ofComponents()
         override val descriptor: SerialDescriptor =
@@ -42,6 +42,7 @@ class Skill(
             var vars: List<Variables>? = null
             var conditions: List<SerializableGearyEntity>? = null
             var run: Skills? = null
+            var onFail: Skills? = null
             val execute = mutableListOf<Any>()
 
             val mapSerializer = object : CustomMapSerializer() {
@@ -55,6 +56,7 @@ class Skill(
                             compositeDecoder.decodeMapValue(ListSerializer(GearyEntitySerializer))
 
                         "run" -> run = compositeDecoder.decodeMapValue(Skills.serializer())
+                        "onFail" -> onFail = compositeDecoder.decodeMapValue(Skills.serializer())
                         else -> execute += compositeDecoder.decodeMapValue(
                             polymorphic.findSerializerFor(module, polymorphic.getNamespaces(module), key)
                         )
@@ -68,6 +70,7 @@ class Skill(
                 vars = vars,
                 conditions = conditions,
                 run = run,
+                onFail = onFail,
                 execute = entity {
                     setAll(execute)
                 },

@@ -107,13 +107,14 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
             "reload" {
                 action {
                     gearyPaper.configHolder.reload()
+                    prefabLoader.loadOrUpdatePrefabs()
                 }
             }
             "prefab" {
                 "reload" {
                     val prefab by stringArg()
                     action {
-                        runCatching { prefabLoader.reread(PrefabKey.of(prefab).toEntity()) }
+                        runCatching { prefabLoader.reload(PrefabKey.of(prefab).toEntity()) }
                             .onSuccess { sender.success("Reread prefab $prefab") }
                             .onFailure { sender.error("Failed to reread prefab $prefab:\n${it.message}") }
                     }
@@ -129,10 +130,12 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                         }
 
                         // Try to load from file
-                        prefabLoader.loadFromPath(
-                            namespace,
-                            plugin.dataFolder.resolve(namespace).resolve(path).toOkioPath()
-                        ).onSuccess {
+                        runCatching {
+                            prefabLoader.loadFromPath(
+                                namespace,
+                                plugin.dataFolder.resolve(namespace).resolve(path).toOkioPath()
+                            )
+                        }.onSuccess {
                             it.inheritPrefabs()
                             sender.success("Read prefab $namespace:$path")
                         }.onFailure { sender.error("Failed to read prefab $namespace:$path:\n${it.message}") }
