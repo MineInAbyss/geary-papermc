@@ -7,6 +7,7 @@ import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.gearyItems
 import net.minecraft.world.entity.player.Inventory
 import org.bukkit.inventory.EquipmentSlot
+import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.PlayerInventory
 import org.spigotmc.AsyncCatcher
 
@@ -38,6 +39,10 @@ class GearyPlayerInventory(
             EquipmentSlot.LEGS -> itemInLeggings
             EquipmentSlot.FEET -> itemInBoots
         }
+    }
+
+    fun find(itemStack: ItemStack): GearyEntity? {
+        return get(inventory.indexOf(itemStack))
     }
 
     // We use custom cursor slot so can't just call get

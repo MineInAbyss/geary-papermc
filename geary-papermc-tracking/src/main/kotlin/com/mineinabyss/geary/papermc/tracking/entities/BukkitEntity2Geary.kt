@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.tracking.entities
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.helpers.toGeary
+import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.tracking.entities.components.AddedToWorld
 import com.mineinabyss.geary.papermc.tracking.entities.events.GearyEntityAddToWorldEvent
 import com.mineinabyss.idofront.typealiases.BukkitEntity
@@ -32,10 +33,13 @@ class BukkitEntity2Geary(val forceMainThread: Boolean = true) {
     fun getOrCreate(bukkit: BukkitEntity): GearyEntity {
         return get(bukkit) ?: run {
             if (forceMainThread) AsyncCatcher.catchOp("Async geary entity creation for $bukkit")
-            entity { set(bukkit) }.also {
-                it.add<AddedToWorld>()
-                GearyEntityAddToWorldEvent(it, bukkit).callEvent()
-            }
+            entity { set(bukkit) }.also { fireAddToWorldEvent(bukkit, it) }
         }
+    }
+
+    fun fireAddToWorldEvent(bukkit: BukkitEntity, entity: GearyEntity) {
+        entity.add<AddedToWorld>()
+        GearyEntityAddToWorldEvent(entity, bukkit).callEvent()
+        entity.encodeComponentsTo(bukkit)
     }
 }

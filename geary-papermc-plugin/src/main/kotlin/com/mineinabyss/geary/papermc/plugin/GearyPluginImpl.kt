@@ -2,13 +2,13 @@ package com.mineinabyss.geary.papermc.plugin
 
 import com.mineinabyss.geary.addons.GearyPhase.ENABLE
 import com.mineinabyss.geary.autoscan.autoscan
+import com.mineinabyss.geary.helpers.withSerialName
 import com.mineinabyss.geary.modules.ArchetypeEngineModule
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.GearyPaperConfigModule
 import com.mineinabyss.geary.papermc.GearyPlugin
 import com.mineinabyss.geary.papermc.GearyProductionPaperConfigModule
 import com.mineinabyss.geary.papermc.bridge.PaperBridge
-import com.mineinabyss.geary.papermc.configlang.ConfigLang
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
@@ -22,14 +22,16 @@ import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.geary.serialization.dsl.FileSystemAddon
 import com.mineinabyss.geary.serialization.dsl.serialization
+import com.mineinabyss.geary.serialization.formats.YamlFormat
 import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.messaging.logSuccess
 import com.mineinabyss.idofront.plugin.listeners
+import com.mineinabyss.idofront.serialization.LocationSerializer
 import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
-import com.mineinabyss.serialization.formats.YamlFormat
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
+import org.bukkit.Location
 import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemStack
 import kotlin.io.path.isDirectory
@@ -53,11 +55,18 @@ class GearyPluginImpl : GearyPlugin() {
             if (configModule.config.trackItems) install(ItemTracking)
             if (configModule.config.trackBlocks) install(BlockTracking)
             if (configModule.config.bridgeEvents) install(PaperBridge)
-            if (configModule.config.configLang) install(ConfigLang)
 
             serialization {
                 format("yml", ::YamlFormat)
                 withUUIDSerializer()
+
+                components {
+                    component(Location::class, LocationSerializer.withSerialName("geary:location"))
+                }
+                //TODO option to auto register contextual on geary end
+                module {
+                    contextual(Location::class, LocationSerializer.withSerialName("geary:location"))
+                }
             }
 
             autoscan(classLoader, "com.mineinabyss.geary") {

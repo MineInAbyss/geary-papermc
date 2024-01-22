@@ -3,7 +3,6 @@ package com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.spawnFromPrefab
-import com.mineinabyss.geary.prefabs.helpers.prefabs
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import org.bukkit.Bukkit
 

@@ -71,7 +71,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                     val amount by intArg { default = 1 }
                     playerAction {
                         val item = gearyItems.createItem(PrefabKey.of(prefabKey)) ?: run {
-                            sender.error("Failed to spawn $prefabKey")
+                            sender.error("Failed to create $prefabKey")
                             return@playerAction
                         }
                         item.amount = amount.coerceIn(1, 64)
@@ -107,13 +107,14 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
             "reload" {
                 action {
                     gearyPaper.configHolder.reload()
+                    prefabLoader.loadOrUpdatePrefabs()
                 }
             }
             "prefab" {
                 "reload" {
                     val prefab by stringArg()
                     action {
-                        runCatching { prefabLoader.reread(PrefabKey.of(prefab).toEntity()) }
+                        runCatching { prefabLoader.reload(PrefabKey.of(prefab).toEntity()) }
                             .onSuccess { sender.success("Reread prefab $prefab") }
                             .onFailure { sender.error("Failed to reread prefab $prefab:\n${it.message}") }
                     }
@@ -129,10 +130,12 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                         }
 
                         // Try to load from file
-                        prefabLoader.loadFromPath(
-                            namespace,
-                            plugin.dataFolder.resolve(namespace).resolve(path).toOkioPath()
-                        ).onSuccess {
+                        runCatching {
+                            prefabLoader.loadFromPath(
+                                namespace,
+                                plugin.dataFolder.resolve(namespace).resolve(path).toOkioPath()
+                            )
+                        }.onSuccess {
                             it.inheritPrefabs()
                             sender.success("Read prefab $namespace:$path")
                         }.onFailure { sender.error("Failed to read prefab $namespace:$path:\n${it.message}") }
@@ -201,11 +204,17 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                             it.isDirectory && it.name.startsWith(args[2].lowercase())
                         }?.map { it.name } ?: listOf()
 
-                        4 -> plugin.dataFolder.resolve(args[2]).walkTopDown().toList().filter {
-                            it.isFile && it.extension == "yml" && it.nameWithoutExtension.startsWith(args[3].lowercase())
-                                    && "${args[2]}:${it.nameWithoutExtension}" !in prefabManager.keys.map(PrefabKey::full)
-                        }.map {
-                            it.relativeTo(plugin.dataFolder.resolve(args[2])).toString()
+                        4 -> {
+                            plugin.dataFolder.resolve(args[2])
+                                .walk()
+                                .filter {
+                                    it.extension == "yml"
+                                            && it.nameWithoutExtension.startsWith(args[3].lowercase())
+                                            && prefabManager[PrefabKey.of(args[2], it.nameWithoutExtension)] == null
+                                }.map {
+                                    it.relativeTo(plugin.dataFolder.resolve(args[2])).toString()
+                                }
+                                .toList()
                         }
 
                         else -> return listOf()

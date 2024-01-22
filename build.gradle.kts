@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val idofrontVersion: String by project
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     java
     alias(libs.plugins.mia.publication)
@@ -17,7 +16,6 @@ dependencies {
     api(gearyLibs.core)
     api(gearyLibs.autoscan)
     api(gearyLibs.prefabs)
-    api(gearyLibs.common.features)
     api(gearyLibs.serialization)
     api(gearyLibs.uuid)
 }
@@ -33,6 +31,8 @@ allprojects {
         maven("https://raw.githubusercontent.com/TheBlackEntity/PlugMan/repository/")
         maven("https://jitpack.io")
         maven("https://repo.codemc.io/repository/nms/")
+        maven("https://mvn.lumine.io/repository/maven-public/")
+        mavenLocal()
     }
 
     dependencies {

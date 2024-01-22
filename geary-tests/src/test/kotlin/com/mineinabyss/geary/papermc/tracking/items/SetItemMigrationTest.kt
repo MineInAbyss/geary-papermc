@@ -11,6 +11,7 @@ import com.mineinabyss.geary.papermc.tracking.items.components.SetItemIgnoredPro
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.serialization.dsl.serialization
+import com.mineinabyss.idofront.serialization.BaseSerializableItemStack
 import com.mineinabyss.idofront.serialization.SerializableItemStack
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -80,7 +81,7 @@ class SetItemMigrationTest : MockedServerTest() {
         // Imitate player renaming item
         item.editMeta {
             it.displayName(Component.text("Custom Name"))
-            it.persistentDataContainer.encode(SetItemIgnoredProperties(setOf(SerializableItemStack.Properties.DISPLAY_NAME)))
+            it.persistentDataContainer.encode(SetItemIgnoredProperties(setOf(BaseSerializableItemStack.Properties.DISPLAY_NAME)))
         }
 
         prefab.toEntity().set(SetItem(SerializableItemStack(displayName = Component.text("Overridden"))))

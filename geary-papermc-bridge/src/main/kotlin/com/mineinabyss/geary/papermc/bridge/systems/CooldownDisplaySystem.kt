@@ -1,53 +1,67 @@
 package com.mineinabyss.geary.papermc.bridge.systems
 
 import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
-import com.mineinabyss.geary.datatypes.family.family
-import com.mineinabyss.geary.game.components.CooldownManager
-import com.mineinabyss.geary.helpers.parent
-import com.mineinabyss.geary.helpers.with
-import com.mineinabyss.geary.papermc.tracking.items.components.SlotType
+import com.mineinabyss.geary.autoscan.AutoScan
+import com.mineinabyss.geary.papermc.bridge.conditions.Cooldown
+import com.mineinabyss.geary.papermc.bridge.conditions.CooldownStarted
 import com.mineinabyss.geary.systems.RepeatingSystem
 import com.mineinabyss.geary.systems.accessors.Pointer
 import net.kyori.adventure.text.Component
-import org.bukkit.ChatColor
+import net.kyori.adventure.text.JoinConfiguration
+import org.bukkit.Color
 import org.bukkit.entity.Player
-import java.awt.Color
 import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 private val INTERVAL = 1.seconds
 
+@AutoScan
 class CooldownDisplaySystem : RepeatingSystem(interval = INTERVAL) {
-    private val Pointer.cooldownManager by get<CooldownManager>()
-    private val Pointer.held by family { has<SlotType.Held>() }
+    val Pointer.player by get<Player>()
+    val Pointer.cooldowns by getRelationsWithData<CooldownStarted, Any?>()
+
+    class CooldownInfo(val display: Component, val timeLeft: Duration, val length: Duration)
 
     @OptIn(UnsafeAccessors::class)
     override fun Pointer.tick() {
-        entity.parent?.with { player: Player ->
-            player.sendActionBar(Component.text(cooldownManager.incompleteCooldowns.entries.joinToString("\n") { (key, cooldown) ->
-                val length = cooldown.length.milliseconds
-                val timeLeft = (cooldown.endTime - System.currentTimeMillis()).milliseconds
+//        val mainHand = player.inventory.toGeary()?.itemInMainHand ?: return
+        val cooldowns = cooldowns.mapNotNull { relation ->
+            val cooldown = relation.target.get<Cooldown>() ?: return@mapNotNull null
+            val timeLeft = cooldown.length - (System.currentTimeMillis() - relation.data.time)
+                .toDuration(DurationUnit.MILLISECONDS)
+            if (timeLeft.isNegative()) {
+                //TODO separate system should be in charge of this
+                entity.removeRelation<CooldownStarted>(relation.target)
+                return@mapNotNull null
+            }
+            CooldownInfo(cooldown.displayName, timeLeft, cooldown.length)
+        }
+        player.sendActionBar(
+            Component.join(JoinConfiguration.newlines(), cooldowns.map { cooldown ->
                 val squaresLeft =
-                    if (timeLeft < INTERVAL) 0 else (timeLeft / length * displayLength).roundToInt()
+                    if (cooldown.timeLeft < INTERVAL) 0 else (cooldown.timeLeft / cooldown.length * displayLength).roundToInt()
 
-                buildString {
-                    append("$key ")
+                val cooldownRender = buildString {
+                    append(" ")
                     append(Color.GREEN)
                     repeat(displayLength - squaresLeft) {
                         append(displayChar)
                     }
-                    append(ChatColor.RED)
+                    append(Color.RED)
                     repeat(squaresLeft) {
                         append(displayChar)
                     }
-                    if (timeLeft < INTERVAL) append(
-                        ChatColor.GREEN,
+                    if (cooldown.timeLeft < INTERVAL) append(
+                        Color.GREEN,
                         " [✔]"
-                    ) else append(ChatColor.GRAY, " [$timeLeft]")
+                    ) else append(Color.GRAY, " [${cooldown.timeLeft}]")
                 }
-            }))
-        }
+                cooldown.display.append(Component.text(cooldownRender))
+            })
+        )
     }
 
     companion object {

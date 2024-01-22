@@ -11,8 +11,7 @@ import com.mineinabyss.geary.papermc.datastore.loadComponentsFrom
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItemIgnoredProperties
 import com.mineinabyss.geary.prefabs.PrefabKey
-import com.mineinabyss.geary.prefabs.helpers.addPrefab
-import com.mineinabyss.idofront.serialization.SerializableItemStack
+import com.mineinabyss.idofront.serialization.BaseSerializableItemStack
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
@@ -32,7 +31,7 @@ class GearyItemProvider {
         prefab.get<SetItem>()?.item?.toItemStack(
             applyTo = item,
             ignoreProperties = prefab.get<SetItemIgnoredProperties>()?.ignoreAsEnumSet()
-                ?: EnumSet.noneOf(SerializableItemStack.Properties::class.java)
+                ?: EnumSet.noneOf(BaseSerializableItemStack.Properties::class.java)
         )
         item.editMeta {
             it.persistentDataContainer.encodePrefabs(listOf(prefabKey))
@@ -50,7 +49,7 @@ class GearyItemProvider {
     ): GearyEntity? {
         if (pdc == null) return null
         return entity {
-            pdc.decodePrefabs().forEach { addPrefab(it.toEntity()) }
+            pdc.decodePrefabs().forEach { extend(it.toEntity()) }
             if (holder != null) addParent(holder)
             loadComponentsFrom(pdc)
             encodeComponentsTo(pdc)

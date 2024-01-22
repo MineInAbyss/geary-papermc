@@ -1,13 +1,12 @@
 package com.mineinabyss.geary.papermc.tracking.items.cache
 
 import com.mineinabyss.geary.datatypes.GearyEntity
+import com.mineinabyss.geary.helpers.fastForEachWithIndex
 import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.EntityEncoded
 import com.mineinabyss.geary.prefabs.PrefabKey
-import com.mineinabyss.geary.prefabs.helpers.prefabs
-import korlibs.datastructure.iterators.fastForEachWithIndex
 import org.bukkit.inventory.ItemStack
 
 abstract class PlayerItemCache<T>(
