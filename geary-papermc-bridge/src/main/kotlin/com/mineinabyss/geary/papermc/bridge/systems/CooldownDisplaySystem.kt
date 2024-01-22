@@ -6,6 +6,7 @@ import com.mineinabyss.geary.papermc.bridge.conditions.Cooldown
 import com.mineinabyss.geary.papermc.bridge.conditions.CooldownStarted
 import com.mineinabyss.geary.systems.RepeatingSystem
 import com.mineinabyss.geary.systems.accessors.Pointer
+import com.mineinabyss.idofront.time.ticks
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.format.NamedTextColor
@@ -46,7 +47,7 @@ class CooldownDisplaySystem : RepeatingSystem(interval = INTERVAL) {
                     if (cooldown.timeLeft < INTERVAL) 0 else (cooldown.timeLeft / cooldown.length * displayLength).roundToInt()
 
                 val cooldownRender = Component.textOfChildren(
-                    Component.text(displayChar.toString().repeat(displayLength - squaresLeft - 1), NamedTextColor.GREEN),
+                    Component.text(displayChar.toString().repeat(displayLength - squaresLeft), NamedTextColor.GREEN),
                     Component.text(displayChar.toString().repeat(squaresLeft), NamedTextColor.RED),
                     if (cooldown.timeLeft < INTERVAL) Component.text(" [✔]", NamedTextColor.GREEN)
                     else Component.text(" [${cooldown.timeLeft.toLong(DurationUnit.SECONDS)}]", NamedTextColor.GRAY)
