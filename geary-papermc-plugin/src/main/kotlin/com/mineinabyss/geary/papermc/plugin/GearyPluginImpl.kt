@@ -29,7 +29,6 @@ import com.mineinabyss.idofront.messaging.logSuccess
 import com.mineinabyss.idofront.plugin.listeners
 import com.mineinabyss.idofront.serialization.LocationSerializer
 import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
-import com.mineinabyss.geary.serialization.formats.YamlFormat
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.bukkit.Location

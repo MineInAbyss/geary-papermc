@@ -21,7 +21,6 @@ import com.mineinabyss.geary.serialization.serializers.SerializableGearyEntity
 import com.mineinabyss.geary.systems.GearyListener
 import com.mineinabyss.geary.systems.accessors.Pointers
 import com.mineinabyss.idofront.di.DI
-import com.mineinabyss.geary.serialization.formats.YamlFormat
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.SerialName
