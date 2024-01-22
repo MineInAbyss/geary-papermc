@@ -204,11 +204,17 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                             it.isDirectory && it.name.startsWith(args[2].lowercase())
                         }?.map { it.name } ?: listOf()
 
-                        4 -> plugin.dataFolder.resolve(args[2]).walkTopDown().toList().filter {
-                            it.isFile && it.extension == "yml" && it.nameWithoutExtension.startsWith(args[3].lowercase())
-                                    && "${args[2]}:${it.nameWithoutExtension}" !in prefabManager.keys.map(PrefabKey::full)
-                        }.map {
-                            it.relativeTo(plugin.dataFolder.resolve(args[2])).toString()
+                        4 -> {
+                            plugin.dataFolder.resolve(args[2])
+                                .walk()
+                                .filter {
+                                    it.extension == "yml"
+                                            && it.nameWithoutExtension.startsWith(args[3].lowercase())
+                                            && prefabManager[PrefabKey.of(args[2], it.nameWithoutExtension)] == null
+                                }.map {
+                                    it.relativeTo(plugin.dataFolder.resolve(args[2])).toString()
+                                }
+                                .toList()
                         }
 
                         else -> return listOf()
