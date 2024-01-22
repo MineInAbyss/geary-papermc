@@ -8,6 +8,7 @@ import com.mineinabyss.geary.systems.RepeatingSystem
 import com.mineinabyss.geary.systems.accessors.Pointer
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Color
 import org.bukkit.entity.Player
 import kotlin.math.roundToInt
@@ -44,22 +45,14 @@ class CooldownDisplaySystem : RepeatingSystem(interval = INTERVAL) {
                 val squaresLeft =
                     if (cooldown.timeLeft < INTERVAL) 0 else (cooldown.timeLeft / cooldown.length * displayLength).roundToInt()
 
-                val cooldownRender = buildString {
-                    append(" ")
-                    append(Color.GREEN)
-                    repeat(displayLength - squaresLeft) {
-                        append(displayChar)
-                    }
-                    append(Color.RED)
-                    repeat(squaresLeft) {
-                        append(displayChar)
-                    }
-                    if (cooldown.timeLeft < INTERVAL) append(
-                        Color.GREEN,
-                        " [✔]"
-                    ) else append(Color.GRAY, " [${cooldown.timeLeft}]")
-                }
-                cooldown.display.append(Component.text(cooldownRender))
+                val cooldownRender = Component.textOfChildren(
+                    Component.text(displayChar.toString().repeat(displayLength - squaresLeft - 1), NamedTextColor.GREEN),
+                    Component.text(displayChar.toString().repeat(squaresLeft), NamedTextColor.RED),
+                    if (cooldown.timeLeft < INTERVAL) Component.text(" [✔]", NamedTextColor.GREEN)
+                    else Component.text(" [${cooldown.timeLeft.toLong(DurationUnit.SECONDS)}]", NamedTextColor.GRAY)
+                ).compact()
+
+                Component.textOfChildren(cooldown.display, Component.space(), cooldownRender)
             })
         )
     }
