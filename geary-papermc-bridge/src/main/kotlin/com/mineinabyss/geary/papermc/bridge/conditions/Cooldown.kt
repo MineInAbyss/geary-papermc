@@ -14,7 +14,7 @@ import kotlin.time.Duration
 @SerialName("geary:cooldown")
 class Cooldown(
     val length: @Serializable(with = DurationSerializer::class) Duration,
-    val displayName: @Serializable(with = MiniMessageSerializer::class) Component,
+    val displayName: @Serializable(with = MiniMessageSerializer::class) Component = Component.empty(),
 )
 
 class CooldownStarted(val time: Long)

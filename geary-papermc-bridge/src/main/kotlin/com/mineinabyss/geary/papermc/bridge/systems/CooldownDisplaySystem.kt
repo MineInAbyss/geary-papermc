@@ -41,7 +41,7 @@ class CooldownDisplaySystem : RepeatingSystem(interval = INTERVAL) {
             CooldownInfo(cooldown.displayName, timeLeft, cooldown.length)
         }
         player.sendActionBar(
-            Component.join(JoinConfiguration.newlines(), cooldowns.map { cooldown ->
+            Component.join(JoinConfiguration.spaces(), cooldowns.map { cooldown ->
                 val squaresLeft =
                     if (cooldown.timeLeft < INTERVAL) 0 else (cooldown.timeLeft / cooldown.length * displayLength).roundToInt()
 
