@@ -65,7 +65,7 @@ class EntityTrackingTests: MockedServerTest() {
         val pig = world.spawn(world.spawnLocation, Pig::class.java)
 
         // act
-        EntityAddToWorldEvent(pig).callEvent() // Not called by MockBukkit
+        EntityAddToWorldEvent(pig, world).callEvent() // Not called by MockBukkit
 
         // assert
         val gearyPig = pig.toGearyOrNull().shouldNotBeNull()
@@ -105,7 +105,7 @@ class EntityTrackingTests: MockedServerTest() {
         @Test
         fun `should persist components on entities when chunk unloaded`() {
             val pig = world.spawn(world.spawnLocation, Pig::class.java)
-            EntityAddToWorldEvent(pig).callEvent()
+            EntityAddToWorldEvent(pig, world).callEvent()
 
             testPersistence(
                 pig.toGeary(),
