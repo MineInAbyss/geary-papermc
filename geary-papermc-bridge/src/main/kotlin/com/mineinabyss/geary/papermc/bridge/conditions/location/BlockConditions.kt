@@ -14,7 +14,7 @@ import org.bukkit.Material
 class BlockConditions(
     val allow: Set<Material> = setOf(),
     val deny: Set<Material> = setOf(),
-    val at: Input<@Contextual Location> = Input.reference("event.location"),
+    val at: Input<@Contextual Location> = Input.reference("location"),
 )
 
 class BlockConditionChecker : CheckingListener() {

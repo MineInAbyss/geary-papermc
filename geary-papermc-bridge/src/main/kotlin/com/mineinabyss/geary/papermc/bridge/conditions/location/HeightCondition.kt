@@ -18,7 +18,7 @@ import org.bukkit.entity.LivingEntity
 @SerialName("geary:check.height")
 class HeightCondition(
     val range: @Serializable(with = IntRangeSerializer::class) IntRange,
-    val at: Input<@Contextual Location> = Input.reference("event.location")
+    val at: Input<@Contextual Location> = Input.reference("location")
 )
 
 class HeightConditionChecker : CheckingListener() {

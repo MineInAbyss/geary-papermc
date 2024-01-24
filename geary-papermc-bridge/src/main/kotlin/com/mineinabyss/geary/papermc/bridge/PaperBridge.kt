@@ -35,7 +35,6 @@ class PaperBridge {
                 }
             }
             geary.pipeline.addSystems(
-                SetPotionEffectsSystem(),
                 BlockConditionChecker(),
                 ChanceChecker(),
                 EntityConditionsChecker(),

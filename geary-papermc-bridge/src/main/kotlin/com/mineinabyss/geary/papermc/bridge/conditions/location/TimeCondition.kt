@@ -14,7 +14,7 @@ class TimeCondition(
     //TODO change to range
     val min: Long = -1,
     val max: Long = 10000000,
-    val at: Input<@Contextual Location> = Input.reference("event.location"),
+    val at: Input<@Contextual Location> = Input.reference("location"),
 )
 
 

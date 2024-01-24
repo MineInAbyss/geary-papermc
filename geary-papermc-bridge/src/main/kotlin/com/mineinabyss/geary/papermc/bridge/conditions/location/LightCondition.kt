@@ -14,7 +14,7 @@ import org.bukkit.block.BlockFace
 @SerialName("geary:check.light")
 class LightCondition(
     @Serializable(with = IntRangeSerializer::class) val range: IntRange = 0..15,
-    val at: Input<@Contextual Location> = Input.reference("event.location")
+    val at: Input<@Contextual Location> = Input.reference("location")
 )
 
 

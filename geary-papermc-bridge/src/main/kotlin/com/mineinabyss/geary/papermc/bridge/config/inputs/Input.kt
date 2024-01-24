@@ -73,5 +73,8 @@ sealed interface Input<T> {
     companion object {
         inline fun <reified T> reference(expression: String) =
             VariableReference<T>(componentId<T>(), expression)
+
+        inline fun <reified T> of(value:T) =
+                Value(componentId<T>(), value)
     }
 }
