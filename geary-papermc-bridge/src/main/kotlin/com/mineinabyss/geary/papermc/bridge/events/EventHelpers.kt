@@ -57,6 +57,7 @@ object EventHelpers {
                         skill.onFail?.skills?.forEach { subskill ->
                             runSkill(chosenTarget, event, subskill)
                         }
+                        return@runSkill
                     }
                 }
                 event.remove<RequestCheck>()

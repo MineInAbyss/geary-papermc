@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.items.inventory
 
 import com.mineinabyss.geary.datatypes.GearyEntity
+import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.cache.NMSItemCache
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
@@ -9,11 +10,14 @@ import com.mineinabyss.idofront.nms.aliases.toNMS
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.PlayerInventory
 
-class NMSInventoryCacheWrapper(override val cache: PlayerItemCache<NMSItemStack>) : InventoryCacheWrapper {
-    override fun updateToMatch(inventory: Inventory) {
+class NMSInventoryCacheWrapper(
+    override val cache: PlayerItemCache<NMSItemStack>,
+    val holder: GearyEntity,
+) : InventoryCacheWrapper {
+    override fun updateToMatch(inventory: Inventory, ignoreCached: Boolean) {
         require(inventory is PlayerInventory) { "Inventory must be a player inventory" }
         require(cache is NMSItemCache) { "Cache must be an NMS cache" }
-        cache.updateToMatch(toArray(inventory.toNMS()))
+        cache.updateToMatch(toArray(inventory.toNMS()), inventory.holder?.toGearyOrNull(), ignoreCached)
     }
 
     override fun getOrUpdate(inventory: Inventory, slot: Int): GearyEntity? {

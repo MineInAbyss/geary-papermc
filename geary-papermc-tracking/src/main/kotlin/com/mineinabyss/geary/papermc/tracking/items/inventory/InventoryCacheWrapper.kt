@@ -6,7 +6,7 @@ import org.bukkit.inventory.Inventory
 
 interface InventoryCacheWrapper {
     val cache: PlayerItemCache<*>
-    fun updateToMatch(inventory: Inventory)
+    fun updateToMatch(inventory: Inventory, ignoreCached: Boolean = false)
 
     fun getOrUpdate(inventory: Inventory, slot: Int): GearyEntity?
 }
