@@ -10,15 +10,13 @@ import com.mineinabyss.idofront.time.ticks
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.format.NamedTextColor
-import org.bukkit.Color
 import org.bukkit.entity.Player
 import kotlin.math.roundToInt
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
-private val INTERVAL = 1.seconds
+private val INTERVAL = 3.ticks
 
 @AutoScan
 class CooldownDisplaySystem : RepeatingSystem(interval = INTERVAL) {
@@ -32,6 +30,8 @@ class CooldownDisplaySystem : RepeatingSystem(interval = INTERVAL) {
 //        val mainHand = player.inventory.toGeary()?.itemInMainHand ?: return
         val cooldowns = cooldowns.mapNotNull { relation ->
             val cooldown = relation.target.get<Cooldown>() ?: return@mapNotNull null
+            if (cooldown.displayName == null) return@mapNotNull null
+
             val timeLeft = cooldown.length - (System.currentTimeMillis() - relation.data.time)
                 .toDuration(DurationUnit.MILLISECONDS)
             if (timeLeft.isNegative()) {
@@ -42,7 +42,7 @@ class CooldownDisplaySystem : RepeatingSystem(interval = INTERVAL) {
             CooldownInfo(cooldown.displayName, timeLeft, cooldown.length)
         }
         player.sendActionBar(
-            Component.join(JoinConfiguration.spaces(), cooldowns.map { cooldown ->
+            Component.join(JoinConfiguration.commas(true), cooldowns.map { cooldown ->
                 val squaresLeft =
                     if (cooldown.timeLeft < INTERVAL) 0 else (cooldown.timeLeft / cooldown.length * displayLength).roundToInt()
 
@@ -50,7 +50,10 @@ class CooldownDisplaySystem : RepeatingSystem(interval = INTERVAL) {
                     Component.text(displayChar.toString().repeat(displayLength - squaresLeft), NamedTextColor.GREEN),
                     Component.text(displayChar.toString().repeat(squaresLeft), NamedTextColor.RED),
                     if (cooldown.timeLeft < INTERVAL) Component.text(" [✔]", NamedTextColor.GREEN)
-                    else Component.text(" [${cooldown.timeLeft.toLong(DurationUnit.SECONDS)}]", NamedTextColor.GRAY)
+                    else Component.text(
+                        " [${cooldown.timeLeft.toString(DurationUnit.SECONDS, 2)}]",
+                        NamedTextColor.GRAY
+                    )
                 ).compact()
 
                 Component.textOfChildren(cooldown.display, Component.space(), cooldownRender)

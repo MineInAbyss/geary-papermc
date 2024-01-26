@@ -21,6 +21,6 @@ class NMSBackedItemTracking : ItemTracking {
 
     override fun getCacheWrapper(entity: GearyEntity): InventoryCacheWrapper? {
         val cache = entity.get(itemCacheComponent) as? PlayerItemCache<NMSItemStack> ?: return null
-        return NMSInventoryCacheWrapper(cache)
+        return NMSInventoryCacheWrapper(cache, entity)
     }
 }

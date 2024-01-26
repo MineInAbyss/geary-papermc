@@ -1,7 +1,11 @@
 package com.mineinabyss.geary.papermc.plugin
 
+import com.mineinabyss.geary.components.relations.InstanceOf
+import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.helpers.entity
+import com.mineinabyss.geary.helpers.parent
 import com.mineinabyss.geary.modules.archetypes
+import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.plugin.commands.locate
 import com.mineinabyss.geary.papermc.plugin.commands.query
@@ -10,6 +14,7 @@ import com.mineinabyss.geary.papermc.tracking.entities.helpers.spawnFromPrefab
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.gearyItems
+import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.helpers.inheritPrefabs
 import com.mineinabyss.geary.prefabs.prefabs
@@ -25,6 +30,7 @@ import okio.Path.Companion.toOkioPath
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
+import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import kotlin.io.path.Path
 import kotlin.io.path.nameWithoutExtension
@@ -114,9 +120,15 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                 "reload" {
                     val prefab by stringArg()
                     action {
-                        runCatching { prefabLoader.reload(PrefabKey.of(prefab).toEntity()) }
+                        val prefabEntity = PrefabKey.of(prefab).toEntity()
+                        runCatching { prefabLoader.reload(prefabEntity) }
                             .onSuccess { sender.success("Reread prefab $prefab") }
                             .onFailure { sender.error("Failed to reread prefab $prefab:\n${it.message}") }
+                        geary.queryManager.getEntitiesMatching(family {
+                            hasRelation<InstanceOf?>(prefabEntity)
+                        }).toSet()
+                            .mapNotNull { it.parent }
+                            .forEach { it.get<Player>()?.inventory?.toGeary()?.forceRefresh(ignoreCached = true) }
                     }
                 }
                 "load" {

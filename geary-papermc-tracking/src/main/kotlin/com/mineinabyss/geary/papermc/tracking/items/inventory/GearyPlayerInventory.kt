@@ -23,8 +23,8 @@ class GearyPlayerInventory(
         return converter.getOrUpdate(inventory, slot)
     }
 
-    fun forceRefresh() {
-        converter.updateToMatch(inventory)
+    fun forceRefresh(ignoreCached: Boolean = false) {
+        converter.updateToMatch(inventory, ignoreCached)
     }
 
     /**

@@ -5,7 +5,6 @@ import com.mineinabyss.geary.prefabs.PrefabKey
 import io.lumine.mythic.bukkit.adapters.BukkitItemStack
 import io.lumine.mythic.bukkit.events.MythicDropLoadEvent
 import io.lumine.mythic.core.drops.droppables.ItemDrop
-import io.lumine.mythic.core.drops.droppables.VanillaItemDrop
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
@@ -18,6 +17,6 @@ class MythicMobDropSystem : Listener {
         val prefabKey = PrefabKey.of(container.line.split(" ")[1])
         if (prefabKey !in gearyItems.prefabs.getKeys()) return
 
-        register(VanillaItemDrop(container.line, config, BukkitItemStack(gearyItems.createItem(prefabKey))))
+        register(ItemDrop(container.line, config, BukkitItemStack(gearyItems.createItem(prefabKey))))
     }
 }

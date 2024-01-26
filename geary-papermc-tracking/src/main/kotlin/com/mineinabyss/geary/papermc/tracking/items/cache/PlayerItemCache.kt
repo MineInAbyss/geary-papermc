@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.items.cache
 
 import com.mineinabyss.geary.datatypes.GearyEntity
+import com.mineinabyss.geary.helpers.addParent
 import com.mineinabyss.geary.helpers.fastForEachWithIndex
 import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.modules.geary
@@ -10,7 +11,7 @@ import com.mineinabyss.geary.prefabs.PrefabKey
 import org.bukkit.inventory.ItemStack
 
 abstract class PlayerItemCache<T>(
-    val maxSize: Int = 64
+    val maxSize: Int = 64,
 ) {
     private val logger get() = geary.logger
 
@@ -40,9 +41,9 @@ abstract class PlayerItemCache<T>(
     }
 
     /** Updates cache to match passed [inventory] */
-    fun updateToMatch(inventory: Array<T?>) {
+    fun updateToMatch(inventory: Array<T?>, holder: GearyEntity? = null, ignoreCached: Boolean = false) {
         inventory.fastForEachWithIndex { slot, item ->
-            if (skipUpdate(slot, item)) return@fastForEachWithIndex
+            if (!ignoreCached && skipUpdate(slot, item)) return@fastForEachWithIndex
             cachedItems[slot] = item
 
             if (item == null) {
@@ -52,6 +53,7 @@ abstract class PlayerItemCache<T>(
                     removeEntity(slot)
                     val newEntity = deserializeItem(item)
                     entities[slot] = newEntity?.id ?: 0uL
+                    if (holder != null) newEntity?.addParent(holder)
                     newEntity?.set<ItemStack>(convertToItemStack(item))
                     logger.d("Adding $newEntity (${newEntity?.prefabs?.map { it.get<PrefabKey>() }}) in slot $slot")
                 }
