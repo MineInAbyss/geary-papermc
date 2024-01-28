@@ -24,4 +24,7 @@ class MockItemCache: PlayerItemCache<MockItem>(64) {
         return getCachedItem(slot) === newItem
     }
 
+    override fun skipReserialization(slot: Int, newItem: MockItem?): Boolean {
+        return false
+    }
 }

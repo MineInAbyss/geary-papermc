@@ -14,6 +14,9 @@ internal fun PersistentDataContainer.keysFrom(plugin: Plugin): List<NamespacedKe
     return keys.filter { it.namespace == pluginNamespace }
 }
 
+
+fun String.isComponentKey(): Boolean = startsWith(COMPONENT_PREFIX)
+
 /** Converts this string to a [NamespacedKey] with the [COMPONENT_PREFIX] on its key. */
 fun String.toComponentKey(): NamespacedKey {
     val namespacedKey = toMCKey()

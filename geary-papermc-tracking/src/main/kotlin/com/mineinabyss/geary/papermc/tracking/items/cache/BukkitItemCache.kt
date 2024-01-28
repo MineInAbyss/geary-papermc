@@ -21,4 +21,8 @@ class BukkitItemCache : PlayerItemCache<ItemStack>(64) {
     override fun skipUpdate(slot: Int, newItem: ItemStack?): Boolean {
         return getCachedItem(slot) === newItem && !(get(slot) != null && newItem?.amount == 0)
     }
+
+    override fun skipReserialization(slot: Int, newItem: ItemStack?): Boolean {
+        return getCachedItem(slot)?.equals(newItem) == true
+    }
 }

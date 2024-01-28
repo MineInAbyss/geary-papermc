@@ -43,7 +43,15 @@ abstract class PlayerItemCache<T>(
     /** Updates cache to match passed [inventory] */
     fun updateToMatch(inventory: Array<T?>, holder: GearyEntity? = null, ignoreCached: Boolean = false) {
         inventory.fastForEachWithIndex { slot, item ->
+            // Generally an identical item reference => the same item, but not vice versa
+            // To avoid expensive equality checks, we do a quick check to skip updates followed by an equality check for re-serialization.
+            // (ex. an item reference is updated when a player scrolls through their inventory, but it's still the same item, so we don't skipUpdate, but do skipReserialization)
             if (!ignoreCached && skipUpdate(slot, item)) return@fastForEachWithIndex
+            if (!ignoreCached && skipReserialization(slot, item)) {
+                cachedItems[slot] = item
+                if(item != null) get(slot)?.set<ItemStack>(convertToItemStack(item))
+                return@fastForEachWithIndex
+            }
             cachedItems[slot] = item
 
             if (item == null) {
@@ -87,6 +95,7 @@ abstract class PlayerItemCache<T>(
     abstract fun convertToItemStack(item: T): ItemStack
     abstract fun deserializeItem(item: T): GearyEntity?
     abstract fun skipUpdate(slot: Int, newItem: T?): Boolean
+    abstract fun skipReserialization(slot: Int, newItem: T?): Boolean
 
     companion object {
         const val MAX_SIZE = 64
