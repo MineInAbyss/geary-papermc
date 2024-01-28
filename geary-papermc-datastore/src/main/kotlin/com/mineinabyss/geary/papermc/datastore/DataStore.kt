@@ -6,10 +6,8 @@ import com.mineinabyss.geary.helpers.componentId
 import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.papermc.datastore.PaperDatastore.COMPONENTS_KEY
 import com.mineinabyss.geary.papermc.datastore.PaperDatastore.PREFABS_KEY
+import com.mineinabyss.geary.papermc.datastore.namespacedkey.*
 import com.mineinabyss.geary.papermc.datastore.namespacedkey.COMPONENT_PREFIX
-import com.mineinabyss.geary.papermc.datastore.namespacedkey.getNamespacedKeyFor
-import com.mineinabyss.geary.papermc.datastore.namespacedkey.getSerializerForNamespaced
-import com.mineinabyss.geary.papermc.datastore.namespacedkey.toComponentKey
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.serialization.dsl.serializableComponents
 import kotlinx.serialization.DeserializationStrategy
@@ -90,7 +88,7 @@ fun PersistentDataContainer.encodeComponents(
 ) {
     hasComponentsEncoded = true
     //remove all keys present on the PDC so we only end up with the new list of components being encoded
-    keys.filter { it.namespace == "geary" && it != COMPONENTS_KEY }
+    keys.filter { it.key.isComponentKey() && it != COMPONENTS_KEY }
         .forEach { remove(it) }
 
     for (value in components)
