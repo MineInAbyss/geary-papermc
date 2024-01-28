@@ -23,7 +23,6 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             from("com.mineinabyss:catalog:$idofrontVersion")
-            version("mythic-dist", "5.5.1")
         }
         create("myLibs").from(files("gradle/myLibs.versions.toml"))
         create("gearyLibs").from("com.mineinabyss:geary-catalog:$gearyVersion")
