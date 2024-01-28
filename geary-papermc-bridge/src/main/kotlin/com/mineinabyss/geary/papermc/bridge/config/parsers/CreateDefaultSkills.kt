@@ -6,6 +6,7 @@ import com.mineinabyss.geary.datatypes.EntityId
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.papermc.bridge.config.OnEvent
+import com.mineinabyss.geary.papermc.bridge.config.Skill
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.systems.GearyListener
 import com.mineinabyss.geary.systems.accessors.Pointers
@@ -27,6 +28,7 @@ class CreateDefaultSkills : GearyListener() {
             }
         }
         events.forEach { (event, entity) ->
+            entity.set(Skill(execute = entity))
             target.entity.addRelation(event, entity.id)
         }
     }
