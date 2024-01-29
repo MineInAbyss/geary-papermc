@@ -33,7 +33,9 @@ class BukkitEntity2Geary(val forceMainThread: Boolean = true) {
     fun getOrCreate(bukkit: BukkitEntity): GearyEntity {
         return get(bukkit) ?: run {
             if (forceMainThread) AsyncCatcher.catchOp("Async geary entity creation for id ${bukkit.entityId}, type ${bukkit.type}")
-            entity { set(bukkit) }.also { fireAddToWorldEvent(bukkit, it) }
+            synchronized(entityMap) {
+                entity { set(bukkit) }.also { fireAddToWorldEvent(bukkit, it) }
+            }
         }
     }
 

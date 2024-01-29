@@ -22,5 +22,6 @@ class GearyPaperConfig(
     val catchAsyncWrite: Boolean = true,
     @YamlComment("Whether to throw an error when converting bukkit concepts to geary entities outside of the server thread.")
     val catchAsyncEntityConversion: Boolean = false,
+    val catchAsyncArchetypeProviderAccess: Boolean = false,
     val logLevel: Severity = Severity.Warn,
 )
