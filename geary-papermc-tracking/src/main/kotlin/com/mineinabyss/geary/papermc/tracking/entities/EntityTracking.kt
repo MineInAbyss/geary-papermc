@@ -5,6 +5,7 @@ import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
 import com.mineinabyss.geary.datatypes.ComponentId
 import com.mineinabyss.geary.helpers.componentId
 import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.papermc.CatchType
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.entities.systems.EntityWorldEventTracker
@@ -29,7 +30,7 @@ interface EntityTracking {
     companion object : GearyAddonWithDefault<EntityTracking> {
         override fun default(): EntityTracking = object : EntityTracking {
             override val bukkitEntityComponent = componentId<BukkitEntity>()
-            override val bukkit2Geary = BukkitEntity2Geary(gearyPaper.config.catchAsyncEntityConversion)
+            override val bukkit2Geary = BukkitEntity2Geary(gearyPaper.config.catch.asyncEntityConversion == CatchType.ERROR)
             override val prefabs = GearyMobPrefabQuery()
         }
 
