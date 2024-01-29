@@ -5,6 +5,8 @@ import com.mineinabyss.geary.components.relations.Persists
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.component
 import com.mineinabyss.geary.helpers.toGeary
+import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.idofront.typealiases.BukkitEntity
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataHolder
@@ -24,6 +26,8 @@ fun GearyEntity.encodeComponentsTo(pdc: PersistentDataContainer) {
 }
 
 fun GearyEntity.encodeComponentsTo(holder: PersistentDataHolder) {
+    val bukkitHolder = holder as? BukkitEntity
+    geary.logger.d("Encoding components for bukkit entity $id (${bukkitHolder?.type} ${bukkitHolder?.uniqueId}")
     encodeComponentsTo(holder.persistentDataContainer)
 }
 
