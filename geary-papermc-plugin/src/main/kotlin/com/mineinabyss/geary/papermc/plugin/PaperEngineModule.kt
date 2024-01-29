@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.plugin
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.StaticConfig
+import com.mineinabyss.geary.datatypes.maps.TypeMap
 import com.mineinabyss.geary.engine.archetypes.ArchetypeEngine
 import com.mineinabyss.geary.engine.archetypes.EntityByArchetypeProvider
 import com.mineinabyss.geary.engine.archetypes.operations.ArchetypeMutateOperations
@@ -38,6 +39,12 @@ class PaperEngineModule(
             if (gearyPaper.config.catchAsyncWrite)
                 AsyncCatcher.catchOp("Async entity write!")
             return super.write
+        }
+    override val records: TypeMap
+        get() {
+            if (gearyPaper.config.catchAsyncRead || gearyPaper.config.catchAsyncWrite)
+                AsyncCatcher.catchOp("Async entity record access!")
+            return super.records
         }
 
     companion object : GearyModuleProvider<PaperEngineModule> {
