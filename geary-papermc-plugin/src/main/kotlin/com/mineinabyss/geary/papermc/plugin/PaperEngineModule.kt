@@ -11,10 +11,14 @@ import com.mineinabyss.geary.engine.archetypes.operations.ArchetypeMutateOperati
 import com.mineinabyss.geary.engine.archetypes.operations.ArchetypeReadOperations
 import com.mineinabyss.geary.modules.ArchetypeEngineModule
 import com.mineinabyss.geary.modules.GearyModuleProvider
+import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.papermc.CatchType
+import com.mineinabyss.geary.papermc.Catching.Companion.asyncCheck
 import com.mineinabyss.geary.papermc.GearyPlugin
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.time.ticks
+import io.papermc.paper.util.TickThread
 import org.spigotmc.AsyncCatcher
 
 class PaperEngineModule(
@@ -26,28 +30,32 @@ class PaperEngineModule(
         Logger(StaticConfig(logWriterList = listOf(PaperWriter(plugin)), minSeverity = gearyPaper.config.logLevel))
     override val entityProvider: EntityByArchetypeProvider
         get() {
-            if (gearyPaper.config.catchAsyncWrite)
-                AsyncCatcher.catchOp("Async entityProvider access!")
+            asyncCheck(gearyPaper.config.catch.asyncWrite, "Async entityProvider access!")
             return super.entityProvider
         }
     override val read: ArchetypeReadOperations
         get() {
-            if (gearyPaper.config.catchAsyncRead)
-                AsyncCatcher.catchOp("Async entity read!")
+            asyncCheck(gearyPaper.config.catch.asyncRead, "Async entity read!")
             return super.read
         }
     override val write: ArchetypeMutateOperations
         get() {
-            if (gearyPaper.config.catchAsyncWrite)
-                AsyncCatcher.catchOp("Async entity write!")
+            asyncCheck(gearyPaper.config.catch.asyncWrite, "Async entity write!")
             return super.write
         }
-    override val records: TypeMap = SynchronizedTypeMap(super.records)
+
+    private val syncTypeMap = SynchronizedTypeMap(super.records)
+
+    override val records: TypeMap
+        get() {
+            asyncCheck(gearyPaper.config.catch.asyncRecordsAccess, "Async records access!")
+            return syncTypeMap
+        }
+
 
     override val archetypeProvider: ArchetypeProvider
         get() {
-            if (gearyPaper.config.catchAsyncArchetypeProviderAccess)
-                AsyncCatcher.catchOp("Async archetype provider access!")
+            asyncCheck(gearyPaper.config.catch.asyncArchetypeProviderAccess, "Async archetype provider access!")
             return super.archetypeProvider
         }
 
