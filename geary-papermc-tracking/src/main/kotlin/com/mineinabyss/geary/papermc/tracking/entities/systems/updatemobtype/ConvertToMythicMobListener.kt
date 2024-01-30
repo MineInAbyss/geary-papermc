@@ -13,6 +13,7 @@ import org.bukkit.event.Listener
 class ConvertToMythicMobListener : Listener {
     @EventHandler
     fun GearyEntityAddToWorldEvent.onAdd() {
+        if (gearyPaper.config.mobTypeConversion == MobTypeConversion.IGNORE) return
         val mm = MythicBukkit.inst()
         if (mm.mobManager == null) return
 
@@ -32,7 +33,7 @@ class ConvertToMythicMobListener : Listener {
                 UpdateMob.scheduleRemove(entity)
             }
 
-            MobTypeConversion.IGNORE ->  Unit
+            MobTypeConversion.IGNORE -> Unit
         }
     }
 }

@@ -11,6 +11,7 @@ import org.bukkit.event.Listener
 class ConvertEntityTypesListener : Listener {
     @EventHandler
     fun GearyEntityAddToWorldEvent.onAdd() {
+        if (gearyPaper.config.mobTypeConversion == MobTypeConversion.IGNORE) return
         val type = gearyEntity.get<SetEntityType>() ?: return
         if(entity.toNMS().type == type.entityTypeFromRegistry) return
 
