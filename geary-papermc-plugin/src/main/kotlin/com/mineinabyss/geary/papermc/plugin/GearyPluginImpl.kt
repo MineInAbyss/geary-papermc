@@ -23,6 +23,7 @@ import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.geary.serialization.dsl.FileSystemAddon
 import com.mineinabyss.geary.serialization.dsl.serialization
 import com.mineinabyss.geary.serialization.formats.YamlFormat
+import com.mineinabyss.geary.uuid.SynchronizedUUID2GearyMap
 import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.messaging.logSuccess
@@ -49,7 +50,7 @@ class GearyPluginImpl : GearyPlugin() {
         geary(PaperEngineModule, PaperEngineModule(this)) {
             // Install default addons
             install(FileSystemAddon, FileSystem.SYSTEM)
-            install(UUIDTracking)
+            install(UUIDTracking, SynchronizedUUID2GearyMap())
 
             if (configModule.config.trackEntities) install(EntityTracking)
             if (configModule.config.trackItems) install(ItemTracking)
