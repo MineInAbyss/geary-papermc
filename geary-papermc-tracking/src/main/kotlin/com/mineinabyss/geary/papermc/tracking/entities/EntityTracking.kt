@@ -13,6 +13,7 @@ import com.mineinabyss.geary.papermc.tracking.entities.systems.TrackOnSetBukkitC
 import com.mineinabyss.geary.papermc.tracking.entities.systems.UntrackOnRemoveBukkitComponent
 import com.mineinabyss.geary.papermc.tracking.entities.systems.attemptspawn.AttemptSpawnListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.attemptspawn.AttemptSpawnMythicMob
+import com.mineinabyss.geary.papermc.tracking.entities.systems.removevanillamobs.RemoveVanillaMobsListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.ConvertEntityTypesListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.ConvertToMythicMobListener
 import com.mineinabyss.idofront.di.DI
@@ -44,6 +45,7 @@ interface EntityTracking {
                 gearyPaper.plugin.listeners(
                     EntityWorldEventTracker(),
                     ConvertEntityTypesListener(),
+                    RemoveVanillaMobsListener(),
                 )
 
                 if (Bukkit.getPluginManager().plugins.any { it.name == "MythicMobs" }) {

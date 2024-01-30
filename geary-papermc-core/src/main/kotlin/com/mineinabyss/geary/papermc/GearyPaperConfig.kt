@@ -5,6 +5,7 @@ import com.charleskorn.kaml.YamlComment
 import com.mineinabyss.geary.modules.geary
 import io.papermc.paper.util.TickThread
 import kotlinx.serialization.Serializable
+import org.bukkit.entity.EntityType
 import org.spigotmc.AsyncCatcher
 
 @Serializable
@@ -21,6 +22,8 @@ class GearyPaperConfig(
     val migrateItemCustomModelDataToPrefab: Boolean = true,
     val catch: Catching = Catching(),
     val mobTypeConversion: MobTypeConversion = MobTypeConversion.IGNORE,
+    @YamlComment("List of mob types to remove if they are not entities with Geary prefabs (i.e. vanilla entities)")
+    val removeVanillaMobTypes: Set<EntityType> = emptySet(),
     val logLevel: Severity = Severity.Warn,
 )
 
