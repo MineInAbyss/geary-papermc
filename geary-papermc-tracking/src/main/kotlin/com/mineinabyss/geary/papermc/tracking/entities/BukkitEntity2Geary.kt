@@ -14,23 +14,23 @@ import kotlin.collections.set
 class BukkitEntity2Geary(val forceMainThread: Boolean = true) {
     private val entityMap = Int2LongOpenHashMap().apply { defaultReturnValue(-1) }
 
-    operator fun get(bukkit: BukkitEntity): GearyEntity? {
+    operator fun get(bukkit: BukkitEntity): GearyEntity? = synchronized(entityMap) {
         val id = entityMap.get(bukkit.entityId)
         if (id == -1L) return null
         return id.toGeary()
     }
 
-    operator fun set(bukkit: BukkitEntity, entity: GearyEntity) {
+    operator fun set(bukkit: BukkitEntity, entity: GearyEntity) = synchronized(entityMap) {
         entityMap[bukkit.entityId] = entity.id.toLong()
     }
 
-    operator fun contains(entityId: Int): Boolean = entityMap.containsKey(entityId)
+    operator fun contains(entityId: Int): Boolean = synchronized(entityMap) { entityMap.containsKey(entityId) }
 
-    fun remove(entityId: Int): GearyEntity? {
+    fun remove(entityId: Int): GearyEntity? = synchronized(entityMap) {
         return entityMap.remove(entityId).takeIf { it != -1L }?.toGeary()
     }
 
-    fun getOrCreate(bukkit: BukkitEntity): GearyEntity {
+    fun getOrCreate(bukkit: BukkitEntity): GearyEntity = synchronized(entityMap) {
         return get(bukkit) ?: run {
             if (forceMainThread) AsyncCatcher.catchOp("Async geary entity creation for id ${bukkit.entityId}, type ${bukkit.type}")
             synchronized(entityMap) {
@@ -39,7 +39,7 @@ class BukkitEntity2Geary(val forceMainThread: Boolean = true) {
         }
     }
 
-    fun fireAddToWorldEvent(bukkit: BukkitEntity, entity: GearyEntity) {
+    fun fireAddToWorldEvent(bukkit: BukkitEntity, entity: GearyEntity) = synchronized(entityMap) {
         entity.add<AddedToWorld>()
         GearyEntityAddToWorldEvent(entity, bukkit).callEvent()
         entity.encodeComponentsTo(bukkit)
