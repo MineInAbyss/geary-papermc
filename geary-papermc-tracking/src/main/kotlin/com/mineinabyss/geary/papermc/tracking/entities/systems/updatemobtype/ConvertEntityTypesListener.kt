@@ -1,5 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype
 
+import com.mineinabyss.geary.papermc.MobTypeConversion
+import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.components.SetEntityType
 import com.mineinabyss.geary.papermc.tracking.entities.events.GearyEntityAddToWorldEvent
 import com.mineinabyss.idofront.nms.aliases.toNMS
@@ -10,9 +12,18 @@ class ConvertEntityTypesListener : Listener {
     @EventHandler
     fun GearyEntityAddToWorldEvent.onAdd() {
         val type = gearyEntity.get<SetEntityType>() ?: return
+        if(entity.toNMS().type == type.entityTypeFromRegistry) return
 
-        if (entity.toNMS().type != type.entityTypeFromRegistry) {
-            UpdateMob.scheduleRecreation(entity, gearyEntity)
+        when (gearyPaper.config.mobTypeConversion) {
+            MobTypeConversion.MIGRATE -> {
+                UpdateMob.scheduleRecreation(entity, gearyEntity)
+            }
+
+            MobTypeConversion.REMOVE -> {
+                UpdateMob.scheduleRemove(entity)
+            }
+
+            MobTypeConversion.IGNORE ->  Unit
         }
     }
 }
