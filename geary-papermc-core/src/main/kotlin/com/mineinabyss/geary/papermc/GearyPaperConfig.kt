@@ -20,6 +20,7 @@ class GearyPaperConfig(
     @YamlComment("If an item has no prefabs encoded, try to find its prefab by matching custom model data.")
     val migrateItemCustomModelDataToPrefab: Boolean = true,
     val catch: Catching = Catching(),
+    val mobTypeConversion: MobTypeConversion = MobTypeConversion.IGNORE,
     val logLevel: Severity = Severity.Warn,
 )
 
@@ -52,3 +53,8 @@ enum class CatchType {
     ERROR, IGNORE, WARN
 }
 
+
+
+enum class MobTypeConversion {
+    MIGRATE, REMOVE, IGNORE
+}

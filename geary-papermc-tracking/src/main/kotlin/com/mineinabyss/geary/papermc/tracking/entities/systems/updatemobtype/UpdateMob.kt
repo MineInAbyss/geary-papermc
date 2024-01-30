@@ -19,4 +19,10 @@ object UpdateMob {
                 .getOrThrow()
         }, 10)
     }
+
+    fun scheduleRemove(entity: BukkitEntity) {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(gearyPaper.plugin, {
+            entity.remove()
+        }, 10)
+    }
 }
