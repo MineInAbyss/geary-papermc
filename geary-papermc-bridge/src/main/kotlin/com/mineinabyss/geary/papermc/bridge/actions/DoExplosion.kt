@@ -17,14 +17,14 @@ data class Explosion(
     val setFire: Boolean = false,
     val breakBlocks: Boolean = false,
     val fuseTicks: Int = 0,
-    val location: Input<@Contextual Location>,
+    val at: Input<@Contextual Location>,
 )
 
 class ExplosionSystem : GearyListener() {
     private val Pointers.explosion by get<Explosion>().on(source)
 
     override fun Pointers.handle() {
-        val location = explosion.location.get(this)
+        val location = explosion.at.get(this)
         if (explosion.fuseTicks <= 0) location.createExplosion(
             explosion.power, explosion.setFire, explosion.breakBlocks
         )

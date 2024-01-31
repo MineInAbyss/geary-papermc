@@ -2,7 +2,6 @@ package com.mineinabyss.geary.papermc.bridge
 
 import com.mineinabyss.geary.addons.GearyPhase
 import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
-import com.mineinabyss.geary.autoscan.autoScanner
 import com.mineinabyss.geary.autoscan.autoscan
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.GearyPaperConfigModule
@@ -18,7 +17,7 @@ import com.mineinabyss.geary.papermc.bridge.events.entities.*
 import com.mineinabyss.geary.papermc.bridge.events.items.ItemBreakBridge
 import com.mineinabyss.geary.papermc.bridge.events.items.ItemConsumeBridge
 import com.mineinabyss.geary.papermc.bridge.events.items.ItemInteractBridge
-import com.mineinabyss.geary.papermc.bridge.mythicmobs.DoMMSkillSystem
+import com.mineinabyss.geary.papermc.bridge.mythicmobs.RunMMSkillSystem
 import com.mineinabyss.geary.papermc.bridge.readers.ReadLocationSystem
 import com.mineinabyss.geary.papermc.bridge.readers.ReadTargetBlockSystem
 import com.mineinabyss.geary.papermc.bridge.targetselectors.NearbyEntitiesSelector
@@ -47,7 +46,7 @@ class PaperBridge {
                 CreateDefaultSkills(),
                 DoSpawnSystem(),
                 ReadTargetBlockSystem(),
-                DoMMSkillSystem(),
+                RunMMSkillSystem(),
                 DoDamageSystem(),
                 NearbyEntitiesSelector(),
                 ReadLocationSystem(),
