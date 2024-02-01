@@ -27,22 +27,34 @@ class CooldownDisplaySystem : RepeatingSystem(interval = INTERVAL) {
 
     @OptIn(UnsafeAccessors::class)
     override fun Pointer.tick() {
-//        val mainHand = player.inventory.toGeary()?.itemInMainHand ?: return
-        val cooldowns = cooldowns.mapNotNull { relation ->
+        //TODO this should be a separate system once we have system priorities set up
+        val validCooldowns = cooldowns.filter { relation ->
+            fun removeCooldown() = entity.removeRelation<CooldownStarted>(relation.target)
+            if (!relation.target.exists()) {
+                removeCooldown()
+                return@filter false
+            }
+            val cooldown = relation.data.cooldown
+            val timeLeft = cooldown.length - (System.currentTimeMillis() - relation.data.time)
+                .toDuration(DurationUnit.MILLISECONDS)
+            if (timeLeft.isNegative()) {
+                removeCooldown()
+                return@filter false
+            }
+            true
+        }
+
+        val cooldownsWithDisplay = validCooldowns.mapNotNull { relation ->
             val cooldown = relation.target.get<Cooldown>() ?: return@mapNotNull null
             if (cooldown.displayName == null) return@mapNotNull null
 
             val timeLeft = cooldown.length - (System.currentTimeMillis() - relation.data.time)
                 .toDuration(DurationUnit.MILLISECONDS)
-            if (timeLeft.isNegative()) {
-                //TODO separate system should be in charge of this
-                entity.removeRelation<CooldownStarted>(relation.target)
-                return@mapNotNull null
-            }
             CooldownInfo(cooldown.displayName, timeLeft, cooldown.length)
         }
+
         player.sendActionBar(
-            Component.join(JoinConfiguration.commas(true), cooldowns.map { cooldown ->
+            Component.join(JoinConfiguration.commas(true), cooldownsWithDisplay.map { cooldown ->
                 val squaresLeft =
                     if (cooldown.timeLeft < INTERVAL) 0 else (cooldown.timeLeft / cooldown.length * displayLength).roundToInt()
 

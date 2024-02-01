@@ -19,26 +19,29 @@ class Cooldown(
 ) {
 
     companion object {
-        fun isComplete(entity: GearyEntity, id: GearyEntity, cooldown: Cooldown): Boolean {
+        fun isComplete(entity: GearyEntity, id: GearyEntity): Boolean {
             val cooldownStarted = entity.getRelation<CooldownStarted>(id)
-            return cooldownStarted == null || System.currentTimeMillis() - cooldownStarted.time >= cooldown.length.inWholeMilliseconds
+            val isComplete =
+                cooldownStarted == null || System.currentTimeMillis() - cooldownStarted.time >= cooldownStarted.cooldown.length.inWholeMilliseconds
+            if (isComplete) entity.removeRelation<CooldownStarted>(id)
+            return isComplete
         }
 
-        fun start(entity: GearyEntity, source: GearyEntity) {
-            entity.setRelation(CooldownStarted(System.currentTimeMillis()), source)
+        fun start(entity: GearyEntity, source: GearyEntity, cooldown: Cooldown) {
+            entity.setRelation(CooldownStarted(System.currentTimeMillis(), cooldown), source)
         }
     }
 }
 
-class CooldownStarted(val time: Long)
+class CooldownStarted(val time: Long, val cooldown: Cooldown)
 
 class CooldownChecker : CheckingListener() {
     private val Pointers.cooldownDefinition by get<Cooldown>().on(source)
 
     @OptIn(UnsafeAccessors::class)
     override fun Pointers.check(): Boolean {
-        if (Cooldown.isComplete(target.entity, source!!.entity, cooldownDefinition)) {
-            Cooldown.start(target.entity, source!!.entity)
+        if (Cooldown.isComplete(target.entity, source!!.entity)) {
+            Cooldown.start(target.entity, source!!.entity, cooldownDefinition)
             return true
         }
         return false
