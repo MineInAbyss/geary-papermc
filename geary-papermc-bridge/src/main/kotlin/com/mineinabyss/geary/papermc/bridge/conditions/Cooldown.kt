@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.bridge.conditions
 
 import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
+import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.events.CheckingListener
 import com.mineinabyss.geary.systems.accessors.Pointers
 import com.mineinabyss.idofront.serialization.DurationSerializer
@@ -15,7 +16,19 @@ import kotlin.time.Duration
 class Cooldown(
     val length: @Serializable(with = DurationSerializer::class) Duration,
     val displayName: @Serializable(with = MiniMessageSerializer::class) Component? = null,
-)
+) {
+
+    companion object {
+        fun isComplete(entity: GearyEntity, id: GearyEntity, cooldown: Cooldown): Boolean {
+            val cooldownStarted = entity.getRelation<CooldownStarted>(id)
+            return cooldownStarted == null || System.currentTimeMillis() - cooldownStarted.time >= cooldown.length.inWholeMilliseconds
+        }
+
+        fun start(entity: GearyEntity, source: GearyEntity) {
+            entity.setRelation(CooldownStarted(System.currentTimeMillis()), source)
+        }
+    }
+}
 
 class CooldownStarted(val time: Long)
 
@@ -24,9 +37,8 @@ class CooldownChecker : CheckingListener() {
 
     @OptIn(UnsafeAccessors::class)
     override fun Pointers.check(): Boolean {
-        val cooldown = target.entity.getRelation<CooldownStarted>(source!!.entity)
-        if (cooldown == null || System.currentTimeMillis() - cooldown.time >= cooldownDefinition.length.inWholeMilliseconds) {
-            target.entity.setRelation(CooldownStarted(System.currentTimeMillis()), source!!.entity)
+        if (Cooldown.isComplete(target.entity, source!!.entity, cooldownDefinition)) {
+            Cooldown.start(target.entity, source!!.entity)
             return true
         }
         return false

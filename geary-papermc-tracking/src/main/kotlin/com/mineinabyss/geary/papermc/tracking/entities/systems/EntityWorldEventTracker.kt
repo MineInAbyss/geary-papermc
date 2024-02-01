@@ -22,7 +22,7 @@ class EntityWorldEventTracker : Listener {
     fun EntityAddToWorldEvent.onBukkitEntityAdd() {
         // Only remove player from ECS on disconnect, not death
         if (entity is Player) return
-        geary.logger.d("EntityAddToWorldEvent: Tracking bukkit entity ${entity.toGearyOrNull()?.id} (${entity.type} ${entity.uniqueId}")
+        geary.logger.d("EntityAddToWorldEvent: Tracking bukkit entity ${entity.toGearyOrNull()?.id} (${entity.type} ${entity.uniqueId})")
         gearyMobs.bukkit2Geary.getOrCreate(entity)
     }
 
@@ -43,7 +43,7 @@ class EntityWorldEventTracker : Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     fun EntitiesUnloadEvent.onEntitiesUnload() {
         if (entities.size != 0)
-            geary.logger.d("EntitiesUnloadEvent: Saving ${entities.size} entities...")
+            geary.logger.d("EntitiesUnloadEvent: Saving ${entities.size} entities in chunk...")
         entities.forEach {
             val gearyEntity = it.toGearyOrNull() ?: return@forEach
             gearyEntity.encodeComponentsTo(it)

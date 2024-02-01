@@ -72,6 +72,12 @@ object EventHelpers {
         }
     }
 
+    fun runSkill(target: GearyEntity, skill: Skill) {
+        temporaryEntity { event ->
+            runSkill(target, event, skill)
+        }
+    }
+
     fun <T : Any> runSkill(
         target: GearyEntity,
         initiator: GearyEntity = target,
