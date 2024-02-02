@@ -11,6 +11,7 @@ import com.mineinabyss.geary.papermc.plugin.commands.locate
 import com.mineinabyss.geary.papermc.plugin.commands.query
 import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.spawnFromPrefab
+import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.UpdateMob
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.gearyItems
@@ -26,11 +27,13 @@ import com.mineinabyss.idofront.commands.extensions.actions.playerAction
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.info
 import com.mineinabyss.idofront.messaging.success
+import com.mineinabyss.idofront.typealiases.BukkitEntity
 import okio.Path.Companion.toOkioPath
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 import kotlin.io.path.Path
 import kotlin.io.path.nameWithoutExtension
@@ -124,8 +127,20 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
                         runCatching { prefabLoader.reload(prefabEntity) }
                             .onSuccess { sender.success("Reread prefab $prefab") }
                             .onFailure { sender.error("Failed to reread prefab $prefab:\n${it.message}") }
+
+
+                        // Reload entities
                         geary.queryManager.getEntitiesMatching(family {
                             hasRelation<InstanceOf?>(prefabEntity)
+                            has<BukkitEntity>()
+                        }).forEach {
+                            UpdateMob.recreateGearyEntity(it.get<BukkitEntity>() ?: return@forEach)
+                        }
+
+                        // Reload items
+                        geary.queryManager.getEntitiesMatching(family {
+                            hasRelation<InstanceOf?>(prefabEntity)
+                            has<ItemStack>()
                         }).toSet()
                             .mapNotNull { it.parent }
                             .forEach { it.get<Player>()?.inventory?.toGeary()?.forceRefresh(ignoreCached = true) }
