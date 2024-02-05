@@ -3,14 +3,19 @@ package com.mineinabyss.geary.papermc.bridge
 import com.mineinabyss.geary.addons.GearyPhase
 import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
 import com.mineinabyss.geary.autoscan.autoscan
+import com.mineinabyss.geary.helpers.component
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.GearyPaperConfigModule
-import com.mineinabyss.geary.papermc.bridge.actions.*
+import com.mineinabyss.geary.papermc.bridge.actions.DoDamageSystem
+import com.mineinabyss.geary.papermc.bridge.actions.DoKnockbackSystem
+import com.mineinabyss.geary.papermc.bridge.actions.DoSpawnSystem
+import com.mineinabyss.geary.papermc.bridge.actions.ExplosionSystem
 import com.mineinabyss.geary.papermc.bridge.conditions.*
 import com.mineinabyss.geary.papermc.bridge.conditions.location.BlockConditionChecker
 import com.mineinabyss.geary.papermc.bridge.conditions.location.HeightConditionChecker
 import com.mineinabyss.geary.papermc.bridge.conditions.location.LightConditionChecker
 import com.mineinabyss.geary.papermc.bridge.conditions.location.TimeConditionChecker
+import com.mineinabyss.geary.papermc.bridge.config.OnEvent
 import com.mineinabyss.geary.papermc.bridge.config.parsers.CreateDefaultSkills
 import com.mineinabyss.geary.papermc.bridge.config.parsers.ParseSkills
 import com.mineinabyss.geary.papermc.bridge.events.entities.*
@@ -22,6 +27,7 @@ import com.mineinabyss.geary.papermc.bridge.readers.ReadLocationSystem
 import com.mineinabyss.geary.papermc.bridge.readers.ReadTargetBlockSystem
 import com.mineinabyss.geary.papermc.bridge.targetselectors.NearbyEntitiesSelector
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.plugin.listeners
 
@@ -31,6 +37,10 @@ class PaperBridge {
             geary {
                 autoscan(this::class.java.classLoader, "com.mineinabyss.geary.papermc.bridge") {
                     systems()
+                }
+
+                component<SetItem>().apply {
+                    addRelation<OnEvent, OnSpawn>()
                 }
             }
             geary.pipeline.addSystems(
