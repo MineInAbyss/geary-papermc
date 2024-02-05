@@ -12,17 +12,24 @@ import org.bukkit.Location
 import org.bukkit.persistence.PersistentDataContainer
 
 
-fun Location.spawnFromPrefab(prefab: PrefabKey): Result<BukkitEntity> {
+fun Location.spawnFromPrefab(prefab: PrefabKey, initEvent: GearyEntity.() -> Unit = {}): Result<BukkitEntity> {
     val entity = prefabs.manager[prefab] ?: return Result.failure(IllegalArgumentException("No prefab found"))
-    return spawnFromPrefab(entity)
+    return spawnFromPrefab(entity, initEvent = initEvent)
 }
 
-fun Location.spawnFromPrefab(prefab: GearyEntity, existingPDC: PersistentDataContainer? = null): Result<BukkitEntity> {
+fun Location.spawnFromPrefab(
+    prefab: GearyEntity,
+    existingPDC: PersistentDataContainer? = null,
+    initEvent: GearyEntity.() -> Unit = {}
+): Result<BukkitEntity> {
     return runCatching {
         val entity = entity {
             if (existingPDC != null) loadComponentsFrom(existingPDC)
             extend(prefab)
-            callEvent(AttemptSpawn(this@spawnFromPrefab))
+            callEvent(source = null) {
+                set(AttemptSpawn(this@spawnFromPrefab))
+                initEvent()
+            }
         }
         val bukkit = entity.get<BukkitEntity>() ?: error("Entity was not created when spawning from prefab")
         gearyMobs.bukkit2Geary.fireAddToWorldEvent(bukkit, entity)
