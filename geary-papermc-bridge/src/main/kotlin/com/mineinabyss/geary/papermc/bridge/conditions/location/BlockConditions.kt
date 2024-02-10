@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.bridge.conditions.location
 import com.mineinabyss.geary.events.CheckingListener
 import com.mineinabyss.geary.papermc.bridge.config.inputs.Input
 import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.idofront.serialization.MaterialByNameSerializer
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -12,8 +13,8 @@ import org.bukkit.Material
 @Serializable
 @SerialName("geary:check.block_type")
 class BlockConditions(
-    val allow: Set<Material> = setOf(),
-    val deny: Set<Material> = setOf(),
+    val allow: Set<@Serializable(with = MaterialByNameSerializer::class) Material> = setOf(),
+    val deny: Set<@Serializable(with = MaterialByNameSerializer::class) Material> = setOf(),
     val at: Input<@Contextual Location> = Input.reference("location"),
 )
 

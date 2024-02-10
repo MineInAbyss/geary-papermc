@@ -11,6 +11,7 @@ import com.mineinabyss.geary.papermc.GearyProductionPaperConfigModule
 import com.mineinabyss.geary.papermc.bridge.PaperBridge
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
+import com.mineinabyss.geary.papermc.plugin.commands.GearyCommands
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
 import com.mineinabyss.geary.papermc.tracking.blocks.gearyBlocks
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
