@@ -18,7 +18,7 @@ import com.mineinabyss.idofront.messaging.info
 import com.mineinabyss.idofront.messaging.success
 import org.bukkit.entity.Entity
 
-fun Command.query() {
+fun Command.mobsQuery() {
     commandGroup {
         val query by stringArg()
         val radius by intArg { default = 0 }
@@ -32,7 +32,7 @@ fun Command.query() {
             for (world in worlds) for (entity in world.entities) {
                 val geary = entity.toGearyOrNull() ?: continue
                 // Only select entities that are instanced from a gearyMobs registered prefab
-                if (geary.prefabs.firstOrNull()?.get<PrefabKey>() !in gearyMobs.prefabs.getKeys()) continue
+                if (!gearyMobs.prefabs.isMob(geary)) continue
 
                 if (types.any { type ->
                         fun excludeDefault() = entity.customName() == null
