@@ -4,10 +4,10 @@ val idofrontVersion: String by project
 
 plugins {
     java
-    alias(libs.plugins.mia.publication)
-    alias(libs.plugins.mia.kotlin.jvm)
-    alias(libs.plugins.dokka) apply false
-    alias(libs.plugins.mia.autoversion)
+    alias(idofrontLibs.plugins.mia.publication)
+    alias(idofrontLibs.plugins.mia.kotlin.jvm)
+    alias(idofrontLibs.plugins.dokka) apply false
+    alias(idofrontLibs.plugins.mia.autoversion)
 }
 
 dependencies {
@@ -36,7 +36,7 @@ allprojects {
     }
 
     dependencies {
-        val libs = rootProject.libs
+        val libs = rootProject.idofrontLibs
         compileOnly(libs.bundles.idofront.core)
         testImplementation(libs.bundles.idofront.core)
     }

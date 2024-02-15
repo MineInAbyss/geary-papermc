@@ -1,9 +1,9 @@
 plugins {
-    id(libs.plugins.mia.copyjar.get().pluginId)
-    id(libs.plugins.mia.kotlin.jvm.get().pluginId)
-    id(libs.plugins.mia.papermc.get().pluginId)
-    id(libs.plugins.mia.nms.get().pluginId)
-    alias(libs.plugins.kotlinx.serialization)
+    id(idofrontLibs.plugins.mia.copyjar.get().pluginId)
+    id(idofrontLibs.plugins.mia.kotlin.jvm.get().pluginId)
+    id(idofrontLibs.plugins.mia.papermc.get().pluginId)
+    id(idofrontLibs.plugins.mia.nms.get().pluginId)
+    alias(idofrontLibs.plugins.kotlinx.serialization)
 }
 
 configurations {
@@ -19,14 +19,14 @@ dependencies {
     implementation(project(":"))
 
     // Plugins
-    compileOnly(myLibs.plugman)
+    compileOnly(libs.plugman)
 
     // MineInAbyss platform
-    compileOnly(libs.kotlin.stdlib)
-    compileOnly(libs.kotlinx.serialization.json)
-    compileOnly(libs.kotlinx.serialization.kaml)
-    compileOnly(libs.kotlinx.coroutines)
-    compileOnly(libs.minecraft.mccoroutine)
+    compileOnly(idofrontLibs.kotlin.stdlib)
+    compileOnly(idofrontLibs.kotlinx.serialization.json)
+    compileOnly(idofrontLibs.kotlinx.serialization.kaml)
+    compileOnly(idofrontLibs.kotlinx.coroutines)
+    compileOnly(idofrontLibs.minecraft.mccoroutine)
 }
 
 copyJar {

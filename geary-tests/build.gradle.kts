@@ -1,10 +1,10 @@
 plugins {
-//    id(libs.plugins.mia.copyjar.get().pluginId)
-    id(libs.plugins.mia.kotlin.jvm.get().pluginId)
-//    id(libs.plugins.mia.papermc.get().pluginId)
-//    id(libs.plugins.mia.nms.get().pluginId)
-    id(libs.plugins.mia.testing.get().pluginId)
-    alias(libs.plugins.kotlinx.serialization)
+//    id(idofrontLibs.plugins.mia.copyjar.get().pluginId)
+    id(idofrontLibs.plugins.mia.kotlin.jvm.get().pluginId)
+//    id(idofrontLibs.plugins.mia.papermc.get().pluginId)
+//    id(idofrontLibs.plugins.mia.nms.get().pluginId)
+    id(idofrontLibs.plugins.mia.testing.get().pluginId)
+    alias(idofrontLibs.plugins.kotlinx.serialization)
 }
 
 repositories {
@@ -14,5 +14,5 @@ repositories {
 dependencies {
     implementation(project(":"))
 
-    testImplementation(libs.minecraft.mockbukkit)
+    testImplementation(idofrontLibs.minecraft.mockbukkit)
 }
