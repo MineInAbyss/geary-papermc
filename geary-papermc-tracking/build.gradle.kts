@@ -1,15 +1,15 @@
 plugins {
-    id(libs.plugins.mia.kotlin.jvm.get().pluginId)
-    id(libs.plugins.mia.papermc.get().pluginId)
-    id(libs.plugins.mia.nms.get().pluginId)
-    id(libs.plugins.mia.publication.get().pluginId)
-    alias(libs.plugins.kotlinx.serialization)
+    id(idofrontLibs.plugins.mia.kotlin.jvm.get().pluginId)
+    id(idofrontLibs.plugins.mia.papermc.get().pluginId)
+    id(idofrontLibs.plugins.mia.nms.get().pluginId)
+    id(idofrontLibs.plugins.mia.publication.get().pluginId)
+    alias(idofrontLibs.plugins.kotlinx.serialization)
 }
 
 dependencies {
-    compileOnly(libs.minecraft.plugin.mythic.dist)
-    compileOnly(libs.idofront.nms)
-    compileOnly(libs.minecraft.mccoroutine)
+    compileOnly(idofrontLibs.minecraft.plugin.mythic.dist)
+    compileOnly(idofrontLibs.idofront.nms)
+    compileOnly(idofrontLibs.minecraft.mccoroutine)
     implementation(gearyLibs.uuid)
     api(project(":geary-papermc-datastore"))
     api(project(":geary-papermc-core"))

@@ -1,8 +1,8 @@
 plugins {
-    id(libs.plugins.mia.kotlin.jvm.get().pluginId)
-    id(libs.plugins.mia.papermc.get().pluginId)
-    id(libs.plugins.mia.publication.get().pluginId)
-    alias(libs.plugins.kotlinx.serialization)
+    id(idofrontLibs.plugins.mia.kotlin.jvm.get().pluginId)
+    id(idofrontLibs.plugins.mia.papermc.get().pluginId)
+    id(idofrontLibs.plugins.mia.publication.get().pluginId)
+    alias(idofrontLibs.plugins.kotlinx.serialization)
 }
 
 dependencies {
@@ -11,13 +11,13 @@ dependencies {
     implementation(gearyLibs.autoscan)
 
     // Plugins
-    compileOnly(myLibs.plugman)
-    compileOnly(libs.minecraft.plugin.mythic.dist)
+    compileOnly(libs.plugman)
+    compileOnly(idofrontLibs.minecraft.plugin.mythic.dist)
 
     // MineInAbyss platform
-    compileOnly(libs.kotlin.stdlib)
-    compileOnly(libs.kotlinx.serialization.json)
-    compileOnly(libs.kotlinx.serialization.kaml)
-    compileOnly(libs.kotlinx.coroutines)
-    compileOnly(libs.minecraft.mccoroutine)
+    compileOnly(idofrontLibs.kotlin.stdlib)
+    compileOnly(idofrontLibs.kotlinx.serialization.json)
+    compileOnly(idofrontLibs.kotlinx.serialization.kaml)
+    compileOnly(idofrontLibs.kotlinx.coroutines)
+    compileOnly(idofrontLibs.minecraft.mccoroutine)
 }
