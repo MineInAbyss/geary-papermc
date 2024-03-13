@@ -1,11 +1,11 @@
 package com.mineinabyss.geary.papermc.bridge.conditions
 
-import com.mineinabyss.geary.events.CheckingListener
+import com.mineinabyss.geary.modules.GearyModule
 import com.mineinabyss.geary.papermc.bridge.helpers.nullOrEquals
-import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.geary.systems.builders.listener
+import com.mineinabyss.geary.systems.query.ListenerQuery
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.bukkit.Material
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 
@@ -39,13 +39,13 @@ class EntityConditions(
     val isLeashed: Boolean? = null,
 )
 
-class EntityConditionsChecker : CheckingListener() {
-    private val Pointers.livingEntity by get<LivingEntity>().on(target)
-
-    private val Pointers.conditions by get<EntityConditions>().on(source)
-
-    override fun Pointers.check(): Boolean = livingEntity !is Player &&
-            conditions.isSleeping nullOrEquals livingEntity.isSleeping &&
+fun GearyModule.createEntityConditionsChecker() = listener(
+    object : ListenerQuery() {
+        val livingEntity by get<LivingEntity>()
+        val conditions by source.get<EntityConditions>()
+    }
+).check {
+    conditions.isSleeping nullOrEquals livingEntity.isSleeping &&
             conditions.isSwimming nullOrEquals livingEntity.isSwimming &&
             conditions.isClimbing nullOrEquals livingEntity.isClimbing &&
             conditions.isJumping nullOrEquals livingEntity.isJumping &&
@@ -65,5 +65,4 @@ class EntityConditionsChecker : CheckingListener() {
             conditions.isInvurnerable nullOrEquals livingEntity.isInvulnerable &&
             conditions.isSilent nullOrEquals livingEntity.isSilent &&
             conditions.isLeashed nullOrEquals livingEntity.isLeashed
-
 }

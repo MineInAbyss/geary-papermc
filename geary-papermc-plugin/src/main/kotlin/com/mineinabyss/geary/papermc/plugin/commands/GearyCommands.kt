@@ -8,11 +8,14 @@ import com.mineinabyss.geary.modules.archetypes
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
+import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery.Companion.getKeyStrings
+import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery.Companion.getKeys
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.spawnFromPrefab
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.UpdateMob
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.gearyItems
+import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery.Companion.getKeys
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.helpers.inheritPrefabs

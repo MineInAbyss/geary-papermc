@@ -1,11 +1,14 @@
 package com.mineinabyss.geary.papermc.bridge.systems
 
-import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
-import com.mineinabyss.geary.autoscan.AutoScan
+import com.mineinabyss.geary.datatypes.GearyEntity
+import com.mineinabyss.geary.modules.GearyModule
 import com.mineinabyss.geary.papermc.bridge.conditions.Cooldown
 import com.mineinabyss.geary.papermc.bridge.conditions.CooldownStarted
-import com.mineinabyss.geary.systems.RepeatingSystem
-import com.mineinabyss.geary.systems.accessors.Pointer
+import com.mineinabyss.geary.papermc.bridge.systems.CooldownDisplayProps.INTERVAL
+import com.mineinabyss.geary.papermc.bridge.systems.CooldownDisplayProps.displayChar
+import com.mineinabyss.geary.papermc.bridge.systems.CooldownDisplayProps.displayLength
+import com.mineinabyss.geary.systems.builders.system
+import com.mineinabyss.geary.systems.query.Query
 import com.mineinabyss.idofront.time.ticks
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
@@ -16,65 +19,68 @@ import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
-private val INTERVAL = 1.ticks
+class CooldownsToRemove(
+    val cooldowns: List<GearyEntity>
+)
 
-@AutoScan
-class CooldownDisplaySystem : RepeatingSystem(interval = INTERVAL) {
-    val Pointer.player by get<Player>()
-    val Pointer.cooldowns by getRelationsWithData<CooldownStarted, Any?>()
-
-    class CooldownInfo(val display: Component, val timeLeft: Duration, val length: Duration)
-
-    @OptIn(UnsafeAccessors::class)
-    override fun Pointer.tick() {
-        //TODO this should be a separate system once we have system priorities set up
-        val validCooldowns = cooldowns.filter { relation ->
-            fun removeCooldown() = entity.removeRelation<CooldownStarted>(relation.target)
-            if (!relation.target.exists()) {
-                removeCooldown()
-                return@filter false
-            }
-            val cooldown = relation.data.cooldown
-            val timeLeft = cooldown.length - (System.currentTimeMillis() - relation.data.time)
-                .toDuration(DurationUnit.MILLISECONDS)
-            if (timeLeft.isNegative()) {
-                removeCooldown()
-                return@filter false
-            }
-            true
+fun GearyModule.createCooldownDisplaySystem() = system(object : Query() {
+    val player by get<Player>()
+    val cooldowns by getRelationsWithData<CooldownStarted, Any?>()
+}).every(INTERVAL).defer {
+    //TODO this should be a separate system once we have system priorities set up
+    val validCooldowns = cooldowns.filter { relation ->
+        if (!relation.target.exists()) {
+            return@filter false
         }
-
-        val cooldownsWithDisplay = validCooldowns.mapNotNull { relation ->
-            val cooldown = relation.target.get<Cooldown>() ?: return@mapNotNull null
-            if (cooldown.displayName == null) return@mapNotNull null
-
-            val timeLeft = cooldown.length - (System.currentTimeMillis() - relation.data.time)
-                .toDuration(DurationUnit.MILLISECONDS)
-            CooldownInfo(cooldown.displayName, timeLeft, cooldown.length)
+        val cooldown = relation.data.cooldown
+        val timeLeft = cooldown.length - (System.currentTimeMillis() - relation.data.time)
+            .toDuration(DurationUnit.MILLISECONDS)
+        if (timeLeft.isNegative()) {
+            return@filter false
         }
+        true
+    }
+    val invalidCooldowns = cooldowns - validCooldowns.toSet()
 
-        player.sendActionBar(
-            Component.join(JoinConfiguration.commas(true), cooldownsWithDisplay.map { cooldown ->
-                val squaresLeft =
-                    if (cooldown.timeLeft < INTERVAL) 0 else (cooldown.timeLeft / cooldown.length * displayLength).roundToInt()
+    val cooldownsWithDisplay = validCooldowns.mapNotNull { relation ->
+        val cooldown = relation.target.get<Cooldown>() ?: return@mapNotNull null
+        if (cooldown.displayName == null) return@mapNotNull null
 
-                val cooldownRender = Component.textOfChildren(
-                    Component.text(displayChar.toString().repeat(displayLength - squaresLeft), NamedTextColor.GREEN),
-                    Component.text(displayChar.toString().repeat(squaresLeft), NamedTextColor.RED),
-                    if (cooldown.timeLeft < INTERVAL) Component.text(" [✔]", NamedTextColor.GREEN)
-                    else Component.text(
-                        " [${cooldown.timeLeft.toString(DurationUnit.SECONDS, 2)}]",
-                        NamedTextColor.GRAY
-                    )
-                ).compact()
-
-                Component.textOfChildren(cooldown.display, Component.space(), cooldownRender)
-            })
-        )
+        val timeLeft = cooldown.length - (System.currentTimeMillis() - relation.data.time)
+            .toDuration(DurationUnit.MILLISECONDS)
+        CooldownInfo(cooldown.displayName, timeLeft, cooldown.length)
     }
 
-    companion object {
-        private const val displayLength = 10
-        private const val displayChar = '■'
+    player.sendActionBar(
+        Component.join(JoinConfiguration.commas(true), cooldownsWithDisplay.map { cooldown ->
+            val squaresLeft =
+                if (cooldown.timeLeft < INTERVAL) 0 else (cooldown.timeLeft / cooldown.length * displayLength).roundToInt()
+
+            val cooldownRender = Component.textOfChildren(
+                Component.text(displayChar.toString().repeat(displayLength - squaresLeft), NamedTextColor.GREEN),
+                Component.text(displayChar.toString().repeat(squaresLeft), NamedTextColor.RED),
+                if (cooldown.timeLeft < INTERVAL) Component.text(" [✔]", NamedTextColor.GREEN)
+                else Component.text(
+                    " [${cooldown.timeLeft.toString(DurationUnit.SECONDS, 2)}]",
+                    NamedTextColor.GRAY
+                )
+            ).compact()
+
+            Component.textOfChildren(cooldown.display, Component.space(), cooldownRender)
+        })
+    )
+    CooldownsToRemove(invalidCooldowns.map { it.target })
+}.onFinish { data: CooldownsToRemove, entity ->
+    data.cooldowns.forEach { target ->
+        entity.removeRelation<CooldownStarted>(target)
     }
+}
+
+class CooldownInfo(val display: Component, val timeLeft: Duration, val length: Duration)
+
+
+object CooldownDisplayProps {
+    const val displayLength = 10
+    const val displayChar = '■'
+    val INTERVAL = 1.ticks
 }

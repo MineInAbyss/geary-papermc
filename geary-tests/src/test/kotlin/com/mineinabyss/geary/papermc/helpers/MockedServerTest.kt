@@ -8,6 +8,9 @@ import com.mineinabyss.idofront.di.DI
 import org.junit.jupiter.api.AfterAll
 
 abstract class MockedServerTest {
+    init {
+        MockBukkit.unmock()
+    }
     val server = MockBukkit.mock()
     val plugin = MockBukkit.createMockPlugin("Geary")
     val world = server.addSimpleWorld("world")

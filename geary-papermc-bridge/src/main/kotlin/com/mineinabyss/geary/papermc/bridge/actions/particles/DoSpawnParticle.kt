@@ -1,10 +1,10 @@
 package com.mineinabyss.geary.papermc.bridge.actions.particles
 
 import com.destroystokyo.paper.ParticleBuilder
-import com.mineinabyss.geary.autoscan.AutoScan
+import com.mineinabyss.geary.modules.GearyModule
 import com.mineinabyss.geary.papermc.bridge.config.inputs.Input
-import com.mineinabyss.geary.systems.GearyListener
-import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.geary.systems.builders.listener
+import com.mineinabyss.geary.systems.query.ListenerQuery
 import com.mineinabyss.idofront.serialization.ColorSerializer
 import com.mineinabyss.idofront.serialization.IntRangeSerializer
 import com.mineinabyss.idofront.util.DoubleRange
@@ -30,21 +30,20 @@ class DoSpawnParticle(
     val speed: DoubleRange = 0.0..0.0,
 )
 
-@AutoScan
-class DoSpawnParticleSystem : GearyListener() {
-    private val Pointers.spawn by get<DoSpawnParticle>().on(source)
-
-    override fun Pointers.handle() {
-        val location = spawn.at.get(this)
-        with(spawn) {
-            ParticleBuilder(particle)
-                .location(location)
-                .offset(offsetX.randomOrMin(), offsetY.randomOrMin(), offsetZ.randomOrMin())
-                .color(color)
-                .count(count.randomOrMin())
-                .extra(speed.randomOrMin())
-                .receivers(radius)
-                .spawn()
-        }
+fun GearyModule.createSpawnParticleAction() = listener(
+    object : ListenerQuery() {
+        val spawn by source.get<DoSpawnParticle>()
+    }
+).exec {
+    val location = spawn.at.get(this)
+    with(spawn) {
+        ParticleBuilder(particle)
+            .location(location)
+            .offset(offsetX.randomOrMin(), offsetY.randomOrMin(), offsetZ.randomOrMin())
+            .color(color)
+            .count(count.randomOrMin())
+            .extra(speed.randomOrMin())
+            .receivers(radius)
+            .spawn()
     }
 }

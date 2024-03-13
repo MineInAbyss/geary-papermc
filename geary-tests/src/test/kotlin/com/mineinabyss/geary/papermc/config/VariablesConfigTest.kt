@@ -19,7 +19,8 @@ import com.mineinabyss.geary.serialization.formats.YamlFormat
 import com.mineinabyss.geary.serialization.serializers.GearyEntitySerializer
 import com.mineinabyss.geary.serialization.serializers.SerializableGearyEntity
 import com.mineinabyss.geary.systems.GearyListener
-import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.geary.systems.builders.listener
+import com.mineinabyss.geary.systems.query.ListenerQuery
 import com.mineinabyss.idofront.di.DI
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -78,21 +79,18 @@ class VariablesConfigTest {
         // arrange
         val prefab = yamlFormat.decodeFromString(serializer, config)
         var result: Int? = null
-        val skillSystem = object : GearyListener() {
-            val Pointers.input1 by get<TestComp>().on(source)
 
-            override fun Pointers.handle() {
-                result = input1.input.get(this)
-            }
+        geary.listener(object : ListenerQuery() {
+            val input1 by source.get<TestComp>()
+        }).exec {
+            result = input1.input.get(this)
         }
-        val generateIntSystem = object : GearyListener() {
-            val Pointers.comp by get<GenerateInt>().on(source)
 
-            override fun Pointers.handle() {
-                event.entity.set(comp.generate)
-            }
+        geary.listener(object : ListenerQuery() {
+            val comp by source.get<GenerateInt>()
+        }).exec {
+            event.entity.set(comp.generate)
         }
-        geary.pipeline.addSystems(skillSystem, generateIntSystem)
 
         // act
         EventHelpers.runSkill<TestEvent>(entity { extend(prefab) })
@@ -208,14 +206,12 @@ class VariablesConfigTest {
         val prefab = yamlFormat.decodeFromString(serializer, config)
 
         var result: GearyEntity? = null
-        val skillSystem = object : GearyListener() {
-            val Pointers.comp by get<TestCompEntity>().on(source)
 
-            override fun Pointers.handle() {
-                result = comp.entity.get(this)
-            }
+        geary.listener(object : ListenerQuery() {
+            val comp by source.get<TestCompEntity>()
+        }).exec {
+            result = comp.entity.get(this)
         }
-        geary.pipeline.addSystems(skillSystem)
 
         // act
         EventHelpers.runSkill<TestEvent>(entity { extend(prefab) })
