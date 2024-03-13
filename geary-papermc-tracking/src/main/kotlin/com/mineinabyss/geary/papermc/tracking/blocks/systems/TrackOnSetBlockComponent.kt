@@ -1,22 +1,23 @@
 package com.mineinabyss.geary.papermc.tracking.blocks.systems
 
+import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.tracking.blocks.components.SetBlock
 import com.mineinabyss.geary.papermc.tracking.blocks.gearyBlocks
 import com.mineinabyss.geary.prefabs.PrefabKey
-import com.mineinabyss.geary.systems.GearyListener
-import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.geary.systems.builders.listener
+import com.mineinabyss.geary.systems.query.ListenerQuery
 
-class TrackOnSetBlockComponent : GearyListener() {
-    private val Pointers.block by get<SetBlock>().on(target)
-    private val Pointers.prefab by get<PrefabKey>().whenSetOnTarget()
-
-    override fun Pointers.handle() {
-        val blockData = gearyBlocks
-            .block2Prefab
-            .blockMap
-            .getOrDefault(block.blockType, null)
-            ?.get(block.blockId) ?: return
-
-        gearyBlocks.block2Prefab[blockData] = prefab
+fun createTrackOnSetBlockComponentListener() = geary.listener(
+    object : ListenerQuery() {
+        val block by get<SetBlock>()
+        val prefab by get<PrefabKey>()
     }
+).exec {
+    val blockData = gearyBlocks
+        .block2Prefab
+        .blockMap
+        .getOrDefault(block.blockType, null)
+        ?.get(block.blockId) ?: return@exec
+
+    gearyBlocks.block2Prefab[blockData] = prefab
 }

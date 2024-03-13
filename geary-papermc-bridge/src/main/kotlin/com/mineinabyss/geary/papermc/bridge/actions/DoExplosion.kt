@@ -1,8 +1,9 @@
 package com.mineinabyss.geary.papermc.bridge.actions
 
+import com.mineinabyss.geary.modules.GearyModule
 import com.mineinabyss.geary.papermc.bridge.config.inputs.Input
-import com.mineinabyss.geary.systems.GearyListener
-import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.geary.systems.builders.listener
+import com.mineinabyss.geary.systems.query.ListenerQuery
 import com.mineinabyss.idofront.spawning.spawn
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
@@ -20,17 +21,18 @@ data class Explosion(
     val at: Input<@Contextual Location>,
 )
 
-class ExplosionSystem : GearyListener() {
-    private val Pointers.explosion by get<Explosion>().on(source)
-
-    override fun Pointers.handle() {
-        val location = explosion.at.get(this)
-        if (explosion.fuseTicks <= 0) location.createExplosion(
-            explosion.power, explosion.setFire, explosion.breakBlocks
-        )
-        else //only spawn a tnt in if we have a fuse
-            location.spawn<TNTPrimed> {
-                fuseTicks = explosion.fuseTicks
-            }
+fun GearyModule.createExplosionAction() = listener(
+    object : ListenerQuery() {
+        val explosion by source.get<Explosion>()
     }
+).exec {
+    val location = explosion.at.get(this)
+    if (explosion.fuseTicks <= 0) location.createExplosion(
+        explosion.power, explosion.setFire, explosion.breakBlocks
+    )
+    else //only spawn a tnt in if we have a fuse
+        location.spawn<TNTPrimed> {
+            fuseTicks = explosion.fuseTicks
+        }
+
 }

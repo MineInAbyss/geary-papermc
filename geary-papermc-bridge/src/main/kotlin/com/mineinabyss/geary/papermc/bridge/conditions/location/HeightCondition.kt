@@ -1,18 +1,14 @@
 package com.mineinabyss.geary.papermc.bridge.conditions.location
 
-import com.mineinabyss.geary.events.CheckingListener
-import com.mineinabyss.geary.papermc.bridge.conditions.HealthConditions
+import com.mineinabyss.geary.modules.GearyModule
 import com.mineinabyss.geary.papermc.bridge.config.inputs.Input
-import com.mineinabyss.geary.papermc.bridge.helpers.nullOr
-import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.geary.systems.builders.listener
+import com.mineinabyss.geary.systems.query.ListenerQuery
 import com.mineinabyss.idofront.serialization.IntRangeSerializer
-import com.mineinabyss.idofront.typealiases.BukkitEntity
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.bukkit.Location
-import org.bukkit.attribute.Attribute
-import org.bukkit.entity.LivingEntity
 
 @Serializable
 @SerialName("geary:check.height")
@@ -21,11 +17,11 @@ class HeightCondition(
     val at: Input<@Contextual Location> = Input.reference("location")
 )
 
-class HeightConditionChecker : CheckingListener() {
-    private val Pointers.condition by get<HeightCondition>().on(source)
-
-    override fun Pointers.check(): Boolean {
-        val location = condition.at.get(this)
-        return location.y.toInt() in condition.range
+fun GearyModule.createHeightConditionChecker() = listener(
+    object : ListenerQuery() {
+        val condition by source.get<HeightCondition>()
     }
+).check {
+    val location = condition.at.get(this)
+    location.y.toInt() in condition.range
 }

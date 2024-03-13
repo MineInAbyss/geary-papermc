@@ -1,8 +1,9 @@
 package com.mineinabyss.geary.papermc.bridge.conditions.location
 
-import com.mineinabyss.geary.events.CheckingListener
+import com.mineinabyss.geary.modules.GearyModule
 import com.mineinabyss.geary.papermc.bridge.config.inputs.Input
-import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.geary.systems.builders.listener
+import com.mineinabyss.geary.systems.query.ListenerQuery
 import com.mineinabyss.idofront.serialization.MaterialByNameSerializer
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
@@ -18,13 +19,13 @@ class BlockConditions(
     val at: Input<@Contextual Location> = Input.reference("location"),
 )
 
-class BlockConditionChecker : CheckingListener() {
-    private val Pointers.conditions by get<BlockConditions>().on(source)
-
-    override fun Pointers.check(): Boolean {
-        val location = conditions.at.get(this)
-        return location.block.type.let {
-            (conditions.allow.isEmpty() || it in conditions.allow) && it !in conditions.deny
-        }
+fun GearyModule.createBlockConditionChecker() = listener(
+    object : ListenerQuery() {
+        val conditions by source.get<BlockConditions>()
+    }
+).check {
+    val location = conditions.at.get(this)
+    location.block.type.let {
+        (conditions.allow.isEmpty() || it in conditions.allow) && it !in conditions.deny
     }
 }

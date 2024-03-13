@@ -1,10 +1,11 @@
 package com.mineinabyss.geary.papermc.bridge.actions
 
+import com.mineinabyss.geary.modules.GearyModule
 import com.mineinabyss.geary.papermc.bridge.config.inputs.Input
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.spawnFromPrefab
 import com.mineinabyss.geary.serialization.serializers.SerializableGearyEntity
-import com.mineinabyss.geary.systems.GearyListener
-import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.geary.systems.builders.listener
+import com.mineinabyss.geary.systems.query.ListenerQuery
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -17,10 +18,11 @@ class DoSpawnEntity(
     val at: Input<@Contextual Location>
 )
 
-class DoSpawnSystem : GearyListener() {
-    private val Pointers.spawn by get<DoSpawnEntity>().on(source)
 
-    override fun Pointers.handle() {
-        spawn.at.get(this).spawnFromPrefab(spawn.entity.get(this))
+fun GearyModule.createDoSpawnAction() = listener(
+    object : ListenerQuery() {
+        val spawn by source.get<DoSpawnEntity>()
     }
+).exec {
+    spawn.at.get(this).spawnFromPrefab(spawn.entity.get(this))
 }

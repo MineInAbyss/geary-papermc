@@ -1,9 +1,9 @@
 package com.mineinabyss.geary.papermc.bridge.conditions
 
-import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
 import com.mineinabyss.geary.datatypes.GearyEntity
-import com.mineinabyss.geary.events.CheckingListener
-import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.geary.modules.GearyModule
+import com.mineinabyss.geary.systems.builders.listener
+import com.mineinabyss.geary.systems.query.ListenerQuery
 import com.mineinabyss.idofront.serialization.DurationSerializer
 import com.mineinabyss.idofront.serialization.MiniMessageSerializer
 import kotlinx.serialization.SerialName
@@ -35,15 +35,14 @@ class Cooldown(
 
 class CooldownStarted(val time: Long, val cooldown: Cooldown)
 
-class CooldownChecker : CheckingListener() {
-    private val Pointers.cooldownDefinition by get<Cooldown>().on(source)
-
-    @OptIn(UnsafeAccessors::class)
-    override fun Pointers.check(): Boolean {
-        if (Cooldown.isComplete(target.entity, source!!.entity)) {
-            Cooldown.start(target.entity, source!!.entity, cooldownDefinition)
-            return true
-        }
-        return false
+fun GearyModule.createCooldownChecker() = listener(
+    object : ListenerQuery() {
+        val cooldownDefinition by source.get<Cooldown>()
     }
+).check {
+    if (Cooldown.isComplete(entity, source.entity)) {
+        Cooldown.start(entity, source.entity, cooldownDefinition)
+        return@check true
+    }
+    return@check false
 }

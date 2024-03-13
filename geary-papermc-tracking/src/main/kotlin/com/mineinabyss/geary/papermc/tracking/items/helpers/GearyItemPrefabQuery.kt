@@ -6,21 +6,24 @@ import com.mineinabyss.geary.helpers.contains
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
-import com.mineinabyss.geary.systems.accessors.Pointer
+import com.mineinabyss.geary.systems.query.CachedQueryRunner
 import com.mineinabyss.geary.systems.query.GearyQuery
 
 class GearyItemPrefabQuery : GearyQuery() {
-    private val itemQuery = family {
-        has<SetItem>()
-        has<Prefab>()
-    }
 
-    val Pointer.key by get<PrefabKey>()
-    val Pointer.isItem by itemQuery
+    val key by get<PrefabKey>()
+    override fun ensure() = this { add(itemQuery) }
 
-    fun getKeys(): List<PrefabKey> = toList{ it.key }
+    companion object {
+        private val itemQuery = family {
+            has<SetItem>()
+            has<Prefab>()
+        }
 
-    fun isItem(entity: GearyEntity): Boolean {
-        return entity.prefabs.any { it.type in itemQuery }
+        fun CachedQueryRunner<GearyItemPrefabQuery>.getKeys(): List<PrefabKey> = map { key }
+
+        fun isItem(entity: GearyEntity): Boolean {
+            return entity.prefabs.any { it.type in itemQuery }
+        }
     }
 }

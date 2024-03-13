@@ -7,8 +7,7 @@ import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.componentId
 import com.mineinabyss.geary.helpers.readableString
 import com.mineinabyss.geary.helpers.temporaryEntity
-import com.mineinabyss.geary.papermc.bridge.config.Skill
-import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.geary.systems.query.ListenerQuery
 import kotlinx.serialization.Serializable
 
 @Serializable(with = InputSerializer::class)
@@ -24,10 +23,10 @@ sealed interface Input<T> {
     fun get(entities: Entities): T
 
     @OptIn(UnsafeAccessors::class)
-    fun get(pointers: Pointers): T = get(
+    fun get(pointers: ListenerQuery): T = get(
         Entities(
-            pointers.target.entity,
-            pointers.event.entity,
+            pointers.unsafeEntity,
+            pointers.event.unsafeEntity,
         )
     )
 
@@ -74,7 +73,7 @@ sealed interface Input<T> {
         inline fun <reified T> reference(expression: String) =
             VariableReference<T>(componentId<T>(), expression)
 
-        inline fun <reified T> of(value:T) =
-                Value(componentId<T>(), value)
+        inline fun <reified T> of(value: T) =
+            Value(componentId<T>(), value)
     }
 }

@@ -17,6 +17,7 @@ import java.util.*
 
 class PlayerItemCacheTest {
     init {
+        MockBukkit.unmock()
         geary(TestEngineModule, TestEngineModule(reuseIDsAfterRemoval = false)) {
             install(Prefabs)
         }

@@ -4,16 +4,16 @@
 
 package com.mineinabyss.geary.papermc.bridge.conditions
 
-import com.mineinabyss.geary.events.CheckingListener
+import com.mineinabyss.geary.modules.GearyModule
 import com.mineinabyss.geary.papermc.bridge.helpers.nullOr
-import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.geary.systems.builders.listener
+import com.mineinabyss.geary.systems.query.ListenerQuery
 import com.mineinabyss.idofront.serialization.DoubleRangeSerializer
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import com.mineinabyss.idofront.util.DoubleRange
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
-import org.bukkit.attribute.Attribute
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 
@@ -28,15 +28,16 @@ class HealthConditions(
     val withinPercent: DoubleRange? = null,
 )
 
-class HealthConditionChecker : CheckingListener() {
-    private val Pointers.bukkit by get<BukkitEntity>().on(target)
-    private val Pointers.health by get<HealthConditions>().on(source)
-
-    override fun Pointers.check(): Boolean {
-        val living = bukkit as? LivingEntity ?: return false
-
-        return (health.within nullOr { living.health in it } && health.withinPercent nullOr {
-            living.health / (living.getAttribute(org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH)?.value ?: return false) in it
-        })
+fun GearyModule.createHealthConditionChecker() = listener(
+    object : ListenerQuery() {
+        val bukkit by get<BukkitEntity>()
+        val health by source.get<HealthConditions>()
     }
+).check {
+    val living = bukkit as? LivingEntity ?: return@check false
+
+    (health.within nullOr { living.health in it } && health.withinPercent nullOr {
+        living.health / (living.getAttribute(org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH)?.value
+            ?: return@check false) in it
+    })
 }

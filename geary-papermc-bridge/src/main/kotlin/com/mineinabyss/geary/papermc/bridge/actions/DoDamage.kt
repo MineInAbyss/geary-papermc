@@ -1,7 +1,8 @@
 package com.mineinabyss.geary.papermc.bridge.actions
 
-import com.mineinabyss.geary.systems.GearyListener
-import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.geary.modules.GearyModule
+import com.mineinabyss.geary.systems.builders.listener
+import com.mineinabyss.geary.systems.query.ListenerQuery
 import com.mineinabyss.idofront.serialization.DoubleRangeSerializer
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import com.mineinabyss.idofront.util.DoubleRange
@@ -23,19 +24,19 @@ data class DoDamage(
     val ignoreArmor: Boolean = false,
 )
 
-
-class DoDamageSystem : GearyListener() {
-    val Pointers.bukkit by get<BukkitEntity>().on(target)
-    val Pointers.damage by get<DoDamage>().on(source)
-
-    override fun Pointers.handle() {
-        val living = bukkit as? LivingEntity ?: return
-        if (living.health > damage.minHealth) {
-            if (damage.ignoreArmor) {
-                living.health -= damage.damage.randomOrMin()
-            } else {
-                living.damage(damage.damage.randomOrMin())
-            }
+fun GearyModule.createDoDamageAction() = listener(
+    object : ListenerQuery() {
+        val bukkit by get<BukkitEntity>()
+        val damage by source.get<DoDamage>()
+    }
+).exec {
+    val living = bukkit as? LivingEntity ?: return@exec
+    if (living.health > damage.minHealth) {
+        if (damage.ignoreArmor) {
+            living.health -= damage.damage.randomOrMin()
+        } else {
+            living.damage(damage.damage.randomOrMin())
         }
     }
+
 }

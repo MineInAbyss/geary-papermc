@@ -1,8 +1,9 @@
 package com.mineinabyss.geary.papermc.bridge.conditions
 
-import com.mineinabyss.geary.events.CheckingListener
+import com.mineinabyss.geary.modules.GearyModule
 import com.mineinabyss.geary.papermc.bridge.helpers.nullOrEquals
-import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.geary.systems.builders.listener
+import com.mineinabyss.geary.systems.query.ListenerQuery
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.bukkit.entity.Player
@@ -41,11 +42,14 @@ class PlayerConditions(
     val isOp: Boolean? = null,
 )
 
-class PlayerConditionsChecker : CheckingListener() {
-    private val Pointers.player by get<Player>().on(target)
-    private val Pointers.conditions by get<PlayerConditions>().on(source)
 
-    override fun Pointers.check(): Boolean = player.isOnline && // Just to align syntax below
+fun GearyModule.createPlayerConditionsChecker() = listener(
+    object : ListenerQuery() {
+        val player by get<Player>()
+        val conditions by source.get<PlayerConditions>()
+    }
+).check {
+    player.isOnline && // Just to align syntax below
             conditions.isSneaking nullOrEquals player.isSneaking &&
             conditions.isSprinting nullOrEquals player.isSprinting &&
             conditions.isBlocking nullOrEquals player.isBlocking &&

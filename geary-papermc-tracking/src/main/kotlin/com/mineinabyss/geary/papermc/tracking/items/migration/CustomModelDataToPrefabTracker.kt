@@ -1,17 +1,19 @@
 package com.mineinabyss.geary.papermc.tracking.items.migration
 
+import com.mineinabyss.geary.modules.GearyModule
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.papermc.tracking.items.gearyItems
 import com.mineinabyss.geary.prefabs.PrefabKey
-import com.mineinabyss.geary.systems.GearyListener
-import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.geary.systems.builders.listener
+import com.mineinabyss.geary.systems.query.ListenerQuery
 
-class CustomModelDataToPrefabTracker : GearyListener() {
-    private val Pointers.key by get<PrefabKey>().whenSetOnTarget()
-    private val Pointers.item by get<SetItem>().whenSetOnTarget()
-
-    override fun Pointers.handle() {
-        val customModelData = item.item.customModelData ?: return
-        gearyItems.migration.map[customModelData] = key
+fun GearyModule.createCustomModelDataToPrefabTracker() = listener(
+    object : ListenerQuery() {
+        val key by get<PrefabKey>()
+        val item by get<SetItem>()
+        override fun ensure() = event.anySet(::key, ::item)
     }
+).exec {
+    val customModelData = item.item.customModelData ?: return@exec
+    gearyItems.migration.map[customModelData] = key
 }

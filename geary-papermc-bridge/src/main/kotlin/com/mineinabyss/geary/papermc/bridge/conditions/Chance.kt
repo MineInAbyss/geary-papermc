@@ -1,10 +1,10 @@
 package com.mineinabyss.geary.papermc.bridge.conditions
 
-import com.mineinabyss.geary.events.CheckingListener
-import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.geary.modules.GearyModule
+import com.mineinabyss.geary.systems.builders.listener
+import com.mineinabyss.geary.systems.query.ListenerQuery
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.bukkit.entity.Player
 import kotlin.random.Random
 
 @JvmInline
@@ -12,10 +12,6 @@ import kotlin.random.Random
 @SerialName("geary:chance")
 value class Chance(val percentage: Double)
 
-class ChanceChecker : CheckingListener() {
-    private val Pointers.chance by get<Chance>().on(source)
-
-    override fun Pointers.check(): Boolean {
-        return Random.nextDouble() < chance.percentage
-    }
-}
+fun GearyModule.createChanceChecker() = listener(object : ListenerQuery() {
+    val chance by source.get<Chance>()
+}).check { Random.nextDouble() < chance.percentage }

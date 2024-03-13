@@ -1,15 +1,14 @@
 package com.mineinabyss.geary.papermc.bridge.actions
 
-import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
-import com.mineinabyss.geary.autoscan.AutoScan
+import com.mineinabyss.geary.modules.GearyModule
 import com.mineinabyss.geary.papermc.bridge.config.Skill
 import com.mineinabyss.geary.papermc.bridge.events.EventHelpers
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.geary.prefabs.serializers.PrefabKeySerializer
 import com.mineinabyss.geary.serialization.serializers.InnerSerializer
-import com.mineinabyss.geary.systems.GearyListener
-import com.mineinabyss.geary.systems.accessors.Pointers
+import com.mineinabyss.geary.systems.builders.listener
+import com.mineinabyss.geary.systems.query.ListenerQuery
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.builtins.ListSerializer
@@ -31,18 +30,16 @@ class RunSkills(
     )
 }
 
-@AutoScan
-class RunSkillSystem : GearyListener() {
-    private val Pointers.action by get<RunSkills>().on(source)
-
-    @OptIn(UnsafeAccessors::class)
-    override fun Pointers.handle() {
-        action.skills.forEach { skill ->
-            EventHelpers.runSkill(
-                target.entity,
-                event.entity,
-                skill,
-            )
-        }
+fun GearyModule.createRunSkillAction() = listener(
+    object : ListenerQuery() {
+        val action by source.get<RunSkills>()
+    }
+).exec {
+    action.skills.forEach { skill ->
+        EventHelpers.runSkill(
+            entity,
+            event.entity,
+            skill,
+        )
     }
 }

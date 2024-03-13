@@ -14,11 +14,14 @@ import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
 import com.mineinabyss.geary.papermc.plugin.commands.GearyCommands
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
 import com.mineinabyss.geary.papermc.tracking.blocks.gearyBlocks
+import com.mineinabyss.geary.papermc.tracking.blocks.helpers.getKeys
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
+import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery.Companion.getKeys
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.gearyItems
+import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery.Companion.getKeys
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.geary.serialization.dsl.FileSystemAddon
@@ -28,13 +31,11 @@ import com.mineinabyss.geary.uuid.SynchronizedUUID2GearyMap
 import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.messaging.logSuccess
-import com.mineinabyss.idofront.plugin.listeners
 import com.mineinabyss.idofront.serialization.LocationSerializer
 import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.bukkit.Location
-import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemStack
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
@@ -73,12 +74,6 @@ class GearyPluginImpl : GearyPlugin() {
 
             autoscan(classLoader, "com.mineinabyss.geary") {
                 components()
-            }
-
-            // Auto register Bukkit listeners when they are added as a system
-            geary.pipeline.interceptSystemAddition { system ->
-                if (system is Listener) listeners(system)
-                system
             }
 
             // Load prefabs in Geary folder, each subfolder is considered its own namespace
