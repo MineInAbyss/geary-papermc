@@ -29,6 +29,6 @@ fun GearyModule.createDefaultSkillsListener() = listener(
     }
     events.forEach { (event, entity) ->
         entity.set(Skill(execute = entity))
-        entity.addRelation(event, entity.id)
+        this.entity.addRelation(event, entity.id)
     }
 }
