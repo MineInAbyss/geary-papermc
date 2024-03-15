@@ -66,6 +66,7 @@ class PaperEngineModule(
 
     fun updateToMatch(config: GearyPaperConfig): ConfigBased {
         val configBased = ConfigBased(config, plugin)
+        this.configBased = configBased
         plugin.injectLogger(logger)
         return configBased
     }
