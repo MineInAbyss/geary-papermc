@@ -5,12 +5,14 @@ import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.GearyPaperConfigModule
 import com.mineinabyss.idofront.config.IdofrontConfig
 import com.mineinabyss.idofront.di.DI
+import com.mineinabyss.idofront.messaging.ComponentLogger
 import org.junit.jupiter.api.AfterAll
 
 abstract class MockedServerTest {
     init {
         MockBukkit.unmock()
     }
+
     val server = MockBukkit.mock()
     val plugin = MockBukkit.createMockPlugin("Geary")
     val world = server.addSimpleWorld("world")
@@ -21,6 +23,8 @@ abstract class MockedServerTest {
             override val configHolder: IdofrontConfig<GearyPaperConfig>
                 get() = error("No config holder in tests, use config directly")
             override val config = GearyPaperConfig()
+
+            override val logger: ComponentLogger = ComponentLogger.fallback()
         })
     }
 
