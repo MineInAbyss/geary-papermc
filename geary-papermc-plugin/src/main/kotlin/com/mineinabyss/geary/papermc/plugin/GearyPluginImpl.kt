@@ -11,6 +11,7 @@ import com.mineinabyss.geary.papermc.GearyProductionPaperConfigModule
 import com.mineinabyss.geary.papermc.bridge.PaperBridge
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
+import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.plugin.commands.GearyCommands
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
 import com.mineinabyss.geary.papermc.tracking.blocks.gearyBlocks
@@ -30,7 +31,6 @@ import com.mineinabyss.geary.serialization.formats.YamlFormat
 import com.mineinabyss.geary.uuid.SynchronizedUUID2GearyMap
 import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.di.DI
-import com.mineinabyss.idofront.messaging.logSuccess
 import com.mineinabyss.idofront.serialization.LocationSerializer
 import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
 import okio.FileSystem
@@ -98,7 +98,7 @@ class GearyPluginImpl : GearyPlugin() {
                     }
                 }
 
-                logSuccess(
+                gearyPaper.logger.iSuccess(
                     "Loaded types: ${gearyMobs.prefabs.getKeys().size} mobs, ${
                         gearyBlocks.prefabs.getKeys().size
                     } blocks, ${gearyItems.prefabs.getKeys().size} items"
