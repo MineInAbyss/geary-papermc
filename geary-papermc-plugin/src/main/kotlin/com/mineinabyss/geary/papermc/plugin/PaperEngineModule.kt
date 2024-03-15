@@ -1,7 +1,5 @@
 package com.mineinabyss.geary.papermc.plugin
 
-import co.touchlab.kermit.Logger
-import co.touchlab.kermit.StaticConfig
 import com.mineinabyss.geary.datatypes.maps.SynchronizedTypeMap
 import com.mineinabyss.geary.datatypes.maps.TypeMap
 import com.mineinabyss.geary.engine.archetypes.ArchetypeEngine
@@ -11,23 +9,30 @@ import com.mineinabyss.geary.engine.archetypes.operations.ArchetypeMutateOperati
 import com.mineinabyss.geary.engine.archetypes.operations.ArchetypeReadOperations
 import com.mineinabyss.geary.modules.ArchetypeEngineModule
 import com.mineinabyss.geary.modules.GearyModuleProvider
-import com.mineinabyss.geary.modules.geary
-import com.mineinabyss.geary.papermc.CatchType
 import com.mineinabyss.geary.papermc.Catching.Companion.asyncCheck
+import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.GearyPlugin
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.idofront.di.DI
+import com.mineinabyss.idofront.messaging.ComponentLogger
+import com.mineinabyss.idofront.messaging.injectLogger
 import com.mineinabyss.idofront.time.ticks
-import io.papermc.paper.util.TickThread
-import org.spigotmc.AsyncCatcher
+
+class ConfigBased(
+    config: GearyPaperConfig,
+    plugin: GearyPlugin,
+) {
+    val logger = ComponentLogger.forPlugin(plugin, minSeverity = config.logLevel)
+}
 
 class PaperEngineModule(
     val plugin: GearyPlugin
-) :
-    ArchetypeEngineModule(tickDuration = 1.ticks) {
+) : ArchetypeEngineModule(tickDuration = 1.ticks) {
+    private var configBased = updateToMatch(gearyPaper.config)
+
     override val engine: ArchetypeEngine = PaperMCEngine()
-    override val logger =
-        Logger(StaticConfig(logWriterList = listOf(PaperWriter(plugin)), minSeverity = gearyPaper.config.logLevel))
+    override val logger get() = configBased.logger
+
     override val entityProvider: EntityByArchetypeProvider
         get() {
             asyncCheck(gearyPaper.config.catch.asyncWrite, "Async entityProvider access!")
@@ -58,6 +63,12 @@ class PaperEngineModule(
             asyncCheck(gearyPaper.config.catch.asyncArchetypeProviderAccess, "Async archetype provider access!")
             return super.archetypeProvider
         }
+
+    fun updateToMatch(config: GearyPaperConfig): ConfigBased {
+        val configBased = ConfigBased(config, plugin)
+        plugin.injectLogger(logger)
+        return configBased
+    }
 
     companion object : GearyModuleProvider<PaperEngineModule> {
         override fun start(module: PaperEngineModule) {
