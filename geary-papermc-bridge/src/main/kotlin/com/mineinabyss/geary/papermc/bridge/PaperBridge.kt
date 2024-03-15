@@ -25,6 +25,7 @@ import com.mineinabyss.geary.papermc.bridge.events.items.ItemInteractBridge
 import com.mineinabyss.geary.papermc.bridge.mythicmobs.createRunMMSkillAction
 import com.mineinabyss.geary.papermc.bridge.readers.createLocationReader
 import com.mineinabyss.geary.papermc.bridge.readers.createTargetBlockReader
+import com.mineinabyss.geary.papermc.bridge.systems.createCooldownDisplaySystem
 import com.mineinabyss.geary.papermc.bridge.targetselectors.createNearbyEntitiesSelector
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
@@ -65,6 +66,8 @@ class PaperBridge {
             createTargetBlockReader()
             createLocationReader()
             createNearbyEntitiesSelector()
+
+            createCooldownDisplaySystem()
 
             geary.pipeline.runOnOrAfter(GearyPhase.ENABLE) {
                 DI.getOrNull<GearyPaperConfigModule>() ?: return@runOnOrAfter
