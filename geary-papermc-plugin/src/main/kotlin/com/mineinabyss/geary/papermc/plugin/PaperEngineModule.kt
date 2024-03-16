@@ -10,28 +10,17 @@ import com.mineinabyss.geary.engine.archetypes.operations.ArchetypeReadOperation
 import com.mineinabyss.geary.modules.ArchetypeEngineModule
 import com.mineinabyss.geary.modules.GearyModuleProvider
 import com.mineinabyss.geary.papermc.Catching.Companion.asyncCheck
-import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.GearyPlugin
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.idofront.di.DI
-import com.mineinabyss.idofront.messaging.ComponentLogger
-import com.mineinabyss.idofront.messaging.injectLogger
+import com.mineinabyss.idofront.messaging.observeLogger
 import com.mineinabyss.idofront.time.ticks
-
-class ConfigBased(
-    config: GearyPaperConfig,
-    plugin: GearyPlugin,
-) {
-    val logger = ComponentLogger.forPlugin(plugin, minSeverity = config.logLevel)
-}
 
 class PaperEngineModule(
     val plugin: GearyPlugin
 ) : ArchetypeEngineModule(tickDuration = 1.ticks) {
-    private var configBased = updateToMatch(gearyPaper.config)
-
     override val engine: ArchetypeEngine = PaperMCEngine()
-    override val logger get() = configBased.logger
+    override val logger by plugin.observeLogger()
 
     override val entityProvider: EntityByArchetypeProvider
         get() {
@@ -63,13 +52,6 @@ class PaperEngineModule(
             asyncCheck(gearyPaper.config.catch.asyncArchetypeProviderAccess, "Async archetype provider access!")
             return super.archetypeProvider
         }
-
-    fun updateToMatch(config: GearyPaperConfig): ConfigBased {
-        val configBased = ConfigBased(config, plugin)
-        this.configBased = configBased
-        plugin.injectLogger(logger)
-        return configBased
-    }
 
     companion object : GearyModuleProvider<PaperEngineModule> {
         override fun start(module: PaperEngineModule) {
