@@ -24,7 +24,7 @@ class GearyPaperConfig(
     val mobTypeConversion: MobTypeConversion = MobTypeConversion.IGNORE,
     @YamlComment("List of mob types to remove if they are not entities with Geary prefabs (i.e. vanilla entities)")
     val removeVanillaMobTypes: Set<EntityType> = emptySet(),
-    val logLevel: Severity = Severity.Warn,
+    val logLevel: Severity = Severity.Info,
 )
 
 @Serializable

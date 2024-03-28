@@ -23,7 +23,7 @@ abstract class PlayerItemCache<T>(
 
     private fun removeEntity(slot: Int) {
         val entity = entities[slot].takeIf { it != 0uL }?.toGeary() ?: return
-        logger.d("Removing ${entities[slot]} in slot $slot")
+        logger.v("Removing ${entities[slot]} in slot $slot")
         val pdc = entity.get<ItemStack>()?.itemMeta?.persistentDataContainer
         if (pdc != null) entity.encodeComponentsTo(pdc)
         entity.removeEntity()
@@ -63,7 +63,7 @@ abstract class PlayerItemCache<T>(
                     entities[slot] = newEntity?.id ?: 0uL
                     if (holder != null) newEntity?.addParent(holder)
                     newEntity?.set<ItemStack>(convertToItemStack(item))
-                    logger.d("Adding $newEntity (${newEntity?.prefabs?.map { it.get<PrefabKey>() }}) in slot $slot")
+                    logger.v("Adding $newEntity (${newEntity?.prefabs?.map { it.get<PrefabKey>() }}) in slot $slot")
                 }
 
                 else -> removeEntity(slot)
