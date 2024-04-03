@@ -8,9 +8,12 @@ import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.CatchType
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery
-import com.mineinabyss.geary.papermc.tracking.entities.systems.*
+import com.mineinabyss.geary.papermc.tracking.entities.systems.EntityWorldEventTracker
 import com.mineinabyss.geary.papermc.tracking.entities.systems.attemptspawn.createAttemptSpawnListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.attemptspawn.createAttemptSpawnMythicMobListener
+import com.mineinabyss.geary.papermc.tracking.entities.systems.boundingbox.setBoundingBoxFromEntityType
+import com.mineinabyss.geary.papermc.tracking.entities.systems.createBukkitEntityRemoveListener
+import com.mineinabyss.geary.papermc.tracking.entities.systems.createBukkitEntitySetListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.removevanillamobs.RemoveVanillaMobsListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.ConvertEntityTypesListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.ConvertToMythicMobListener
@@ -39,6 +42,7 @@ interface EntityTracking {
             geary.createBukkitEntityRemoveListener()
             geary.createBukkitEntitySetListener()
             geary.createAttemptSpawnListener()
+            geary.setBoundingBoxFromEntityType()
             geary.pipeline.runOnOrAfter(GearyPhase.ENABLE) {
                 gearyPaper.plugin.listeners(
                     EntityWorldEventTracker(),

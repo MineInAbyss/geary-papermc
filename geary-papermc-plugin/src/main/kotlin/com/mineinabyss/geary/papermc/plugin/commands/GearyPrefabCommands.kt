@@ -8,7 +8,7 @@ import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.UpdateMob
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
-import com.mineinabyss.geary.prefabs.helpers.inheritPrefabs
+import com.mineinabyss.geary.prefabs.helpers.inheritPrefabsIfNeeded
 import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.idofront.commands.Command
 import com.mineinabyss.idofront.commands.arguments.stringArg
@@ -69,7 +69,7 @@ fun Command.prefabs() {
                         gearyPaper.plugin.dataFolder.resolve(namespace).resolve(path).toOkioPath()
                     )
                 }.onSuccess {
-                    it.inheritPrefabs()
+                    it.inheritPrefabsIfNeeded()
                     sender.success("Read prefab $namespace:$path")
                 }.onFailure { sender.error("Failed to read prefab $namespace:$path:\n${it.message}") }
             }

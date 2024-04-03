@@ -35,9 +35,8 @@ fun Command.mobsQuery() {
                 if (!GearyMobPrefabQuery.isMob(geary)) continue
 
                 if (types.any { type ->
-                        fun excludeDefault() = entity.customName() == null
                         when (type) {
-                            "custom" -> excludeDefault()
+                            "custom" -> true
                             else -> {
                                 val prefab = runCatching { PrefabKey.of(type).toEntityOrNull() }.getOrNull()
                                     ?: this@commandGroup.stopCommand("No such prefab or selector $type")
@@ -56,10 +55,10 @@ fun Command.mobsQuery() {
 
             sender.success(
                 """
-                        ${if (isInfo) "There are" else "Removed"}
-                        <b>$entityCount</b> entities matching your query
-                        ${if (radius <= 0) "in all loaded chunks." else "in a radius of $radius blocks."}
-                        """.trimIndent().replace("\n", " ")
+                ${if (isInfo) "There are" else "Removed"}
+                <b>$entityCount</b> entities matching your query
+                ${if (radius <= 0) "in all loaded chunks." else "in a radius of $radius blocks."}
+                """.trimIndent().replace("\n", " ")
             )
             if (isInfo) {
                 val categories = entities
