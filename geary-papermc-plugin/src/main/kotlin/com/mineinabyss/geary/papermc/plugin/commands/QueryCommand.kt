@@ -1,8 +1,5 @@
 package com.mineinabyss.geary.papermc.plugin.commands
 
-import com.mineinabyss.geary.components.relations.InstanceOf
-import com.mineinabyss.geary.datatypes.GearyEntity
-import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
@@ -62,7 +59,9 @@ fun Command.mobsQuery() {
             )
             if (isInfo) {
                 val categories = entities
-                    .groupingBy { it.toGeary().prefabs.first().get<PrefabKey>() }
+                    .asSequence()
+                    .flatMap { it.toGeary().prefabs }
+                    .groupingBy { it }
                     .eachCount()
                     .entries
                     .sortedByDescending { it.value }
@@ -82,8 +81,3 @@ fun Command.mobsQuery() {
         }
     }
 }
-
-fun GearyEntity.deepInstanceOf(entity: GearyEntity): Boolean =
-    instanceOf(entity) || getRelations<InstanceOf?, Any?>().any {
-        it.target.toGeary().deepInstanceOf(entity)
-    }

@@ -10,10 +10,6 @@ description: An Entity Component System written for Spigot
 
 dependencies:
   server:
-    MythicMobs:
-      required: false
-      load: BEFORE
-      join-classpath: true
     Idofront:
       required: true
       load: BEFORE

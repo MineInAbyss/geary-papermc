@@ -18,9 +18,6 @@ configurations {
 dependencies {
     implementation(project(":"))
 
-    // Plugins
-    compileOnly(libs.plugman)
-
     // MineInAbyss platform
     compileOnly(idofrontLibs.kotlin.stdlib)
     compileOnly(idofrontLibs.kotlinx.serialization.json)

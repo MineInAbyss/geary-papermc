@@ -10,7 +10,10 @@ import org.bukkit.util.BoundingBox
 fun GearyModule.setBoundingBoxFromEntityType() = listener(
     object : ListenerQuery() {
         val mobType by get<SetEntityType>()
-        override fun ensure() = event.anySet(::mobType)
+        override fun ensure() {
+            event.anySet(::mobType)
+            this { not { has<BoundingBox>() } }
+        }
     }
 ).exec {
     entity.addRelation<NoInherit, BoundingBox>()

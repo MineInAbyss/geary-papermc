@@ -3,8 +3,7 @@ package com.mineinabyss.geary.papermc.tracking.entities.helpers
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.helpers.contains
-import com.mineinabyss.geary.papermc.tracking.entities.components.SetEntityType
-import com.mineinabyss.geary.papermc.tracking.entities.components.SetMythicMob
+import com.mineinabyss.geary.papermc.tracking.entities.components.CustomMob
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
 import com.mineinabyss.geary.systems.query.CachedQueryRunner
@@ -22,10 +21,7 @@ class GearyMobPrefabQuery : GearyQuery() {
 
         private val mobQuery = family {
             has<Prefab>()
-            or {
-                has<SetEntityType>()
-                has<SetMythicMob>()
-            }
+            has<CustomMob>()
         }
 
         fun isMob(entity: GearyEntity): Boolean {

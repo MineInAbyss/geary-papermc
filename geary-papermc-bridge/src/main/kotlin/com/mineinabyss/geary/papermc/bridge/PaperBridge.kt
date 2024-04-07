@@ -22,7 +22,6 @@ import com.mineinabyss.geary.papermc.bridge.events.entities.*
 import com.mineinabyss.geary.papermc.bridge.events.items.ItemBreakBridge
 import com.mineinabyss.geary.papermc.bridge.events.items.ItemConsumeBridge
 import com.mineinabyss.geary.papermc.bridge.events.items.ItemInteractBridge
-import com.mineinabyss.geary.papermc.bridge.mythicmobs.createRunMMSkillAction
 import com.mineinabyss.geary.papermc.bridge.readers.createLocationReader
 import com.mineinabyss.geary.papermc.bridge.readers.createTargetBlockReader
 import com.mineinabyss.geary.papermc.bridge.systems.createCooldownDisplaySystem
@@ -56,7 +55,6 @@ class PaperBridge {
 
             createExplosionAction()
             createDoSpawnAction()
-            createRunMMSkillAction()
             createDoDamageAction()
             createDoKnockbackAction()
 

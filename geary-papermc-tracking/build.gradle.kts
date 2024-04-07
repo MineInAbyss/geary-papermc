@@ -7,7 +7,6 @@ plugins {
 }
 
 dependencies {
-    compileOnly(idofrontLibs.minecraft.plugin.mythic.dist)
     compileOnly(idofrontLibs.idofront.nms)
     compileOnly(idofrontLibs.minecraft.mccoroutine)
     implementation(gearyLibs.uuid)

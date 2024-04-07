@@ -12,7 +12,6 @@ import com.mineinabyss.geary.papermc.tracking.items.migration.SetItemIgnoredProp
 import com.mineinabyss.geary.papermc.tracking.items.migration.createCustomModelDataToPrefabTracker
 import com.mineinabyss.geary.papermc.tracking.items.migration.createItemMigrationListener
 import com.mineinabyss.geary.papermc.tracking.items.systems.LoginListener
-import com.mineinabyss.geary.papermc.tracking.items.systems.MythicMobDropSystem
 import com.mineinabyss.geary.papermc.tracking.items.systems.createInventoryTrackerSystem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.systems.query.CachedQueryRunner
@@ -46,7 +45,6 @@ interface ItemTracking {
                 gearyPaper.plugin.listeners(
                     loginListener,
                     SetItemIgnoredPropertyListener(),
-                    MythicMobDropSystem()
                 )
             }
         }
