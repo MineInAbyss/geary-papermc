@@ -67,7 +67,10 @@ fun Command.mobsQuery() {
                     .sortedByDescending { it.value }
 
                 if (categories.isNotEmpty()) sender.info(
-                    categories.joinToString("\n") { (type, amount) -> "<gray>${type}</gray>: $amount" }
+                    categories.joinToString("\n") { (type, amount) ->
+                        val prefabName = type.get<PrefabKey>()?.toString() ?: type.toString()
+                        "<gray>${prefabName}</gray>: $amount"
+                    }
                 )
             }
         }
