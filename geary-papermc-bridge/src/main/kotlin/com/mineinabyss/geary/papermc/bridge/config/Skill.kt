@@ -58,7 +58,11 @@ class Skill(
                         "run" -> run = compositeDecoder.decodeMapValue(Skills.serializer())
                         "onFail" -> onFail = compositeDecoder.decodeMapValue(Skills.serializer())
                         else -> execute += compositeDecoder.decodeMapValue(
-                            polymorphic.findSerializerFor(module, polymorphic.getNamespaces(module), key)
+                            polymorphic.findSerializerFor(
+                                serializersModule = module,
+                                namespaces = polymorphic.getParentConfig(module)?.namespaces ?: emptyList(),
+                                key = key
+                            )
                         )
                     }
                 }

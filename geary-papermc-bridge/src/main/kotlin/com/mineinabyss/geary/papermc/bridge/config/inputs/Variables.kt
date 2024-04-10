@@ -33,7 +33,7 @@ class Variables(
 
         override fun deserialize(decoder: Decoder): Variables {
             val module = decoder.serializersModule
-            val namespaces = polymorphic.getNamespaces(module)
+            val namespaces = polymorphic.getParentConfig(module)?.namespaces ?: emptyList()
             val inputs = mutableMapOf<String, Input<*>>()
             var using: SetTarget? = null
 

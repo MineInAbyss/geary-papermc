@@ -1,6 +1,5 @@
 package com.mineinabyss.geary.papermc.config
 
-import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.TestEngineModule
@@ -11,14 +10,17 @@ import com.mineinabyss.geary.papermc.bridge.config.Skills
 import com.mineinabyss.geary.papermc.bridge.config.inputs.Input
 import com.mineinabyss.geary.papermc.bridge.config.inputs.Variables
 import com.mineinabyss.geary.papermc.bridge.events.EventHelpers
+import com.mineinabyss.geary.prefabs.PrefabLoader
 import com.mineinabyss.geary.prefabs.Prefabs
 import com.mineinabyss.geary.prefabs.configuration.components.ChildrenOnPrefab
 import com.mineinabyss.geary.serialization.dsl.serializableComponents
 import com.mineinabyss.geary.serialization.dsl.serialization
+import com.mineinabyss.geary.serialization.formats.Format
 import com.mineinabyss.geary.serialization.formats.YamlFormat
 import com.mineinabyss.geary.serialization.serializers.GearyEntitySerializer
+import com.mineinabyss.geary.serialization.serializers.PolymorphicListAsMapSerializer
+import com.mineinabyss.geary.serialization.serializers.PolymorphicListAsMapSerializer.Companion.provideConfig
 import com.mineinabyss.geary.serialization.serializers.SerializableGearyEntity
-import com.mineinabyss.geary.systems.GearyListener
 import com.mineinabyss.geary.systems.builders.listener
 import com.mineinabyss.geary.systems.query.ListenerQuery
 import com.mineinabyss.idofront.di.DI
@@ -27,6 +29,7 @@ import io.kotest.matchers.shouldBe
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.modules.SerializersModule
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
@@ -72,12 +75,18 @@ class VariablesConfigTest {
     @SerialName("geary:generate_int")
     class GenerateInt(val generate: Int)
 
-    @OptIn(UnsafeAccessors::class)
     fun testReadCorrectly(
         @Language("yaml") config: String
     ) {
         // arrange
-        val prefab = yamlFormat.decodeFromString(serializer, config)
+        val props = yamlFormat.decodeFromString(
+            PrefabLoader.PrefabFileProperties.serializer(),
+            config,
+            configType = Format.ConfigType.NON_STRICT
+        )
+        val prefab = yamlFormat.decodeFromString(serializer, config, overrideSerializersModule = SerializersModule {
+            provideConfig(PolymorphicListAsMapSerializer.Config(namespaces = props.namespaces))
+        })
         var result: Int? = null
 
         geary.listener(object : ListenerQuery() {
@@ -194,7 +203,6 @@ class VariablesConfigTest {
     @Test
     fun `should read entity variable reference correctly`() {
         val config = """
-            namespaces: [ geary ]
             skills:
                 - event: on.test
                   vars:
@@ -203,7 +211,9 @@ class VariablesConfigTest {
                     entity: ${'$'}test
         """.trimIndent()
 
-        val prefab = yamlFormat.decodeFromString(serializer, config)
+        val prefab = yamlFormat.decodeFromString(serializer, config, overrideSerializersModule = SerializersModule {
+            provideConfig(PolymorphicListAsMapSerializer.Config(namespaces = listOf("geary")))
+        })
 
         var result: GearyEntity? = null
 
