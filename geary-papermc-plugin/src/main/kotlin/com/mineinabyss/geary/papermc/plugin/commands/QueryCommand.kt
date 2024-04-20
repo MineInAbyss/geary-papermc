@@ -65,11 +65,23 @@ fun Command.mobsQuery() {
                     .eachCount()
                     .entries
                     .sortedByDescending { it.value }
+                    .toList()
 
                 if (categories.isNotEmpty()) sender.info(
-                    categories.joinToString("\n") { (type, amount) ->
-                        val prefabName = type.get<PrefabKey>()?.toString() ?: type.toString()
-                        "<gray>${prefabName}</gray>: $amount"
+                    // Print mobs
+                    buildString {
+                        val mobs = categories.filterTo(mutableSetOf()) { GearyMobPrefabQuery.isMob(it.key) }
+                        if (mobs.isNotEmpty()) appendLine("Mobs:")
+                        mobs.forEach { (type, amount) ->
+                            val prefabName = type.get<PrefabKey>()?.toString() ?: type.toString()
+                            appendLine("<gray>${prefabName}</gray>: $amount")
+                        }
+                        val otherPrefabs = categories - mobs
+                        if (otherPrefabs.isNotEmpty()) appendLine("Other prefabs:")
+                        categories.filter { !GearyMobPrefabQuery.isMob(it.key) }.forEach { (type, amount) ->
+                            val prefabName = type.get<PrefabKey>()?.toString() ?: type.toString()
+                            appendLine("<dark_gray>${prefabName}</dark_gray>: $amount")
+                        }
                     }
                 )
             }
