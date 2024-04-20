@@ -11,7 +11,6 @@ import com.mineinabyss.geary.papermc.tracking.entities.components.markSetEntityT
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.entities.systems.EntityWorldEventTracker
 import com.mineinabyss.geary.papermc.tracking.entities.systems.attemptspawn.createAttemptSpawnListener
-import com.mineinabyss.geary.papermc.tracking.entities.systems.boundingbox.setBoundingBoxFromEntityType
 import com.mineinabyss.geary.papermc.tracking.entities.systems.createBukkitEntityRemoveListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.createBukkitEntitySetListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.removevanillamobs.RemoveVanillaMobsListener
@@ -41,7 +40,6 @@ interface EntityTracking {
             geary.createBukkitEntityRemoveListener()
             geary.createBukkitEntitySetListener()
             geary.createAttemptSpawnListener()
-            geary.setBoundingBoxFromEntityType()
             geary.markSetEntityTypeAsCustomMob()
             geary.pipeline.runOnOrAfter(GearyPhase.ENABLE) {
                 gearyPaper.plugin.listeners(
