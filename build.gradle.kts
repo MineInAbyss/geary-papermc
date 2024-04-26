@@ -12,7 +12,6 @@ plugins {
 
 dependencies {
     api(project(":geary-papermc-tracking"))
-    api(project(":geary-papermc-bridge"))
     api(gearyLibs.core)
     api(gearyLibs.autoscan)
     api(gearyLibs.prefabs)
@@ -26,6 +25,7 @@ allprojects {
 
     repositories {
         mavenCentral()
+        google()
         maven("https://repo.mineinabyss.com/releases")
         maven("https://repo.mineinabyss.com/snapshots")
         mavenLocal()

@@ -16,4 +16,4 @@ class GearyBlockPrefabQuery : GearyQuery() {
     }
 }
 
-fun CachedQueryRunner<GearyBlockPrefabQuery>.getKeys() = map { key }
+fun CachedQueryRunner<GearyBlockPrefabQuery>.getKeys() = map { it.key }

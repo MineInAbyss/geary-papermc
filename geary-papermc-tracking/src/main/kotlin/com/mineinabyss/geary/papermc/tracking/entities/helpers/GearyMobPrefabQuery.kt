@@ -16,8 +16,8 @@ class GearyMobPrefabQuery : GearyQuery() {
 
     companion object {
 
-        fun CachedQueryRunner<GearyMobPrefabQuery>.getKeys(): List<PrefabKey> = map { key }
-        fun CachedQueryRunner<GearyMobPrefabQuery>.getKeyStrings(): List<String> = map { key.toString() }
+        fun CachedQueryRunner<GearyMobPrefabQuery>.getKeys(): List<PrefabKey> = map { it.key }
+        fun CachedQueryRunner<GearyMobPrefabQuery>.getKeyStrings(): List<String> = map { it.key.toString() }
 
         private val mobQuery = family {
             has<Prefab>()

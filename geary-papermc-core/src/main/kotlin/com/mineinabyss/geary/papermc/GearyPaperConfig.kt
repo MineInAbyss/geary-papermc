@@ -16,8 +16,6 @@ class GearyPaperConfig(
     val trackItems: Boolean = true,
     @YamlComment("Convert blocks to and from geary.")
     val trackBlocks: Boolean = true,
-    @YamlComment("Convert bukkit events to data in Geary (deprecated)")
-    val bridgeEvents: Boolean = true,
     @YamlComment("If an item has no prefabs encoded, try to find its prefab by matching custom model data.")
     val migrateItemCustomModelDataToPrefab: Boolean = true,
     val catch: Catching = Catching(),

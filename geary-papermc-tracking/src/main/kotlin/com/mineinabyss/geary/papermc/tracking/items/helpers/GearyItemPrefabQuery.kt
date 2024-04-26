@@ -20,7 +20,7 @@ class GearyItemPrefabQuery : GearyQuery() {
             has<Prefab>()
         }
 
-        fun CachedQueryRunner<GearyItemPrefabQuery>.getKeys(): List<PrefabKey> = map { key }
+        fun CachedQueryRunner<GearyItemPrefabQuery>.getKeys(): List<PrefabKey> = map { it.key }
 
         fun isItem(entity: GearyEntity): Boolean {
             return entity.prefabs.any { it.type in itemQuery }
