@@ -27,11 +27,8 @@ class BukkitEntity2Geary(val forceMainThread: Boolean = true) {
 
     operator fun contains(entityId: Int): Boolean = synchronized(entityMap) { entityMap.containsKey(entityId) }
 
-    fun remove(entityId: Int): GearyEntity? = synchronized(entityMap) {
-        val entity = entityMap[entityId].toGeary()
-        fireRemoveFromWorldEvent(entity.get<BukkitEntity>()!!, entity)
+    fun remove(entityId: Int) = synchronized(entityMap) {
         entityMap.remove(entityId)
-        return entity
     }
 
     fun getOrCreate(bukkit: BukkitEntity): GearyEntity = synchronized(entityMap) {
@@ -45,6 +42,10 @@ class BukkitEntity2Geary(val forceMainThread: Boolean = true) {
 
     fun fireAddToWorldEvent(bukkit: BukkitEntity, entity: GearyEntity) = synchronized(entityMap) {
         entity.add<AddedToWorld>()
+        val entityBinds = gearyMobs.entityTypeBinds[bukkit.type.key.toString()]
+        entityBinds.forEach { bind ->
+            entity.extend(bind)
+        }
         GearyEntityAddToWorldEvent(entity, bukkit).callEvent()
         entity.encodeComponentsTo(bukkit)
     }

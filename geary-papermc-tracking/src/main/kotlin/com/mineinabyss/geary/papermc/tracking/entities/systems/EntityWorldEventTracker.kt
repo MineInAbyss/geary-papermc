@@ -36,7 +36,10 @@ class EntityWorldEventTracker : Listener {
         Bukkit.getScheduler().scheduleSyncDelayedTask(gearyPaper.plugin, {
             if (entity.isValid) return@scheduleSyncDelayedTask // If the entity is still valid, it's the paper bug
             geary.logger.v("EntityRemoveFromWorldEvent: Calling removeEntity for ${entity.toGearyOrNull()?.id} (${entity.type} ${entity.uniqueId})")
-            entity.toGearyOrNull()?.removeEntity()
+            entity.toGearyOrNull()?.let {
+                gearyMobs.bukkit2Geary.fireRemoveFromWorldEvent(entity, it)
+                it.removeEntity()
+            }
         }, 10)
     }
 

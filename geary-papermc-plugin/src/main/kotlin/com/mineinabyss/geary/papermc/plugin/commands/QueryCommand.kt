@@ -13,7 +13,22 @@ import com.mineinabyss.idofront.commands.extensions.actions.PlayerAction
 import com.mineinabyss.idofront.commands.extensions.actions.playerAction
 import com.mineinabyss.idofront.messaging.info
 import com.mineinabyss.idofront.messaging.success
+import dev.jorel.commandapi.arguments.ArgumentSuggestions
+import dev.jorel.commandapi.kotlindsl.*
 import org.bukkit.entity.Entity
+import org.bukkit.entity.Player
+
+fun testCommand() = commandAPICommand("test") {
+    playerArgument("player")
+    textArgument("string") {
+        replaceSuggestions(ArgumentSuggestions.strings("a", "b", "c"))
+    }
+    playerExecutor { player, args ->
+        val player: Player by args
+        val string: String by args
+        player.sendMessage("Hello, ${player.name}, $string!")
+    }
+}
 
 fun Command.mobsQuery() {
     commandGroup {
@@ -58,29 +73,23 @@ fun Command.mobsQuery() {
                 """.trimIndent().replace("\n", " ")
             )
             if (isInfo) {
-                val categories = entities
+                val mobs = entities
                     .asSequence()
                     .flatMap { it.toGeary().prefabs }
                     .groupingBy { it }
                     .eachCount()
+                    .filter { GearyMobPrefabQuery.isMob(it.key) }
                     .entries
                     .sortedByDescending { it.value }
                     .toList()
 
-                if (categories.isNotEmpty()) sender.info(
+                if (mobs.isNotEmpty()) sender.info(
                     // Print mobs
                     buildString {
-                        val mobs = categories.filterTo(mutableSetOf()) { GearyMobPrefabQuery.isMob(it.key) }
                         if (mobs.isNotEmpty()) appendLine("Mobs:")
                         mobs.forEach { (type, amount) ->
                             val prefabName = type.get<PrefabKey>()?.toString() ?: type.toString()
                             appendLine("<gray>${prefabName}</gray>: $amount")
-                        }
-                        val otherPrefabs = categories - mobs
-                        if (otherPrefabs.isNotEmpty()) appendLine("Other prefabs:")
-                        categories.filter { !GearyMobPrefabQuery.isMob(it.key) }.forEach { (type, amount) ->
-                            val prefabName = type.get<PrefabKey>()?.toString() ?: type.toString()
-                            appendLine("<dark_gray>${prefabName}</dark_gray>: $amount")
                         }
                     }
                 )
