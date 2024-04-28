@@ -11,6 +11,7 @@ import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.CatchType
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.components.BindToEntityType
+import com.mineinabyss.geary.papermc.tracking.entities.components.markBindEntityTypeAsCustomMob
 import com.mineinabyss.geary.papermc.tracking.entities.components.markSetEntityTypeAsCustomMob
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.entities.systems.EntityWorldEventTracker
@@ -19,8 +20,6 @@ import com.mineinabyss.geary.papermc.tracking.entities.systems.createBukkitEntit
 import com.mineinabyss.geary.papermc.tracking.entities.systems.createBukkitEntitySetListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.removevanillamobs.RemoveVanillaMobsListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.ConvertEntityTypesListener
-import com.mineinabyss.geary.systems.builders.cache
-import com.mineinabyss.geary.systems.query.CachedQueryRunner
 import com.mineinabyss.geary.systems.query.ShorthandQuery1
 import com.mineinabyss.geary.systems.query.query
 import com.mineinabyss.idofront.di.DI
@@ -32,7 +31,7 @@ val gearyMobs by DI.observe<EntityTracking>()
 interface EntityTracking {
     val bukkitEntityComponent: ComponentId
     val bukkit2Geary: BukkitEntity2Geary
-    val prefabs: CachedQueryRunner<GearyMobPrefabQuery>
+    val query: GearyMobPrefabQuery
     val entityTypeBinds: QueryGroupedBy<String, ShorthandQuery1<BindToEntityType>>
 
     companion object : GearyAddonWithDefault<EntityTracking> {
@@ -40,7 +39,7 @@ interface EntityTracking {
             override val bukkitEntityComponent = componentId<BukkitEntity>()
             override val bukkit2Geary =
                 BukkitEntity2Geary(gearyPaper.config.catch.asyncEntityConversion == CatchType.ERROR)
-            override val prefabs = geary.cache(GearyMobPrefabQuery())
+            override val query = GearyMobPrefabQuery()
             override val entityTypeBinds = geary.cacheGroupedBy(query<BindToEntityType>()) { (type) ->
                 entity.addRelation<NoInherit, BindToEntityType>()
                 type.key
@@ -48,10 +47,13 @@ interface EntityTracking {
         }
 
         override fun EntityTracking.install() {
-            geary.createBukkitEntityRemoveListener()
-            geary.createBukkitEntitySetListener()
-            geary.createAttemptSpawnListener()
-            geary.markSetEntityTypeAsCustomMob()
+            geary.apply {
+                createBukkitEntityRemoveListener()
+                createBukkitEntitySetListener()
+                createAttemptSpawnListener()
+                markSetEntityTypeAsCustomMob()
+                markBindEntityTypeAsCustomMob()
+            }
             geary.pipeline.runOnOrAfter(GearyPhase.ENABLE) {
                 gearyPaper.plugin.listeners(
                     EntityWorldEventTracker(),

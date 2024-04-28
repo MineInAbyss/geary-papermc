@@ -8,6 +8,14 @@ plugins {
     alias(idofrontLibs.plugins.mia.kotlin.jvm)
     alias(idofrontLibs.plugins.dokka) apply false
     alias(idofrontLibs.plugins.mia.autoversion)
+    idea
+}
+
+idea {
+    module {
+        isDownloadJavadoc = true
+        isDownloadSources = true
+    }
 }
 
 dependencies {

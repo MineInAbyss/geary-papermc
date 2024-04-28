@@ -21,4 +21,11 @@ value class SetEntityType(val key: String) {
 
 fun GearyModule.markSetEntityTypeAsCustomMob() = observe<OnSet>()
     .involving(query<SetEntityType>())
-    .exec { entity.add<CustomMob>() }
+    .exec {
+        entity.add<ShowInMobQueries>()
+        entity.add<SpawnableByGeary>()
+    }
+
+fun GearyModule.markBindEntityTypeAsCustomMob() = observe<OnSet>()
+    .involving(query<BindToEntityType>())
+    .exec { entity.add<ShowInMobQueries>() }

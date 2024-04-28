@@ -17,9 +17,8 @@ configurations {
 
 dependencies {
     implementation(project(":"))
-    compileOnly("dev.jorel:commandapi-bukkit-core:9.3.0")
-    compileOnly("dev.jorel:commandapi-bukkit-kotlin:9.3.0")
-    implementation("dev.jorel:commandapi-bukkit-shade:9.3.0")
+    implementation("me.lucko:commodore:2.2")
+
 
     // MineInAbyss platform
     compileOnly(idofrontLibs.kotlin.stdlib)

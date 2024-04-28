@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.plugin.commands
 
 import com.mineinabyss.geary.papermc.gearyPaper
-import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery
+import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.prefabs.PrefabKey
@@ -13,22 +13,7 @@ import com.mineinabyss.idofront.commands.extensions.actions.PlayerAction
 import com.mineinabyss.idofront.commands.extensions.actions.playerAction
 import com.mineinabyss.idofront.messaging.info
 import com.mineinabyss.idofront.messaging.success
-import dev.jorel.commandapi.arguments.ArgumentSuggestions
-import dev.jorel.commandapi.kotlindsl.*
 import org.bukkit.entity.Entity
-import org.bukkit.entity.Player
-
-fun testCommand() = commandAPICommand("test") {
-    playerArgument("player")
-    textArgument("string") {
-        replaceSuggestions(ArgumentSuggestions.strings("a", "b", "c"))
-    }
-    playerExecutor { player, args ->
-        val player: Player by args
-        val string: String by args
-        player.sendMessage("Hello, ${player.name}, $string!")
-    }
-}
 
 fun Command.mobsQuery() {
     commandGroup {
@@ -44,7 +29,7 @@ fun Command.mobsQuery() {
             for (world in worlds) for (entity in world.entities) {
                 val geary = entity.toGearyOrNull() ?: continue
                 // Only select entities that are instanced from a gearyMobs registered prefab
-                if (!GearyMobPrefabQuery.isMob(geary)) continue
+                if (!gearyMobs.query.isMob(geary)) continue
 
                 if (types.any { type ->
                         when (type) {
@@ -69,7 +54,7 @@ fun Command.mobsQuery() {
                 """
                 ${if (isInfo) "There are" else "Removed"}
                 <b>$entityCount</b> entities matching your query
-                ${if (radius <= 0) "in all loaded chunks." else "in a radius of $radius blocks."}
+                ${if (radius <= 0) "in loaded chunks." else "in a radius of $radius blocks."}
                 """.trimIndent().replace("\n", " ")
             )
             if (isInfo) {
@@ -78,19 +63,15 @@ fun Command.mobsQuery() {
                     .flatMap { it.toGeary().prefabs }
                     .groupingBy { it }
                     .eachCount()
-                    .filter { GearyMobPrefabQuery.isMob(it.key) }
+                    .filter { gearyMobs.query.isMobPrefab(it.key) }
                     .entries
                     .sortedByDescending { it.value }
                     .toList()
 
                 if (mobs.isNotEmpty()) sender.info(
-                    // Print mobs
-                    buildString {
-                        if (mobs.isNotEmpty()) appendLine("Mobs:")
-                        mobs.forEach { (type, amount) ->
-                            val prefabName = type.get<PrefabKey>()?.toString() ?: type.toString()
-                            appendLine("<gray>${prefabName}</gray>: $amount")
-                        }
+                    mobs.joinToString(separator = "\n") { (type, amount) ->
+                        val prefabName = type.get<PrefabKey>()?.toString() ?: type.toString()
+                        "<gray>${prefabName}</gray>: $amount"
                     }
                 )
             }
