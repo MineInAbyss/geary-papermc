@@ -15,7 +15,7 @@ import org.bukkit.Bukkit
 
 fun Command.locate() {
     "locate" {
-        val mobKey by optionArg(options = gearyMobs.prefabs.map { it.key.toString() }) {
+        val mobKey by optionArg(options = gearyMobs.query.getKeyStrings()) {
             parseErrorMessage = { "No such entity: $passed" }
         }
         val radius by intArg {

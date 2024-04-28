@@ -12,13 +12,11 @@ import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.plugin.commands.GearyCommands
-import com.mineinabyss.geary.papermc.plugin.commands.testCommand
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
 import com.mineinabyss.geary.papermc.tracking.blocks.gearyBlocks
 import com.mineinabyss.geary.papermc.tracking.blocks.helpers.getKeys
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
-import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery.Companion.getKeys
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.gearyItems
@@ -33,8 +31,6 @@ import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.serialization.LocationSerializer
 import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
-import dev.jorel.commandapi.CommandAPI
-import dev.jorel.commandapi.CommandAPIBukkitConfig
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.bukkit.Location
@@ -98,11 +94,8 @@ class GearyPluginImpl : GearyPlugin() {
                         }
                     }
                 }
-
-                gearyPaper.logger.iSuccess(
-                    "Loaded types: ${gearyMobs.prefabs.getKeys().size} mobs, ${
-                        gearyBlocks.prefabs.getKeys().size
-                    } blocks, ${gearyItems.prefabs.getKeys().size} items"
+                gearyPaper.logger.s(
+                    "Loaded prefabs - Mobs: ${gearyMobs.query.getKeys().size}, Blocks: ${gearyBlocks.prefabs.getKeys().size}, Items: ${gearyItems.prefabs.getKeys().size}"
                 )
             }
         }
@@ -118,12 +111,9 @@ class GearyPluginImpl : GearyPlugin() {
 
         // Register commands
         GearyCommands()
-        CommandAPI.onLoad(CommandAPIBukkitConfig(this).verboseOutput(true))
-        testCommand()
     }
 
     override fun onEnable() {
-        CommandAPI.onEnable()
         ArchetypeEngineModule.start(DI.get<PaperEngineModule>())
     }
 

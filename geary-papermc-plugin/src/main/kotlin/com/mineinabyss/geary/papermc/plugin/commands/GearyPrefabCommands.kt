@@ -8,12 +8,14 @@ import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.UpdateMob
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
+import com.mineinabyss.geary.prefabs.PrefabLoader.PrefabLoadResult
 import com.mineinabyss.geary.prefabs.helpers.inheritPrefabsIfNeeded
 import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.idofront.commands.Command
 import com.mineinabyss.idofront.commands.arguments.stringArg
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.success
+import com.mineinabyss.idofront.messaging.warn
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import okio.Path.Companion.toOkioPath
 import org.bukkit.entity.Player
@@ -63,15 +65,25 @@ fun Command.prefabs() {
                 }
 
                 // Try to load from file
-                runCatching {
-                    prefabLoader.loadFromPath(
-                        namespace,
-                        gearyPaper.plugin.dataFolder.resolve(namespace).resolve(path).toOkioPath()
-                    )
-                }.onSuccess {
-                    it.inheritPrefabsIfNeeded()
-                    sender.success("Read prefab $namespace:$path")
-                }.onFailure { sender.error("Failed to read prefab $namespace:$path:\n${it.message}") }
+                val load = prefabLoader.loadFromPath(
+                    namespace,
+                    gearyPaper.plugin.dataFolder.resolve(namespace).resolve(path).toOkioPath()
+                )
+                when (load) {
+                    is PrefabLoadResult.Failure -> {
+                        sender.error("Failed to read prefab $namespace:$path:\n${load.error.message}")
+                    }
+
+                    is PrefabLoadResult.Success -> {
+                        load.entity.inheritPrefabsIfNeeded()
+                        sender.success("Read prefab $namespace:$path")
+                    }
+
+                    is PrefabLoadResult.Warn -> {
+                        load.entity.inheritPrefabsIfNeeded()
+                        sender.warn("Read prefab $namespace:$path with warnings")
+                    }
+                }
             }
         }
     }
