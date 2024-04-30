@@ -4,10 +4,10 @@ import com.mineinabyss.geary.addons.GearyPhase
 import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
 import com.mineinabyss.geary.components.relations.NoInherit
 import com.mineinabyss.geary.datatypes.ComponentId
-import com.mineinabyss.geary.events.queries.QueryGroupedBy
-import com.mineinabyss.geary.events.queries.cacheGroupedBy
 import com.mineinabyss.geary.helpers.componentId
 import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.observers.queries.QueryGroupedBy
+import com.mineinabyss.geary.observers.queries.cacheGroupedBy
 import com.mineinabyss.geary.papermc.CatchType
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.components.BindToEntityType

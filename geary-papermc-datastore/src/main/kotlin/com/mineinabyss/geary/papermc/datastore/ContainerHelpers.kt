@@ -1,11 +1,13 @@
 package com.mineinabyss.geary.papermc.datastore
 
 import com.mineinabyss.geary.components.relations.InstanceOf
-import com.mineinabyss.geary.components.relations.Persists
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.component
 import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.serialization.components.Persists
+import com.mineinabyss.geary.serialization.getAllPersisting
+import com.mineinabyss.geary.serialization.setAllPersisting
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer

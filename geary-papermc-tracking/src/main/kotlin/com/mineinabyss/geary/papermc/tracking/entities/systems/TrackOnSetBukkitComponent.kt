@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.entities.systems
 
-import com.mineinabyss.geary.events.types.OnSet
 import com.mineinabyss.geary.modules.GearyModule
+import com.mineinabyss.geary.observers.events.OnSet
 import com.mineinabyss.geary.papermc.datastore.hasComponentsEncoded
 import com.mineinabyss.geary.papermc.datastore.loadComponentsFrom
 import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs

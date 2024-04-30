@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.items.migration
 
-import com.mineinabyss.geary.events.types.OnSet
 import com.mineinabyss.geary.modules.GearyModule
+import com.mineinabyss.geary.observers.events.OnSet
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItemIgnoredProperties
 import com.mineinabyss.geary.systems.builders.observe
