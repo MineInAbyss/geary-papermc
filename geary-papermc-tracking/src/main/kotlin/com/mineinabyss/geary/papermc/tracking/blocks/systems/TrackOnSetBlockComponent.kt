@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.blocks.systems
 
-import com.mineinabyss.geary.events.types.OnSet
 import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.observers.events.OnSet
 import com.mineinabyss.geary.papermc.tracking.blocks.components.SetBlock
 import com.mineinabyss.geary.papermc.tracking.blocks.gearyBlocks
 import com.mineinabyss.geary.prefabs.PrefabKey

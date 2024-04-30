@@ -2,7 +2,6 @@ package com.mineinabyss.geary.papermc.plugin
 
 import com.mineinabyss.geary.addons.GearyPhase.ENABLE
 import com.mineinabyss.geary.autoscan.autoscan
-import com.mineinabyss.geary.helpers.withSerialName
 import com.mineinabyss.geary.modules.ArchetypeEngineModule
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.GearyPaperConfigModule
@@ -17,15 +16,18 @@ import com.mineinabyss.geary.papermc.tracking.blocks.gearyBlocks
 import com.mineinabyss.geary.papermc.tracking.blocks.helpers.getKeys
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
+import com.mineinabyss.geary.papermc.tracking.entities.helpers.getKeys
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.gearyItems
 import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery.Companion.getKeys
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.prefabs
-import com.mineinabyss.geary.serialization.dsl.FileSystemAddon
+import com.mineinabyss.geary.serialization.FileSystemAddon
 import com.mineinabyss.geary.serialization.dsl.serialization
+import com.mineinabyss.geary.serialization.dsl.withCommonComponentNames
 import com.mineinabyss.geary.serialization.formats.YamlFormat
+import com.mineinabyss.geary.serialization.helpers.withSerialName
 import com.mineinabyss.geary.uuid.SynchronizedUUID2GearyMap
 import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.di.DI
@@ -59,6 +61,7 @@ class GearyPluginImpl : GearyPlugin() {
             serialization {
                 format("yml", ::YamlFormat)
                 withUUIDSerializer()
+                withCommonComponentNames()
 
                 components {
                     component(Location::class, LocationSerializer.withSerialName("geary:location"))
@@ -95,7 +98,7 @@ class GearyPluginImpl : GearyPlugin() {
                     }
                 }
                 gearyPaper.logger.s(
-                    "Loaded prefabs - Mobs: ${gearyMobs.query.getKeys().size}, Blocks: ${gearyBlocks.prefabs.getKeys().size}, Items: ${gearyItems.prefabs.getKeys().size}"
+                    "Loaded prefabs - Mobs: ${gearyMobs.query.prefabs.getKeys().size}, Blocks: ${gearyBlocks.prefabs.getKeys().size}, Items: ${gearyItems.prefabs.getKeys().size}"
                 )
             }
         }

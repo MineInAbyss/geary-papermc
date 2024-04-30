@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.datastore
 
-import com.mineinabyss.geary.helpers.withSerialName
 import com.mineinabyss.geary.serialization.dsl.SerializableComponentsDSL
+import com.mineinabyss.geary.serialization.helpers.withSerialName
 import com.mineinabyss.idofront.serialization.UUIDSerializer
 import java.util.*
 

@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.plugin.commands
 
 import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
+import com.mineinabyss.geary.papermc.tracking.entities.helpers.getKeyStrings
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.idofront.commands.Command
@@ -15,7 +16,7 @@ import org.bukkit.Bukkit
 
 fun Command.locate() {
     "locate" {
-        val mobKey by optionArg(options = gearyMobs.query.getKeyStrings()) {
+        val mobKey by optionArg(options = gearyMobs.query.prefabs.getKeyStrings()) {
             parseErrorMessage = { "No such entity: $passed" }
         }
         val radius by intArg {
