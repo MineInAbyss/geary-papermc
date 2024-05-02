@@ -6,7 +6,7 @@ import com.mineinabyss.geary.helpers.contains
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
-import com.mineinabyss.geary.systems.query.CachedQueryRunner
+import com.mineinabyss.geary.systems.query.CachedQuery
 import com.mineinabyss.geary.systems.query.GearyQuery
 
 class GearyItemPrefabQuery : GearyQuery() {
@@ -20,7 +20,7 @@ class GearyItemPrefabQuery : GearyQuery() {
             has<Prefab>()
         }
 
-        fun CachedQueryRunner<GearyItemPrefabQuery>.getKeys(): List<PrefabKey> = map { it.key }
+        fun CachedQuery<GearyItemPrefabQuery>.getKeys(): List<PrefabKey> = map { it.key }
 
         fun isItem(entity: GearyEntity): Boolean {
             return entity.prefabs.any { it.type in itemQuery }

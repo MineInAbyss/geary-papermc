@@ -20,6 +20,7 @@ idea {
 
 dependencies {
     api(project(":geary-papermc-tracking"))
+    api(project(":geary-papermc-integrations"))
     api(gearyLibs.core)
     api(gearyLibs.autoscan)
     api(gearyLibs.prefabs)

@@ -12,8 +12,7 @@ import org.spigotmc.AsyncCatcher
 class GearyPaperConfig(
     @YamlComment("Convert bukkit entities to and from geary, for instance to store and persist components on a player.")
     val trackEntities: Boolean = true,
-    @YamlComment("Convert items to and from geary. Depends on entity tracking.")
-    val trackItems: Boolean = true,
+    val items: GearyItemConfig = GearyItemConfig(),
     @YamlComment("Convert blocks to and from geary.")
     val trackBlocks: Boolean = true,
     @YamlComment("If an item has no prefabs encoded, try to find its prefab by matching custom model data.")
@@ -59,3 +58,10 @@ enum class CatchType {
 enum class MobTypeConversion {
     MIGRATE, REMOVE, IGNORE
 }
+
+@Serializable
+data class GearyItemConfig(
+    val enabled: Boolean = true,
+    val migrateByCustomModelData: Boolean = false,
+    val autoDiscoverVanillaRecipes: Boolean = false
+)

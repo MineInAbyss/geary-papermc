@@ -17,7 +17,6 @@ fun GearyModule.createAttemptSpawnListener() = observeWithData<AttemptSpawn>()
         val loc = event.location
         mobType.entityTypeFromRegistry.spawn(
             loc.world.toNMS(),
-            null,
             // We set the entity here so that we don't create a separate Geary entity in EntityWorldEventTracker
             // This is called before adding to the world.
             { mob -> entity.set(mob.toBukkit()) },
