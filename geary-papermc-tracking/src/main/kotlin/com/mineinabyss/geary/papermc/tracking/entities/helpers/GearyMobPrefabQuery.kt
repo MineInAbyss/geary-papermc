@@ -9,7 +9,7 @@ import com.mineinabyss.geary.papermc.tracking.entities.components.SpawnableByGea
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
 import com.mineinabyss.geary.systems.builders.cache
-import com.mineinabyss.geary.systems.query.CachedQueryRunner
+import com.mineinabyss.geary.systems.query.CachedQuery
 import com.mineinabyss.geary.systems.query.GearyQuery
 import com.mineinabyss.geary.systems.query.ShorthandQuery1
 import com.mineinabyss.geary.systems.query.query
@@ -36,5 +36,5 @@ class GearyMobPrefabQuery : GearyQuery() {
 }
 
 
-fun CachedQueryRunner<ShorthandQuery1<PrefabKey>>.getKeys() = map { it.comp1 }
-fun CachedQueryRunner<ShorthandQuery1<PrefabKey>>.getKeyStrings() = map { it.comp1.toString() }
+fun CachedQuery<ShorthandQuery1<PrefabKey>>.getKeys() = map { it.comp1 }
+fun CachedQuery<ShorthandQuery1<PrefabKey>>.getKeyStrings() = map { it.comp1.toString() }

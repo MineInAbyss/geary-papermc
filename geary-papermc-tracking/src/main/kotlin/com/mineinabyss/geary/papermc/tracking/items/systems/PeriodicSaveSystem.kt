@@ -1,8 +1,8 @@
 package com.mineinabyss.geary.papermc.tracking.items.systems
 
-import com.mineinabyss.geary.components.relations.Persists
 import com.mineinabyss.geary.modules.GearyModule
 import com.mineinabyss.geary.papermc.datastore.encode
+import com.mineinabyss.geary.serialization.components.Persists
 import com.mineinabyss.geary.systems.builders.system
 import com.mineinabyss.geary.systems.query.Query
 import com.mineinabyss.idofront.items.editItemMeta

@@ -12,7 +12,7 @@ import com.mineinabyss.geary.papermc.tracking.items.migration.createItemMigratio
 import com.mineinabyss.geary.papermc.tracking.items.systems.LoginListener
 import com.mineinabyss.geary.papermc.tracking.items.systems.createInventoryTrackerSystem
 import com.mineinabyss.geary.prefabs.PrefabKey
-import com.mineinabyss.geary.systems.query.CachedQueryRunner
+import com.mineinabyss.geary.systems.query.CachedQuery
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.plugin.listeners
 import org.bukkit.inventory.ItemStack
@@ -22,7 +22,7 @@ val gearyItems by DI.observe<ItemTracking>()
 interface ItemTracking {
     val itemProvider: GearyItemProvider
     val loginListener: LoginListener
-    val prefabs: CachedQueryRunner<GearyItemPrefabQuery>
+    val prefabs: CachedQuery<GearyItemPrefabQuery>
     fun getCacheWrapper(entity: GearyEntity): InventoryCacheWrapper?
 
     fun createItem(
