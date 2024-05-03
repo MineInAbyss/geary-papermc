@@ -9,7 +9,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
 import java.util.*
 
-class ShowDisplayNameOnKillerSystem : Listener {
+class ShowDisplayNameOnKillerListener : Listener {
     @EventHandler
     fun PlayerDeathEvent.replaceMobName() {
         val message = (deathMessage() as TranslatableComponent)

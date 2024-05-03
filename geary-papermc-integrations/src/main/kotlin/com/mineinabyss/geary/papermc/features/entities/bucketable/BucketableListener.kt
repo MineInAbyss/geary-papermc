@@ -17,7 +17,7 @@ class Bucketable(
     val bucketItem: SerializableItemStack
 )
 
-class BucketableSystem : Listener {
+class BucketableListener : Listener {
     @EventHandler
     fun PlayerBucketEntityEvent.cancelBucketEntity() {
         if (!entity.toGeary()

@@ -6,7 +6,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityBreedEvent
 import org.bukkit.event.entity.EntityEnterLoveModeEvent
 
-class PreventBreedingSystem : Listener {
+class PreventBreedingListener : Listener {
     @EventHandler
     fun EntityEnterLoveModeEvent.cancelLove() {
         if (entity.toGearyOrNull()?.has<PreventBreeding>() == true) isCancelled = true

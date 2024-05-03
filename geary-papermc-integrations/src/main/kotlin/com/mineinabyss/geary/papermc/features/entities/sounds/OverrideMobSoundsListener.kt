@@ -11,7 +11,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDeathEvent
 
-class OverrideMobSoundsBukkitListener : Listener {
+class OverrideMobSoundsListener : Listener {
     @EventHandler
     fun EntityDeathEvent.makeSoundOnDeath() {
         val sounds = entity.toGeary().get<Sounds>() ?: return
