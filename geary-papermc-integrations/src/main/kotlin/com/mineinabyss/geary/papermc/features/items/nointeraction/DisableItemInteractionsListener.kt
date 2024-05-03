@@ -11,7 +11,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerItemConsumeEvent
 import org.bukkit.inventory.EquipmentSlot
 
-class DisableItemInteractionsBukkitListener : Listener {
+class DisableItemInteractionsListener : Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun PlayerInteractEvent.onClick() {
         disableIfNeeded(player, hand)

@@ -12,7 +12,7 @@ import org.bukkit.NamespacedKey
 /**
  * This system is implemented separate from idofront recipes since they are handled differently by Minecraft.
  */
-fun GearyModule.createPotionMixRecipeSystem() = observe<OnSet>()
+fun GearyModule.trackPotionMixes() = observe<OnSet>()
     .involving(query<SetPotionMixes, PrefabKey>())
     .exec { (potionMixes, prefabKey) ->
         val result = potionMixes.result?.toItemStackOrNull() ?: gearyItems.createItem(prefabKey)

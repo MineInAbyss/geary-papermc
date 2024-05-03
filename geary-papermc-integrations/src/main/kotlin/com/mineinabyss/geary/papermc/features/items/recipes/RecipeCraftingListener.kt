@@ -20,7 +20,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.SmithingTransformRecipe
 import java.util.*
 
-class RecipeCraftingSystem : Listener {
+class RecipeCraftingListener : Listener {
     /**
      * Prevents custom items being usable in vanilla recipes based on their material,
      * when they have a [DenyInVanillaRecipes] component, by setting result to null.

@@ -6,7 +6,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityRegainHealthEvent
 
-class PreventRegenerationSystem : Listener {
+class PreventRegenerationListener : Listener {
     @EventHandler
     fun EntityRegainHealthEvent.onEntityHeal() {
         entity.toGearyOrNull()?.with { prevent: PreventRegeneration ->

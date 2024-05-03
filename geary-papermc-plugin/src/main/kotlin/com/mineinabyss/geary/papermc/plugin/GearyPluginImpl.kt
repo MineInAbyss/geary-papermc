@@ -9,21 +9,19 @@ import com.mineinabyss.geary.papermc.GearyPaperModule
 import com.mineinabyss.geary.papermc.GearyPlugin
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
-import com.mineinabyss.geary.papermc.features.entities.bucketable.BucketableSystem
-import com.mineinabyss.geary.papermc.features.entities.displayname.ShowDisplayNameOnKillerSystem
-import com.mineinabyss.geary.papermc.features.entities.prevent.breeding.PreventBreedingSystem
-import com.mineinabyss.geary.papermc.features.entities.prevent.interaction.PreventInteractionSystem
-import com.mineinabyss.geary.papermc.features.entities.prevent.regen.PreventRegenerationSystem
-import com.mineinabyss.geary.papermc.features.entities.prevent.riding.PreventRidingSystem
-import com.mineinabyss.geary.papermc.features.entities.sounds.OverrideMobSoundsBukkitListener
-import com.mineinabyss.geary.papermc.features.entities.sounds.createAmbientSoundsSystem
-import com.mineinabyss.geary.papermc.features.entities.sounds.silenceVanillaSoundsSystem
-import com.mineinabyss.geary.papermc.features.entities.taming.TamingBukkitListener
+import com.mineinabyss.geary.papermc.features.entities.bucketable.BucketableListener
+import com.mineinabyss.geary.papermc.features.entities.displayname.ShowDisplayNameOnKillerListener
+import com.mineinabyss.geary.papermc.features.entities.prevent.breeding.PreventBreedingListener
+import com.mineinabyss.geary.papermc.features.entities.prevent.interaction.PreventInteractionListener
+import com.mineinabyss.geary.papermc.features.entities.prevent.regen.PreventRegenerationListener
+import com.mineinabyss.geary.papermc.features.entities.prevent.riding.PreventRidingListener
+import com.mineinabyss.geary.papermc.features.entities.sounds.AmbientSoundsFeature
+import com.mineinabyss.geary.papermc.features.entities.taming.TamingListener
 import com.mineinabyss.geary.papermc.features.items.backpack.BackpackListener
 import com.mineinabyss.geary.papermc.features.items.food.FoodConsumptionListener
 import com.mineinabyss.geary.papermc.features.items.food.ReplaceBurnedDropListener
 import com.mineinabyss.geary.papermc.features.items.holdsentity.SpawnHeldPrefabSystem
-import com.mineinabyss.geary.papermc.features.items.nointeraction.DisableItemInteractionsBukkitListener
+import com.mineinabyss.geary.papermc.features.items.nointeraction.DisableItemInteractionsListener
 import com.mineinabyss.geary.papermc.features.items.recipes.ItemRecipes
 import com.mineinabyss.geary.papermc.features.items.wearables.WearableItemSystem
 import com.mineinabyss.geary.papermc.gearyPaper
@@ -102,7 +100,6 @@ class GearyPluginImpl : GearyPlugin() {
                 components {
                     component(Location::class, LocationSerializer.withSerialName("geary:location"))
                 }
-                //TODO option to auto register contextual on geary end
                 module {
                     contextual(Location::class, LocationSerializer.withSerialName("geary:location"))
                 }
@@ -139,7 +136,7 @@ class GearyPluginImpl : GearyPlugin() {
             }
 
             val isMMLoaded = Bukkit.getPluginManager().plugins.find { it.name == "MythicMobs" } != null
-            if (isMMLoaded) {
+            if (isMMLoaded && gearyPaper.config.integrations.mythicMobs) {
                 gearyPaper.logger.s("MythicMobs detected, enabling support.")
                 install(MythicMobsSupport)
             }
@@ -162,29 +159,31 @@ class GearyPluginImpl : GearyPlugin() {
     override fun onEnable() {
         ArchetypeEngineModule.start(DI.get<PaperEngineModule>())
 
-        geary.run {
-            createAmbientSoundsSystem()
-            silenceVanillaSoundsSystem()
+        if (gearyPaper.config.items.enabled) {
+            geary {
+                install(AmbientSoundsFeature)
+            }
+            listeners(
+                BucketableListener(),
+                ShowDisplayNameOnKillerListener(),
+                PreventBreedingListener(),
+                PreventInteractionListener(),
+                PreventRegenerationListener(),
+                PreventRidingListener(),
+                TamingListener(),
+            )
         }
-        listeners(
-            BucketableSystem(),
-            ShowDisplayNameOnKillerSystem(),
-            PreventBreedingSystem(),
-            PreventInteractionSystem(),
-            PreventRegenerationSystem(),
-            PreventRidingSystem(),
-            OverrideMobSoundsBukkitListener(),
-            TamingBukkitListener(),
-        )
 
-        listeners(
-            WearableItemSystem(),
-            BackpackListener(),
-            FoodConsumptionListener(),
-            SpawnHeldPrefabSystem(),
-            DisableItemInteractionsBukkitListener(),
-            ReplaceBurnedDropListener(),
-        )
+        if (gearyPaper.config.trackEntities) {
+            listeners(
+                WearableItemSystem(),
+                BackpackListener(),
+                FoodConsumptionListener(),
+                SpawnHeldPrefabSystem(),
+                DisableItemInteractionsListener(),
+                ReplaceBurnedDropListener(),
+            )
+        }
     }
 
     override fun onDisable() {

@@ -6,7 +6,7 @@ import com.mineinabyss.geary.systems.builders.observe
 import com.mineinabyss.geary.systems.query.query
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 
-fun GearyModule.silenceVanillaSoundsSystem() = observe<OnSet>()
+fun GearyModule.silenceVanillaSounds() = observe<OnSet>()
     .involving(query<BukkitEntity, Sounds>())
     .exec { (bukkit) ->
         bukkit.isSilent = true

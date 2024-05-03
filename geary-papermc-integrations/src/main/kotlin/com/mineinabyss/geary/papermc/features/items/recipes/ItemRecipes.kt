@@ -19,12 +19,16 @@ interface ItemRecipes {
         }
 
         override fun ItemRecipes.install() {
+            geary.run {
+                trackPotionMixes()
+            }
+
             geary.pipeline.runOnOrAfter(GearyPhase.ENABLE) {
                 val autoDiscoveredRecipes = recipes
 
                 gearyPaper.plugin.listeners(
-                    RecipeDiscoverySystem(autoDiscoveredRecipes),
-                    RecipeCraftingSystem(),
+                    RecipeDiscoveryListener(autoDiscoveredRecipes),
+                    RecipeCraftingListener(),
                 )
             }
         }

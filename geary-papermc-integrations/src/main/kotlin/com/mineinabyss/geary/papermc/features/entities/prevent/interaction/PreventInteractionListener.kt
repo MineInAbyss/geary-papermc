@@ -7,7 +7,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 
-class PreventInteractionSystem : Listener {
+class PreventInteractionListener : Listener {
     @EventHandler
     fun PlayerInteractEntityEvent.onPlayerRightClick() {
         val preventInteraction = rightClicked.toGearyOrNull()?.get<PreventInteraction>() ?: return

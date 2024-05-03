@@ -17,8 +17,6 @@ configurations {
 
 dependencies {
     implementation(project(":"))
-    implementation("me.lucko:commodore:2.2")
-
 
     // MineInAbyss platform
     compileOnly(idofrontLibs.kotlin.stdlib)

@@ -12,7 +12,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import kotlin.random.Random
 
-class TamingBukkitListener : Listener {
+class TamingListener : Listener {
     /** Tame entities with [Tamable] component on right click */
     @EventHandler
     fun PlayerInteractEntityEvent.tameMob() {
