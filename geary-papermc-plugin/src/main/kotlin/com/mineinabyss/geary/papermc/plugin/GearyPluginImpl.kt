@@ -7,6 +7,7 @@ import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.GearyPaperModule
 import com.mineinabyss.geary.papermc.GearyPlugin
+import com.mineinabyss.geary.papermc.bridge.events.GearyPaperMCBridge
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
 import com.mineinabyss.geary.papermc.features.entities.bucketable.BucketableListener
@@ -141,6 +142,7 @@ class GearyPluginImpl : GearyPlugin() {
                 install(MythicMobsSupport)
             }
             install(ItemRecipes)
+            install(GearyPaperMCBridge)
         }
 
 

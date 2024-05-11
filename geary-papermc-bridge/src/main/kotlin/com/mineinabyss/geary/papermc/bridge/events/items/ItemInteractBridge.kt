@@ -15,19 +15,19 @@ import org.bukkit.event.player.PlayerInteractEvent
 
 @Serializable
 @SerialName("geary:on.item_interact")
-sealed class OnItemInteract
+class OnItemInteract
 
 @Serializable
 @SerialName("geary:on_item_left_click")
-sealed class OnItemLeftClick
+class OnItemLeftClick
 
 @Serializable
 @SerialName("geary:on_item_right_click")
-sealed class OnItemRightClick
+class OnItemRightClick
 
 @Serializable
 @SerialName("geary:on_item_right_click_entity")
-sealed class OnItemRightClickEntity
+class OnItemRightClickEntity
 
 class ItemInteractBridge : Listener {
     private val rightClickCooldowns = Int2IntOpenHashMap()
