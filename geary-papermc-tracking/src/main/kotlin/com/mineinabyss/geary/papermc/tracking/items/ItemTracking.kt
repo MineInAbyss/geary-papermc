@@ -7,7 +7,6 @@ import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.items.inventory.InventoryCacheWrapper
-import com.mineinabyss.geary.papermc.tracking.items.migration.SetItemIgnoredPropertyListener
 import com.mineinabyss.geary.papermc.tracking.items.migration.createItemMigrationListener
 import com.mineinabyss.geary.papermc.tracking.items.systems.LoginListener
 import com.mineinabyss.geary.papermc.tracking.items.systems.createInventoryTrackerSystem
@@ -40,7 +39,6 @@ interface ItemTracking {
             pipeline.runOnOrAfter(GearyPhase.ENABLE) {
                 gearyPaper.plugin.listeners(
                     loginListener,
-                    SetItemIgnoredPropertyListener(),
                 )
             }
         }
