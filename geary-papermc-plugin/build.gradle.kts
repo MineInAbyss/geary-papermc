@@ -1,3 +1,5 @@
+import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
+
 plugins {
     id(idofrontLibs.plugins.mia.copyjar.get().pluginId)
     id(idofrontLibs.plugins.mia.kotlin.jvm.get().pluginId)
@@ -14,6 +16,8 @@ configurations {
         exclude(group = "it.unimi.dsi")
     }
 }
+
+paperweight.reobfArtifactConfiguration.set(ReobfArtifactConfiguration.MOJANG_PRODUCTION)
 
 dependencies {
     implementation(project(":"))
