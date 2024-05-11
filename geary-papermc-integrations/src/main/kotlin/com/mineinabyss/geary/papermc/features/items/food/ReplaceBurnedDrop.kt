@@ -2,7 +2,6 @@ package com.mineinabyss.geary.papermc.features.items.food
 
 import com.mineinabyss.geary.papermc.tracking.items.itemEntityContext
 import com.mineinabyss.idofront.serialization.SerializableItemStack
-import io.lumine.mythic.bukkit.events.MythicMobLootDropEvent
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.bukkit.event.EventHandler
@@ -35,10 +34,10 @@ class ReplaceBurnedDropListener : Listener {
         }
     }
 
-    @EventHandler
-    fun MythicMobLootDropEvent.replaceBurnedMythicLoot() {
-        if (entity.fireTicks == 0) return
-
+//    @EventHandler
+//    fun MythicMobLootDropEvent.replaceBurnedMythicLoot() {
+//        if (entity.fireTicks == 0) return
+//
 //        itemEntityContext {
 //            val newDrops = mutableListOf<MythicDropsDrop>()
 //            drops.drops.removeIf { drop ->
@@ -49,5 +48,5 @@ class ReplaceBurnedDropListener : Listener {
 //            }
 //            drops.addAll(newDrops)
 //        }
-    }
+//    }
 }
