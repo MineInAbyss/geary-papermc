@@ -21,7 +21,7 @@ sealed class OnLoad
 @SerialName("geary:on_death")
 class OnDeath
 
-class EntitySpawnBridge : Listener {
+class EntityLoadUnloadBridge : Listener {
     @EventHandler(ignoreCancelled = true)
     fun GearyEntityAddToWorldEvent.emitOnLoad() {
         gearyEntity.emit<OnLoad>()
