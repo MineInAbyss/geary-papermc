@@ -25,14 +25,13 @@ class GearyItemProvider {
 
     /** Creates an ItemStack from a [prefabKey], encoding relevant information to it. */
     fun serializePrefabToItemStack(prefabKey: PrefabKey, existing: ItemStack? = null): ItemStack? {
-        val item = existing ?: ItemStack(Material.AIR)
         val prefab = prefabKey.toEntityOrNull() ?: return null
 
-        prefab.get<SetItem>()?.item?.toItemStack(
-            applyTo = item,
+        val item = prefab.get<SetItem>()?.item?.toItemStack(
+            applyTo = existing ?: ItemStack(Material.AIR),
             ignoreProperties = prefab.get<SetItemIgnoredProperties>()?.ignoreAsEnumSet()
                 ?: EnumSet.noneOf(BaseSerializableItemStack.Properties::class.java)
-        )
+        ) ?: ItemStack(Material.AIR)
         item.editMeta {
             it.persistentDataContainer.encodePrefabs(listOf(prefabKey))
         }
