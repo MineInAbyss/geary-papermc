@@ -12,12 +12,10 @@ import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
 import com.mineinabyss.geary.papermc.features.entities.bucketable.BucketableListener
 import com.mineinabyss.geary.papermc.features.entities.displayname.ShowDisplayNameOnKillerListener
-import com.mineinabyss.geary.papermc.features.entities.prevent.breeding.PreventBreedingListener
-import com.mineinabyss.geary.papermc.features.entities.prevent.interaction.PreventInteractionListener
-import com.mineinabyss.geary.papermc.features.entities.prevent.regen.PreventRegenerationListener
-import com.mineinabyss.geary.papermc.features.entities.prevent.riding.PreventRidingListener
+import com.mineinabyss.geary.papermc.features.entities.prevent.PreventEventsFeature
 import com.mineinabyss.geary.papermc.features.entities.sounds.AmbientSoundsFeature
 import com.mineinabyss.geary.papermc.features.entities.taming.TamingListener
+import com.mineinabyss.geary.papermc.features.general.cooldown.CooldownFeature
 import com.mineinabyss.geary.papermc.features.items.backpack.BackpackListener
 import com.mineinabyss.geary.papermc.features.items.food.ReplaceBurnedDropListener
 import com.mineinabyss.geary.papermc.features.items.holdsentity.SpawnHeldPrefabSystem
@@ -160,22 +158,20 @@ class GearyPluginImpl : GearyPlugin() {
     override fun onEnable() {
         ArchetypeEngineModule.start(DI.get<PaperEngineModule>())
 
-        if (gearyPaper.config.items.enabled) {
+        if (gearyPaper.config.trackEntities) {
             geary {
+                install(CooldownFeature)
                 install(AmbientSoundsFeature)
+                install(PreventEventsFeature)
             }
             listeners(
                 BucketableListener(),
                 ShowDisplayNameOnKillerListener(),
-                PreventBreedingListener(),
-                PreventInteractionListener(),
-                PreventRegenerationListener(),
-                PreventRidingListener(),
                 TamingListener(),
             )
         }
 
-        if (gearyPaper.config.trackEntities) {
+        if (gearyPaper.config.items.enabled) {
             listeners(
                 WearableItemSystem(),
                 BackpackListener(),
