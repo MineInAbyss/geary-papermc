@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 import org.bukkit.event.entity.EntityRegainHealthEvent
 
 @Serializable
-@SerialName("mobzy:prevent.regeneration")
+@SerialName("geary:prevent.regeneration")
 class PreventRegeneration(val reason: Set<EntityRegainHealthEvent.RegainReason> = setOf())

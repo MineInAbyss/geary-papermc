@@ -14,7 +14,7 @@ import org.bukkit.event.Listener
 
 @JvmInline
 @Serializable
-@SerialName("mobzy:bind.mythic_mob")
+@SerialName("geary:bind.mythic_mob")
 value class BindToMythicMob(val id: String)
 
 class BindToMythicMobSystem : Listener {

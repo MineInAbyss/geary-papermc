@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
  * Prevents NPC entities from riding vehicles like boats.
  */
 @Serializable
-@SerialName("mobzy:prevent.riding")
+@SerialName("geary:prevent.riding")
 class PreventRiding

@@ -23,7 +23,7 @@ import kotlin.time.Duration.Companion.seconds
  * @param ambientRate How often on average should the ambient sound play.
  */
 @Serializable
-@SerialName("mobzy:sounds")
+@SerialName("geary:sounds")
 class Sounds(
     val step: Sound? = null,
     val ambient: Sound? = null,
@@ -37,7 +37,7 @@ class Sounds(
     val ambientChance: Double = 1.ticks / ambientRate
 
     @Serializable
-    @SerialName("mobzy:sound")
+    @SerialName("geary:sound")
     class Sound(
         val sound: String,
         val volume: Float = 1F,

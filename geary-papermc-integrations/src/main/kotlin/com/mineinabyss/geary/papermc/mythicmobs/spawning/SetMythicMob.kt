@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 
 @JvmInline
 @Serializable
-@SerialName("mobzy:set.mythic_mob")
+@SerialName("geary:set.mythic_mob")
 value class SetMythicMob(val id: String)
