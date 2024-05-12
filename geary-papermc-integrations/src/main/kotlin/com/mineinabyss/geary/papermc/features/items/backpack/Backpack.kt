@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("looty:backpack")
+@SerialName("geary:backpack")
 class Backpack(
     val canOpenInInventory: Boolean = true,
     val canOpenInChest: Boolean = true,

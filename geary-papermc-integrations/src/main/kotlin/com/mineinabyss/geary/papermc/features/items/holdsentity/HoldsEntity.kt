@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("looty:holds_prefab")
+@SerialName("geary:holds_prefab")
 class HoldsEntity(
     val prefabKey: PrefabKey,
     val emptiedItem: SerializableItemStack? = null
