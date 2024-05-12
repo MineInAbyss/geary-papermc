@@ -9,11 +9,9 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.inventory.ItemStack
 
-const val DEFAULT_COOK_TIME = -1
-
 @JvmInline
 @Serializable
-@SerialName("looty:replace_burned_drop")
+@SerialName("geary:replace_burned_drop")
 value class ReplaceBurnedDrop(
     val replaceWith: SerializableItemStack
 )
@@ -30,7 +28,7 @@ class ReplaceBurnedDropListener : Listener {
                 replace?.let { newDrops += it.replaceWith.toItemStack() }
                 replace != null
             }
-            drops.addAll(newDrops)
+            drops += newDrops
         }
     }
 

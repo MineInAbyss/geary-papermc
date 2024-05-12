@@ -19,7 +19,6 @@ import com.mineinabyss.geary.papermc.features.entities.prevent.riding.PreventRid
 import com.mineinabyss.geary.papermc.features.entities.sounds.AmbientSoundsFeature
 import com.mineinabyss.geary.papermc.features.entities.taming.TamingListener
 import com.mineinabyss.geary.papermc.features.items.backpack.BackpackListener
-import com.mineinabyss.geary.papermc.features.items.food.FoodConsumptionListener
 import com.mineinabyss.geary.papermc.features.items.food.ReplaceBurnedDropListener
 import com.mineinabyss.geary.papermc.features.items.holdsentity.SpawnHeldPrefabSystem
 import com.mineinabyss.geary.papermc.features.items.nointeraction.DisableItemInteractionsListener
@@ -180,7 +179,6 @@ class GearyPluginImpl : GearyPlugin() {
             listeners(
                 WearableItemSystem(),
                 BackpackListener(),
-                FoodConsumptionListener(),
                 SpawnHeldPrefabSystem(),
                 DisableItemInteractionsListener(),
                 ReplaceBurnedDropListener(),

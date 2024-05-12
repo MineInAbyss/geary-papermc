@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("looty:requires_consumable")
+@SerialName("geary:requires_consumable")
 class RequiresConsumable(
     val type: SerializableItemStack,
     val minAmount: Int = 1,

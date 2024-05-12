@@ -10,7 +10,7 @@ import org.bukkit.Sound
  * @param sound The sound to play when equipped.
  */
 @Serializable
-@SerialName("looty:hat")
+@SerialName("geary:hat")
 class Hat(
     val sound: Sound = Sound.ITEM_ARMOR_EQUIP_NETHERITE
 )

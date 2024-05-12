@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("looty:consume_item")
+@SerialName("geary:consume_item")
 class ConsumeItemFromInventory(
     val type: SerializableItemStack,
     val amount: Int = 1,

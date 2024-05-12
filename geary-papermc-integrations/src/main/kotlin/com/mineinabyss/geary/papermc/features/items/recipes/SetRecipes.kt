@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("looty:set.recipes")
+@SerialName("geary:set.recipes")
 class SetRecipes(
     val recipes: List<SerializableRecipeIngredients>,
     val discoverRecipes: Boolean = false,

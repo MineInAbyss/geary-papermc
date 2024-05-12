@@ -8,5 +8,5 @@ import kotlinx.serialization.Serializable
  * Meaning if a GearyItem has a base-material of PAPER and this component, it cannot be used to craft books.
  */
 @Serializable
-@SerialName("looty:deny_in_vanilla_recipes")
+@SerialName("geary:deny_in_vanilla_recipes")
 class DenyInVanillaRecipes
