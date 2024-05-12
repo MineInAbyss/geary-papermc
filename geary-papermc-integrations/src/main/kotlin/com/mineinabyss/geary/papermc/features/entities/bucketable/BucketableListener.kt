@@ -11,7 +11,7 @@ import org.bukkit.event.player.PlayerBucketEntityEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 
 @Serializable
-@SerialName("mobzy:bucketable")
+@SerialName("geary:bucketable")
 class Bucketable(
     val bucketLiquidRequired: Material = Material.WATER,
     val bucketItem: SerializableItemStack

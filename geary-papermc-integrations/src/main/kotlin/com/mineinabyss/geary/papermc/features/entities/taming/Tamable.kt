@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("mobzy:tamable")
+@SerialName("geary:tamable")
 class Tamable(
     val tameItem: SerializableItemStack? = null,
     val saddleModelId: String? = null,

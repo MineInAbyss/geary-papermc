@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
  * Removes vanilla breeding behaviour on mobs
  */
 @Serializable
-@SerialName("mobzy:prevent.breeding")
+@SerialName("geary:prevent.breeding")
 class PreventBreeding

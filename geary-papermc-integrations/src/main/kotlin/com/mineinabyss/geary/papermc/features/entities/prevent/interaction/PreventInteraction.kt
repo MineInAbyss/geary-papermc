@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  * Cancels player damage, right clicks, and any form of movement.
  */
 @Serializable
-@SerialName("mobzy:prevent.interaction")
+@SerialName("geary:prevent.interaction")
 class PreventInteraction(val type: Set<InteractionType> = setOf())
 
 enum class InteractionType {
