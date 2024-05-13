@@ -145,9 +145,10 @@ class GearyPluginImpl : GearyPlugin() {
 
         DI.add<SerializablePrefabItemService>(
             object : SerializablePrefabItemService {
-                override fun encodeFromPrefab(item: ItemStack, prefabName: String) {
+                override fun encodeFromPrefab(item: ItemStack, prefabName: String): ItemStack {
                     val result = gearyItems.createItem(PrefabKey.of(prefabName), item)
                     require(result != null) { "Failed to create serializable ItemStack from $prefabName, does the prefab exist and have a geary:set.item component?" }
+                    return result
                 }
             })
 

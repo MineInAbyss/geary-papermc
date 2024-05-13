@@ -35,7 +35,7 @@ class GearyItemProvider {
         item.editMeta {
             it.persistentDataContainer.encodePrefabs(listOf(prefabKey))
         }
-        return item.takeIf { it.type != Material.AIR }
+        return item.takeUnless { it.isEmpty }
     }
 
     /**

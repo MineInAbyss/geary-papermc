@@ -11,6 +11,7 @@ class SetRecipes(
     val recipes: List<SerializableRecipeIngredients>,
     val discoverRecipes: Boolean = false,
     val group: String = "",
+    val category: String = "MISC",
     val removeRecipes: List<String> = listOf(),
     val result: SerializableItemStack? = null,
 )
