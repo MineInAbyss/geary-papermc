@@ -53,12 +53,7 @@ class Block2Prefab {
 
             // Calculates noteblock states
             arrayListOf<BlockData>().apply {
-                // Make the default blockstate the 0'th entry in the array
-                add(0, Material.NOTE_BLOCK.createBlockData() as NoteBlock)
-
-                // Max size is set to total -1 to reserve 1 state (0) for the default vanilla noteblock
-                val maxSize = Instrument.entries.size * 50 - 1
-                for (j in 1..<maxSize) {
+                for (j in 0..Instrument.entries.size * 50) {
                     val noteBlockData = Material.NOTE_BLOCK.createBlockData() as NoteBlock
                     noteBlockData.instrument = Instrument.getByType(min(Instrument.entries.size, j / 50).toByte()) ?: continue
 
