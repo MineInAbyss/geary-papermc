@@ -1,3 +1,5 @@
+import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
+
 plugins {
     id(idofrontLibs.plugins.mia.copyjar.get().pluginId)
     id(idofrontLibs.plugins.mia.kotlin.jvm.get().pluginId)
@@ -15,11 +17,10 @@ configurations {
     }
 }
 
+paperweight.reobfArtifactConfiguration.set(ReobfArtifactConfiguration.MOJANG_PRODUCTION)
+
 dependencies {
     implementation(project(":"))
-
-    // Plugins
-    compileOnly(libs.plugman)
 
     // MineInAbyss platform
     compileOnly(idofrontLibs.kotlin.stdlib)

@@ -3,34 +3,38 @@ package com.mineinabyss.geary.papermc.tracking.entities.helpers
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.helpers.contains
-import com.mineinabyss.geary.papermc.tracking.entities.components.SetEntityType
-import com.mineinabyss.geary.papermc.tracking.entities.components.SetMythicMob
+import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.papermc.tracking.entities.components.ShowInMobQueries
+import com.mineinabyss.geary.papermc.tracking.entities.components.SpawnableByGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
-import com.mineinabyss.geary.systems.query.CachedQueryRunner
+import com.mineinabyss.geary.systems.builders.cache
+import com.mineinabyss.geary.systems.query.CachedQuery
 import com.mineinabyss.geary.systems.query.GearyQuery
+import com.mineinabyss.geary.systems.query.ShorthandQuery1
+import com.mineinabyss.geary.systems.query.query
 
 class GearyMobPrefabQuery : GearyQuery() {
+    private val mobQuery = family {
+        has<Prefab>()
+        has<ShowInMobQueries>()
+    }
 
-    val key by get<PrefabKey>()
-    override fun ensure() = this { add(mobQuery) }
+    val prefabs = geary.cache(query<PrefabKey> { add(mobQuery) })
+    val spawnablePrefabs = geary.cache(query<PrefabKey> {
+        has<Prefab>()
+        has<SpawnableByGeary>()
+    })
 
-    companion object {
+    fun isMob(entity: GearyEntity): Boolean {
+        return entity.prefabs.any { it.type in mobQuery }
+    }
 
-        fun CachedQueryRunner<GearyMobPrefabQuery>.getKeys(): List<PrefabKey> = map { key }
-        fun CachedQueryRunner<GearyMobPrefabQuery>.getKeyStrings(): List<String> = map { key.toString() }
-
-        private val mobQuery = family {
-            has<Prefab>()
-            or {
-                has<SetEntityType>()
-                has<SetMythicMob>()
-            }
-        }
-
-        fun isMob(entity: GearyEntity): Boolean {
-            return entity.prefabs.any { it.type in mobQuery }
-        }
+    fun isMobPrefab(entity: GearyEntity): Boolean {
+        return entity.type in mobQuery
     }
 }
 
+
+fun CachedQuery<ShorthandQuery1<PrefabKey>>.getKeys() = map { it.comp1 }
+fun CachedQuery<ShorthandQuery1<PrefabKey>>.getKeyStrings() = map { it.comp1.toString() }

@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 val idofrontVersion: String by project
 
 plugins {
@@ -8,10 +6,19 @@ plugins {
     alias(idofrontLibs.plugins.mia.kotlin.jvm)
     alias(idofrontLibs.plugins.dokka) apply false
     alias(idofrontLibs.plugins.mia.autoversion)
+    idea
+}
+
+idea {
+    module {
+        isDownloadJavadoc = true
+        isDownloadSources = true
+    }
 }
 
 dependencies {
     api(project(":geary-papermc-tracking"))
+    api(project(":geary-papermc-integrations"))
     api(project(":geary-papermc-bridge"))
     api(gearyLibs.core)
     api(gearyLibs.autoscan)
@@ -26,12 +33,9 @@ allprojects {
 
     repositories {
         mavenCentral()
+        google()
         maven("https://repo.mineinabyss.com/releases")
         maven("https://repo.mineinabyss.com/snapshots")
-        maven("https://raw.githubusercontent.com/TheBlackEntity/PlugMan/repository/")
-        maven("https://jitpack.io")
-        maven("https://repo.codemc.io/repository/nms/")
-        maven("https://mvn.lumine.io/repository/maven-public/")
         mavenLocal()
     }
 
@@ -41,14 +45,12 @@ allprojects {
         testImplementation(libs.bundles.idofront.core)
     }
 
-    tasks {
-        withType<KotlinCompile> {
-            kotlinOptions {
-                freeCompilerArgs += listOf(
-                    "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
-                    "-opt-in=kotlin.ExperimentalUnsignedTypes",
-                )
-            }
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll(
+                "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+                "-opt-in=kotlin.ExperimentalUnsignedTypes",
+            )
         }
     }
 }

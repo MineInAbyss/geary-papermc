@@ -1,10 +1,7 @@
 package com.mineinabyss.geary.papermc.plugin.commands
 
-import com.mineinabyss.geary.components.relations.InstanceOf
-import com.mineinabyss.geary.datatypes.GearyEntity
-import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.papermc.gearyPaper
-import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery
+import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.prefabs.PrefabKey
@@ -32,12 +29,11 @@ fun Command.mobsQuery() {
             for (world in worlds) for (entity in world.entities) {
                 val geary = entity.toGearyOrNull() ?: continue
                 // Only select entities that are instanced from a gearyMobs registered prefab
-                if (!GearyMobPrefabQuery.isMob(geary)) continue
+                if (!gearyMobs.query.isMob(geary)) continue
 
                 if (types.any { type ->
-                        fun excludeDefault() = entity.customName() == null
                         when (type) {
-                            "custom" -> excludeDefault()
+                            "custom" -> true
                             else -> {
                                 val prefab = runCatching { PrefabKey.of(type).toEntityOrNull() }.getOrNull()
                                     ?: this@commandGroup.stopCommand("No such prefab or selector $type")
@@ -56,20 +52,27 @@ fun Command.mobsQuery() {
 
             sender.success(
                 """
-                        ${if (isInfo) "There are" else "Removed"}
-                        <b>$entityCount</b> entities matching your query
-                        ${if (radius <= 0) "in all loaded chunks." else "in a radius of $radius blocks."}
-                        """.trimIndent().replace("\n", " ")
+                ${if (isInfo) "There are" else "Removed"}
+                <b>$entityCount</b> entities matching your query
+                ${if (radius <= 0) "in loaded chunks." else "in a radius of $radius blocks."}
+                """.trimIndent().replace("\n", " ")
             )
             if (isInfo) {
-                val categories = entities
-                    .groupingBy { it.toGeary().prefabs.first().get<PrefabKey>() }
+                val mobs = entities
+                    .asSequence()
+                    .flatMap { it.toGeary().prefabs }
+                    .groupingBy { it }
                     .eachCount()
+                    .filter { gearyMobs.query.isMobPrefab(it.key) }
                     .entries
                     .sortedByDescending { it.value }
+                    .toList()
 
-                if (categories.isNotEmpty()) sender.info(
-                    categories.joinToString("\n") { (type, amount) -> "<gray>${type}</gray>: $amount" }
+                if (mobs.isNotEmpty()) sender.info(
+                    mobs.joinToString(separator = "\n") { (type, amount) ->
+                        val prefabName = type.get<PrefabKey>()?.toString() ?: type.toString()
+                        "<gray>${prefabName}</gray>: $amount"
+                    }
                 )
             }
         }
@@ -83,8 +86,3 @@ fun Command.mobsQuery() {
         }
     }
 }
-
-fun GearyEntity.deepInstanceOf(entity: GearyEntity): Boolean =
-    instanceOf(entity) || getRelations<InstanceOf?, Any?>().any {
-        it.target.toGeary().deepInstanceOf(entity)
-    }

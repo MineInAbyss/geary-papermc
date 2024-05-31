@@ -12,31 +12,27 @@ import org.spigotmc.AsyncCatcher
 class GearyPaperConfig(
     @YamlComment("Convert bukkit entities to and from geary, for instance to store and persist components on a player.")
     val trackEntities: Boolean = true,
-    @YamlComment("Convert items to and from geary. Depends on entity tracking.")
-    val trackItems: Boolean = true,
+    val items: ItemTrackingConfig = ItemTrackingConfig(),
     @YamlComment("Convert blocks to and from geary.")
     val trackBlocks: Boolean = true,
-    @YamlComment("Convert bukkit events to data in Geary (deprecated)")
-    val bridgeEvents: Boolean = true,
-    @YamlComment("If an item has no prefabs encoded, try to find its prefab by matching custom model data.")
-    val migrateItemCustomModelDataToPrefab: Boolean = true,
     val catch: Catching = Catching(),
     val mobTypeConversion: MobTypeConversion = MobTypeConversion.IGNORE,
     @YamlComment("List of mob types to remove if they are not entities with Geary prefabs (i.e. vanilla entities)")
     val removeVanillaMobTypes: Set<EntityType> = emptySet(),
-    val logLevel: Severity = Severity.Warn,
+    val logLevel: Severity = Severity.Info,
+    val integrations: Integrations = Integrations()
 )
 
 @Serializable
 class Catching(
     @YamlComment("Whether to throw an error when an entity read operation occurs outside of the server thread.")
-    val asyncRead: CatchType = CatchType.WARN,
+    val asyncRead: CatchType = CatchType.IGNORE,
     @YamlComment("Whether to throw an error when an entity write operation occurs outside of the server thread.")
     val asyncWrite: CatchType = CatchType.ERROR,
     @YamlComment("Whether to throw an error when converting bukkit concepts to geary entities outside of the server thread.")
-    val asyncEntityConversion: CatchType = CatchType.WARN,
-    val asyncRecordsAccess: CatchType = CatchType.WARN,
-    val asyncArchetypeProviderAccess: CatchType = CatchType.WARN,
+    val asyncEntityConversion: CatchType = CatchType.IGNORE,
+    val asyncRecordsAccess: CatchType = CatchType.IGNORE,
+    val asyncArchetypeProviderAccess: CatchType = CatchType.IGNORE,
 ) {
     companion object{
         fun asyncCheck(type: CatchType, message: String) {
@@ -61,3 +57,17 @@ enum class CatchType {
 enum class MobTypeConversion {
     MIGRATE, REMOVE, IGNORE
 }
+
+@Serializable
+data class ItemTrackingConfig(
+    val enabled: Boolean = true,
+    @YamlComment("If an item has no prefabs encoded, try to find its prefab by matching custom model data.")
+    val migrateByCustomModelData: Boolean = false,
+    val autoDiscoverVanillaRecipes: Boolean = false
+)
+
+@Serializable
+data class Integrations(
+    @YamlComment("Allow binding to MythicMobs entities.")
+    val mythicMobs: Boolean = true,
+)

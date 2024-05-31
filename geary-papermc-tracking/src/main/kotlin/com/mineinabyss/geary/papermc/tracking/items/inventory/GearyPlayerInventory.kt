@@ -39,6 +39,7 @@ class GearyPlayerInventory(
             EquipmentSlot.CHEST -> itemInChestplate
             EquipmentSlot.LEGS -> itemInLeggings
             EquipmentSlot.FEET -> itemInBoots
+            EquipmentSlot.BODY -> null
         }
     }
 

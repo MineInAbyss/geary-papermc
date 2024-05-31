@@ -10,7 +10,7 @@ import com.mineinabyss.idofront.messaging.error
 fun Command.items() {
     "items" {
         "give" {
-            val prefabKey by optionArg(options = gearyItems.prefabs.map { key.toString() }) {
+            val prefabKey by optionArg(options = gearyItems.prefabs.map { it.key.toString() }) {
                 parseErrorMessage = { "No such entity: $passed" }
             }
             val amount by intArg { default = 1 }

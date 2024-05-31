@@ -7,9 +7,8 @@ import com.mineinabyss.geary.helpers.toGeary
 import com.mineinabyss.geary.papermc.datastore.PaperDatastore.COMPONENTS_KEY
 import com.mineinabyss.geary.papermc.datastore.PaperDatastore.PREFABS_KEY
 import com.mineinabyss.geary.papermc.datastore.namespacedkey.*
-import com.mineinabyss.geary.papermc.datastore.namespacedkey.COMPONENT_PREFIX
 import com.mineinabyss.geary.prefabs.PrefabKey
-import com.mineinabyss.geary.serialization.dsl.serializableComponents
+import com.mineinabyss.geary.serialization.serializableComponents
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.builtins.SetSerializer

@@ -10,6 +10,7 @@ import org.bukkit.block.data.BlockData
 import org.bukkit.block.data.type.CaveVines
 import org.bukkit.block.data.type.NoteBlock
 import org.bukkit.block.data.type.Tripwire
+import kotlin.math.min
 
 class Block2Prefab {
     val blockMap = createBlockMap()
@@ -52,27 +53,13 @@ class Block2Prefab {
 
             // Calculates noteblock states
             arrayListOf<BlockData>().apply {
-                // Make the default blockstate the 0'th entry in the array
-                add(0, Material.NOTE_BLOCK.createBlockData() as NoteBlock)
-                // Start at 50 to skip PIANO, which is the default Instrument
-                for (j in 50..799) {
+                for (j in 0..Instrument.entries.size * 50) {
                     val noteBlockData = Material.NOTE_BLOCK.createBlockData() as NoteBlock
-                    noteBlockData.instrument = Instrument.getByType((j / 50 % 400).toByte()) ?: continue
+                    noteBlockData.instrument = Instrument.getByType(min(Instrument.entries.size, j / 50).toByte()) ?: continue
 
                     noteBlockData.note = Note((j % 25))
-                    noteBlockData.isPowered = j / 25 % 2 == 1
-                    add(j - 49, noteBlockData)
-                }
-
-                // Adds the piano states to the end of the blockMap, excluding Note:0 due to it being the default
-                // Since the order is not really relevant and some plugins might want to use the default states,
-                // them being at the end makes it easier to skip them
-                for (j in 1..49) {
-                    val noteBlockData = Material.NOTE_BLOCK.createBlockData() as NoteBlock
-                    noteBlockData.instrument = Instrument.PIANO
-                    noteBlockData.note = Note((j % 25))
-                    noteBlockData.isPowered = j / 25 % 2 == 1
-                    add(j + 750, noteBlockData)
+                    noteBlockData.isPowered = j % 50 >= 25
+                    add(j, noteBlockData)
                 }
             }.toTypedArray().let { putIfAbsent(SetBlock.BlockType.NOTEBLOCK, it) }
 

@@ -10,6 +10,7 @@ import com.mineinabyss.geary.papermc.helpers.SomeData
 import com.mineinabyss.geary.papermc.helpers.TestEntityTracking
 import com.mineinabyss.geary.papermc.helpers.withTestSerializers
 import com.mineinabyss.geary.serialization.dsl.serialization
+import com.mineinabyss.geary.serialization.setPersisting
 import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import io.kotest.matchers.nulls.shouldBeNull

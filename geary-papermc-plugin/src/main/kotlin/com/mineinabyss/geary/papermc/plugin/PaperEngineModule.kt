@@ -1,7 +1,6 @@
 package com.mineinabyss.geary.papermc.plugin
 
-import com.mineinabyss.geary.datatypes.maps.SynchronizedTypeMap
-import com.mineinabyss.geary.datatypes.maps.TypeMap
+import com.mineinabyss.geary.datatypes.maps.SynchronizedArrayTypeMap
 import com.mineinabyss.geary.engine.archetypes.ArchetypeEngine
 import com.mineinabyss.geary.engine.archetypes.ArchetypeProvider
 import com.mineinabyss.geary.engine.archetypes.EntityByArchetypeProvider
@@ -38,9 +37,9 @@ class PaperEngineModule(
             return super.write
         }
 
-    private val syncTypeMap = SynchronizedTypeMap(super.records)
+    private val syncTypeMap = SynchronizedArrayTypeMap()
 
-    override val records: TypeMap
+    override val records: SynchronizedArrayTypeMap
         get() {
             asyncCheck(gearyPaper.config.catch.asyncRecordsAccess, "Async records access!")
             return syncTypeMap

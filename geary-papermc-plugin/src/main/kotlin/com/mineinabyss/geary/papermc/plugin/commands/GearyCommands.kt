@@ -2,8 +2,8 @@ package com.mineinabyss.geary.papermc.plugin.commands
 
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
-import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery.Companion.getKeyStrings
-import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery.Companion.getKeys
+import com.mineinabyss.geary.papermc.tracking.entities.helpers.getKeyStrings
+import com.mineinabyss.geary.papermc.tracking.entities.helpers.getKeys
 import com.mineinabyss.geary.papermc.tracking.items.gearyItems
 import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery.Companion.getKeys
 import com.mineinabyss.geary.prefabs.PrefabKey
@@ -45,7 +45,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
         ).filter { it.startsWith(args[0]) } else args[0]) {
             "mobs", "m" -> when (if (args.size == 2) return listOf("spawn", "remove", "locate", "info") else args[1]) {
                 "spawn", "s" -> if (args.size == 3) {
-                    return gearyMobs.prefabs.getKeys().filterPrefabs(args[2]).toList()
+                    return gearyMobs.query.spawnablePrefabs.getKeys().filterPrefabs(args[2]).toList()
                 } else if (args.size == 4) {
                     val min = args[3].toIntOrNull()?.coerceAtLeast(1) ?: 1
                     return (min - 1 until min + 100).map { it.toString() }
@@ -109,7 +109,7 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
     private val mobs: List<String> by lazy {
         buildList {
             addAll(listOf("custom"))
-            addAll(gearyMobs.prefabs.getKeyStrings())
+            addAll(gearyMobs.query.prefabs.getKeyStrings())
         }
     }
 }

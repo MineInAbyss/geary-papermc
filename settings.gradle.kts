@@ -30,10 +30,11 @@ dependencyResolutionManagement {
 }
 
 include(
+    "geary-papermc-bridge",
+    "geary-papermc-integrations",
     "geary-papermc-core",
     "geary-papermc-datastore",
     "geary-papermc-plugin",
     "geary-papermc-tracking",
-    "geary-papermc-bridge",
     "geary-tests"
 )

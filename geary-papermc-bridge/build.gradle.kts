@@ -10,10 +10,6 @@ dependencies {
     implementation(gearyLibs.serialization)
     implementation(gearyLibs.autoscan)
 
-    // Plugins
-    compileOnly(libs.plugman)
-    compileOnly(idofrontLibs.minecraft.plugin.mythic.dist)
-
     // MineInAbyss platform
     compileOnly(idofrontLibs.kotlin.stdlib)
     compileOnly(idofrontLibs.kotlinx.serialization.json)
