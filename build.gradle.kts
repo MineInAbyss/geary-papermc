@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 val idofrontVersion: String by project
 
 plugins {
@@ -47,14 +45,12 @@ allprojects {
         testImplementation(libs.bundles.idofront.core)
     }
 
-    tasks {
-        withType<KotlinCompile> {
-            kotlinOptions {
-                freeCompilerArgs += listOf(
-                    "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
-                    "-opt-in=kotlin.ExperimentalUnsignedTypes",
-                )
-            }
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll(
+                "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+                "-opt-in=kotlin.ExperimentalUnsignedTypes",
+            )
         }
     }
 }
