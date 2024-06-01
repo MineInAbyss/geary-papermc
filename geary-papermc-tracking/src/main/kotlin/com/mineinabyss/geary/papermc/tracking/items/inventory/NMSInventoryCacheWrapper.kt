@@ -28,7 +28,9 @@ class NMSInventoryCacheWrapper(
                 inventory.holder?.itemOnCursor?.toNMS()
             ) { toArray(inventory.toNMS()) }
         } else {
-            cache.getOrUpdate(slot, inventory.toNMS().getItem(slot)) { toArray(inventory.toNMS()) }
+            runCatching { inventory.toNMS().getItem(slot) }.getOrNull()?.let { item ->
+                cache.getOrUpdate(slot, item) { toArray(inventory.toNMS()) }
+            }
         }
     }
 
