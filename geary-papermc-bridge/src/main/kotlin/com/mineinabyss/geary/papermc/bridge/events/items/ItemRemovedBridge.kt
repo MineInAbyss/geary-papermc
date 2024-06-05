@@ -1,6 +1,9 @@
 package com.mineinabyss.geary.papermc.bridge.events.items
 
+import com.mineinabyss.geary.helpers.addParent
+import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
+import com.mineinabyss.geary.papermc.tracking.items.itemEntityContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.bukkit.event.EventHandler
@@ -36,7 +39,10 @@ class ItemRemovedBridge : Listener {
 
     @EventHandler(ignoreCancelled = true)
     fun PlayerDropItemEvent.emitOnItemDrop() {
-        val droppedItem = player.inventory.toGeary()?.find(itemDrop.itemStack) ?: return
-        droppedItem.emit<OnItemDrop>()
+        itemEntityContext {
+            val droppedItem = itemDrop.itemStack.toGearyOrNull() ?: return
+            droppedItem.addParent(player.toGeary())
+            droppedItem.emit<OnItemDrop>()
+        }
     }
 }

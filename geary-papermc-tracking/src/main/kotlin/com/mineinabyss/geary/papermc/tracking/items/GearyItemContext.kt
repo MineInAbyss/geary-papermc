@@ -10,7 +10,15 @@ class GearyItemContext : Closeable {
     val cached = mutableMapOf<ItemStack, GearyEntity>()
     fun ItemStack.toGeary(): GearyEntity {
         return cached.getOrPut(this) {
-            gearyItems.itemProvider.deserializeItemStackToEntity(this.fastPDC) ?: entity()
+            toGearyOrNull() ?: entity()
+        }
+    }
+
+    fun ItemStack.toGearyOrNull(): GearyEntity? {
+        return cached.getOrPut(this) {
+            gearyItems.itemProvider.deserializeItemStackToEntity(this.fastPDC)?.apply {
+                set<ItemStack>(this@toGearyOrNull)
+            } ?: return null
         }
     }
 

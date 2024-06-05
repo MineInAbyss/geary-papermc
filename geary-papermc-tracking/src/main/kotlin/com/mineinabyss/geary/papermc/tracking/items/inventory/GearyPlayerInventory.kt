@@ -44,7 +44,9 @@ class GearyPlayerInventory(
     }
 
     fun find(itemStack: ItemStack): GearyEntity? {
-        return get(inventory.indexOf(itemStack))
+        val index = inventory.indexOf(itemStack)
+        if (index == -1) return null
+        return get(index)
     }
 
     // We use custom cursor slot so can't just call get
