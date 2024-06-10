@@ -6,6 +6,7 @@ import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItemIgnoredProperties
 import com.mineinabyss.geary.systems.builders.observe
 import com.mineinabyss.geary.systems.query.query
+import com.mineinabyss.idofront.items.editItemMeta
 import com.mineinabyss.idofront.serialization.BaseSerializableItemStack
 import org.bukkit.inventory.ItemStack
 import java.util.*
@@ -16,5 +17,7 @@ fun GearyModule.createItemMigrationListener() = observe<OnSet>()
         val overrides = entity.get<SetItemIgnoredProperties>()
         val ignoredProperties =
             overrides?.ignoreAsEnumSet() ?: EnumSet.noneOf(BaseSerializableItemStack.Properties::class.java)
-        setItem.item.toItemStack(applyTo = item, ignoredProperties)
+        val newItem = setItem.item.toItemStack(applyTo = item, ignoredProperties)
+        item.type = newItem.type
+        item.itemMeta = newItem.itemMeta
     }
