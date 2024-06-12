@@ -152,8 +152,7 @@ class GearyPluginImpl : GearyPlugin() {
                 }
             })
 
-        // Register commands
-        GearyCommands()
+        GearyCommands.registerCommands()
     }
 
     override fun onEnable() {

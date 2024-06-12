@@ -3,11 +3,12 @@ package com.mineinabyss.geary.papermc.plugin.commands
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.archetypes
 import com.mineinabyss.idofront.commands.Command
+import com.mineinabyss.idofront.commands.brigadier.IdoRootCommand
 import com.mineinabyss.idofront.messaging.info
 
-fun Command.stats() {
+fun IdoRootCommand.stats() {
     "stats" {
-        action {
+        executes {
             val tempEntity = entity()
 
             sender.info(
