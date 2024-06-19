@@ -1,7 +1,6 @@
-package com.mineinabyss.geary.papermc.plugin
+package com.mineinabyss.geary.papermc
 
 import com.mineinabyss.geary.engine.archetypes.ArchetypeEngine
-import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.idofront.time.ticks
 import org.bukkit.Bukkit
 

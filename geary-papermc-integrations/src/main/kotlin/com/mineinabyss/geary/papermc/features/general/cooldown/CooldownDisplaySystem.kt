@@ -21,7 +21,7 @@ class CooldownsToRemove(
     val cooldowns: List<GearyEntity>
 )
 
-fun GearyModule.createCooldownDisplaySystem() = system(object : Query() {
+fun GearyModule.cooldownDisplaySystem() = system(object : Query() {
     val player by get<Player>()
     val cooldowns by getRelationsWithData<CooldownStarted, Any?>()
 }).every(INTERVAL).defer {

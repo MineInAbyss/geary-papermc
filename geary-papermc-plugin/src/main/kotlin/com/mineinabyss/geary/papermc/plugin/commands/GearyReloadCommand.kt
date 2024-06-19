@@ -9,7 +9,7 @@ private val prefabLoader get() = prefabs.loader
 fun Command.reload() {
     "reload" {
         action {
-            gearyPaper.configHolder.reload()
+            gearyPaper.reloadConfig()
             prefabLoader.loadOrUpdatePrefabs()
         }
     }

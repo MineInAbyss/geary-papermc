@@ -11,6 +11,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerItemBreakEvent
 import org.bukkit.event.player.PlayerItemConsumeEvent
+import org.bukkit.inventory.EquipmentSlot
 
 @Serializable
 @SerialName("geary:on_item_consumed")
@@ -27,7 +28,11 @@ sealed class OnItemDrop
 class ItemRemovedBridge : Listener {
     @EventHandler(ignoreCancelled = true)
     fun PlayerItemConsumeEvent.emitOnConsume() {
-        val heldItem = player.inventory.toGeary()?.get(hand) ?: return
+        val gearyInventory = player.inventory.toGeary() ?: return
+        val heldItem = when (hand) {
+            EquipmentSlot.HAND -> gearyInventory.itemInMainHand
+            else -> gearyInventory.itemInOffhand
+        } ?: return
         heldItem.emit<OnItemConsume>()
     }
 

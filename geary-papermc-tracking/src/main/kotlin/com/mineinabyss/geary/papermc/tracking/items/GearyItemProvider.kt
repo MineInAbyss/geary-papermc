@@ -27,8 +27,9 @@ class GearyItemProvider {
     fun serializePrefabToItemStack(prefabKey: PrefabKey, existing: ItemStack? = null): ItemStack? {
         val prefab = prefabKey.toEntityOrNull() ?: return null
 
+        val serializableItem = prefab.get<SetItem>()?.item
         val item = prefab.get<SetItem>()?.item?.toItemStack(
-            applyTo = existing ?: ItemStack(Material.AIR),
+            applyTo = existing ?: ItemStack(serializableItem?.type ?: Material.AIR),
             ignoreProperties = prefab.get<SetItemIgnoredProperties>()?.ignoreAsEnumSet()
                 ?: EnumSet.noneOf(BaseSerializableItemStack.Properties::class.java)
         ) ?: ItemStack(Material.AIR)

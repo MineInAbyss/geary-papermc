@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.helpers
 
 import be.seeseemelk.mockbukkit.MockBukkit
-import com.mineinabyss.geary.papermc.GearyPaperConfig
+import com.mineinabyss.geary.papermc.GearyPluginConfig
 import com.mineinabyss.geary.papermc.GearyPaperModule
 import com.mineinabyss.idofront.config.IdofrontConfig
 import com.mineinabyss.idofront.di.DI
@@ -20,9 +20,9 @@ abstract class MockedServerTest {
     init {
         DI.add<GearyPaperModule>(object : GearyPaperModule {
             override val plugin = this@MockedServerTest.plugin
-            override val configHolder: IdofrontConfig<GearyPaperConfig>
+            override val configHolder: IdofrontConfig<GearyPluginConfig>
                 get() = error("No config holder in tests, use config directly")
-            override val config = GearyPaperConfig()
+            override val config = GearyPluginConfig()
 
             override val logger: ComponentLogger = ComponentLogger.fallback()
         })

@@ -11,7 +11,7 @@ import com.mineinabyss.geary.papermc.tracking.items.systems.LoginListener
 import com.mineinabyss.geary.systems.builders.cache
 import org.bukkit.inventory.ItemStack
 
-class BukkitBackedItemTracking : ItemTracking {
+class BukkitBackedItemTracking : ItemTrackingModule {
     override val itemProvider = GearyItemProvider()
     override val loginListener = LoginListener { BukkitItemCache() }
     override val prefabs = geary.cache(GearyItemPrefabQuery())

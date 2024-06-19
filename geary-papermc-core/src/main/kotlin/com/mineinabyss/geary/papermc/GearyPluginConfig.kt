@@ -9,7 +9,7 @@ import org.bukkit.entity.EntityType
 import org.spigotmc.AsyncCatcher
 
 @Serializable
-class GearyPaperConfig(
+class GearyPluginConfig(
     @YamlComment("Convert bukkit entities to and from geary, for instance to store and persist components on a player.")
     val trackEntities: Boolean = true,
     val items: ItemTrackingConfig = ItemTrackingConfig(),
@@ -20,7 +20,9 @@ class GearyPaperConfig(
     @YamlComment("List of mob types to remove if they are not entities with Geary prefabs (i.e. vanilla entities)")
     val removeVanillaMobTypes: Set<EntityType> = emptySet(),
     val logLevel: Severity = Severity.Info,
-    val integrations: Integrations = Integrations()
+    val integrations: Integrations = Integrations(),
+    @YamlComment("Bridges some Bukkit events to Geary, allowing for use in observers")
+    val enableEventBridge: Boolean = true
 )
 
 @Serializable
