@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.plugin.commands
 
 import com.mineinabyss.geary.papermc.tracking.items.gearyItems
+import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.idofront.commands.Command
 import com.mineinabyss.idofront.commands.arguments.intArg
 import com.mineinabyss.idofront.commands.arguments.optionArg
@@ -15,13 +16,9 @@ fun Command.items() {
             }
             val amount by intArg { default = 1 }
             playerAction {
-                val item = gearyItems.createItem(
-                    com.mineinabyss.geary.prefabs.PrefabKey.of(prefabKey)
-                ) ?: run {
-                    sender.error("Failed to create $prefabKey")
-                    return@playerAction
-                }
-                item.amount = amount.coerceIn(1, 64)
+                val item = gearyItems.createItem(PrefabKey.of(prefabKey))
+                    ?: return@playerAction sender.error("Failed to create $prefabKey")
+                item.amount = amount.coerceIn(1, item.maxStackSize)
                 player.inventory.addItem(item)
             }
         }

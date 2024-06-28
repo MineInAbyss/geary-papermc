@@ -3,7 +3,7 @@ version: ${plugin_version}
 author: Offz
 load: STARTUP
 main: com.mineinabyss.geary.papermc.plugin.GearyPluginImpl
-api-version: '1.20'
+api-version: '1.21'
 
 prefix: Geary
 description: An Entity Component System written for Spigot

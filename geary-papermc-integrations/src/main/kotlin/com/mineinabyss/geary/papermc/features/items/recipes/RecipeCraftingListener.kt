@@ -4,7 +4,6 @@ import com.mineinabyss.geary.papermc.datastore.decode
 import com.mineinabyss.geary.papermc.datastore.decodePrefabs
 import com.mineinabyss.geary.papermc.datastore.encode
 import com.mineinabyss.geary.papermc.datastore.hasComponentsEncoded
-import com.mineinabyss.geary.papermc.tracking.items.components.SetItemIgnoredProperties
 import com.mineinabyss.idofront.items.editItemMeta
 import com.mineinabyss.idofront.nms.nbt.fastPDC
 import com.mineinabyss.idofront.serialization.BaseSerializableItemStack
@@ -60,21 +59,9 @@ class RecipeCraftingListener : Listener {
             it.template.test(template) && it.addition.test(mineral) && it.base.itemStack.itemMeta?.persistentDataContainer?.decodePrefabs()
                 ?.firstOrNull() == inputGearyEntity
         }.firstOrNull()?.result
-        var recipeResultItem = (customRecipeResult ?: ItemStack.empty()).let {
-            result?.toSerializable()?.toItemStack(it, EnumSet.of(BaseSerializableItemStack.Properties.DISPLAY_NAME))
-        }
 
-        recipeResultItem = recipeResultItem?.editItemMeta {
-            displayName(
-                equipment.fastPDC?.decode<SetItemIgnoredProperties>()?.let { properties ->
-                    persistentDataContainer.encode(properties)
-                    if (BaseSerializableItemStack.Properties.DISPLAY_NAME in properties.ignore && result?.itemMeta?.hasDisplayName() == true)
-                        result?.itemMeta?.displayName()?.compact()
-                    else displayName()?.compact()
-                } ?: displayName()?.compact()
-            )
+        result = (customRecipeResult ?: ItemStack.empty()).let {
+            result?.toSerializable()?.toItemStack(it)
         }
-
-        result = recipeResultItem
     }
 }

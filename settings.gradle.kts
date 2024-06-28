@@ -21,10 +21,7 @@ dependencyResolutionManagement {
     }
 
     versionCatalogs {
-        create("idofrontLibs") {
-            from("com.mineinabyss:catalog:$idofrontVersion")
-            version("mockbukkit", "3.9.0")
-        }
+        create("idofrontLibs").from("com.mineinabyss:catalog:$idofrontVersion")
         create("gearyLibs").from("com.mineinabyss:geary-catalog:$gearyVersion")
     }
 }

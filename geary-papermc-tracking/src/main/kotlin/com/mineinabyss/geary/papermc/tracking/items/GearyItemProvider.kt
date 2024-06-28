@@ -9,8 +9,8 @@ import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.encodePrefabs
 import com.mineinabyss.geary.papermc.datastore.loadComponentsFrom
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
-import com.mineinabyss.geary.papermc.tracking.items.components.SetItemIgnoredProperties
 import com.mineinabyss.geary.prefabs.PrefabKey
+import com.mineinabyss.idofront.items.editItemMeta
 import com.mineinabyss.idofront.serialization.BaseSerializableItemStack
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
@@ -27,15 +27,9 @@ class GearyItemProvider {
     fun serializePrefabToItemStack(prefabKey: PrefabKey, existing: ItemStack? = null): ItemStack? {
         val prefab = prefabKey.toEntityOrNull() ?: return null
 
-        val item = prefab.get<SetItem>()?.item?.toItemStack(
-            applyTo = existing ?: ItemStack(Material.AIR),
-            ignoreProperties = prefab.get<SetItemIgnoredProperties>()?.ignoreAsEnumSet()
-                ?: EnumSet.noneOf(BaseSerializableItemStack.Properties::class.java)
-        ) ?: ItemStack(Material.AIR)
-        item.editMeta {
-            it.persistentDataContainer.encodePrefabs(listOf(prefabKey))
+        return prefab.get<SetItem>()?.item?.toItemStackOrNull(existing ?: ItemStack(Material.AIR))?.editItemMeta {
+            persistentDataContainer.encodePrefabs(listOf(prefabKey))
         }
-        return item.takeUnless { it.isEmpty }
     }
 
     /**
