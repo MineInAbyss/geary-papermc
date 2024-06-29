@@ -10,6 +10,8 @@ class SetBlock (
     val blockId: Int,
 ) {
     enum class BlockType {
-        NOTEBLOCK, WIRE, CAVEVINE, SLAB, STAIR
+        NOTEBLOCK, WIRE, CAVEVINE, SLAB, STAIR, DOOR, TRAPDOOR, GRATE;
+
+        val isCopper get() = this in setOf(SLAB, STAIR, DOOR, TRAPDOOR, GRATE)
     }
 }

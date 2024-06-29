@@ -9,6 +9,7 @@ import org.bukkit.block.BlockFace
 import org.bukkit.block.data.BlockData
 import org.bukkit.block.data.type.CaveVines
 import org.bukkit.block.data.type.NoteBlock
+import org.bukkit.block.data.type.Slab
 import org.bukkit.block.data.type.Tripwire
 import kotlin.math.min
 
@@ -74,11 +75,22 @@ class Block2Prefab {
                 }
             }.toTypedArray().let { putIfAbsent(SetBlock.BlockType.CAVEVINE, it) }
 
-            //Calculates slab states & stair states
-            /*for (n in 1..4) {
-            putIfAbsent(BLOCKY_SLABS.elementAt(n - 1).createBlockData() as Slab, n)
-            putIfAbsent(BLOCKY_STAIRS.elementAt(n - 1).createBlockData() as Stairs, n)
-            }*/
+            //Calculates slab, stair, door, trapdoor & grate states
+            // We add AIR first to  offset all the ids to 1-4
+            listOf(Material.AIR, Material.WAXED_CUT_COPPER_SLAB, Material.WAXED_EXPOSED_CUT_COPPER_SLAB, Material.WAXED_OXIDIZED_CUT_COPPER_SLAB, Material.WAXED_WEATHERED_CUT_COPPER_SLAB)
+                .map(Material::createBlockData).toTypedArray().let { putIfAbsent(SetBlock.BlockType.SLAB, it) }
+
+            listOf(Material.AIR, Material.WAXED_CUT_COPPER_STAIRS, Material.WAXED_EXPOSED_CUT_COPPER_STAIRS, Material.WAXED_OXIDIZED_CUT_COPPER_STAIRS, Material.WAXED_WEATHERED_CUT_COPPER_STAIRS)
+                .map(Material::createBlockData).toTypedArray().let { putIfAbsent(SetBlock.BlockType.STAIR, it) }
+
+            listOf(Material.AIR, Material.WAXED_COPPER_DOOR, Material.WAXED_EXPOSED_COPPER_DOOR, Material.WAXED_OXIDIZED_COPPER_DOOR, Material.WAXED_WEATHERED_COPPER_DOOR)
+                .map(Material::createBlockData).toTypedArray().let { putIfAbsent(SetBlock.BlockType.DOOR, it) }
+
+            listOf(Material.AIR, Material.WAXED_COPPER_TRAPDOOR, Material.WAXED_EXPOSED_COPPER_TRAPDOOR, Material.WAXED_OXIDIZED_COPPER_TRAPDOOR, Material.WAXED_WEATHERED_COPPER_TRAPDOOR)
+                .map(Material::createBlockData).toTypedArray().let { putIfAbsent(SetBlock.BlockType.TRAPDOOR, it) }
+
+            listOf(Material.AIR, Material.WAXED_COPPER_GRATE, Material.WAXED_EXPOSED_COPPER_GRATE, Material.WAXED_OXIDIZED_COPPER_GRATE, Material.WAXED_WEATHERED_COPPER_GRATE)
+                .map(Material::createBlockData).toTypedArray().let { putIfAbsent(SetBlock.BlockType.GRATE, it) }
         }
     }
 }
