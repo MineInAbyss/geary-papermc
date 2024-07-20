@@ -29,7 +29,7 @@ fun GearyEntity.encodeComponentsTo(pdc: PersistentDataContainer) {
 
 fun GearyEntity.encodeComponentsTo(holder: PersistentDataHolder) {
     val bukkitHolder = holder as? BukkitEntity
-    geary.logger.v("Encoding components for bukkit entity $id (${bukkitHolder?.type} ${bukkitHolder?.uniqueId})")
+    geary.logger.v { "Encoding components for bukkit entity $id (${bukkitHolder?.type} ${bukkitHolder?.uniqueId})" }
     encodeComponentsTo(holder.persistentDataContainer)
 }
 

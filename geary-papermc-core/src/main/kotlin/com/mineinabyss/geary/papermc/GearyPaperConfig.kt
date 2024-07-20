@@ -1,9 +1,9 @@
 package com.mineinabyss.geary.papermc
 
+import ca.spottedleaf.moonrise.common.util.TickThread
 import co.touchlab.kermit.Severity
 import com.charleskorn.kaml.YamlComment
 import com.mineinabyss.geary.modules.geary
-import io.papermc.paper.util.TickThread
 import kotlinx.serialization.Serializable
 import org.bukkit.entity.EntityType
 import org.spigotmc.AsyncCatcher

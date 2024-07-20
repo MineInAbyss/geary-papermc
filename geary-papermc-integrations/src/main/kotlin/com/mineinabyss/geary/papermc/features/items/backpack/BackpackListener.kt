@@ -26,13 +26,13 @@ import org.bukkit.inventory.ItemStack
 class BackpackListener : Listener {
 
     private fun isBackpack(player: Player, slot: EquipmentSlot) =
-        getBackpack(player, slot)?.has<com.mineinabyss.geary.papermc.features.items.backpack.Backpack>() == true
+        getBackpack(player, slot)?.has<Backpack>() == true
 
     private fun getBackpack(player: Player, slot: EquipmentSlot) = player.inventory.toGeary()?.get(slot)
     private fun getBackpack(player: Player, slot: Int) = player.inventory.toGeary()?.get(slot)
-    private fun com.mineinabyss.geary.papermc.features.items.backpack.BackpackContents.openBackpack(
+    private fun BackpackContents.openBackpack(
         player: Player,
-        title: Component
+        title: Component,
     ) {
         val inventory = Bukkit.createInventory(player, InventoryType.CHEST, title)
         inventory.contents = this.contents.toTypedArray()
@@ -44,9 +44,9 @@ class BackpackListener : Listener {
         if (!rightClicked || player.isSneaking) return
         val (item, hand) = (item ?: return) to (hand ?: return)
         val backpack = getBackpack(player, hand) ?: return
-        if (!backpack.has<com.mineinabyss.geary.papermc.features.items.backpack.Backpack>()) return
+        if (!backpack.has<Backpack>()) return
         val title = if (item.itemMeta.hasDisplayName()) item.itemMeta.displayName()!! else item.displayName()
-        backpack.getOrSetPersisting { com.mineinabyss.geary.papermc.features.items.backpack.BackpackContents() }
+        backpack.getOrSetPersisting<BackpackContents> { BackpackContents() }
             .openBackpack(player, title)
         isCancelled = true
     }
@@ -56,13 +56,13 @@ class BackpackListener : Listener {
         if (!click.isRightClick || slotType == InventoryType.SlotType.OUTSIDE) return
         val player = whoClicked as? Player ?: return
         val gearyEntity = getBackpack(player, slot) ?: return
-        val backpack = gearyEntity.get<com.mineinabyss.geary.papermc.features.items.backpack.Backpack>() ?: return
+        val backpack = gearyEntity.get<Backpack>() ?: return
 
         val contents =
-            gearyEntity.getOrSetPersisting { com.mineinabyss.geary.papermc.features.items.backpack.BackpackContents() }
+            gearyEntity.getOrSetPersisting<BackpackContents> { BackpackContents() }
         val title =
-            if (currentItem?.itemMeta?.hasDisplayName() == true) currentItem?.itemMeta?.displayName()!! else currentItem?.displayName()
-                ?: Component.text("Backpack")
+            if (currentItem?.itemMeta?.hasDisplayName() == true) currentItem?.itemMeta?.displayName()!!
+            else currentItem?.displayName() ?: Component.text("Backpack")
 
         when (clickedInventory?.type ?: return) {
             InventoryType.PLAYER -> {
@@ -81,26 +81,18 @@ class BackpackListener : Listener {
     fun InventoryCloseEvent.onCloseBackpack() {
         val player = player as Player
         val backpack = getBackpack(player, EquipmentSlot.HAND) ?: getBackpack(player, EquipmentSlot.OFF_HAND) ?: return
-        backpack.setPersisting(
-            com.mineinabyss.geary.papermc.features.items.backpack.BackpackContents(
-                inventory.contents.toList().map { it ?: ItemStack(Material.AIR) })
-        )
+        backpack.setPersisting(BackpackContents(inventory.contents.toList().map { it ?: ItemStack(Material.AIR) }))
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerDropItemEvent.onDropBackpack() {
-        if (itemDrop.toGearyOrNull()
-                ?.has<com.mineinabyss.geary.papermc.features.items.backpack.Backpack>() == true
-        ) player.closeInventory()
+        if (itemDrop.toGearyOrNull()?.has<Backpack>() == true) player.closeInventory()
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerSwapHandItemsEvent.onSwapBackpack() {
-        if (isBackpack(player, EquipmentSlot.HAND) || isBackpack(
-                player,
-                EquipmentSlot.OFF_HAND
-            )
-        ) player.closeInventory()
+        if (isBackpack(player, EquipmentSlot.HAND) || isBackpack(player, EquipmentSlot.OFF_HAND))
+            player.closeInventory()
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
