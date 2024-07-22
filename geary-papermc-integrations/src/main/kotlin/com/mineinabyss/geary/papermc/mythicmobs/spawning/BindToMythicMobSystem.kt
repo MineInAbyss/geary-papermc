@@ -5,6 +5,7 @@ import com.mineinabyss.geary.papermc.mythicmobs.mobzyMythicMobs
 import com.mineinabyss.geary.papermc.tracking.entities.events.GearyEntityAddToWorldEvent
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import io.lumine.mythic.bukkit.BukkitAPIHelper
+import io.lumine.mythic.bukkit.MythicBukkit
 import io.lumine.mythic.bukkit.events.MythicMobSpawnEvent
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -30,7 +31,7 @@ class BindToMythicMobSystem : Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun GearyEntityAddToWorldEvent.bindMythicOnSubsequentLoad() {
-        val instance = BukkitAPIHelper().getMythicMobInstance(entity) ?: return
+        val instance = MythicBukkit.inst().mobManager?.getMythicMobInstance(entity) ?: return
         val name = instance.type.internalName
         val binds = mobzyMythicMobs.mythicMobBinds[name]
         binds.forEach { bind -> gearyEntity.extend(bind) }
