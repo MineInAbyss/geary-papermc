@@ -14,3 +14,7 @@ dependencies:
       required: true
       load: BEFORE
       join-classpath: true
+    MythicMobs:
+      required: true
+      load: BEFORE
+      join-classpath: true

@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.plugin
 
+import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.addons.GearyPhase.ENABLE
 import com.mineinabyss.geary.autoscan.autoscan
 import com.mineinabyss.geary.modules.ArchetypeEngineModule
@@ -53,6 +54,8 @@ import com.mineinabyss.idofront.plugin.dataPath
 import com.mineinabyss.idofront.plugin.listeners
 import com.mineinabyss.idofront.serialization.LocationSerializer
 import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
+import com.mineinabyss.idofront.time.ticks
+import kotlinx.coroutines.delay
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.bukkit.Bukkit
@@ -138,6 +141,7 @@ class GearyPluginImpl : GearyPlugin() {
                 gearyPaper.logger.s("MythicMobs detected, enabling support.")
                 install(MythicMobsSupport)
             }
+
             install(ItemRecipes)
             install(GearyPaperMCBridge)
         }
