@@ -2,6 +2,8 @@ package com.mineinabyss.geary.papermc.mythicmobs.events
 
 import com.google.common.collect.Lists
 import com.mineinabyss.geary.modules.GearyModule
+import com.mineinabyss.geary.prefabs.configuration.components.Action
+import com.mineinabyss.geary.prefabs.configuration.components.RoleContext
 import com.mineinabyss.geary.serialization.serializers.InnerSerializer
 import com.mineinabyss.geary.systems.builders.observeWithData
 import com.mineinabyss.geary.systems.query.query
@@ -9,6 +11,7 @@ import com.mineinabyss.idofront.typealiases.BukkitEntity
 import io.lumine.mythic.api.adapters.AbstractEntity
 import io.lumine.mythic.bukkit.BukkitAdapter
 import io.lumine.mythic.bukkit.MythicBukkit
+import io.lumine.mythic.core.skills.SkillCondition
 import io.lumine.mythic.core.skills.SkillMetadataImpl
 import io.lumine.mythic.core.skills.SkillTriggers
 import kotlinx.serialization.Serializable

@@ -14,19 +14,19 @@ import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 
 @Serializable
-@SerialName("geary:on.item_interact")
+@SerialName("geary:item_interact")
 class OnItemInteract
 
 @Serializable
-@SerialName("geary:on_item_left_click")
+@SerialName("geary:item_left_click")
 class OnItemLeftClick
 
 @Serializable
-@SerialName("geary:on_item_right_click")
+@SerialName("geary:item_right_click")
 class OnItemRightClick
 
 @Serializable
-@SerialName("geary:on_item_right_click_entity")
+@SerialName("geary:item_right_click_entity")
 class OnItemRightClickEntity
 
 class ItemInteractBridge : Listener {
