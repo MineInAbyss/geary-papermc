@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    api(gearyLibs.core)
+    api(libs.geary.core)
 
     // MineInAbyss platform
     compileOnly(idofrontLibs.kotlinx.serialization.json)

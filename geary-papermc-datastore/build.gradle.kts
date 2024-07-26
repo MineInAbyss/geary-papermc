@@ -7,8 +7,8 @@ plugins {
 
 dependencies {
     implementation(project(":geary-papermc-core"))
-    api(gearyLibs.prefabs)
-    api(gearyLibs.serialization)
+    api(libs.geary.prefabs)
+    api(libs.geary.serialization)
 
     compileOnly(idofrontLibs.kotlinx.serialization.json)
     compileOnly(idofrontLibs.kotlinx.serialization.cbor)

@@ -1,1 +1,10 @@
+[versions]
+geary = "0.26.3-dev.0"
+
 [libraries]
+geary-core = { module = "com.mineinabyss:geary-core", version.ref = "geary" }
+geary-actions = { module = "com.mineinabyss:geary-actions", version.ref = "geary" }
+geary-autoscan = { module = "com.mineinabyss:geary-autoscan", version.ref = "geary" }
+geary-prefabs = { module = "com.mineinabyss:geary-prefabs", version.ref = "geary" }
+geary-serialization = { module = "com.mineinabyss:geary-serialization", version.ref = "geary" }
+geary-uuid = { module = "com.mineinabyss:geary-uuid", version.ref = "geary" }

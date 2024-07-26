@@ -7,8 +7,9 @@ plugins {
 
 dependencies {
     implementation(project(":geary-papermc-tracking"))
-    implementation(gearyLibs.serialization)
-    implementation(gearyLibs.autoscan)
+    implementation(libs.geary.serialization)
+    implementation(libs.geary.autoscan)
+    implementation(libs.geary.actions)
 
     // MineInAbyss platform
     compileOnly(idofrontLibs.kotlin.stdlib)

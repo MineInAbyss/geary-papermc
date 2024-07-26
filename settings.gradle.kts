@@ -12,7 +12,6 @@ pluginManagement {
 
 dependencyResolutionManagement {
     val idofrontVersion: String by settings
-    val gearyVersion: String by settings
 
     repositories {
         maven("https://repo.mineinabyss.com/releases")
@@ -22,7 +21,6 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         create("idofrontLibs").from("com.mineinabyss:catalog:$idofrontVersion")
-        create("gearyLibs").from("com.mineinabyss:geary-catalog:$gearyVersion")
     }
 }
 

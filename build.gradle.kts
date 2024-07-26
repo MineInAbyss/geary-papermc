@@ -20,11 +20,12 @@ dependencies {
     api(project(":geary-papermc-tracking"))
     api(project(":geary-papermc-integrations"))
     api(project(":geary-papermc-bridge"))
-    api(gearyLibs.core)
-    api(gearyLibs.autoscan)
-    api(gearyLibs.prefabs)
-    api(gearyLibs.serialization)
-    api(gearyLibs.uuid)
+    api(libs.geary.core)
+    api(libs.geary.autoscan)
+    api(libs.geary.prefabs)
+    api(libs.geary.serialization)
+    api(libs.geary.uuid)
+    api(libs.geary.actions)
 }
 
 allprojects {

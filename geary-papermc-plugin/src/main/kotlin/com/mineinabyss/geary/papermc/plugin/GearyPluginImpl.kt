@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.plugin
 
 import com.github.shynixn.mccoroutine.bukkit.launch
+import com.mineinabyss.geary.actions.GearyActions
 import com.mineinabyss.geary.addons.GearyPhase.ENABLE
 import com.mineinabyss.geary.autoscan.autoscan
 import com.mineinabyss.geary.modules.ArchetypeEngineModule
@@ -143,6 +144,7 @@ class GearyPluginImpl : GearyPlugin() {
             }
 
             install(ItemRecipes)
+            install(GearyActions)
             install(GearyPaperMCBridge)
         }
 
