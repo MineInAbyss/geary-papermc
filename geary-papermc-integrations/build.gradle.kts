@@ -20,6 +20,7 @@ dependencies {
     compileOnly(idofrontLibs.kotlinx.serialization.json)
     compileOnly(idofrontLibs.minecraft.mccoroutine)
 
+    compileOnly(libs.geary.actions)
     implementation(project(":geary-papermc-tracking"))
 }
 

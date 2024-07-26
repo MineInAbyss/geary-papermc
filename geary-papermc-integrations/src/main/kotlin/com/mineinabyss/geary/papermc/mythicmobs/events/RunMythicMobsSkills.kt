@@ -1,9 +1,9 @@
 package com.mineinabyss.geary.papermc.mythicmobs.events
 
 import com.google.common.collect.Lists
+import com.mineinabyss.geary.actions.ActionGroupContext
+import com.mineinabyss.geary.actions.Condition
 import com.mineinabyss.geary.modules.GearyModule
-import com.mineinabyss.geary.prefabs.configuration.components.Condition
-import com.mineinabyss.geary.prefabs.configuration.components.RoleContext
 import com.mineinabyss.geary.serialization.serializers.InnerSerializer
 import com.mineinabyss.geary.systems.builders.observeWithData
 import com.mineinabyss.geary.systems.query.query
@@ -41,7 +41,7 @@ class MythicMobsCondition(
         transform = ::MythicMobsCondition
     )
 
-    override fun RoleContext.execute(): Boolean {
+    override fun ActionGroupContext.execute(): Boolean {
         val bukkit = entity.get<BukkitEntity>() ?: return true
         val entity = BukkitAdapter.adapt(bukkit)
         return keys.all { line ->
