@@ -1,9 +1,9 @@
-package com.mineinabyss.geary.papermc.bridge.cooldowns.systems
+package com.mineinabyss.geary.papermc.bridge.cooldowns
 
 import com.mineinabyss.geary.modules.GearyModule
-import com.mineinabyss.geary.papermc.bridge.cooldowns.systems.CooldownDisplayProps.INTERVAL
-import com.mineinabyss.geary.papermc.bridge.cooldowns.systems.CooldownDisplayProps.displayChar
-import com.mineinabyss.geary.papermc.bridge.cooldowns.systems.CooldownDisplayProps.displayLength
+import com.mineinabyss.geary.papermc.bridge.cooldowns.CooldownDisplayProps.INTERVAL
+import com.mineinabyss.geary.papermc.bridge.cooldowns.CooldownDisplayProps.displayChar
+import com.mineinabyss.geary.papermc.bridge.cooldowns.CooldownDisplayProps.displayLength
 import com.mineinabyss.geary.systems.builders.system
 import com.mineinabyss.geary.systems.query.query
 import com.mineinabyss.idofront.time.ticks

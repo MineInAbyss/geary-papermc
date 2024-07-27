@@ -13,15 +13,15 @@ import org.bukkit.event.player.PlayerItemBreakEvent
 import org.bukkit.event.player.PlayerItemConsumeEvent
 
 @Serializable
-@SerialName("geary:on_item_consumed")
+@SerialName("geary:item_consumed")
 sealed class OnItemConsume
 
 @Serializable
-@SerialName("geary:on_item_break")
+@SerialName("geary:item_break")
 sealed class OnItemBreak
 
 @Serializable
-@SerialName("geary:on_item_drop")
+@SerialName("geary:item_drop")
 sealed class OnItemDrop
 
 class ItemRemovedBridge : Listener {

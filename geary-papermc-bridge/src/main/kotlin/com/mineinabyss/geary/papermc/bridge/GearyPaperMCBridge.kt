@@ -8,8 +8,8 @@ import com.mineinabyss.geary.papermc.bridge.events.entities.EntityLoadUnloadBrid
 import com.mineinabyss.geary.papermc.bridge.events.entities.EntityShearedBridge
 import com.mineinabyss.geary.papermc.bridge.events.items.ItemInteractBridge
 import com.mineinabyss.geary.papermc.bridge.events.items.ItemRemovedBridge
-import com.mineinabyss.geary.papermc.bridge.cooldowns.systems.clearOldCooldownsSystem
-import com.mineinabyss.geary.papermc.bridge.cooldowns.systems.cooldownDisplaySystem
+import com.mineinabyss.geary.papermc.bridge.cooldowns.clearOldCooldownsSystem
+import com.mineinabyss.geary.papermc.bridge.cooldowns.cooldownDisplaySystem
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.idofront.plugin.listeners
 

@@ -15,4 +15,5 @@ dependencies {
     implementation(project(":"))
 
     testImplementation(idofrontLibs.minecraft.mockbukkit)
+    testImplementation(idofrontLibs.kotlinx.serialization.kaml)
 }

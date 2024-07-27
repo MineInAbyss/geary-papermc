@@ -1,4 +1,4 @@
-package com.mineinabyss.geary.papermc.bridge.cooldowns.systems
+package com.mineinabyss.geary.papermc.bridge.cooldowns
 
 import com.mineinabyss.geary.actions.Action
 import com.mineinabyss.geary.actions.ActionGroupContext
