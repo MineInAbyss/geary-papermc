@@ -15,7 +15,7 @@ class HasConsumableCondition(
 ): Condition {
     override fun ActionGroupContext.execute(): Boolean {
         val player = entity.get<Player>() ?: return false
-        val matchedItem = player.inventory.firstOrNull { type.matches(it) } ?: return false
+        val matchedItem = player.inventory.filterNotNull().firstOrNull { type.matches(it) } ?: return false
         return matchedItem.amount >= minAmount
     }
 }
