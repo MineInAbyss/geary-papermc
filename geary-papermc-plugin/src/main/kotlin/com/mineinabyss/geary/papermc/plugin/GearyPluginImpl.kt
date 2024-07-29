@@ -16,7 +16,6 @@ import com.mineinabyss.geary.papermc.features.entities.displayname.ShowDisplayNa
 import com.mineinabyss.geary.papermc.features.entities.prevent.PreventEventsFeature
 import com.mineinabyss.geary.papermc.features.entities.sounds.AmbientSoundsFeature
 import com.mineinabyss.geary.papermc.features.entities.taming.TamingListener
-import com.mineinabyss.geary.papermc.features.general.cooldown.CooldownFeature
 import com.mineinabyss.geary.papermc.features.items.backpack.BackpackListener
 import com.mineinabyss.geary.papermc.features.items.food.ReplaceBurnedDropListener
 import com.mineinabyss.geary.papermc.features.items.holdsentity.SpawnHeldPrefabSystem
@@ -163,7 +162,6 @@ class GearyPluginImpl : GearyPlugin() {
 
         if (gearyPaper.config.trackEntities) {
             geary {
-                install(CooldownFeature)
                 install(AmbientSoundsFeature)
                 install(PreventEventsFeature)
             }

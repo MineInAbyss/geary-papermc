@@ -4,6 +4,7 @@ import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.idofront.entities.leftClicked
 import com.mineinabyss.idofront.entities.rightClicked
+import io.papermc.paper.event.player.PlayerArmSwingEvent
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -22,6 +23,11 @@ class OnItemInteract
 class OnItemLeftClick
 
 @Serializable
+@SerialName("geary:item_left_click_block")
+class OnItemLeftClickBlock
+
+
+@Serializable
 @SerialName("geary:item_right_click")
 class OnItemRightClick
 
@@ -36,6 +42,13 @@ class ItemInteractBridge : Listener {
     fun PlayerInteractEntityEvent.onRightClickEntity() {
         val heldItem = player.inventory.toGeary()?.get(hand) ?: return
         heldItem.emit<OnItemRightClickEntity>()
+    }
+
+
+    @EventHandler
+    fun PlayerArmSwingEvent.onLeftClick() {
+        val heldItem = player.inventory.toGeary()?.get(hand) ?: return
+        heldItem.emit<OnItemLeftClick>()
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -56,7 +69,7 @@ class ItemInteractBridge : Listener {
 
         heldItem.emit<OnItemInteract>()
 
-        if (leftClicked) heldItem.emit<OnItemLeftClick>()
+        if (leftClicked) heldItem.emit<OnItemLeftClickBlock>()
         if (rightClicked()) heldItem.emit<OnItemRightClick>()
     }
 }
