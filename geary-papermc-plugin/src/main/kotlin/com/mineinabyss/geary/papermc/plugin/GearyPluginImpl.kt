@@ -8,11 +8,9 @@ import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.GearyPaperModule
 import com.mineinabyss.geary.papermc.GearyPlugin
-import com.mineinabyss.geary.papermc.bridge.GearyPaperMCBridge
+import com.mineinabyss.geary.papermc.features.GearyPaperMCFeatures
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
-import com.mineinabyss.geary.papermc.features.entities.bucketable.BucketableListener
-import com.mineinabyss.geary.papermc.features.entities.displayname.ShowDisplayNameOnKillerListener
 import com.mineinabyss.geary.papermc.features.entities.prevent.PreventEventsFeature
 import com.mineinabyss.geary.papermc.features.entities.sounds.AmbientSoundsFeature
 import com.mineinabyss.geary.papermc.features.entities.taming.TamingListener
@@ -140,7 +138,7 @@ class GearyPluginImpl : GearyPlugin() {
 
             install(ItemRecipes)
             install(GearyActions)
-            install(GearyPaperMCBridge)
+            install(GearyPaperMCFeatures)
         }
 
 
@@ -166,8 +164,8 @@ class GearyPluginImpl : GearyPlugin() {
                 install(PreventEventsFeature)
             }
             listeners(
-                BucketableListener(),
-                ShowDisplayNameOnKillerListener(),
+                com.mineinabyss.geary.papermc.features.entities.bucketable.BucketableListener(),
+                com.mineinabyss.geary.papermc.features.entities.displayname.ShowDisplayNameOnKillerListener(),
                 TamingListener(),
             )
         }

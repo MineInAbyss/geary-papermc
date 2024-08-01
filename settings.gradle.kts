@@ -25,8 +25,8 @@ dependencyResolutionManagement {
 }
 
 include(
-    "geary-papermc-bridge",
-    "geary-papermc-integrations",
+    "geary-papermc-features",
+    "geary-papermc-mythicmobs",
     "geary-papermc-core",
     "geary-papermc-datastore",
     "geary-papermc-plugin",

@@ -18,8 +18,8 @@ idea {
 
 dependencies {
     api(project(":geary-papermc-tracking"))
-    api(project(":geary-papermc-integrations"))
-    api(project(":geary-papermc-bridge"))
+    api(project(":geary-papermc-mythicmobs"))
+    api(project(":geary-papermc-features"))
     api(libs.geary.core)
     api(libs.geary.autoscan)
     api(libs.geary.prefabs)
