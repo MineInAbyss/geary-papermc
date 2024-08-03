@@ -24,7 +24,7 @@ class MythicSkillsAction(
         serialName = "geary:mythic_skills",
         inner = ListSerializer(String.serializer()),
         inverseTransform = { it.keys },
-        transform = ::MythicSkillsAction
+        transform = { MythicSkillsAction(it) }
     )
 }
 

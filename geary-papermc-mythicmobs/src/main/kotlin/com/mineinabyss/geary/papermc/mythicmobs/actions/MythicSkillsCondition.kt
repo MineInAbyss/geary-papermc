@@ -18,7 +18,7 @@ class MythicSkillsCondition(
         serialName = "geary:mythic_conditions",
         inner = ListSerializer(String.serializer()),
         inverseTransform = { it.keys },
-        transform = ::MythicSkillsCondition
+        transform = { MythicSkillsCondition(it) }
     )
 
     override fun ActionGroupContext.execute(): Boolean {
