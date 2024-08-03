@@ -9,6 +9,7 @@ import com.mineinabyss.geary.observers.queries.cacheGroupedBy
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.mythicmobs.actions.runMMSkillAction
 import com.mineinabyss.geary.papermc.mythicmobs.items.MythicMobDropListener
+import com.mineinabyss.geary.papermc.mythicmobs.skills.MythicSkillRegisterListener
 import com.mineinabyss.geary.papermc.mythicmobs.spawning.*
 import com.mineinabyss.geary.systems.query.ShorthandQuery1
 import com.mineinabyss.geary.systems.query.query
@@ -37,6 +38,7 @@ interface MythicMobsSupport {
             pipeline.runOnOrAfter(GearyPhase.ENABLE) {
                 gearyPaper.plugin.listeners(
                     MythicMobDropListener(),
+                    MythicSkillRegisterListener(),
                     BindToMythicMobSystem(),
                 )
             }
