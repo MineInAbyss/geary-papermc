@@ -19,27 +19,19 @@ import com.mineinabyss.idofront.plugin.listeners
 val mobzyMythicMobs: MythicMobsSupport by DI.observe()
 
 interface MythicMobsSupport {
-    val mythicMobBinds: QueryGroupedBy<String, ShorthandQuery1<BindToMythicMob>>
-
     companion object : GearyAddonWithDefault<MythicMobsSupport> {
         override fun default() = object : MythicMobsSupport {
-            override val mythicMobBinds = geary.cacheGroupedBy(query<BindToMythicMob>()) { (type) ->
-                entity.addRelation<NoInherit, BindToMythicMob>()
-                type.id
-            }
         }
 
         override fun MythicMobsSupport.install(): Unit = geary.run {
             runMMSkillAction()
             mythicMobSpawner()
             markMMAsCustomMob()
-            markBindMMAsCustomMob()
 
             pipeline.runOnOrAfter(GearyPhase.ENABLE) {
                 gearyPaper.plugin.listeners(
                     MythicMobDropListener(),
                     MythicSkillRegisterListener(),
-                    BindToMythicMobSystem(),
                 )
             }
         }

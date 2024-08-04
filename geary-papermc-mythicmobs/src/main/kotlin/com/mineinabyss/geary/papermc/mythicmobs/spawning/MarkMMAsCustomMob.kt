@@ -13,7 +13,3 @@ fun GearyModule.markMMAsCustomMob() = observe<OnSet>()
         entity.add<ShowInMobQueries>()
         entity.add<SpawnableByGeary>()
     }
-
-fun GearyModule.markBindMMAsCustomMob() = observe<OnSet>()
-    .involving(query<BindToMythicMob>())
-    .exec { entity.add<ShowInMobQueries>() }
