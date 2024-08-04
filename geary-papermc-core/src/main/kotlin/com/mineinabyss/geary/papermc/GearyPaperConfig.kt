@@ -20,7 +20,8 @@ class GearyPaperConfig(
     @YamlComment("List of mob types to remove if they are not entities with Geary prefabs (i.e. vanilla entities)")
     val removeVanillaMobTypes: Set<EntityType> = emptySet(),
     val logLevel: Severity = Severity.Info,
-    val integrations: Integrations = Integrations()
+    val integrations: Integrations = Integrations(),
+    val resourcePack: ResourcePack = ResourcePack(),
 )
 
 @Serializable
@@ -70,4 +71,11 @@ data class ItemTrackingConfig(
 data class Integrations(
     @YamlComment("Allow binding to MythicMobs entities.")
     val mythicMobs: Boolean = true,
+)
+
+@Serializable
+data class ResourcePack(
+    val generate: Boolean = true,
+    @YamlComment("The path to generate the pack to from `plugins/Geary`", "Adding .zip to path will export as a zip instead of directory")
+    val outputPath: String = "resourcepack.zip"
 )

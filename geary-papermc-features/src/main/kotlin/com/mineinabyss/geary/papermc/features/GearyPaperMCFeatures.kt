@@ -10,6 +10,7 @@ import com.mineinabyss.geary.papermc.features.common.event_bridge.items.ItemInte
 import com.mineinabyss.geary.papermc.features.common.event_bridge.items.ItemRemovedBridge
 import com.mineinabyss.geary.papermc.features.common.cooldowns.clearOldCooldownsSystem
 import com.mineinabyss.geary.papermc.features.common.cooldowns.cooldownDisplaySystem
+import com.mineinabyss.geary.papermc.features.items.resourcepacks.ResourcePackGenerator
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.idofront.plugin.listeners
 
@@ -31,6 +32,10 @@ open class GearyPaperMCFeatures {
                     ItemInteractBridge(),
                     ItemRemovedBridge(),
                 )
+            }
+
+            geary.pipeline.runOnOrAfter(GearyPhase.INIT_ENTITIES) {
+                ResourcePackGenerator().generateResourcePack()
             }
         }
 
