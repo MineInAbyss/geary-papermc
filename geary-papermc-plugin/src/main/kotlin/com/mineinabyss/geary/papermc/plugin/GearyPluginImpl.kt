@@ -8,9 +8,9 @@ import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.GearyPaperModule
 import com.mineinabyss.geary.papermc.GearyPlugin
-import com.mineinabyss.geary.papermc.features.GearyPaperMCFeatures
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
+import com.mineinabyss.geary.papermc.features.GearyPaperMCFeatures
 import com.mineinabyss.geary.papermc.features.entities.prevent.PreventEventsFeature
 import com.mineinabyss.geary.papermc.features.entities.sounds.AmbientSoundsFeature
 import com.mineinabyss.geary.papermc.features.entities.taming.TamingListener
@@ -104,10 +104,9 @@ class GearyPluginImpl : GearyPlugin() {
                 components()
             }
 
-            // Load prefabs in Geary folder, each subfolder is considered its own namespace
-            dataFolder.toPath().listDirectoryEntries()
-                .filter { it.isDirectory() }
-                .forEach { folder ->
+            // Load prefabs in Geary/prefabs folder, each subfolder is considered its own namespace
+            dataPath.resolve("prefabs").apply { toFile().createNewFile() }
+                .listDirectoryEntries().filter { it.isDirectory() }.forEach { folder ->
                     namespace(folder.name) {
                         geary.logger.i("Loading prefabs from $folder")
                         prefabs {
