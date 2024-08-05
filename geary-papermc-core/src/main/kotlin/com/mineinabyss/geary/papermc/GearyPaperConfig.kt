@@ -77,5 +77,7 @@ data class Integrations(
 data class ResourcePack(
     val generate: Boolean = true,
     @YamlComment("The path to generate the pack to from `plugins/Geary`", "Adding .zip to path will export as a zip instead of directory")
-    val outputPath: String = "resourcepack.zip"
+    val outputPath: String = "resourcepack.zip",
+    @YamlComment("Points to a resourcepack in zip or directory format to merge into Geary's pack")
+    val includedPackPath: String = ""
 )

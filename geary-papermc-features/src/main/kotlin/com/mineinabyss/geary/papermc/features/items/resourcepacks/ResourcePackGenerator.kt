@@ -2,7 +2,6 @@ package com.mineinabyss.geary.papermc.features.items.resourcepacks
 
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
-import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
 import com.mineinabyss.geary.systems.builders.cache
@@ -16,8 +15,9 @@ import team.unnamed.creative.model.ModelTextures
 
 class ResourcePackGenerator {
 
-    private val resourcePack: ResourcePack = ResourcePack.resourcePack()
     private val resourcePackQuery = geary.cache(ResourcePackQuery())
+    private val includedPackPath = gearyPaper.plugin.dataFolder.resolve(gearyPaper.config.resourcePack.includedPackPath)
+    private val resourcePack = ResourcePacks.readToResourcePack(includedPackPath) ?: ResourcePack.resourcePack()
 
     fun generateResourcePack() {
         if (!gearyPaper.config.resourcePack.generate) return
@@ -45,15 +45,7 @@ class ResourcePackGenerator {
             defaultVanillaModel.build().addTo(resourcePack)
         }
 
-        when {
-            resourcePackFile.extension == "zip" -> ResourcePacks.resourcePackWriter.writeToZipFile(resourcePackFile, resourcePack)
-            resourcePackFile.isDirectory -> ResourcePacks.resourcePackWriter.writeToDirectory(resourcePackFile, resourcePack)
-            else -> {
-                gearyPaper.logger.w("Failed to generate resourcepack in ${resourcePackFile.path}")
-                gearyPaper.logger.w("Outputting to default plugins/Geary/resourcepack directory")
-                ResourcePacks.resourcePackWriter.writeToDirectory(gearyPaper.plugin.dataFolder.resolve("resourcepack"), resourcePack)
-            }
-        }
+        ResourcePacks.writeToFile(resourcePackFile, resourcePack)
     }
 
     private fun generatePredicateModels(resourcePack: ResourcePack, resourcePackContent: ResourcePackContent, prefabKey: PrefabKey) {
