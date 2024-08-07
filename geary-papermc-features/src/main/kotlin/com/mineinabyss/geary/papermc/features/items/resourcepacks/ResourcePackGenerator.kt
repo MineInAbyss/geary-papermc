@@ -25,48 +25,62 @@ class ResourcePackGenerator {
         resourcePackFile.deleteRecursively()
 
         resourcePackQuery.forEach { (prefabKey, resourcePackContent) ->
-            val defaultVanillaModel = Key.key("item/${resourcePackContent.baseMaterial.key().value()}").let { resourcePack.model(it)?.toBuilder() ?: Model.model().key(it) }
+            val vanillaModelKey = ResourcePacks.vanillaKeyForMaterial(resourcePackContent.baseMaterial)
+            val defaultVanillaModel = ((resourcePack.model(vanillaModelKey)
+                ?: ResourcePacks.defaultVanillaResourcePack?.model(vanillaModelKey)))
+                ?.toBuilder() ?: Model.model().key(vanillaModelKey)
 
             // Generates any missing models for predicates if only textures are provided
             generatePredicateModels(resourcePack, resourcePackContent, prefabKey)
 
             // If a model is defined we assume it exists in the resourcepack already, and just add the override to the vanilla model
             if (resourcePackContent.model != null) {
-                resourcePackContent.itemOverrides(resourcePackContent.model.key()).forEach(defaultVanillaModel::addOverride)
+                resourcePackContent.itemOverrides(resourcePackContent.model.key())
+                    .forEach(defaultVanillaModel::addOverride)
             } else { // If it only has textures we need to generate the model ourselves and add it
                 val model = Model.model()
                     .key(Key.key(prefabKey.namespace, prefabKey.key))
                     .parent(resourcePackContent.parentModel.key())
                     .textures(resourcePackContent.textures.modelTextures).build()
                 resourcePackContent.itemOverrides(model.key()).forEach(defaultVanillaModel::addOverride)
-                model.addTo(resourcePack)
+                model.let(ResourcePacks::ensureVanillaModelProperties)
+                    .let(ResourcePacks::ensureItemOverridesSorted)
+                    .addTo(resourcePack)
             }
 
-            defaultVanillaModel.build().addTo(resourcePack)
+            defaultVanillaModel.build().let(ResourcePacks::ensureVanillaModelProperties)
+                .let(ResourcePacks::ensureItemOverridesSorted)
+                .addTo(resourcePack)
         }
 
         ResourcePacks.writeToFile(resourcePackFile, resourcePack)
     }
 
-    private fun generatePredicateModels(resourcePack: ResourcePack, resourcePackContent: ResourcePackContent, prefabKey: PrefabKey) {
+    private fun generatePredicateModels(
+        resourcePack: ResourcePack,
+        resourcePackContent: ResourcePackContent,
+        prefabKey: PrefabKey
+    ) {
         fun predicateModel(modelKey: Key, suffix: String) {
             Model.model().key(Key.key(prefabKey.namespace, prefabKey.key.plus(suffix)))
                 .parent(resourcePackContent.parentModel)
                 .textures(ModelTextures.of(listOf(ModelTexture.ofKey(modelKey)), null, emptyMap()))
                 .build().addTo(resourcePack)
         }
-        resourcePackContent.itemPredicates.blockingTexture?.let { predicateModel(it, "_blocking") }
-        resourcePackContent.itemPredicates.brokenTexture?.let { predicateModel(it, "_broken") }
-        resourcePackContent.itemPredicates.castTexture?.let { predicateModel(it, "_cast") }
-        resourcePackContent.itemPredicates.chargedTexture?.let { predicateModel(it, "_charged") }
-        resourcePackContent.itemPredicates.fireworkTexture?.let { predicateModel(it, "_firework") }
-        resourcePackContent.itemPredicates.lefthandedTexture?.let { predicateModel(it, "_lefthanded") }
-        resourcePackContent.itemPredicates.throwingTexture?.let { predicateModel(it, "_throwing") }
-        resourcePackContent.itemPredicates.angleTextures.onEachIndexed { i, (key, _) -> predicateModel(key, "_angle_$i") }
-        resourcePackContent.itemPredicates.cooldownTextures.onEachIndexed { i, (key, _) -> predicateModel(key, "_cooldown_$i") }
-        resourcePackContent.itemPredicates.damageTextures.onEachIndexed { i, (key, _) -> predicateModel(key, "_damage_$i") }
-        resourcePackContent.itemPredicates.pullingTextures.onEachIndexed { i, (key, _) -> predicateModel(key, "_pulling_$i") }
-        resourcePackContent.itemPredicates.timeTextures.onEachIndexed { i, (key, _) -> predicateModel(key, "_time_$i") }
+
+        val predicates = resourcePackContent.itemPredicates
+        predicates.blockingTexture?.let { predicateModel(it, "_blocking") }
+        predicates.brokenTexture?.let { predicateModel(it, "_broken") }
+        predicates.castTexture?.let { predicateModel(it, "_cast") }
+        predicates.chargedTexture?.let { predicateModel(it, "_charged") }
+        predicates.fireworkTexture?.let { predicateModel(it, "_firework") }
+        predicates.lefthandedTexture?.let { predicateModel(it, "_lefthanded") }
+        predicates.throwingTexture?.let { predicateModel(it, "_throwing") }
+        predicates.angleTextures.onEachIndexed { i, (key, _) -> predicateModel(key, "_angle_$i") }
+        predicates.cooldownTextures.onEachIndexed { i, (key, _) -> predicateModel(key, "_cooldown_$i") }
+        predicates.damageTextures.onEachIndexed { i, (key, _) -> predicateModel(key, "_damage_$i") }
+        predicates.pullingTextures.onEachIndexed { i, (key, _) -> predicateModel(key, "_pulling_$i") }
+        predicates.timeTextures.onEachIndexed { i, (key, _) -> predicateModel(key, "_time_$i") }
 
     }
 
