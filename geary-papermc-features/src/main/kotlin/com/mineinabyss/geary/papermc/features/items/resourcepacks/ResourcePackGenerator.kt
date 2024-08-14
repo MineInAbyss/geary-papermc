@@ -16,8 +16,8 @@ import team.unnamed.creative.model.ModelTextures
 class ResourcePackGenerator {
 
     private val resourcePackQuery = geary.cache(ResourcePackQuery())
-    private val includedPackPath = gearyPaper.plugin.dataFolder.resolve(gearyPaper.config.resourcePack.includedPackPath)
-    private val resourcePack = ResourcePacks.readToResourcePack(includedPackPath) ?: ResourcePack.resourcePack()
+    private val includedPackPath = gearyPaper.config.resourcePack.includedPackPath.takeUnless(String::isEmpty)?.let { gearyPaper.plugin.dataFolder.resolve(it) }
+    private val resourcePack = includedPackPath?.let(ResourcePacks::readToResourcePack) ?: ResourcePack.resourcePack()
 
     fun generateResourcePack() {
         if (!gearyPaper.config.resourcePack.generate) return
