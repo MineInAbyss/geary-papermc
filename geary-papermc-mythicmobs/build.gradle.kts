@@ -22,6 +22,7 @@ dependencies {
 
     compileOnly(libs.geary.actions)
     implementation(project(":geary-papermc-tracking"))
+    implementation(project(":geary-papermc-features"))
 }
 
 /*configurations.all {
