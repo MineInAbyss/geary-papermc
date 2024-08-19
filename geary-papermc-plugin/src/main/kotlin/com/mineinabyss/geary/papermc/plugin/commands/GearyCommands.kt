@@ -41,7 +41,8 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
             "items",
             "prefab",
             "stats",
-            "reload"
+            "reload",
+            "debug"
         ).filter { it.startsWith(args[0]) } else args[0]) {
             "mobs", "m" -> when (if (args.size == 2) return listOf("spawn", "remove", "locate", "info") else args[1]) {
                 "spawn", "s" -> if (args.size == 3) {
@@ -95,6 +96,14 @@ internal class GearyCommands : IdofrontCommandExecutor(), TabCompleter {
 
                         else -> return listOf()
                     }
+                }
+            }
+
+            "debug" -> {
+                if (!sender.hasPermission("geary.debug")) return emptyList()
+                when (if (args.size == 2) return listOf("inventory", "resourcepack_items") else args[1]) {
+                    "inventory", "resourcepack_items" -> return plugin.server.onlinePlayers.map { it.name }.filter { it.startsWith(args[2], true) }
+                    else -> return listOf()
                 }
             }
 
