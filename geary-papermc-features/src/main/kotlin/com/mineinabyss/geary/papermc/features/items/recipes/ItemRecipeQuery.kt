@@ -5,7 +5,6 @@ import com.mineinabyss.geary.papermc.tracking.items.gearyItems
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.systems.query.CachedQuery
 import com.mineinabyss.geary.systems.query.GearyQuery
-import com.mineinabyss.idofront.recipes.register
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
@@ -41,7 +40,7 @@ fun CachedQuery<ItemRecipeQuery>.registerRecipes(): Set<NamespacedKey> {
             runCatching {
                 val key = NamespacedKey(prefabKey.namespace, "${prefabKey.key}$i")
                 // Register recipe only if not present
-                Bukkit.getRecipe(key) ?: recipe.toRecipe(key, result, recipes.group, recipes.category).register()
+                Bukkit.getRecipe(key) ?: recipe.registerRecipeWithOptions(key, result, recipes.group, recipes.category)
                 if (recipes.discoverRecipes) discoveredRecipes += key
             }.onFailure {
                 geary.logger.w { "Failed to register recipe ${prefabKey.key} #$i, ${it.message}" }
