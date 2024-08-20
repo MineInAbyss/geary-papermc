@@ -57,7 +57,7 @@ import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 import java.nio.file.Path
-import kotlin.io.path.createParentDirectories
+import kotlin.io.path.createDirectories
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
@@ -107,7 +107,7 @@ class GearyPluginImpl : GearyPlugin() {
             }
 
             // Load prefabs in Geary/prefabs folder, each subfolder is considered its own namespace
-            dataPath.resolve("prefabs").createParentDirectories().listDirectoryEntries().filter(Path::isDirectory)
+            dataPath.resolve("prefabs").createDirectories().listDirectoryEntries().filter(Path::isDirectory)
                 .forEach { folder ->
                     namespace(folder.name) {
                         geary.logger.i("Loading prefabs from $folder")
