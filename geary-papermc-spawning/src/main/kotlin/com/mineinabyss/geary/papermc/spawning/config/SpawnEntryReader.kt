@@ -23,7 +23,10 @@ class SpawnEntryReader(
             .filter { it.name.contains('.') }
             .mapNotNull { path ->
                 runCatching { yamlFormat.decodeFromFile(serializer, path) }
-                    .onFailure { geary.logger.w { "Failed to read spawn entry from $path" } }
+                    .onFailure {
+                        geary.logger.w { "Failed to read spawn entry from $path" }
+                        geary.logger.d { it.stackTraceToString() }
+                    }
                     .getOrNull()
             }
             .flatMap { it.values }

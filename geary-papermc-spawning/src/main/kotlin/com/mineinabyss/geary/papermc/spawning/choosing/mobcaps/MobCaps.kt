@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.choosing.mobcaps
 
 import com.mineinabyss.geary.papermc.spawning.components.SpawnCategory
+import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.spawn_types.GearyReadSpawnCategoryEvent
 import org.bukkit.Location
 
@@ -14,6 +15,16 @@ class MobCaps(
             GearyReadSpawnCategoryEvent(it).also { it.callEvent() }.category ?: SpawnCategory.of(it)
         }
         .eachCount()
+
+    fun filterAllowedAt(location: Location, spawns: List<SpawnEntry>): List<SpawnEntry> {
+        val mobCaps = calculateCategoriesNear(location)
+        return spawns.filter {
+            mobCaps.getOrDefault(it.type.category, 0) < caps.getOrDefault(
+                it.type.category,
+                Int.MAX_VALUE
+            )
+        }
+    }
 
     fun getAllowedCategoriesAt(location: Location): List<SpawnCategory> {
         val mobCaps = calculateCategoriesNear(location)

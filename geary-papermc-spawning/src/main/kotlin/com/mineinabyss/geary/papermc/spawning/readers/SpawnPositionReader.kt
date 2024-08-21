@@ -12,7 +12,7 @@ class SpawnPositionReader {
             type == Material.WATER -> SpawnPosition.WATER
             type == Material.LAVA -> SpawnPosition.LAVA
             location.block.isEmpty -> SpawnPosition.AIR
-            location.block.isSolid && location.up(1).block.isEmpty -> SpawnPosition.GROUND
+            location.block.isSolid && location.up(1).block.isPassable -> SpawnPosition.GROUND
             else -> SpawnPosition.IN_BLOCK
         }
     }

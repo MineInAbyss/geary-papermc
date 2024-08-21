@@ -20,6 +20,8 @@ class SpawnLocationChooser(
             randomSign() * horizontalRange.randomOrMin().toDouble(),
         )
 
+//        spawnLocation.y = spawnLocation.y.coerceAtMost(location.world.getHighestBlockAt(spawnLocation).y.toDouble())
+
         // Ensure not near ANY player
         if (onlinePlayers.any { it.location.distanceSquared(spawnLocation) < config.minDistance * config.minDistance })
             return null
