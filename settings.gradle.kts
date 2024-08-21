@@ -30,6 +30,7 @@ include(
     "geary-papermc-core",
     "geary-papermc-datastore",
     "geary-papermc-plugin",
+    "geary-papermc-spawning",
     "geary-papermc-tracking",
     "geary-tests"
 )

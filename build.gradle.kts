@@ -20,6 +20,7 @@ dependencies {
     api(project(":geary-papermc-tracking"))
     api(project(":geary-papermc-mythicmobs"))
     api(project(":geary-papermc-features"))
+    api(project(":geary-papermc-spawning"))
     api(libs.geary.core)
     api(libs.geary.autoscan)
     api(libs.geary.prefabs)
@@ -37,6 +38,8 @@ allprojects {
         google()
         maven("https://repo.mineinabyss.com/releases")
         maven("https://repo.mineinabyss.com/snapshots")
+        maven("https://maven.enginehub.org/repo/") //WorldGuard/Edit
+        maven("https://mvn.lumine.io/repository/maven-public/") // Mythic
         mavenLocal()
     }
 
