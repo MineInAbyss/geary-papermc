@@ -23,6 +23,7 @@ import com.mineinabyss.geary.papermc.features.items.wearables.WearableItemSystem
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsSupport
 import com.mineinabyss.geary.papermc.plugin.commands.GearyCommands
+import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
 import com.mineinabyss.geary.papermc.tracking.blocks.gearyBlocks
 import com.mineinabyss.geary.papermc.tracking.blocks.helpers.getKeys
@@ -157,6 +158,7 @@ class GearyPluginImpl : GearyPlugin() {
     }
 
     override fun onEnable() {
+        SpawningFeature().install()
         ArchetypeEngineModule.start(DI.get<PaperEngineModule>())
 
         if (gearyPaper.config.trackEntities) {
