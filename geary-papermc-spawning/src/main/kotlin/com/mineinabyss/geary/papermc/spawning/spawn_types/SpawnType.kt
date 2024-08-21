@@ -1,4 +1,4 @@
-package com.mineinabyss.geary.papermc.spawning.config
+package com.mineinabyss.geary.papermc.spawning.spawn_types
 
 import com.mineinabyss.geary.papermc.spawning.components.SpawnCategory
 import com.mineinabyss.geary.serialization.serializers.InnerSerializer
@@ -16,11 +16,11 @@ interface SpawnType {
     object Serializer : InnerSerializer<String, SpawnType>(
         serialName = "geary:spawn_type",
         inner = String.serializer(),
-        transform = { getType(it) },
+        transform = { getType(it) ?: error("Unknown spawn type $it") },
         inverseTransform = { it.key }
     )
 
     companion object {
-        fun getType(type: String): SpawnType = TODO()
+        fun getType(type: String): SpawnType? = GearyReadTypeEvent(type).also { it.callEvent() }.spawnType
     }
 }

@@ -29,6 +29,6 @@ class SpawnChooser(
     fun chooseAllowedSpawnNear(location: Location, position: SpawnPosition): SpawnEntry? {
         val allowedSpawns = getAllowedSpawnsNear(location, position)
         if (allowedSpawns.isEmpty()) return null
-        return WeightedList(allowedSpawns.associateWith { it.weight }).roll()
+        return WeightedList(allowedSpawns.associateWith { it.priority }).roll()
     }
 }
