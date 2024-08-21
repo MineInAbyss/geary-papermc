@@ -13,5 +13,5 @@ data class SpawnEntry(
     val amount: @Serializable(with = IntRangeSerializer::class) IntRange = 1..1,
     val regions: List<String> = listOf(),
     val priority: Double = 1.0,
-    val conditions: EnsureAction,
+    val conditions: EnsureAction = EnsureAction(listOf()),
 )

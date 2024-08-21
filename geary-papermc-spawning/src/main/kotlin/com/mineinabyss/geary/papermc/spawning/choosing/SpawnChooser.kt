@@ -18,11 +18,13 @@ class SpawnChooser(
         // Get spawns from regions
         val regions = wg.getRegionsAt(location)
         val spawnsInRegion = wg.getSpawnsForRegions(regions)
-        if (spawnsInRegion.isNotEmpty()) return emptyList()
+        if (spawnsInRegion.isEmpty()) return emptyList()
 
         // Check mob caps
         val allowedCategories = caps.getAllowedCategoriesAt(location).toSet()
-        val allowedSpawns = spawnsInRegion.filter { it.position == position && it.type.category in allowedCategories }
+        val allowedSpawns = caps
+            .filterAllowedAt(location, spawnsInRegion.filter { it.position == position })
+
         return allowedSpawns
     }
 

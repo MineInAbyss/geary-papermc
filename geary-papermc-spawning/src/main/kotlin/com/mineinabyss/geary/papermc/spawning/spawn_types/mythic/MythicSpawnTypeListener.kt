@@ -15,10 +15,10 @@ class MythicSpawnTypeListener : Listener {
     fun GearyReadTypeEvent.readMythicType() {
         if (spawnType != null) return
 
-        val (namespace, key) = PrefabKey.ofOrNull(name) ?: return
+        val key = PrefabKey.ofOrNull(name) ?: return
 
-        if (namespace.startsWith("mm:") || namespace.startsWith("mythic:")) {
-            register(MythicSpawnType(name, key))
+        if (key.namespace.startsWith("mm") || key.namespace.startsWith("mythic")) {
+            spawnType = MythicSpawnType(name, key.key)
         }
     }
 

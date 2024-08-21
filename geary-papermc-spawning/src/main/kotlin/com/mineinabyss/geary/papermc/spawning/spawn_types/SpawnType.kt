@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.spawning.spawn_types
 
 import com.mineinabyss.geary.papermc.spawning.components.SpawnCategory
 import com.mineinabyss.geary.serialization.serializers.InnerSerializer
+import com.mineinabyss.idofront.events.call
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.serializer
 import org.bukkit.Location
@@ -21,6 +22,10 @@ interface SpawnType {
     )
 
     companion object {
-        fun getType(type: String): SpawnType? = GearyReadTypeEvent(type).also { it.callEvent() }.spawnType
+        fun getType(type: String): SpawnType? {
+            val event = GearyReadTypeEvent(type)
+            event.call()
+            return event.spawnType
+        }
     }
 }
