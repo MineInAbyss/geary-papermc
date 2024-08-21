@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.choosing.mobcaps
 
 import com.mineinabyss.geary.papermc.spawning.components.SpawnCategory
-import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
+import com.mineinabyss.geary.papermc.spawning.spawn_types.GearyReadSpawnCategoryEvent
 import org.bukkit.Location
 
 class MobCaps(
@@ -10,7 +10,9 @@ class MobCaps(
 ) {
     fun calculateCategoriesNear(location: Location): Map<SpawnCategory, Int> = location
         .getNearbyEntities(searchRadius.toDouble(), searchRadius.toDouble(), searchRadius.toDouble())
-        .groupingBy { it.toGearyOrNull()?.get<SpawnCategory>() ?: SpawnCategory(it.spawnCategory.name.lowercase()) }
+        .groupingBy {
+            GearyReadSpawnCategoryEvent(it).also { it.callEvent() }.category ?: SpawnCategory.of(it)
+        }
         .eachCount()
 
     fun getAllowedCategoriesAt(location: Location): List<SpawnCategory> {
