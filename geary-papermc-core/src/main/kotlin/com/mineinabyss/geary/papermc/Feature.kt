@@ -10,12 +10,26 @@ abstract class Feature(context: FeatureContext) {
     val logger = context.logger
     val listeners = mutableListOf<Listener>()
     val tasks = mutableListOf<Job>()
+    private var pluginDeps = listOf<String>()
+
+    fun pluginDeps(vararg plugins: String) {
+        pluginDeps = plugins.toList()
+    }
 
     open fun canEnable(): Boolean = true
 
     open fun enable() {}
 
     open fun disable() {}
+
+    fun defaultCanEnable(): Boolean {
+        val unmet = pluginDeps.filter { !plugin.server.pluginManager.isPluginEnabled(it) }
+        if (unmet.isNotEmpty()) {
+            logger.w { "Plugin dependencies not met for ${this::class.simpleName}: $unmet" }
+            return false
+        }
+        return canEnable()
+    }
 
     fun defaultDisable() {
         logger.i { "Disabling ${this::class.simpleName}" }

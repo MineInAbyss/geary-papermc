@@ -45,7 +45,6 @@ import com.mineinabyss.idofront.config.config
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.messaging.injectLogger
-import com.mineinabyss.idofront.messaging.injectedLogger
 import com.mineinabyss.idofront.messaging.observeLogger
 import com.mineinabyss.idofront.plugin.listeners
 import com.mineinabyss.idofront.serialization.LocationSerializer
@@ -55,60 +54,12 @@ import okio.Path.Companion.toOkioPath
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
-import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
 import java.nio.file.Path
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
-import kotlin.reflect.KClass
-
-typealias FeatureBuilder = (FeatureContext) -> Feature
-
-class Features(
-    val plugin: Plugin,
-    vararg val features: FeatureBuilder,
-) {
-    val featuresByClass = mutableMapOf<KClass<*>, FeatureBuilder>()
-    val enabled = mutableListOf<Feature>()
-    fun enableAll() = features.forEach {
-        enable(it)
-    }
-
-    fun enable(builder: FeatureBuilder) {
-        val logger = plugin.injectedLogger()
-        val context = FeatureContext(plugin, logger)
-        val feature = builder(context)
-        featuresByClass[feature::class] = builder
-        if (feature.canEnable()) {
-            runCatching {
-                feature.defaultEnable()
-                enabled.add(feature)
-            }.onFailure { it.printStackTrace() }
-        }
-    }
-
-    fun disableAll() {
-        enabled.forEach(Feature::defaultDisable)
-        enabled.clear()
-    }
-
-    fun reloadAll() {
-        disableAll()
-        enableAll()
-    }
-
-    inline fun <reified T : Feature> getOrNull() = enabled.firstOrNull { it is T } as? T
-
-    inline fun <reified T : Feature> reload() {
-        val feature = getOrNull<T>()
-        feature?.defaultDisable() ?: error("Feature ${T::class.simpleName} has never been loaded!")
-        enabled.remove(feature)
-        enable(featuresByClass[T::class] ?: error("Feature ${T::class.simpleName} has never been loaded!"))
-    }
-}
-
 
 class GearyPluginImpl : GearyPlugin() {
     val features = Features(
@@ -217,7 +168,7 @@ class GearyPluginImpl : GearyPlugin() {
 //                        executes { features.reload<PrefabsFeature>() }
 //                    }
                     "spawns" {
-                        executes { features.reload<SpawningFeature>() }
+                        executes { features.reload<SpawningFeature>(sender) }
                     }
                 }
             }

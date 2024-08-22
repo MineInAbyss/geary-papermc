@@ -10,6 +10,7 @@ dependencies {
     // Plugins
     compileOnly(idofrontLibs.minecraft.plugin.mythic.dist)
     compileOnly(idofrontLibs.idofront.nms)
+    compileOnly(idofrontLibs.idofront.util)
 
     // Other deps
     compileOnly(idofrontLibs.kotlinx.serialization.json)
