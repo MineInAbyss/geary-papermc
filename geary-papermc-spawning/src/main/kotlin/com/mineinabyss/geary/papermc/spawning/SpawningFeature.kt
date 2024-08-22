@@ -14,20 +14,15 @@ import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeLi
 import com.mineinabyss.geary.papermc.spawning.spawn_types.mythic.MythicSpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.tasks.SpawnTask
 import com.mineinabyss.idofront.config.config
-import com.mineinabyss.idofront.plugin.Plugins
 
 class SpawningFeature(context: FeatureContext) : Feature(context) {
     val config by config("spawning", plugin.dataPath, SpawnConfig())
 
-    override fun canEnable() = when {
-        !gearyPaper.config.spawning -> false
-        !(Plugins.isEnabled("WorldGuard") && Plugins.isEnabled("MythicMobs")) -> {
-            logger.w { "WorldGuard and MythicMobs are required for the spawning system to work" }
-            false
-        }
-
-        else -> true
+    init {
+        pluginDeps("WorldGuard", "MythicMobs")
     }
+
+    override fun canEnable() = gearyPaper.config.spawning
 
     override fun enable() {
         listeners(
