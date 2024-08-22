@@ -27,7 +27,7 @@ class MythicSpawnTypeListener : Listener {
         if (category != null) return
 
         if (mobsManager.isMythicMob(entity)) {
-            val cat = mobsManager.getMythicMobInstance(entity).type.config.getString("SpawnCategory") ?: return
+            val cat = mobsManager.getMythicMobInstance(entity)?.type?.config?.getString("SpawnCategory") ?: return
             category = SpawnCategory(cat)
         }
     }

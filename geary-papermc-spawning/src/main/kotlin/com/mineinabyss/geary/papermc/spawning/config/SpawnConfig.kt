@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.config
 
 import com.mineinabyss.geary.papermc.spawning.components.SpawnCategory
+import com.mineinabyss.idofront.serialization.DurationSerializer
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration
 
@@ -14,15 +15,15 @@ import kotlin.time.Duration
 
 @Serializable
 data class SpawnConfig(
+    val defaultCap: Int = 10,
     val playerCaps: Map<SpawnCategory, Int> = mapOf(
         SpawnCategory("flying") to 10,
         SpawnCategory("hostile") to 70,
         SpawnCategory("passive") to 10,
         SpawnCategory("water") to 10,
     ),
-    val globalCaps: Map<String, Int> = mapOf(),
     val range: Range = Range(),
-    val runTimes: Map<SpawnPosition, Duration> = mapOf(),
+    val runTimes: Map<SpawnPosition, @Serializable(with = DurationSerializer::class) Duration> = mapOf(),
     val maxSpawnAttemptsPerPlayer: Int = 10,
 ) {
     @Serializable

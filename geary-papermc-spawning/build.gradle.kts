@@ -14,6 +14,7 @@ dependencies {
 
     // Other deps
     compileOnly(idofrontLibs.kotlinx.serialization.json)
+    compileOnly(idofrontLibs.kotlinx.serialization.kaml)
     compileOnly(idofrontLibs.minecraft.mccoroutine)
 
     compileOnly(libs.geary.actions)
