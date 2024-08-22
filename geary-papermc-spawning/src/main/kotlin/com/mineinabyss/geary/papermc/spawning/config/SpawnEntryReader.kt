@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.spawning.config
 
 import com.charleskorn.kaml.*
 import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.papermc.spawning.spawn_types.SpawnType
 import com.mineinabyss.geary.serialization.serializers.PolymorphicListAsMapSerializer
 import com.mineinabyss.geary.serialization.serializers.PolymorphicListAsMapSerializer.Companion.provideConfig
 import kotlinx.serialization.modules.SerializersModule
@@ -42,6 +43,9 @@ class SpawnEntryReader(
                         spawns += decoded.entry
                         entries[nameStr] = decoded
                     }
+                        .onSuccess {
+                            geary.logger.d { "Read spawn $nameStr entry from $path" }
+                        }
                         .onFailure {
                             geary.logger.w { "Failed to read spawn $nameStr entry from $path" }
                             geary.logger.w { it.localizedMessage }
@@ -50,7 +54,7 @@ class SpawnEntryReader(
                 }
 
             }
-        return spawns
+        return spawns.filter { it.type != SpawnType.None }
     }
 
     fun decodeSpawnEntry(
