@@ -5,9 +5,7 @@ import com.mineinabyss.geary.addons.GearyPhase.ENABLE
 import com.mineinabyss.geary.autoscan.autoscan
 import com.mineinabyss.geary.modules.ArchetypeEngineModule
 import com.mineinabyss.geary.modules.geary
-import com.mineinabyss.geary.papermc.GearyPaperConfig
-import com.mineinabyss.geary.papermc.GearyPaperModule
-import com.mineinabyss.geary.papermc.GearyPlugin
+import com.mineinabyss.geary.papermc.*
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
 import com.mineinabyss.geary.papermc.features.GearyPaperMCFeatures
@@ -20,9 +18,9 @@ import com.mineinabyss.geary.papermc.features.items.holdsentity.SpawnHeldPrefabS
 import com.mineinabyss.geary.papermc.features.items.nointeraction.DisableItemInteractionsListener
 import com.mineinabyss.geary.papermc.features.items.recipes.ItemRecipes
 import com.mineinabyss.geary.papermc.features.items.wearables.WearableItemSystem
-import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsSupport
 import com.mineinabyss.geary.papermc.plugin.commands.GearyCommands
+import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
 import com.mineinabyss.geary.papermc.tracking.blocks.gearyBlocks
 import com.mineinabyss.geary.papermc.tracking.blocks.helpers.getKeys
@@ -42,6 +40,7 @@ import com.mineinabyss.geary.serialization.formats.YamlFormat
 import com.mineinabyss.geary.serialization.helpers.withSerialName
 import com.mineinabyss.geary.uuid.SynchronizedUUID2GearyMap
 import com.mineinabyss.geary.uuid.UUIDTracking
+import com.mineinabyss.idofront.commands.brigadier.commands
 import com.mineinabyss.idofront.config.config
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.messaging.ComponentLogger
@@ -62,8 +61,11 @@ import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 
-
 class GearyPluginImpl : GearyPlugin() {
+    val features = Features(
+        this, ::SpawningFeature
+    )
+
     override fun onLoad() {
         // Register DI
         val configModule = object : GearyPaperModule {
@@ -142,7 +144,6 @@ class GearyPluginImpl : GearyPlugin() {
             install(GearyPaperMCFeatures)
         }
 
-
         DI.add<SerializablePrefabItemService>(
             object : SerializablePrefabItemService {
                 override fun encodeFromPrefab(item: ItemStack, prefabName: String): ItemStack {
@@ -152,6 +153,26 @@ class GearyPluginImpl : GearyPlugin() {
                 }
             })
 
+        commands {
+            "gearyNew" {
+                "spawns" {
+                    "list" {
+                        executes {
+
+                        }
+                    }
+                }
+                "reload" {
+                    executes { features.reloadAll() }
+//                    "prefabs" {
+//                        executes { features.reload<PrefabsFeature>() }
+//                    }
+                    "spawns" {
+                        executes { features.reload<SpawningFeature>(sender) }
+                    }
+                }
+            }
+        }
         // Register commands
         GearyCommands()
     }
@@ -180,6 +201,8 @@ class GearyPluginImpl : GearyPlugin() {
                 ReplaceBurnedDropListener(),
             )
         }
+
+        features.enableAll()
     }
 
     override fun onDisable() {

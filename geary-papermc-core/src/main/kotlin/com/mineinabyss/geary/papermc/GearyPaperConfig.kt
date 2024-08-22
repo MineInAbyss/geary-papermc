@@ -22,6 +22,8 @@ class GearyPaperConfig(
     val logLevel: Severity = Severity.Info,
     val integrations: Integrations = Integrations(),
     val resourcePack: ResourcePack = ResourcePack(),
+    @YamlComment("Whether to enable Geary's spawning system")
+    val spawning: Boolean = true,
 )
 
 @Serializable

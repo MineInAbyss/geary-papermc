@@ -9,16 +9,18 @@ plugins {
 dependencies {
     // Plugins
     compileOnly(idofrontLibs.minecraft.plugin.mythic.dist)
-    compileOnly(idofrontLibs.minecraft.plugin.modelengine)
     compileOnly(idofrontLibs.idofront.nms)
+    compileOnly(idofrontLibs.idofront.util)
 
     // Other deps
     compileOnly(idofrontLibs.kotlinx.serialization.json)
+    compileOnly(idofrontLibs.kotlinx.serialization.kaml)
     compileOnly(idofrontLibs.minecraft.mccoroutine)
 
     compileOnly(libs.geary.actions)
     implementation(project(":geary-papermc-tracking"))
-    implementation(project(":geary-papermc-features"))
+    compileOnly(idofrontLibs.minecraft.plugin.worldguard) { exclude(group = "org.bukkit") }
+//    implementation(project(":geary-papermc-features"))
 }
 
 /*configurations.all {
