@@ -21,8 +21,8 @@ class SpawnLocationChooser(
             randomSign() * horizontalRange.randomOrMin().toDouble(),
         )
 
-        if (Random.nextDouble() < 0.3) {
-            val highestY = location.world.getHighestBlockAt(spawnLocation).y.toDouble()
+        if (Random.nextDouble() < 0.2) {
+            val highestY = location.world.getHighestBlockAt(spawnLocation).y.toDouble() + 1
             if (abs(highestY - location.y) <= verticalRange.last)
                 spawnLocation.y = highestY
         }

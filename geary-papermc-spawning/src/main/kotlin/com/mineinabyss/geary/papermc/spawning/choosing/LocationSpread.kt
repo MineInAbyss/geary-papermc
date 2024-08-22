@@ -1,14 +1,18 @@
 package com.mineinabyss.geary.papermc.spawning.choosing
 
+import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
+import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import org.bukkit.Location
 import org.bukkit.util.BoundingBox
-import org.bukkit.util.Vector
 import kotlin.math.ceil
 import kotlin.math.floor
-import kotlin.math.sign
-import kotlin.random.Random
 
-class LocationSpread {
+class LocationSpread(
+    val spawnPositionReader: SpawnPositionReader,
+    val triesForNearbyLoc: Int,
+) {
+    val random = java.util.Random()
+
     /**
      * Ensures that the given location is suitable for spawning an entity by checking if it is inside any solid blocks.
      * If it is, it will attempt to find a suitable location by shifting the bounding box upwards.
@@ -46,52 +50,20 @@ class LocationSpread {
         return null
     }
 
-
-    /**
-     * Gets a location to spawn in a mob given an original location and min/max radii around it
-     *
-     * @param loc    the location to check off of
-     * @param maxRad the maximum radius for the new location to be picked at
-     * @return a new position to spawn in
-     */
-    private fun getSpawnInRadius(loc: Location, maxRad: Double): Location? {
-        if (maxRad == 0.0) return loc
-        if (!loc.chunk.isLoaded) return null
-        for (i in 0..29) { //TODO, arbitrary number, should instead search all locations around the spawn
-            val x = sign(Math.random() - 0.5) * Random.nextDouble(maxRad)
-            val z = sign(Math.random() - 0.5) * Random.nextDouble(maxRad)
-            val searchLoc: Location = loc.clone().add(Vector(x, 0.0, z))
-
-            return if (!searchLoc.block.type.isSolid)
-                searchLoc.checkDown(2) ?: continue
-            else
-                searchLoc.checkUp(2) ?: continue
+    fun getNearbySpawnLocation(
+        position: SpawnPosition,
+        loc: Location,
+        horizontalRange: Double,
+        verticalRange: Double,
+    ): Location {
+        // generate x, z offsets within the radius using a normal distribution
+        repeat(triesForNearbyLoc) {
+            val dx = random.nextGaussian(0.0, horizontalRange).toInt()
+            val dz = random.nextGaussian(0.0, horizontalRange).toInt()
+            val dy = verticalRange * random.nextDouble(0.0, 1.0).toInt()
+            val offsetLoc = loc.clone().apply { add(dx.toDouble(), dy.toDouble(), dz.toDouble()) }
+            if (spawnPositionReader.spawnPositionFor(offsetLoc) == position) return offsetLoc
         }
-        return null
+        return loc
     }
-
-    private fun Location.checkDown(maxI: Int): Location? {
-        var l = clone()
-        for (i in 0 until maxI) {
-            l = l.add(0.0, -1.0, 0.0)
-            if (l.y < l.world.minHeight) return null
-            if (l.y >= l.world.maxHeight) l.y = l.world.maxHeight.toDouble()
-            if (l.block.type.isSolid) return l.add(0.0, 1.0, 0.0)
-        }
-        return null
-    }
-
-    private fun Location.checkUp(maxI: Int): Location? {
-        var l = clone()
-        for (i in 0 until maxI) {
-            l = l.add(0.0, 1.0, 0.0)
-            if (!l.block.type.isSolid) {
-                return l
-            }
-            if (l.y >= l.world.maxHeight) return null
-            if (l.y < l.world.minHeight) l.y = 10.0
-        }
-        return null
-    }
-
 }
