@@ -5,6 +5,7 @@ import com.charleskorn.kaml.YamlConfiguration
 import com.mineinabyss.geary.papermc.Feature
 import com.mineinabyss.geary.papermc.FeatureContext
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.spawning.choosing.LocationSpread
 import com.mineinabyss.geary.papermc.spawning.choosing.SpawnChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.SpawnLocationChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
@@ -52,7 +53,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
                 locationChooser = SpawnLocationChooser(config.range),
                 spawnPositionReader = SpawnPositionReader(),
                 spawnAttempts = config.maxSpawnAttemptsPerPlayer,
-                mobSpawner = MobSpawner(spawnChooser),
+                mobSpawner = MobSpawner(spawnChooser, LocationSpread()),
             ).job
         )
     }

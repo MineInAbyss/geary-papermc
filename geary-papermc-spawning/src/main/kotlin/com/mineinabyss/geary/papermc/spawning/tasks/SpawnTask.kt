@@ -21,7 +21,11 @@ class SpawnTask(
 ) {
     val job = gearyPaper.plugin.launch {
         while (true) {
-            run()
+            runCatching {
+                run()
+            }.onFailure {
+                gearyPaper.logger.d { it.stackTraceToString() }
+            }
             delay(1.ticks)
         }
     }
