@@ -28,4 +28,11 @@ interface SpawnType {
             return event.spawnType
         }
     }
+
+    object None : SpawnType {
+        override val key = "none"
+        override val category = SpawnCategory("none")
+
+        override fun spawnAt(location: Location) {}
+    }
 }

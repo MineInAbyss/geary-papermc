@@ -7,6 +7,7 @@ import org.bukkit.Location
 
 class MobCaps(
     val caps: Map<SpawnCategory, Int>,
+    val defaultCapLimit: Int,
     val searchRadius: Int,
 ) {
     fun calculateCategoriesNear(location: Location): Map<SpawnCategory, Int> = location
@@ -21,7 +22,7 @@ class MobCaps(
         return spawns.filter {
             mobCaps.getOrDefault(it.type.category, 0) < caps.getOrDefault(
                 it.type.category,
-                Int.MAX_VALUE
+                defaultCapLimit,
             )
         }
     }

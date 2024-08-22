@@ -12,8 +12,8 @@ import org.bukkit.Material
 @Serializable
 @SerialName("geary:block_below")
 class BlockBelowCondition(
-    val allow: Set<@Serializable(with = MaterialByNameSerializer::class) Material>,
-    val deny: Set<@Serializable(with = MaterialByNameSerializer::class) Material>,
+    val allow: Set<@Serializable(with = MaterialByNameSerializer::class) Material> = setOf(),
+    val deny: Set<@Serializable(with = MaterialByNameSerializer::class) Material> = setOf(),
 ) : Condition {
     override fun ActionGroupContext.execute(): Boolean {
         val blockBelow = location.down(1).block.type
