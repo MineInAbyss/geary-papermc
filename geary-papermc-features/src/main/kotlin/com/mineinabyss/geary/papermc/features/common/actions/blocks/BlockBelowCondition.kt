@@ -16,7 +16,7 @@ class BlockBelowCondition(
     val deny: Set<@Serializable(with = MaterialByNameSerializer::class) Material> = setOf(),
 ) : Condition {
     override fun ActionGroupContext.execute(): Boolean {
-        val blockBelow = location.down(1).block.type
+        val blockBelow = location?.down(1)?.block?.type ?: return true
         return (allow.isEmpty() || blockBelow in allow) && blockBelow !in deny
     }
 }

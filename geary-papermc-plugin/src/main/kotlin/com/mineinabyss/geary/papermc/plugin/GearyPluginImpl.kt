@@ -156,8 +156,8 @@ class GearyPluginImpl : GearyPlugin() {
         commands {
             "gearyNew" {
                 "spawns" {
-                    "list" {
-                        executes {
+                    "test" {
+                        playerExecutes {
 
                         }
                     }

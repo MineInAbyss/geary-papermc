@@ -75,14 +75,16 @@ class SpawnEntryReader(
     }
 }
 
-fun mergeYamlNodes(original: YamlNode, override: YamlNode) = when {
+fun mergeYamlNodes(original: YamlNode, override: YamlNode): YamlNode = when {
     original is YamlMap && override is YamlMap -> {
-        val originalMap = original.entries.entries.associateBy { it.key.content }.toMutableMap()
-        override.entries.forEach {
-            originalMap[it.key.content] = it
+        val mapEntries = original.entries.entries.associate { it.key.content to (it.key to it.value) }.toMutableMap()
+        override.entries.forEach { (key, node) ->
+            if (key.content in mapEntries) {
+                mapEntries[key.content] = key to mergeYamlNodes(mapEntries[key.content]!!.second, node)
+            } else mapEntries[key.content] = key to node
         }
         YamlMap(
-            originalMap.values.associate { it.key to it.value },
+            mapEntries.values.toMap(),
             original.path
         )
     }

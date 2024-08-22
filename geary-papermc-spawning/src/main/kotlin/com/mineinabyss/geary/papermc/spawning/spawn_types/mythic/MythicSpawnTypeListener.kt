@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.spawn_types.mythic
 
 import com.mineinabyss.geary.papermc.spawning.components.SpawnCategory
+import com.mineinabyss.geary.papermc.spawning.spawn_types.GearyReadEntityTypeEvent
 import com.mineinabyss.geary.papermc.spawning.spawn_types.GearyReadSpawnCategoryEvent
 import com.mineinabyss.geary.papermc.spawning.spawn_types.GearyReadTypeEvent
 import com.mineinabyss.geary.prefabs.PrefabKey
@@ -31,5 +32,13 @@ class MythicSpawnTypeListener : Listener {
             category = SpawnCategory(cat)
         }
     }
-}
 
+    @EventHandler
+    fun GearyReadEntityTypeEvent.readEntityType() {
+        if (type != null) return
+        if (mobsManager.isMythicMob(entity)) {
+            val typeName = mobsManager.getMythicMobInstance(entity)?.type?.internalName ?: return
+            type = "mm:$typeName"
+        }
+    }
+}

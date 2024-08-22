@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.mythicmobs.actions
 
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.Condition
+import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.papermc.location
 import com.mineinabyss.geary.serialization.serializers.InnerSerializer
 import com.mineinabyss.idofront.typealiases.BukkitEntity
@@ -24,7 +25,7 @@ class MythicSkillsCondition(
     )
 
     override fun ActionGroupContext.execute(): Boolean {
-        val entity = BukkitAdapter.adapt(entity.get<BukkitEntity>())
+        val entity = BukkitAdapter.adapt(getOrNull<GearyEntity>("entity")?.get<BukkitEntity>())
         val location = entity?.location ?: BukkitAdapter.adapt(location)
         return keys.all { line ->
             val condition = MythicBukkit.inst().skillManager.getCondition(line)
@@ -35,3 +36,5 @@ class MythicSkillsCondition(
         }
     }
 }
+
+inline fun <T> ActionGroupContext.getOrNull(key: String): T? = environment[key] as? T

@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.spawning
 
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.papermc.location
+import com.mineinabyss.geary.papermc.spawning.choosing.LocationSpread
 import com.mineinabyss.geary.papermc.spawning.choosing.SpawnChooser
 import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
 import com.mineinabyss.idofront.util.randomOrMin
@@ -11,14 +12,19 @@ import org.bukkit.Location
 
 class MobSpawner(
     val spawnChooser: SpawnChooser,
+    val spread: LocationSpread,
 ) {
-    fun attemptSpawnAt(location: Location, position: SpawnPosition) {
-        val spawn = spawnChooser.chooseAllowedSpawnNear(location, position) ?: return
+    fun attemptSpawnAt(location: Location, position: SpawnPosition): Boolean {
+        val spawn = spawnChooser.chooseAllowedSpawnNear(location, position) ?: return false
+
+        // Check dynamic conditions
         if (!spawn.conditions.conditionsMet(
                 ActionGroupContext().apply {
-                    this.location = location
+                    this.location = location.clone()
+                    environment["spawnTypes"] = listOf(spawn.type.key)
                 })
-        ) return
+        ) return false
+
         repeat(spawn.amount.randomOrMin()) {
             val radius = spawn.radius.randomOrMin().toDouble()
             val spawnLoc = if (radius == 1.0) location
@@ -32,7 +38,18 @@ class MobSpawner(
                     position == SpawnPosition.GROUND,
                 )
             )
-            spawn.type.spawnAt(spawnLoc)
+            val spawned = spawn.type.spawnAt(spawnLoc)
+
+            val nonSuffocatingLoc = spread.ensureSuitableLocationOrNull(
+                spawnLoc,
+                spawned.boundingBox,
+                extraAttemptsUp = 10
+            ) ?: run {
+                spawned.remove()
+                return@repeat
+            }
+            spawned.teleportAsync(nonSuffocatingLoc)
         }
+        return true
     }
 }

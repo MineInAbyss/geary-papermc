@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.spawning.spawn_types
 import com.mineinabyss.geary.papermc.spawning.components.SpawnCategory
 import com.mineinabyss.geary.serialization.serializers.InnerSerializer
 import com.mineinabyss.idofront.events.call
+import com.mineinabyss.idofront.typealiases.BukkitEntity
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.serializer
 import org.bukkit.Location
@@ -12,7 +13,7 @@ interface SpawnType {
     val key: String
     val category: SpawnCategory
 
-    fun spawnAt(location: Location)
+    fun spawnAt(location: Location): BukkitEntity
 
     object Serializer : InnerSerializer<String, SpawnType>(
         serialName = "geary:spawn_type",
@@ -33,6 +34,6 @@ interface SpawnType {
         override val key = "none"
         override val category = SpawnCategory("none")
 
-        override fun spawnAt(location: Location) {}
+        override fun spawnAt(location: Location): BukkitEntity = error("Cannot spawn a 'none' entity")
     }
 }
