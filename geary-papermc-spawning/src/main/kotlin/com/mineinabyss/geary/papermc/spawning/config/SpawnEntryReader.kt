@@ -73,26 +73,43 @@ class SpawnEntryReader(
             merged,
         )
     }
-}
 
-fun mergeYamlNodes(original: YamlNode, override: YamlNode): YamlNode = when {
-    original is YamlMap && override is YamlMap -> {
-        val mapEntries = original.entries.entries.associate { it.key.content to (it.key to it.value) }.toMutableMap()
-        override.entries.forEach { (key, node) ->
-            if (key.content in mapEntries) {
-                mapEntries[key.content] = key to mergeYamlNodes(mapEntries[key.content]!!.second, node)
-            } else mapEntries[key.content] = key to node
+    companion object {
+        val specialMergeTags = Regex("(\\\$inherit)|(\\\$remove)")
+
+        fun mergeYamlNodes(original: YamlNode, override: YamlNode): YamlNode = when {
+            original is YamlMap && override is YamlMap -> {
+                val mapEntries =
+                    original.entries.entries.associate { it.key.content to (it.key to it.value) }.toMutableMap()
+                override.entries.forEach { (key, node) ->
+                    if (key.content in mapEntries) {
+                        mapEntries[key.content] = key to mergeYamlNodes(mapEntries[key.content]!!.second, node)
+                    } else mapEntries[key.content] = key to node
+                }
+                YamlMap(
+                    mapEntries.values.toMap(),
+                    original.path
+                )
+            }
+
+            original is YamlList && override is YamlList -> {
+                val inheritKey = override.items.firstOrNull { (it as? YamlScalar)?.content == "\$inherit" }
+                val removeTags = override.items.mapNotNull {
+                    (it as? YamlScalar)?.content?.takeIf { it.startsWith("\$remove") }?.removePrefix("\$remove")?.trim()
+                }.toSet()
+
+                if (inheritKey != null)
+                    YamlList(original.items
+                        .filter { (it as? YamlMap)?.entries?.any { it.key.content in removeTags } != true }
+                        .plus(override.items.filter {
+                            (it as? YamlScalar)?.content?.contains(specialMergeTags) != true
+                        }), override.path
+                    )
+                else override
+            }
+
+            else -> override
         }
-        YamlMap(
-            mapEntries.values.toMap(),
-            original.path
-        )
+
     }
-    original is YamlList && override is YamlList -> {
-        val inheritKey = override.items.firstOrNull { (it as? YamlScalar)?.content == "\$inherit" }
-        if (inheritKey != null)
-            YamlList(original.items + override.items.minus(inheritKey), override.path)
-        else override
-    }
-    else -> override
 }
