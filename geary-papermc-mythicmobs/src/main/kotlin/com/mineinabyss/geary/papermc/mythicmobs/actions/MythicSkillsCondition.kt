@@ -2,8 +2,10 @@ package com.mineinabyss.geary.papermc.mythicmobs.actions
 
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.Condition
+import com.mineinabyss.geary.papermc.location
 import com.mineinabyss.geary.serialization.serializers.InnerSerializer
 import com.mineinabyss.idofront.typealiases.BukkitEntity
+import io.lumine.mythic.api.skills.conditions.ILocationCondition
 import io.lumine.mythic.bukkit.BukkitAdapter
 import io.lumine.mythic.bukkit.MythicBukkit
 import kotlinx.serialization.Serializable
@@ -22,11 +24,14 @@ class MythicSkillsCondition(
     )
 
     override fun ActionGroupContext.execute(): Boolean {
-        val bukkit = entity.get<BukkitEntity>() ?: return true
-        val entity = BukkitAdapter.adapt(bukkit)
+        val entity = BukkitAdapter.adapt(entity.get<BukkitEntity>())
+        val location = entity?.location ?: BukkitAdapter.adapt(location)
         return keys.all { line ->
             val condition = MythicBukkit.inst().skillManager.getCondition(line)
-            condition.evaluateEntity(entity)
+            if (condition is ILocationCondition)
+                condition.check(location)
+            else
+                condition.evaluateEntity(entity)
         }
     }
 }
