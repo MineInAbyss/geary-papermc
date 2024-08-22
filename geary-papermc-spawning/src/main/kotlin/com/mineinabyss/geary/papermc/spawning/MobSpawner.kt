@@ -6,41 +6,35 @@ import com.mineinabyss.geary.papermc.spawning.choosing.LocationSpread
 import com.mineinabyss.geary.papermc.spawning.choosing.SpawnChooser
 import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
 import com.mineinabyss.idofront.util.randomOrMin
-import io.lumine.mythic.bukkit.BukkitAdapter
-import io.lumine.mythic.core.mobs.MobExecutor
 import org.bukkit.Location
 
 class MobSpawner(
     val spawnChooser: SpawnChooser,
-    val spread: LocationSpread,
+    val spreadRepo: LocationSpread,
 ) {
     fun attemptSpawnAt(location: Location, position: SpawnPosition): Boolean {
         val spawn = spawnChooser.chooseAllowedSpawnNear(location, position) ?: return false
 
         // Check dynamic conditions
-        if (!spawn.conditions.conditionsMet(
-                ActionGroupContext().apply {
-                    this.location = location.clone()
-                    environment["spawnTypes"] = listOf(spawn.type.key)
-                })
+        if (!spawn.conditions.all {
+                it.conditionsMet(
+                    ActionGroupContext().apply {
+                        this.location = location.clone()
+                        environment["spawnTypes"] = listOf(spawn.type.key)
+                    }
+                )
+            }
         ) return false
 
         repeat(spawn.amount.randomOrMin()) {
-            val radius = spawn.radius.randomOrMin().toDouble()
-            val spawnLoc = if (radius == 1.0) location
-            else BukkitAdapter.adapt(
-                MobExecutor.findSafeSpawnLocation(
-                    BukkitAdapter.adapt(location),
-                    radius,
-                    radius,
-                    2,
-                    false,
-                    position == SpawnPosition.GROUND,
-                )
-            )
+            val spread = spawn.spread.randomOrMin().toDouble()
+            val ySpread = spawn.ySpread.randomOrMin().toDouble()
+            val spawnLoc = if (spread == 0.0 && ySpread == 0.0) location
+            else spreadRepo.getNearbySpawnLocation(position, location, spread, ySpread)
+
             val spawned = spawn.type.spawnAt(spawnLoc)
 
-            val nonSuffocatingLoc = spread.ensureSuitableLocationOrNull(
+            val nonSuffocatingLoc = spreadRepo.ensureSuitableLocationOrNull(
                 spawnLoc,
                 spawned.boundingBox,
                 extraAttemptsUp = 10

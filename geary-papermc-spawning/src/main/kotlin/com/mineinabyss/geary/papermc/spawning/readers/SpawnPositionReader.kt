@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.readers
 
 import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
-import com.mineinabyss.idofront.location.up
+import com.mineinabyss.idofront.location.down
 import org.bukkit.Location
 import org.bukkit.Material
 
@@ -11,8 +11,8 @@ class SpawnPositionReader {
         return when {
             type == Material.WATER -> SpawnPosition.WATER
             type == Material.LAVA -> SpawnPosition.LAVA
+            location.clone().down(1).block.isSolid && location.block.isPassable -> SpawnPosition.GROUND
             location.block.isEmpty -> SpawnPosition.AIR
-            location.block.isSolid && location.up(1).block.isPassable -> SpawnPosition.GROUND
             else -> SpawnPosition.IN_BLOCK
         }
     }

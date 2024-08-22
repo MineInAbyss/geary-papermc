@@ -9,9 +9,10 @@ import kotlinx.serialization.Serializable
 data class SpawnEntry(
     val position: SpawnPosition = SpawnPosition.GROUND,
     val type: SpawnType = SpawnType.None,
-    val radius: @Serializable(with = IntRangeSerializer::class) IntRange = 0..0,
+    val spread: @Serializable(with = IntRangeSerializer::class) IntRange = 0..0,
+    val ySpread: @Serializable(with = IntRangeSerializer::class) IntRange = 0..0,
     val amount: @Serializable(with = IntRangeSerializer::class) IntRange = 1..1,
     val regions: List<String> = listOf(),
     val priority: Double = 1.0,
-    val conditions: EnsureAction = EnsureAction(listOf()),
+    val conditions: List<EnsureAction> = listOf(EnsureAction(listOf())),
 )

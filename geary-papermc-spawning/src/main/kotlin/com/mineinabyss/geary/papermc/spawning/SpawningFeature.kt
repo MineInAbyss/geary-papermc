@@ -46,14 +46,17 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         val wg = WorldGuardSpawning(spawns)
         val caps = MobCaps(config.playerCaps, config.defaultCap, config.range.playerCapRadius)
         val spawnChooser = SpawnChooser(wg, caps)
-
+        val spawnPositionReader = SpawnPositionReader()
         task(
             SpawnTask(
                 runTimes = config.runTimes,
                 locationChooser = SpawnLocationChooser(config.range),
-                spawnPositionReader = SpawnPositionReader(),
+                spawnPositionReader = spawnPositionReader,
                 spawnAttempts = config.maxSpawnAttemptsPerPlayer,
-                mobSpawner = MobSpawner(spawnChooser, LocationSpread()),
+                mobSpawner = MobSpawner(
+                    spawnChooser,
+                    LocationSpread(spawnPositionReader, triesForNearbyLoc = 10)
+                ),
             ).job
         )
     }

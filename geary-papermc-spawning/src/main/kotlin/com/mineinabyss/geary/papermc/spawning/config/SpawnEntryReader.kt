@@ -88,6 +88,11 @@ fun mergeYamlNodes(original: YamlNode, override: YamlNode): YamlNode = when {
             original.path
         )
     }
-
+    original is YamlList && override is YamlList -> {
+        val inheritKey = override.items.firstOrNull { (it as? YamlScalar)?.content == "\$inherit" }
+        if (inheritKey != null)
+            YamlList(original.items + override.items.minus(inheritKey), override.path)
+        else override
+    }
     else -> override
 }
