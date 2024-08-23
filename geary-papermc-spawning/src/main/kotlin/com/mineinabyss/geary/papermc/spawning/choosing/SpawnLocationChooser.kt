@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.choosing
 
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
+import com.mineinabyss.idofront.location.up
 import com.mineinabyss.idofront.util.randomOrMin
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -22,9 +23,7 @@ class SpawnLocationChooser(
         )
 
         if (Random.nextDouble() < 0.2) {
-            val highestY = location.world.getHighestBlockAt(spawnLocation).y.toDouble() + 1
-            if (abs(highestY - location.y) <= verticalRange.last)
-                spawnLocation.y = highestY
+            spawnLocation.y = tryGetHighestBlockWithinYRange(spawnLocation, config.maxVerticalDistance).y
         }
 
         // Ensure not near ANY player
@@ -32,6 +31,19 @@ class SpawnLocationChooser(
             return null
 
         return spawnLocation
+    }
+
+    fun tryGetHighestBlockWithinYRange(location: Location, range: Int): Location {
+        val newLoc = location.clone()
+        val highestY = newLoc.world.getHighestBlockAt(newLoc).y.toDouble() + 1
+        if (abs(highestY - newLoc.y) <= range) return newLoc.apply { y = highestY }
+        if (!newLoc.block.isPassable) return newLoc
+        (newLoc.y.toInt() downTo newLoc.y.toInt() - range)
+            .forEach {
+                newLoc.y = it.toDouble()
+                if (!newLoc.block.isPassable) return newLoc.up(1)
+            }
+        return location
     }
 
     private fun randomSign() = if (Random.nextBoolean()) 1 else -1
