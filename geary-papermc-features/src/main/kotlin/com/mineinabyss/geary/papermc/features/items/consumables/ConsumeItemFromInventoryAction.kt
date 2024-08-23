@@ -14,7 +14,7 @@ class ConsumeItemFromInventoryAction(
     val amount: Int = 1,
 ) : Action {
     override fun ActionGroupContext.execute() {
-        val player = entity.get<Player>() ?: return
+        val player = entity?.get<Player>() ?: return
         val matchedItem = player.inventory.firstOrNull { type.matches(it) } ?: return
         matchedItem.amount -= amount
     }

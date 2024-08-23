@@ -17,7 +17,7 @@ class GetTargetBlock(
     val maxDistance: Expression<Int>,
 ) : FunctionExpression<GearyEntity, Location?> {
     override fun ActionGroupContext.map(input: GearyEntity): Location? {
-        val bukkit = entity.get<BukkitEntity>() ?: return null
+        val bukkit = entity?.get<BukkitEntity>() ?: return null
         return (bukkit as? LivingEntity)?.getTargetBlock(null, eval(maxDistance))?.location
     }
 }

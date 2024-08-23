@@ -52,6 +52,7 @@ data class CooldownCondition(
     val ids: List<String>,
 ) : Condition {
     override fun ActionGroupContext.execute(): Boolean {
+        val entity = entity ?: return true
         return Cooldowns.areComplete(entity, ids)
     }
 

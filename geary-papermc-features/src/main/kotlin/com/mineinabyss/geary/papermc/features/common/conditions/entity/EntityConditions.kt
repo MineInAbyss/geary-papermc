@@ -1,4 +1,4 @@
-package com.mineinabyss.geary.papermc.features.common.conditions
+package com.mineinabyss.geary.papermc.features.common.conditions.entity
 
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.Condition
@@ -39,7 +39,7 @@ class EntityConditions(
     infix fun Boolean?.nullOrEquals(other: Boolean) = this == null || this == other
 
     override fun ActionGroupContext.execute(): Boolean {
-        val livingEntity = entity.get<LivingEntity>() ?: return false
+        val livingEntity = entity?.get<LivingEntity>() ?: return false
         return sleeping nullOrEquals livingEntity.isSleeping &&
                 swimming nullOrEquals livingEntity.isSwimming &&
                 climbing nullOrEquals livingEntity.isClimbing &&

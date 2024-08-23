@@ -6,6 +6,7 @@ import com.mineinabyss.geary.actions.Action
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.expressions.Expression
 import com.mineinabyss.geary.actions.expressions.expr
+import com.mineinabyss.geary.papermc.location
 import com.mineinabyss.idofront.serialization.ColorSerializer
 import com.mineinabyss.idofront.serialization.DoubleRangeSerializer
 import com.mineinabyss.idofront.serialization.IntRangeSerializer
@@ -26,15 +27,15 @@ class SoundAction(
     val pitch: Expression<Float> = expr(1.0f),
 ) : Action {
     override fun ActionGroupContext.execute() {
-        val bukkit = entity.get<BukkitEntity>() ?: return
-        bukkit.world.playSound(
-            Sound.sound()
-                .type(Key.key(eval(sound)))
-                .pitch(eval(pitch))
-                .volume(eval(volume))
-                .source(eval(category))
-                .build(),
-            bukkit
-        )
+        val bukkit = entity?.get<BukkitEntity>()
+        val location = location ?: return
+        val sound = Sound.sound()
+            .type(Key.key(eval(sound)))
+            .pitch(eval(pitch))
+            .volume(eval(volume))
+            .source(eval(category))
+            .build()
+        if (bukkit != null) location.world.playSound(sound, bukkit)
+        else location.world.playSound(sound, location.x, location.y, location.z)
     }
 }

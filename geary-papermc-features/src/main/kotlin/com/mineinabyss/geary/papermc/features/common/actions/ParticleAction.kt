@@ -7,23 +7,19 @@ import com.mineinabyss.geary.actions.Action
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.expressions.Expression
 import com.mineinabyss.geary.actions.expressions.expr
+import com.mineinabyss.geary.papermc.location
 import com.mineinabyss.idofront.serialization.ColorSerializer
 import com.mineinabyss.idofront.serialization.DoubleRangeSerializer
 import com.mineinabyss.idofront.serialization.IntRangeSerializer
-import com.mineinabyss.idofront.util.DoubleRange
-import com.mineinabyss.idofront.util.randomOrMin
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.Particle
 
 @Serializable
 @SerialName("geary:particle")
 class ParticleAction(
-    val at: Expression<@Contextual Location>,
     val particle: Expression<Particle>,
     val offsetX: Expression<Double> = expr(0.0),
     val offsetY: Expression<Double> = expr(0.0),
@@ -34,8 +30,9 @@ class ParticleAction(
     val speed: Expression<Double> = expr(0.0),
 ) : Action {
     override fun ActionGroupContext.execute() {
+        val location = location ?: return
         ParticleBuilder(eval(particle))
-            .location(eval(at))
+            .location(location)
             .offset(eval(offsetX), eval(offsetY), eval(offsetZ))
             .color(eval(color))
             .count(eval(count))

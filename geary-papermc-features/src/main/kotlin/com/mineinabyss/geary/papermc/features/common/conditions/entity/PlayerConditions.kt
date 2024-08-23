@@ -1,4 +1,4 @@
-package com.mineinabyss.geary.papermc.features.common.conditions
+package com.mineinabyss.geary.papermc.features.common.conditions.entity
 
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.Condition
@@ -38,7 +38,7 @@ class PlayerConditions(
 ) : Condition {
     infix fun Boolean?.nullOrEquals(other: Boolean) = this == null || this == other
     override fun ActionGroupContext.execute(): Boolean {
-        val player = entity.get<Player>() ?: return false
+        val player = entity?.get<Player>() ?: return false
         return player.isOnline && // Just to align syntax below
                 sneaking nullOrEquals player.isSneaking &&
                 sprinting nullOrEquals player.isSprinting &&

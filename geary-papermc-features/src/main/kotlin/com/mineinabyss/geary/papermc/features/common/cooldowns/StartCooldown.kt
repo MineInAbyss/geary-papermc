@@ -18,9 +18,9 @@ class StartCooldown(
     val id: String,
 ) : Action {
     override fun ActionGroupContext.execute() {
-        entity.setPersisting(
+        entity?.setPersisting(
             Cooldowns(
-                (entity.get<Cooldowns>()?.cooldowns ?: mapOf())
+                (entity?.get<Cooldowns>()?.cooldowns ?: mapOf())
                     .plus(id to StartedCooldown(System.currentTimeMillis() + length.inWholeMilliseconds, length, display))
             )
         )

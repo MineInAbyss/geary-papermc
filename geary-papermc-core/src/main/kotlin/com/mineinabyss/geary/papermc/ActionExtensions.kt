@@ -6,7 +6,7 @@ import org.bukkit.Location
 
 var ActionGroupContext.location: Location?
     get() = (environment["location"] as? Location)
-        ?: entity.get<BukkitEntity>()?.location
+        ?: entity?.get<BukkitEntity>()?.location
     set(value) {
         environment["location"] = value
     }
