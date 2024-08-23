@@ -15,7 +15,7 @@ class SendActionBarAction(
     val text: Expression<@Serializable(with = MiniMessageSerializer::class) Component>,
 ) : Action {
     override fun ActionGroupContext.execute() {
-        val player = entity.get<Player>() ?: return
+        val player = entity?.get<Player>() ?: return
         player.sendActionBar(eval(text))
     }
 }

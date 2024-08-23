@@ -1,4 +1,4 @@
-package com.mineinabyss.geary.papermc.features.common.conditions
+package com.mineinabyss.geary.papermc.features.common.conditions.location
 
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.Condition

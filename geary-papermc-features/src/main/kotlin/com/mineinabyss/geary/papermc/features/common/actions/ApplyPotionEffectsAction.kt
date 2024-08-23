@@ -15,7 +15,7 @@ class ApplyPotionEffectsAction(
     val effects: List<@Serializable(with = PotionEffectSerializer::class) PotionEffect>,
 ) : Action {
     override fun ActionGroupContext.execute() {
-        val bukkit = entity.get<BukkitEntity>() as? LivingEntity ?: return
+        val bukkit = entity?.get<BukkitEntity>() as? LivingEntity ?: return
         bukkit.addPotionEffects(effects)
     }
 
