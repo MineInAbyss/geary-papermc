@@ -94,8 +94,11 @@ class SpawnEntryReader(
 
             original is YamlList && override is YamlList -> {
                 val inheritKey = override.items.firstOrNull { (it as? YamlScalar)?.content == "\$inherit" }
-                val removeTags = override.items.mapNotNull {
-                    (it as? YamlScalar)?.content?.takeIf { it.startsWith("\$remove") }?.removePrefix("\$remove")?.trim()
+                val removeTags = override.items.flatMap {
+                    (it as? YamlScalar)?.content?.takeIf { it.startsWith("\$remove") }?.removePrefix("\$remove")
+                        ?.trim()
+                        ?.split(' ')
+                        ?: emptyList()
                 }.toSet()
 
                 if (inheritKey != null)
