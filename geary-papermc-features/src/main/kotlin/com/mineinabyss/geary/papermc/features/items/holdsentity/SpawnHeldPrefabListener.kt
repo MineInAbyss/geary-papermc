@@ -2,7 +2,7 @@ package com.mineinabyss.geary.papermc.features.items.holdsentity
 
 import org.bukkit.event.Listener
 
-class SpawnHeldPrefabSystem : Listener {
+class SpawnHeldPrefabListener : Listener {
 //    @EventHandler(ignoreCancelled = true) // Fires after the onPickupMob thus it places it aswell
 //    fun PlayerInteractEvent.onEmptyMobzyBucket() {
 //        if (action != Action.RIGHT_CLICK_BLOCK || hand != EquipmentSlot.HAND) return
