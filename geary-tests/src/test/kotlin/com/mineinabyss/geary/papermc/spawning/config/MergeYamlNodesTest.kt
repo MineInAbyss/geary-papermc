@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.config
 
 import com.charleskorn.kaml.Yaml
+import com.mineinabyss.geary.papermc.MultiEntryYamlReader
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
@@ -24,6 +25,6 @@ class MergeYamlNodesTest {
         """.trimIndent()
         )
 
-        SpawnEntryReader.mergeYamlNodes(original, override).contentToString() shouldBe "{'test': [{'b': {}}]}"
+        MultiEntryYamlReader.mergeYamlNodes(original, override).contentToString() shouldBe "{'test': [{'b': {}}]}"
     }
 }
