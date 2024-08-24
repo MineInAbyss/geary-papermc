@@ -22,7 +22,6 @@ class RecipeFeature(val context: FeatureContext) : Feature(context) {
         if (!context.isFirstEnable) {
             (recipes.entities().toSet() + potionMixes.entities().toSet()).forEach {
                 prefabs.loader.reload(it)
-
             }
         }
 

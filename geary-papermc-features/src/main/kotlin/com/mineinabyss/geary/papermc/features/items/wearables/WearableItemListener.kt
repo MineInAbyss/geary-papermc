@@ -15,7 +15,7 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 
-class WearableItemSystem : Listener {
+class WearableItemListener : Listener {
     @EventHandler
     fun InventoryClickEvent.shiftClickToWear() {
         if (!click.isShiftClick) return

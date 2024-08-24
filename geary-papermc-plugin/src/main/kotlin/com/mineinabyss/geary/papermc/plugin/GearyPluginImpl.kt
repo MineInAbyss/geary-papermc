@@ -9,17 +9,9 @@ import com.mineinabyss.geary.papermc.*
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
 import com.mineinabyss.geary.papermc.features.GearyPaperMCFeatures
-import com.mineinabyss.geary.papermc.features.entities.bucketable.BucketableListener
-import com.mineinabyss.geary.papermc.features.entities.displayname.ShowDisplayNameOnKillerListener
-import com.mineinabyss.geary.papermc.features.entities.prevent.PreventEventsFeature
-import com.mineinabyss.geary.papermc.features.entities.sounds.AmbientSoundsFeature
-import com.mineinabyss.geary.papermc.features.entities.taming.TamingListener
-import com.mineinabyss.geary.papermc.features.items.backpack.BackpackListener
-import com.mineinabyss.geary.papermc.features.items.food.ReplaceBurnedDropListener
-import com.mineinabyss.geary.papermc.features.items.holdsentity.SpawnHeldPrefabSystem
-import com.mineinabyss.geary.papermc.features.items.nointeraction.DisableItemInteractionsListener
+import com.mineinabyss.geary.papermc.features.entities.EntityFeatures
+import com.mineinabyss.geary.papermc.features.items.ItemFeatures
 import com.mineinabyss.geary.papermc.features.items.recipes.RecipeFeature
-import com.mineinabyss.geary.papermc.features.items.wearables.WearableItemSystem
 import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsSupport
 import com.mineinabyss.geary.papermc.plugin.commands.GearyCommands
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
@@ -48,7 +40,6 @@ import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.messaging.injectLogger
 import com.mineinabyss.idofront.messaging.observeLogger
-import com.mineinabyss.idofront.plugin.listeners
 import com.mineinabyss.idofront.serialization.LocationSerializer
 import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
 import okio.FileSystem
@@ -65,7 +56,11 @@ import kotlin.io.path.name
 
 class GearyPluginImpl : GearyPlugin() {
     val features = Features(
-        this, ::SpawningFeature, ::RecipeFeature
+        this,
+        ::SpawningFeature,
+        ::RecipeFeature,
+        ::EntityFeatures,
+        ::ItemFeatures,
     )
 
     override fun onLoad() {
@@ -177,32 +172,11 @@ class GearyPluginImpl : GearyPlugin() {
     override fun onEnable() {
         ArchetypeEngineModule.start(DI.get<PaperEngineModule>())
 
-        if (gearyPaper.config.trackEntities) {
-            geary {
-                install(AmbientSoundsFeature)
-                install(PreventEventsFeature)
-            }
-            listeners(
-                BucketableListener(),
-                ShowDisplayNameOnKillerListener(),
-                TamingListener(),
-            )
-        }
-
-        if (gearyPaper.config.items.enabled) {
-            listeners(
-                WearableItemSystem(),
-                BackpackListener(),
-                SpawnHeldPrefabSystem(),
-                DisableItemInteractionsListener(),
-                ReplaceBurnedDropListener(),
-            )
-        }
-
         features.enableAll()
     }
 
     override fun onDisable() {
+        features.disableAll()
         server.worlds.forEach { world ->
             world.entities.forEach entities@{ entity ->
                 val gearyEntity = entity.toGearyOrNull() ?: return@entities
