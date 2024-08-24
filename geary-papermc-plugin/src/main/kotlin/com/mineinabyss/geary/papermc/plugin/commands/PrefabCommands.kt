@@ -1,0 +1,114 @@
+package com.mineinabyss.geary.papermc.plugin.commands
+
+import com.mineinabyss.geary.components.relations.InstanceOf
+import com.mineinabyss.geary.datatypes.family.family
+import com.mineinabyss.geary.helpers.parent
+import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.UpdateMob
+import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
+import com.mineinabyss.geary.prefabs.PrefabKey
+import com.mineinabyss.geary.prefabs.PrefabLoader.PrefabLoadResult
+import com.mineinabyss.geary.prefabs.helpers.inheritPrefabsIfNeeded
+import com.mineinabyss.geary.prefabs.prefabs
+import com.mineinabyss.idofront.commands.brigadier.Args
+import com.mineinabyss.idofront.commands.brigadier.ArgsMinecraft
+import com.mineinabyss.idofront.commands.brigadier.IdoCommand
+import com.mineinabyss.idofront.messaging.error
+import com.mineinabyss.idofront.messaging.success
+import com.mineinabyss.idofront.messaging.warn
+import com.mineinabyss.idofront.typealiases.BukkitEntity
+import okio.Path.Companion.toOkioPath
+import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
+import kotlin.io.path.Path
+import kotlin.io.path.nameWithoutExtension
+
+private val prefabLoader get() = prefabs.loader
+private val prefabManager get() = prefabs.manager
+
+internal fun IdoCommand.prefabs() = "prefab" {
+    requiresPermission("geary.admin.prefab")
+    "reload" {
+        val prefabArg by ArgsMinecraft.namespacedKey().suggests {
+            suggest(prefabManager.keys.filter {
+                val arg = argument.lowercase()
+                it.key.startsWith(arg) || it.full.startsWith(arg)
+            }.map { it.toString() })
+        }
+        executes {
+            val prefab = PrefabKey.of(prefabArg().asString())
+            val prefabEntity = prefab.toEntityOrNull() ?: commandException("No such prefab $prefabArg")
+            runCatching { prefabLoader.reload(prefabEntity) }
+                .onSuccess { sender.success("Reread prefab $prefab") }
+                .onFailure { sender.error("Failed to reread prefab $prefab:\n${it.message}") }
+
+
+            // Reload entities
+            geary.queryManager.getEntitiesMatching(family {
+                hasRelation<InstanceOf?>(prefabEntity)
+                has<BukkitEntity>()
+            }).forEach {
+                UpdateMob.recreateGearyEntity(it.get<BukkitEntity>() ?: return@forEach)
+            }
+
+            // Reload items
+            geary.queryManager.getEntitiesMatching(family {
+                hasRelation<InstanceOf?>(prefabEntity)
+                has<ItemStack>()
+            }).toSet()
+                .mapNotNull { it.parent }
+                .forEach { it.get<Player>()?.inventory?.toGeary()?.forceRefresh(ignoreCached = true) }
+        }
+    }
+    "load" {
+        val namespaceArg by Args.word().suggests {
+            suggest(plugin.dataFolder.resolve("prefabs").listFiles()?.filter {
+                it.isDirectory && it.name.startsWith(suggestions.remaining.lowercase())
+            }?.map { it.name } ?: emptyList())
+        }
+        val pathArg by Args.word().suggests {
+            //TODO get previous argument in suggestion
+//                plugin.dataFolder.resolve("prefabs").resolve(namespaceArg()).walk()
+//                    .filter {
+//                        it.name.startsWith(args[3].lowercase()) && it.extension == "yml" && prefabManager[PrefabKey.of(
+//                            args[2],
+//                            it.nameWithoutExtension
+//                        )] == null
+//                    }.map {
+//                        it.relativeTo(plugin.dataFolder.resolve(args[2])).toString()
+//                    }
+//                    .toList()
+        }
+        executes {
+            val namespace = namespaceArg()
+            val path = pathArg()
+
+            // Ensure not already registered
+            if (prefabManager[PrefabKey.of(namespace, Path(path).nameWithoutExtension)] != null) {
+                commandException("Prefab $namespace:$path already exists")
+            }
+
+            // Try to load from file
+            val load = prefabLoader.loadFromPath(
+                namespace,
+                gearyPaper.plugin.dataFolder.resolve(namespace).resolve(path).toOkioPath()
+            )
+            when (load) {
+                is PrefabLoadResult.Failure -> {
+                    sender.error("Failed to read prefab $namespace:$path:\n${load.error.message}")
+                }
+
+                is PrefabLoadResult.Success -> {
+                    load.entity.inheritPrefabsIfNeeded()
+                    sender.success("Read prefab $namespace:$path")
+                }
+
+                is PrefabLoadResult.Warn -> {
+                    load.entity.inheritPrefabsIfNeeded()
+                    sender.warn("Read prefab $namespace:$path with warnings")
+                }
+            }
+        }
+    }
+}

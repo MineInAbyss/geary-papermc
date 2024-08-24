@@ -13,7 +13,7 @@ import com.mineinabyss.geary.papermc.features.entities.EntityFeatures
 import com.mineinabyss.geary.papermc.features.items.ItemFeatures
 import com.mineinabyss.geary.papermc.features.items.recipes.RecipeFeature
 import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsSupport
-import com.mineinabyss.geary.papermc.plugin.commands.GearyCommands
+import com.mineinabyss.geary.papermc.plugin.commands.registerGearyCommands
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
 import com.mineinabyss.geary.papermc.tracking.blocks.gearyBlocks
@@ -34,7 +34,6 @@ import com.mineinabyss.geary.serialization.formats.YamlFormat
 import com.mineinabyss.geary.serialization.helpers.withSerialName
 import com.mineinabyss.geary.uuid.SynchronizedUUID2GearyMap
 import com.mineinabyss.geary.uuid.UUIDTracking
-import com.mineinabyss.idofront.commands.brigadier.commands
 import com.mineinabyss.idofront.config.config
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.messaging.ComponentLogger
@@ -149,24 +148,7 @@ class GearyPluginImpl : GearyPlugin() {
                 }
             })
 
-        commands {
-            "gearyNew" {
-                "spawns" {
-                    "test" {
-                        playerExecutes {
-
-                        }
-                    }
-                }
-                "reload" {
-                    executes { features.reloadAll() }
-                    "recipes" { executes { features.reload<RecipeFeature>(sender) } }
-                    "spawns" { executes { features.reload<SpawningFeature>(sender) } }
-                }
-            }
-        }
-        // Register commands
-        GearyCommands()
+        registerGearyCommands()
     }
 
     override fun onEnable() {
