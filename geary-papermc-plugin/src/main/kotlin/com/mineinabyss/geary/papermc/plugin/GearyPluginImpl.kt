@@ -12,7 +12,7 @@ import com.mineinabyss.geary.papermc.features.GearyPaperMCFeatures
 import com.mineinabyss.geary.papermc.features.entities.EntityFeatures
 import com.mineinabyss.geary.papermc.features.items.ItemFeatures
 import com.mineinabyss.geary.papermc.features.items.recipes.RecipeFeature
-import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsSupport
+import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsFeature
 import com.mineinabyss.geary.papermc.plugin.commands.registerGearyCommands
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
@@ -43,7 +43,6 @@ import com.mineinabyss.idofront.serialization.LocationSerializer
 import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
-import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
@@ -60,6 +59,7 @@ class GearyPluginImpl : GearyPlugin() {
         ::RecipeFeature,
         ::EntityFeatures,
         ::ItemFeatures,
+        ::MythicMobsFeature,
     )
 
     override fun onLoad() {
@@ -129,12 +129,6 @@ class GearyPluginImpl : GearyPlugin() {
                 )
             }
 
-            val isMMLoaded = Bukkit.getPluginManager().plugins.find { it.name == "MythicMobs" } != null
-            if (isMMLoaded && gearyPaper.config.integrations.mythicMobs) {
-                gearyPaper.logger.s("MythicMobs detected, enabling support.")
-                install(MythicMobsSupport)
-            }
-
             install(GearyActions)
             install(GearyPaperMCFeatures)
         }
@@ -148,6 +142,7 @@ class GearyPluginImpl : GearyPlugin() {
                 }
             })
 
+        features.loadAll()
         registerGearyCommands()
     }
 
