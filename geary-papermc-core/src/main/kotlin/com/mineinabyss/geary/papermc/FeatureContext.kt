@@ -1,10 +1,10 @@
 package com.mineinabyss.geary.papermc
 
-import co.touchlab.kermit.Logger
+import com.mineinabyss.idofront.messaging.ComponentLogger
 import org.bukkit.plugin.Plugin
 
 data class FeatureContext(
     val plugin: Plugin,
-    val logger: Logger,
+    val logger: ComponentLogger,
     val isFirstEnable: Boolean,
 )

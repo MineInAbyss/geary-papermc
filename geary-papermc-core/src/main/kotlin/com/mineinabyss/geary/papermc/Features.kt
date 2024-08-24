@@ -14,47 +14,59 @@ class Features(
     vararg val features: FeatureBuilder,
 ) {
     val featuresByClass = mutableMapOf<KClass<*>, FeatureBuilder>()
+    val loaded = mutableListOf<Feature>()
     val enabled = mutableListOf<Feature>()
+    val context get() = FeatureContext(plugin, plugin.injectedLogger(), isFirstEnable)
     private var isFirstEnable = true
 
+    fun loadAll() {
+        features.forEach(::load)
+    }
+
     fun enableAll() {
-        features.forEach {
-            enable(it)
-        }
+        loaded.forEach(::enable)
         isFirstEnable = false
     }
 
-    fun enable(builder: FeatureBuilder): Result<Feature> {
-        val logger = plugin.injectedLogger()
-        val context = FeatureContext(plugin, logger, isFirstEnable)
+    fun load(builder: FeatureBuilder): Result<Feature> {
         val feature = builder(context)
         featuresByClass[feature::class] = builder
-        return if (feature.defaultCanEnable()) {
-            runCatching {
-                feature.defaultEnable()
-                enabled.add(feature)
-                feature
-            }.onFailure { it.printStackTrace() }
-        } else Result.failure(IllegalStateException("Feature ${feature::class.simpleName} could not be enabled"))
+        if (!feature.canLoad()) return Result.failure(IllegalStateException("Feature ${feature.name} could not be loaded"))
+        return feature.defaultLoad()
+            .onSuccess { loaded.add(feature) }
+            .onFailure { it.printStackTrace() }
+            .map { feature }
+    }
+
+    fun enable(feature: Feature): Result<Feature> {
+        if (!feature.defaultCanEnable()) return Result.failure(IllegalStateException("Feature ${feature::class.simpleName} could not be enabled"))
+        return feature.defaultEnable()
+            .onSuccess { enabled.add(feature) }
+            .onFailure { it.printStackTrace() }
+            .map { feature }
     }
 
     fun disableAll() {
         enabled.forEach(Feature::defaultDisable)
         enabled.clear()
+        loaded.clear()
     }
 
     fun reloadAll() {
         disableAll()
+        loadAll()
         enableAll()
     }
 
     inline fun <reified T : Feature> getOrNull() = enabled.firstOrNull { it is T } as? T
 
     inline fun <reified T : Feature> reload(notify: CommandSender? = null) {
-        val feature = getOrNull<T>()
-        feature?.defaultDisable() ?: error("Feature ${T::class.simpleName} has never been loaded!")
+        val builder = featuresByClass[T::class] ?: error("Feature ${T::class.simpleName} has never been loaded!")
+        val feature = getOrNull<T>()!!
+        feature.defaultDisable()
         enabled.remove(feature)
-        enable(featuresByClass[T::class] ?: error("Feature ${T::class.simpleName} has never been loaded!"))
+        load(builder)
+            .map { enable(it) }
             .onSuccess { notify?.success("Reloaded ${T::class.simpleName}") }
             .onFailure { notify?.error("Failed to reload ${T::class.simpleName}\n${it.stackTraceToString()}") }
 
