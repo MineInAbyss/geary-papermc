@@ -9,6 +9,8 @@ import com.mineinabyss.geary.papermc.*
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
 import com.mineinabyss.geary.papermc.features.GearyPaperMCFeatures
+import com.mineinabyss.geary.papermc.features.entities.bucketable.BucketableListener
+import com.mineinabyss.geary.papermc.features.entities.displayname.ShowDisplayNameOnKillerListener
 import com.mineinabyss.geary.papermc.features.entities.prevent.PreventEventsFeature
 import com.mineinabyss.geary.papermc.features.entities.sounds.AmbientSoundsFeature
 import com.mineinabyss.geary.papermc.features.entities.taming.TamingListener
@@ -16,7 +18,7 @@ import com.mineinabyss.geary.papermc.features.items.backpack.BackpackListener
 import com.mineinabyss.geary.papermc.features.items.food.ReplaceBurnedDropListener
 import com.mineinabyss.geary.papermc.features.items.holdsentity.SpawnHeldPrefabSystem
 import com.mineinabyss.geary.papermc.features.items.nointeraction.DisableItemInteractionsListener
-import com.mineinabyss.geary.papermc.features.items.recipes.ItemRecipes
+import com.mineinabyss.geary.papermc.features.items.recipes.RecipeFeature
 import com.mineinabyss.geary.papermc.features.items.wearables.WearableItemSystem
 import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsSupport
 import com.mineinabyss.geary.papermc.plugin.commands.GearyCommands
@@ -63,7 +65,7 @@ import kotlin.io.path.name
 
 class GearyPluginImpl : GearyPlugin() {
     val features = Features(
-        this, ::SpawningFeature
+        this, ::SpawningFeature, ::RecipeFeature
     )
 
     override fun onLoad() {
@@ -139,7 +141,6 @@ class GearyPluginImpl : GearyPlugin() {
                 install(MythicMobsSupport)
             }
 
-            install(ItemRecipes)
             install(GearyActions)
             install(GearyPaperMCFeatures)
         }
@@ -164,12 +165,8 @@ class GearyPluginImpl : GearyPlugin() {
                 }
                 "reload" {
                     executes { features.reloadAll() }
-//                    "prefabs" {
-//                        executes { features.reload<PrefabsFeature>() }
-//                    }
-                    "spawns" {
-                        executes { features.reload<SpawningFeature>(sender) }
-                    }
+                    "recipes" { executes { features.reload<RecipeFeature>(sender) } }
+                    "spawns" { executes { features.reload<SpawningFeature>(sender) } }
                 }
             }
         }
@@ -186,8 +183,8 @@ class GearyPluginImpl : GearyPlugin() {
                 install(PreventEventsFeature)
             }
             listeners(
-                com.mineinabyss.geary.papermc.features.entities.bucketable.BucketableListener(),
-                com.mineinabyss.geary.papermc.features.entities.displayname.ShowDisplayNameOnKillerListener(),
+                BucketableListener(),
+                ShowDisplayNameOnKillerListener(),
                 TamingListener(),
             )
         }

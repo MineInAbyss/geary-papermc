@@ -15,13 +15,18 @@ class Features(
 ) {
     val featuresByClass = mutableMapOf<KClass<*>, FeatureBuilder>()
     val enabled = mutableListOf<Feature>()
-    fun enableAll() = features.forEach {
-        enable(it)
+    private var isFirstEnable = true
+
+    fun enableAll() {
+        features.forEach {
+            enable(it)
+        }
+        isFirstEnable = false
     }
 
     fun enable(builder: FeatureBuilder): Result<Feature> {
         val logger = plugin.injectedLogger()
-        val context = FeatureContext(plugin, logger)
+        val context = FeatureContext(plugin, logger, isFirstEnable)
         val feature = builder(context)
         featuresByClass[feature::class] = builder
         return if (feature.defaultCanEnable()) {
