@@ -12,4 +12,5 @@ interface GearyPaperModule {
     val configHolder: IdofrontConfig<GearyPaperConfig>
     val config: GearyPaperConfig
     val logger: ComponentLogger
+    val features: Features
 }

@@ -40,9 +40,12 @@ class Features(
 
     fun enable(feature: Feature): Result<Feature> {
         if (!feature.defaultCanEnable()) return Result.failure(IllegalStateException("Feature ${feature::class.simpleName} could not be enabled"))
+        enabled.add(feature)
         return feature.defaultEnable()
-            .onSuccess { enabled.add(feature) }
-            .onFailure { it.printStackTrace() }
+            .onFailure {
+                enabled.remove(feature)
+                it.printStackTrace()
+            }
             .map { feature }
     }
 
@@ -59,6 +62,8 @@ class Features(
     }
 
     inline fun <reified T : Feature> getOrNull() = enabled.firstOrNull { it is T } as? T
+
+    inline fun <reified T : Feature> get() = getOrNull<T>() ?: error("Feature ${T::class.simpleName} is not enabled!")
 
     inline fun <reified T : Feature> reload(notify: CommandSender? = null) {
         val builder = featuresByClass[T::class] ?: error("Feature ${T::class.simpleName} has never been loaded!")

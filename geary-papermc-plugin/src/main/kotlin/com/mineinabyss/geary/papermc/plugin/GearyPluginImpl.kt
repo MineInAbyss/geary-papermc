@@ -70,10 +70,9 @@ class GearyPluginImpl : GearyPlugin() {
                 "config", plugin.dataPath, GearyPaperConfig(),
                 onLoad = { plugin.injectLogger(ComponentLogger.forPlugin(plugin, minSeverity = it.logLevel)) }
             )
-
             override val config: GearyPaperConfig by configHolder
-
             override val logger by plugin.observeLogger()
+            override val features get() = this@GearyPluginImpl.features
         }
 
         DI.add<GearyPaperModule>(configModule)

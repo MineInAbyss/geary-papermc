@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.helpers
 
 import be.seeseemelk.mockbukkit.MockBukkit
+import com.mineinabyss.geary.papermc.Features
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.GearyPaperModule
 import com.mineinabyss.idofront.config.IdofrontConfig
@@ -25,6 +26,7 @@ abstract class MockedServerTest {
             override val config = GearyPaperConfig()
 
             override val logger: ComponentLogger = ComponentLogger.fallback()
+            override val features: Features = Features(this@MockedServerTest.plugin)
         })
     }
 

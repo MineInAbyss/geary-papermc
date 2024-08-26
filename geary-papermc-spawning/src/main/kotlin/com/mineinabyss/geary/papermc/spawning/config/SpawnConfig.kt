@@ -32,5 +32,6 @@ data class SpawnConfig(
         val minDistance: Int = 16,
         val maxVerticalDistance: Int = 32,
         val playerCapRadius: Int = 128,
+        val defaultNearbyRange: Double = 128.0,
     )
 }
