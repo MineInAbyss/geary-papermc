@@ -15,8 +15,14 @@ import kotlin.collections.set
 class BukkitEntity2Geary(val forceMainThread: Boolean = true) {
     private val entityMap = Int2LongOpenHashMap().apply { defaultReturnValue(-1) }
 
-    operator fun get(bukkit: BukkitEntity): GearyEntity? = synchronized(entityMap) {
-        val id = entityMap.get(bukkit.entityId)
+    operator fun get(bukkitEntity: BukkitEntity): GearyEntity? = synchronized(entityMap) {
+        val id = entityMap.get(bukkitEntity.entityId)
+        if (id == -1L) return null
+        return id.toGeary()
+    }
+
+    operator fun get(entityId: Int): GearyEntity? = synchronized(entityMap) {
+        val id = entityMap.get(entityId)
         if (id == -1L) return null
         return id.toGeary()
     }
