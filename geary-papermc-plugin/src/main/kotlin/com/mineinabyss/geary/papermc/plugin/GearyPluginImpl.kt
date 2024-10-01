@@ -26,6 +26,7 @@ import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.gearyItems
 import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery.Companion.getKeys
 import com.mineinabyss.geary.prefabs.PrefabKey
+import com.mineinabyss.geary.prefabs.Prefabs
 import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.geary.serialization.FileSystemAddon
 import com.mineinabyss.geary.serialization.dsl.serialization
@@ -104,11 +105,12 @@ class GearyPluginImpl : GearyPlugin() {
             }
 
             // Load prefabs in Geary/prefabs folder, each subfolder is considered its own namespace
+            install(Prefabs)
             dataPath.resolve("prefabs").createDirectories().listDirectoryEntries().filter(Path::isDirectory)
                 .forEach { folder ->
                     namespace(folder.name) {
-                        geary.logger.i("Loading prefabs from $folder")
                         prefabs {
+                            geary.logger.i("Loading prefabs from $folder")
                             fromRecursive(folder.toOkioPath())
                         }
                     }
