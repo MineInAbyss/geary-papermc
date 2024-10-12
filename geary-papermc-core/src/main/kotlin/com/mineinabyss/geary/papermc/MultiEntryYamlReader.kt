@@ -71,14 +71,14 @@ class MultiEntryYamlReader<T>(
     companion object {
         private val specialMergeTags = Regex("(\\\$inherit)|(\\\$remove)")
 
-        fun mergeYamlNodes(original: YamlNode, override: YamlNode): YamlNode = when {
+        fun mergeYamlNodes(original: YamlNode?, override: YamlNode): YamlNode = when {
             original is YamlMap && override is YamlMap -> {
                 val mapEntries =
                     original.entries.entries.associate { it.key.content to (it.key to it.value) }.toMutableMap()
                 override.entries.forEach { (key, node) ->
-                    if (key.content in mapEntries) {
-                        mapEntries[key.content] = key to mergeYamlNodes(mapEntries[key.content]!!.second, node)
-                    } else mapEntries[key.content] = key to node
+//                    if (key.content in mapEntries) {
+                        mapEntries[key.content] = key to mergeYamlNodes(mapEntries[key.content]?.second, node)
+//                    } else mapEntries[key.content] = key to node
                 }
                 YamlMap(
                     mapEntries.values.toMap(),
@@ -103,6 +103,12 @@ class MultiEntryYamlReader<T>(
                         }), override.path
                     )
                 else override
+            }
+
+            // If original is not a list, but we ask to inherit, remove these tags from the override
+            override is YamlList -> {
+                println("Overriding! $override")
+                YamlList(override.items.filter { (it as? YamlScalar)?.content?.contains(specialMergeTags) != true }, override.path)
             }
 
             else -> override
