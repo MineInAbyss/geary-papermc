@@ -12,7 +12,6 @@ import com.mineinabyss.geary.prefabs.PrefabLoader.PrefabLoadResult
 import com.mineinabyss.geary.prefabs.helpers.inheritPrefabsIfNeeded
 import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.idofront.commands.brigadier.Args
-import com.mineinabyss.idofront.commands.brigadier.ArgsMinecraft
 import com.mineinabyss.idofront.commands.brigadier.IdoCommand
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.success
@@ -29,13 +28,21 @@ private val prefabManager get() = prefabs.manager
 
 internal fun IdoCommand.prefabs() = "prefab" {
     requiresPermission("geary.admin.prefab")
-    "reload" {
-        val prefabArg by ArgsMinecraft.namespacedKey().suggests {
-            suggest(prefabManager.keys.filter {
-                val arg = argument.lowercase()
-                it.key.startsWith(arg) || it.full.startsWith(arg)
-            }.map { it.toString() })
+    "count" {
+        val prefabArg by GearyArgs.prefab()
+
+        executes {
+            val prefab = PrefabKey.of(prefabArg().asString()).toEntityOrNull() ?: commandException("No such prefab $prefabArg")
+            val count = geary.queryManager.getEntitiesMatching(family {
+                hasRelation<InstanceOf?>(prefab)
+                not { has<PrefabKey>() }
+            }).count()
+            sender.success("There are $count direct instances of ${prefabArg().asString()}")
         }
+    }
+    "reload" {
+        val prefabArg by GearyArgs.prefab()
+
         executes {
             val prefab = PrefabKey.of(prefabArg().asString())
             val prefabEntity = prefab.toEntityOrNull() ?: commandException("No such prefab $prefabArg")

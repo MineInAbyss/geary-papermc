@@ -11,8 +11,8 @@ import com.mineinabyss.geary.papermc.features.entities.taming.TamingListener
 import com.mineinabyss.geary.papermc.gearyPaper
 
 class EntityFeatures(context: FeatureContext) : Feature(context) {
-    private val subFeatures = Features(
-        context.plugin,
+    override val subFeatures = Features(
+        plugin,
         ::AmbientSoundsFeature,
         ::PreventEventsFeature
     )
@@ -20,15 +20,10 @@ class EntityFeatures(context: FeatureContext) : Feature(context) {
     override fun canEnable(): Boolean = gearyPaper.config.trackEntities
 
     override fun enable() {
-        subFeatures.enableAll()
         listeners(
             BucketableListener(),
             ShowDisplayNameOnKillerListener(),
             TamingListener(),
         )
-    }
-
-    override fun disable() {
-        subFeatures.disableAll()
     }
 }

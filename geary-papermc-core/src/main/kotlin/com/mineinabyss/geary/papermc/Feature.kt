@@ -14,6 +14,8 @@ abstract class Feature(context: FeatureContext) {
     val tasks = mutableListOf<Job>()
     private var pluginDeps = listOf<String>()
 
+    open val subFeatures = Features(plugin)
+
     fun pluginDeps(vararg plugins: String) {
         pluginDeps = plugins.toList()
     }
@@ -49,6 +51,7 @@ abstract class Feature(context: FeatureContext) {
     fun defaultDisable() {
         logger.i { "Disabling ${this::class.simpleName}" }
         disable()
+        subFeatures.disableAll()
         listeners.forEach {
             HandlerList.unregisterAll(it)
         }
@@ -61,6 +64,7 @@ abstract class Feature(context: FeatureContext) {
     }
 
     fun defaultLoad() = runCatching {
+        subFeatures.loadAll()
         load()
     }.onSuccess {
         logger.s("Loaded ${this::class.simpleName}")
@@ -69,6 +73,7 @@ abstract class Feature(context: FeatureContext) {
     }
 
     fun defaultEnable() = runCatching {
+        subFeatures.enableAll()
         enable()
     }.onSuccess {
         logger.s("Enabled ${this::class.simpleName}")
