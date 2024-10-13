@@ -3,9 +3,12 @@ package com.mineinabyss.geary.papermc.plugin.commands
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.archetypes
 import com.mineinabyss.geary.papermc.features.items.resourcepacks.ResourcePackContent
+import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.plugin.schema_generator.GearySchema
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.gearyItems
+import com.mineinabyss.geary.serialization.serializableComponents
 import com.mineinabyss.idofront.commands.brigadier.IdoCommand
 import com.mineinabyss.idofront.items.editItemMeta
 import com.mineinabyss.idofront.messaging.info
@@ -13,9 +16,15 @@ import org.bukkit.Material
 import org.bukkit.block.ShulkerBox
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.BlockStateMeta
+import kotlin.io.path.div
 
 internal fun IdoCommand.debug() = "debug" {
     requiresPermission("geary.admin.debug")
+    "generateschema" {
+        executes {
+            GearySchema(gearyPaper.plugin.dataPath / "schema.ts", serializableComponents).generate()
+        }
+    }
     "inventory" {
         playerExecutes {
             repeat(64) {
