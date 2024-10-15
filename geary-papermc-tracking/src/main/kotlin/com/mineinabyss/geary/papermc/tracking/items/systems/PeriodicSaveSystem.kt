@@ -9,7 +9,7 @@ import com.mineinabyss.idofront.items.editItemMeta
 import org.bukkit.inventory.ItemStack
 import kotlin.time.Duration.Companion.seconds
 
-fun GearyModule.createPeriodicSaveSystem() = system(
+fun Geary.createPeriodicSaveSystem() = system(
     object : Query() {
         val persisting by getRelationsWithData<Persists, Any>()
         val item by get<ItemStack>()

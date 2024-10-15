@@ -12,7 +12,7 @@ import com.mineinabyss.geary.papermc.tracking.items.systems.LoginListener
 import com.mineinabyss.geary.systems.builders.cache
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
 
-class NMSBackedItemTracking : ItemTracking {
+class NMSBackedItemTracking : ItemTrackingModule {
     override val itemProvider = GearyItemProvider()
     override val loginListener = LoginListener { NMSItemCache() }
     override val prefabs = geary.cache(GearyItemPrefabQuery())

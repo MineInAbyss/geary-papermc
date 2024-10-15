@@ -28,7 +28,7 @@ class MythicSkillsAction(
     )
 }
 
-fun GearyModule.runMMSkillAction() = observeWithData<MythicSkillsAction>()
+fun Geary.runMMSkillAction() = observeWithData<MythicSkillsAction>()
     .exec(query<BukkitEntity>()) { (bukkit) ->
         event.keys.forEach { line ->
             val entity = BukkitAdapter.adapt(bukkit)

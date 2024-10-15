@@ -9,7 +9,7 @@ import com.mineinabyss.geary.systems.builders.observe
 import com.mineinabyss.geary.systems.query.query
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 
-fun GearyModule.createBukkitEntitySetListener() = observe<OnSet>()
+fun Geary.createBukkitEntitySetListener() = observe<OnSet>()
     .involving(query<BukkitEntity>())
     .exec { (bukkit) ->
         gearyMobs.bukkit2Geary[bukkit] = entity

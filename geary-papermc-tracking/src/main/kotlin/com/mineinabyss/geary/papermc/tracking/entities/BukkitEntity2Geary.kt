@@ -12,7 +12,9 @@ import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap
 import org.spigotmc.AsyncCatcher
 import kotlin.collections.set
 
-class BukkitEntity2Geary(val forceMainThread: Boolean = true) {
+class BukkitEntity2Geary(
+    val forceMainThread: Boolean = true
+) {
     private val entityMap = Int2LongOpenHashMap().apply { defaultReturnValue(-1) }
 
     operator fun get(bukkitEntity: BukkitEntity): GearyEntity? = synchronized(entityMap) {

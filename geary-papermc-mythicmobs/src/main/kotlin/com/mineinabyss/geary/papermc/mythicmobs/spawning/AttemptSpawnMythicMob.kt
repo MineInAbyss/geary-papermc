@@ -9,7 +9,7 @@ import io.lumine.mythic.bukkit.BukkitAdapter
 import io.lumine.mythic.bukkit.MythicBukkit
 import kotlin.jvm.optionals.getOrNull
 
-fun GearyModule.mythicMobSpawner() = observeWithData<AttemptSpawn>()
+fun Geary.mythicMobSpawner() = observeWithData<AttemptSpawn>()
     .exec(query<SetMythicMob>()) { (mobType) ->
         val mythicMob = MythicBukkit.inst().mobManager.getMythicMob(mobType.id).getOrNull() ?: return@exec
         mythicMob.spawn(BukkitAdapter.adapt(event.location), 1.0, SpawnReason.NATURAL) { mob ->

@@ -7,7 +7,7 @@ import com.mineinabyss.geary.papermc.tracking.entities.components.SpawnableByGea
 import com.mineinabyss.geary.systems.builders.observe
 import com.mineinabyss.geary.systems.query.query
 
-fun GearyModule.markMMAsCustomMob() = observe<OnSet>()
+fun Geary.markMMAsCustomMob() = observe<OnSet>()
     .involving(query<SetMythicMob>())
     .exec {
         entity.add<ShowInMobQueries>()

@@ -2,10 +2,10 @@ package com.mineinabyss.geary.papermc.tracking.entities.systems
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
-import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.gearyPaper
-import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
+import com.mineinabyss.geary.papermc.tracking.entities.EntityTrackingModule
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -16,7 +16,10 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.world.EntitiesUnloadEvent
 
-class EntityWorldEventTracker : Listener {
+class EntityWorldEventTracker(
+    val geary: Geary,
+    val gearyMobs: EntityTrackingModule
+) : Listener {
     /** Remove entities from ECS when they are removed from Bukkit for any reason (Uses PaperMC event) */
     @EventHandler(priority = EventPriority.LOWEST)
     fun EntityAddToWorldEvent.onBukkitEntityAdd() {

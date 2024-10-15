@@ -12,7 +12,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.world.entity.MobSpawnType
 import org.bukkit.event.entity.CreatureSpawnEvent
 
-fun GearyModule.createAttemptSpawnListener() = observeWithData<AttemptSpawn>()
+fun Geary.createAttemptSpawnListener() = observeWithData<AttemptSpawn>()
     .exec(query<SetEntityType> { not { has<BukkitEntity>() } }) { (mobType) ->
         val loc = event.location
         mobType.entityTypeFromRegistry.spawn(

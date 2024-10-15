@@ -24,6 +24,7 @@ dependencyResolutionManagement {
     }
 }
 
+//includeBuild("../geary")
 include(
     "geary-papermc-features",
     "geary-papermc-mythicmobs",

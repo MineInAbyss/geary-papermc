@@ -54,7 +54,7 @@ class PaperEngineModule(
 
     companion object : GearyModuleProvider<PaperEngineModule> {
         override fun start(module: PaperEngineModule) {
-            DI.add<PaperEngineModule>(module)
+            ArchetypeEngineModule.start(module)
         }
 
         override fun init(module: PaperEngineModule) {

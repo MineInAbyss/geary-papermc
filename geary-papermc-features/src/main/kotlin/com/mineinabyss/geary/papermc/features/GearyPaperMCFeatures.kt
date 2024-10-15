@@ -1,44 +1,38 @@
 package com.mineinabyss.geary.papermc.features
 
-import com.mineinabyss.geary.addons.GearyPhase
-import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
-import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.addons.dsl.createAddon
+import com.mineinabyss.geary.papermc.features.common.cooldowns.clearOldCooldownsSystem
+import com.mineinabyss.geary.papermc.features.common.cooldowns.cooldownDisplaySystem
 import com.mineinabyss.geary.papermc.features.common.event_bridge.entities.EntityDamageBridge
 import com.mineinabyss.geary.papermc.features.common.event_bridge.entities.EntityLoadUnloadBridge
 import com.mineinabyss.geary.papermc.features.common.event_bridge.entities.EntityShearedBridge
 import com.mineinabyss.geary.papermc.features.common.event_bridge.items.ItemInteractBridge
 import com.mineinabyss.geary.papermc.features.common.event_bridge.items.ItemRemovedBridge
-import com.mineinabyss.geary.papermc.features.common.cooldowns.clearOldCooldownsSystem
-import com.mineinabyss.geary.papermc.features.common.cooldowns.cooldownDisplaySystem
 import com.mineinabyss.geary.papermc.features.items.resourcepacks.ResourcePackGenerator
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.onPluginEnable
 import com.mineinabyss.idofront.plugin.listeners
 
-open class GearyPaperMCFeatures {
-    companion object : GearyAddonWithDefault<GearyPaperMCFeatures> {
-        override fun GearyPaperMCFeatures.install() {
-            geary.run {
-                cooldownDisplaySystem()
-                clearOldCooldownsSystem()
-            }
-            geary.pipeline.runOnOrAfter(GearyPhase.ENABLE) {
-                gearyPaper.plugin.listeners(
-                    EntityDamageBridge(),
-                    EntityLoadUnloadBridge(),
-                    EntityShearedBridge()
-                )
+val GearyPaperMCFeatures = createAddon("Geary Paper Features") {
+    systems {
+        cooldownDisplaySystem()
+        clearOldCooldownsSystem()
+    }
 
-                gearyPaper.plugin.listeners(
-                    ItemInteractBridge(),
-                    ItemRemovedBridge(),
-                )
-            }
+    entities {
+        ResourcePackGenerator().generateResourcePack()
+    }
 
-            geary.pipeline.runOnOrAfter(GearyPhase.INIT_ENTITIES) {
-                ResourcePackGenerator().generateResourcePack()
-            }
-        }
+    onPluginEnable {
+        gearyPaper.plugin.listeners(
+            EntityDamageBridge(),
+            EntityLoadUnloadBridge(),
+            EntityShearedBridge()
+        )
 
-        override fun default() = GearyPaperMCFeatures()
+        gearyPaper.plugin.listeners(
+            ItemInteractBridge(),
+            ItemRemovedBridge(),
+        )
     }
 }

@@ -8,7 +8,7 @@ import com.mineinabyss.idofront.time.ticks
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import kotlin.random.Random
 
-fun GearyModule.playAmbientSounds() = system(object : Query() {
+fun Geary.playAmbientSounds() = system(object : Query() {
     val bukkit by get<BukkitEntity>()
     val sounds by get<Sounds>()
 }).every(1.ticks).exec {

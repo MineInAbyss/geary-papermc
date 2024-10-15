@@ -19,13 +19,13 @@ value class SetEntityType(val key: String) {
             .orElseGet { error("An entity type with key $key was not found.") }
 }
 
-fun GearyModule.markSetEntityTypeAsCustomMob() = observe<OnSet>()
+fun Geary.markSetEntityTypeAsCustomMob() = observe<OnSet>()
     .involving(query<SetEntityType>())
     .exec {
         entity.add<ShowInMobQueries>()
         entity.add<SpawnableByGeary>()
     }
 
-fun GearyModule.markBindEntityTypeAsCustomMob() = observe<OnSet>()
+fun Geary.markBindEntityTypeAsCustomMob() = observe<OnSet>()
     .involving(query<BindToEntityType>())
     .exec { entity.add<ShowInMobQueries>() }

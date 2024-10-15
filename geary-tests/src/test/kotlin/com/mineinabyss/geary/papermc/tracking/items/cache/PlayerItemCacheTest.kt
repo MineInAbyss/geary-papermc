@@ -5,7 +5,7 @@ import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.TestEngineModule
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.prefabs.PrefabKey
-import com.mineinabyss.geary.prefabs.Prefabs
+import com.mineinabyss.geary.prefabs.PrefabsModule
 
 class PlayerItemCacheTest {
     init {

@@ -1,15 +1,16 @@
 package com.mineinabyss.geary.papermc.tracking.entities
 
-import com.mineinabyss.geary.addons.GearyPhase
-import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
+import com.mineinabyss.geary.addons.dsl.createAddon
 import com.mineinabyss.geary.components.relations.NoInherit
 import com.mineinabyss.geary.datatypes.ComponentId
 import com.mineinabyss.geary.helpers.componentId
-import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.observers.queries.QueryGroupedBy
 import com.mineinabyss.geary.observers.queries.cacheGroupedBy
 import com.mineinabyss.geary.papermc.CatchType
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.onPluginEnable
+import com.mineinabyss.geary.papermc.tracking.entities.EntityTrackingModule.Builder
 import com.mineinabyss.geary.papermc.tracking.entities.components.BindToEntityType
 import com.mineinabyss.geary.papermc.tracking.entities.components.markBindEntityTypeAsCustomMob
 import com.mineinabyss.geary.papermc.tracking.entities.components.markSetEntityTypeAsCustomMob
@@ -22,46 +23,44 @@ import com.mineinabyss.geary.papermc.tracking.entities.systems.removevanillamobs
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.ConvertEntityTypesListener
 import com.mineinabyss.geary.systems.query.ShorthandQuery1
 import com.mineinabyss.geary.systems.query.query
-import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.plugin.listeners
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 
-val gearyMobs by DI.observe<EntityTracking>()
+//val gearyMobs by DI.observe<EntityTracking>()
 
-interface EntityTracking {
-    val bukkitEntityComponent: ComponentId
-    val bukkit2Geary: BukkitEntity2Geary
-    val query: GearyMobPrefabQuery
-    val entityTypeBinds: QueryGroupedBy<String, ShorthandQuery1<BindToEntityType>>
-
-    companion object : GearyAddonWithDefault<EntityTracking> {
-        override fun default(): EntityTracking = object : EntityTracking {
-            override val bukkitEntityComponent = componentId<BukkitEntity>()
-            override val bukkit2Geary =
-                BukkitEntity2Geary(gearyPaper.config.catch.asyncEntityConversion == CatchType.ERROR)
-            override val query = GearyMobPrefabQuery()
-            override val entityTypeBinds = geary.cacheGroupedBy(query<BindToEntityType>()) { (type) ->
+data class EntityTrackingModule(
+    val bukkitEntityComponent: ComponentId = componentId<BukkitEntity>(),
+    val bukkit2Geary: BukkitEntity2Geary = BukkitEntity2Geary(gearyPaper.config.catch.asyncEntityConversion == CatchType.ERROR),
+    val query: GearyMobPrefabQuery = GearyMobPrefabQuery(),
+    val entityTypeBinds: QueryGroupedBy<String, ShorthandQuery1<BindToEntityType>>,
+) {
+    data class Builder(
+        var bindsQuery: Geary.() -> QueryGroupedBy<String, ShorthandQuery1<BindToEntityType>> = {
+            cacheGroupedBy(query<BindToEntityType>()) { (type) ->
                 entity.addRelation<NoInherit, BindToEntityType>()
                 type.key
             }
-        }
+        },
+        var build: Geary.() -> EntityTrackingModule = { EntityTrackingModule(entityTypeBinds = bindsQuery()) },
+    )
 
-        override fun EntityTracking.install() {
-            geary.apply {
-                createBukkitEntityRemoveListener()
-                createBukkitEntitySetListener()
-                createAttemptSpawnListener()
-                markSetEntityTypeAsCustomMob()
-                markBindEntityTypeAsCustomMob()
-            }
-            geary.pipeline.runOnOrAfter(GearyPhase.ENABLE) {
-                gearyPaper.plugin.listeners(
-                    EntityWorldEventTracker(),
-                    ConvertEntityTypesListener(),
-                    RemoveVanillaMobsListener(),
-                )
+}
 
-            }
-        }
+val EntityTracking = createAddon<Builder, EntityTrackingModule>("Entity Tracking", ::Builder) {
+    val module = configuration.build(geary)
+
+    onPluginEnable {
+        createBukkitEntityRemoveListener()
+        createBukkitEntitySetListener()
+        createAttemptSpawnListener()
+        markSetEntityTypeAsCustomMob()
+        markBindEntityTypeAsCustomMob()
+        plugin.listeners(
+            EntityWorldEventTracker(this, module),
+            ConvertEntityTypesListener(),
+            RemoveVanillaMobsListener(),
+        )
     }
+
+    module
 }
