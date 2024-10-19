@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.features.items.resourcepacks
 
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.tracking.items.gearyItems
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
 import com.mineinabyss.geary.systems.builders.cache
@@ -16,7 +17,8 @@ import team.unnamed.creative.model.ModelTextures
 class ResourcePackGenerator {
 
     private val resourcePackQuery = geary.cache(ResourcePackQuery())
-    private val includedPackPath = gearyPaper.config.resourcePack.includedPackPath.takeUnless(String::isEmpty)?.let { gearyPaper.plugin.dataFolder.resolve(it) }
+    private val includedPackPath = gearyPaper.config.resourcePack.includedPackPath.takeUnless(String::isEmpty)
+        ?.let { gearyPaper.plugin.dataFolder.resolve(it) }
     private val resourcePack = includedPackPath?.let(ResourcePacks::readToResourcePack) ?: ResourcePack.resourcePack()
 
     fun generateResourcePack() {
@@ -24,8 +26,11 @@ class ResourcePackGenerator {
         val resourcePackFile = gearyPaper.plugin.dataFolder.resolve(gearyPaper.config.resourcePack.outputPath)
         resourcePackFile.deleteRecursively()
 
-        resourcePackQuery.forEach { (prefabKey, resourcePackContent) ->
-            val vanillaModelKey = ResourcePacks.vanillaKeyForMaterial(resourcePackContent.baseMaterial)
+        resourcePackQuery.forEach { (prefabKey, resourcePackContent, itemStack) ->
+            val vanillaModelKey = ResourcePacks.vanillaKeyForMaterial(
+                resourcePackContent.baseMaterial ?: itemStack?.type
+                ?: error("No baseMaterial defined in either ResourcePackContent or SerializableItemStack")
+            )
             val defaultVanillaModel = ((resourcePack.model(vanillaModelKey)
                 ?: ResourcePacks.defaultVanillaResourcePack?.model(vanillaModelKey)))
                 ?.toBuilder() ?: Model.model().key(vanillaModelKey)
@@ -35,14 +40,14 @@ class ResourcePackGenerator {
 
             // If a model is defined we assume it exists in the resourcepack already, and just add the override to the vanilla model
             if (resourcePackContent.model != null) {
-                resourcePackContent.itemOverrides(resourcePackContent.model.key())
+                resourcePackContent.itemOverrides(resourcePackContent.model.key(), itemStack)
                     .forEach(defaultVanillaModel::addOverride)
             } else { // If it only has textures we need to generate the model ourselves and add it
                 val model = Model.model()
                     .key(Key.key(prefabKey.namespace, prefabKey.key))
                     .parent(resourcePackContent.parentModel.key())
                     .textures(resourcePackContent.textures.modelTextures).build()
-                resourcePackContent.itemOverrides(model.key()).forEach(defaultVanillaModel::addOverride)
+                resourcePackContent.itemOverrides(model.key(), itemStack).forEach(defaultVanillaModel::addOverride)
                 model.let(ResourcePacks::ensureVanillaModelProperties)
                     .let(ResourcePacks::ensureItemOverridesSorted)
                     .addTo(resourcePack)
@@ -88,6 +93,7 @@ class ResourcePackGenerator {
         class ResourcePackQuery : GearyQuery() {
             private val prefabKey by get<PrefabKey>()
             private val resourcePackContent by get<ResourcePackContent>()
+            //private val itemstack by get<SerializableItemStack>().orNull()
 
             override fun ensure() = this {
                 has<Prefab>()
@@ -95,6 +101,7 @@ class ResourcePackGenerator {
 
             operator fun component1() = prefabKey
             operator fun component2() = resourcePackContent
+            operator fun component3() = gearyItems.itemProvider.serializePrefabToItemStack(prefabKey)
         }
     }
 }
