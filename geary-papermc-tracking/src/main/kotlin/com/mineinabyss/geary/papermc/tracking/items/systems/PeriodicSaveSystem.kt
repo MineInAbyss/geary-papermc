@@ -1,6 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.items.systems
 
-import com.mineinabyss.geary.modules.GearyModule
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.datastore.encode
 import com.mineinabyss.geary.serialization.components.Persists
 import com.mineinabyss.geary.systems.builders.system

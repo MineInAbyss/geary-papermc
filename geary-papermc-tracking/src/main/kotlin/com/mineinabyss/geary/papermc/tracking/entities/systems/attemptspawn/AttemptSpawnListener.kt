@@ -1,9 +1,9 @@
 package com.mineinabyss.geary.papermc.tracking.entities.systems.attemptspawn
 
-import com.mineinabyss.geary.modules.GearyModule
+import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.observeWithData
 import com.mineinabyss.geary.papermc.tracking.entities.components.AttemptSpawn
 import com.mineinabyss.geary.papermc.tracking.entities.components.SetEntityType
-import com.mineinabyss.geary.systems.builders.observeWithData
 import com.mineinabyss.geary.systems.query.query
 import com.mineinabyss.idofront.nms.aliases.toBukkit
 import com.mineinabyss.idofront.nms.aliases.toNMS

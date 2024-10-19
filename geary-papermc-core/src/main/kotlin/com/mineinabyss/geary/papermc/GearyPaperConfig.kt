@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc
 import ca.spottedleaf.moonrise.common.util.TickThread
 import co.touchlab.kermit.Severity
 import com.charleskorn.kaml.YamlComment
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.modules.geary
 import kotlinx.serialization.Serializable
 import org.bukkit.entity.EntityType
@@ -42,7 +43,7 @@ class Catching(
             when (type) {
                 CatchType.ERROR -> AsyncCatcher.catchOp(message)
                 CatchType.WARN -> if (!TickThread.isTickThread()) {
-                    geary.logger.w(message)
+                    Geary.w(message)
                     IllegalStateException("(Ignoring) $message").printStackTrace()
                 }
                 CatchType.IGNORE -> Unit

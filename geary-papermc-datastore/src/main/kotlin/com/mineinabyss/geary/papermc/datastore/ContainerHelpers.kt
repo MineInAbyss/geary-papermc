@@ -3,7 +3,7 @@ package com.mineinabyss.geary.papermc.datastore
 import com.mineinabyss.geary.components.relations.InstanceOf
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.component
-import com.mineinabyss.geary.helpers.toGeary
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.serialization.components.Persists
 import com.mineinabyss.geary.serialization.getAllPersisting
@@ -22,14 +22,14 @@ fun GearyEntity.encodeComponentsTo(pdc: PersistentDataContainer) {
     }
     // Update hashes
     persisting.forEach {
-        getRelation<Persists>(component(it::class))?.hash = it.hashCode()
+        getRelation<Persists>(world.component(it::class))?.hash = it.hashCode()
     }
-    pdc.encodeComponents(persisting, type)
+    pdc.encodeComponents(world, persisting, type)
 }
 
 fun GearyEntity.encodeComponentsTo(holder: PersistentDataHolder) {
     val bukkitHolder = holder as? BukkitEntity
-    geary.logger.v { "Encoding components for bukkit entity $id (${bukkitHolder?.type} ${bukkitHolder?.uniqueId})" }
+    world.logger.v { "Encoding components for bukkit entity $id (${bukkitHolder?.type} ${bukkitHolder?.uniqueId})" }
     encodeComponentsTo(holder.persistentDataContainer)
 }
 
@@ -40,7 +40,7 @@ fun GearyEntity.encodeComponentsTo(item: ItemStack) {
 
 /** Decodes a [PersistentDataContainer]'s components, adding them to this entity and its list of persisting components */
 fun GearyEntity.loadComponentsFrom(pdc: PersistentDataContainer) {
-    loadComponentsFrom(pdc.decodeComponents())
+    loadComponentsFrom(pdc.decodeComponents(world))
 }
 
 fun GearyEntity.loadComponentsFrom(decodedEntityData: DecodedEntityData) {
@@ -49,11 +49,13 @@ fun GearyEntity.loadComponentsFrom(decodedEntityData: DecodedEntityData) {
     // Components written to this entity's PDC will override the ones defined in type
     setAllPersisting(components)
     //TODO this should just add the id and a listener handle what addPrefab currently does
-    type.forEach { extend(it.toGeary()) }
+    with(world) {
+        type.forEach { extend(it.toGeary()) }
+    }
 }
 
-fun PersistentDataHolder.decodeComponents(): DecodedEntityData =
-    persistentDataContainer.decodeComponents()
+fun PersistentDataHolder.decodeComponents(world: Geary): DecodedEntityData =
+    persistentDataContainer.decodeComponents(world)
 
-fun ItemStack.decodeComponents(): DecodedEntityData =
-    itemMeta.decodeComponents()
+fun ItemStack.decodeComponents(world: Geary): DecodedEntityData =
+    itemMeta.decodeComponents(world)

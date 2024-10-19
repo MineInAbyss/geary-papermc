@@ -2,7 +2,7 @@ package com.mineinabyss.geary.papermc.tracking.entities
 
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.entity
-import com.mineinabyss.geary.helpers.toGeary
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.tracking.entities.components.AddedToWorld
 import com.mineinabyss.geary.papermc.tracking.entities.events.GearyEntityAddToWorldEvent
@@ -17,12 +17,14 @@ class BukkitEntity2Geary(
 ) {
     private val entityMap = Int2LongOpenHashMap().apply { defaultReturnValue(-1) }
 
+    context(Geary)
     operator fun get(bukkitEntity: BukkitEntity): GearyEntity? = synchronized(entityMap) {
         val id = entityMap.get(bukkitEntity.entityId)
         if (id == -1L) return null
         return id.toGeary()
     }
 
+    context(Geary)
     operator fun get(entityId: Int): GearyEntity? = synchronized(entityMap) {
         val id = entityMap.get(entityId)
         if (id == -1L) return null
@@ -39,6 +41,7 @@ class BukkitEntity2Geary(
         entityMap.remove(entityId)
     }
 
+    context(Geary)
     fun getOrCreate(bukkit: BukkitEntity): GearyEntity = synchronized(entityMap) {
         return get(bukkit) ?: run {
             if (forceMainThread) AsyncCatcher.catchOp("Async geary entity creation for id ${bukkit.entityId}, type ${bukkit.type}")
@@ -48,9 +51,10 @@ class BukkitEntity2Geary(
         }
     }
 
+    context(Geary)
     fun fireAddToWorldEvent(bukkit: BukkitEntity, entity: GearyEntity) = synchronized(entityMap) {
         entity.add<AddedToWorld>()
-        val entityBinds = gearyMobs.entityTypeBinds[bukkit.type.key.toString()]
+        val entityBinds = getAddon(EntityTracking).entityTypeBinds[bukkit.type.key.toString()]
         entityBinds.forEach { bind ->
             entity.extend(bind)
         }

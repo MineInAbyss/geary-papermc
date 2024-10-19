@@ -1,6 +1,6 @@
 package com.mineinabyss.geary.papermc.features.entities.sounds
 
-import com.mineinabyss.geary.modules.GearyModule
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.features.entities.sounds.OverrideMobSoundsListener.Companion.makeSound
 import com.mineinabyss.geary.systems.builders.system
 import com.mineinabyss.geary.systems.query.Query

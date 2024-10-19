@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.entities
 
+import com.mineinabyss.geary.addons.dsl.Addon
 import com.mineinabyss.geary.addons.dsl.createAddon
 import com.mineinabyss.geary.components.relations.NoInherit
 import com.mineinabyss.geary.datatypes.ComponentId
@@ -29,9 +30,9 @@ import com.mineinabyss.idofront.typealiases.BukkitEntity
 //val gearyMobs by DI.observe<EntityTracking>()
 
 data class EntityTrackingModule(
-    val bukkitEntityComponent: ComponentId = componentId<BukkitEntity>(),
+    val bukkitEntityComponent: ComponentId,
     val bukkit2Geary: BukkitEntity2Geary = BukkitEntity2Geary(gearyPaper.config.catch.asyncEntityConversion == CatchType.ERROR),
-    val query: GearyMobPrefabQuery = GearyMobPrefabQuery(),
+    val query: GearyMobPrefabQuery,
     val entityTypeBinds: QueryGroupedBy<String, ShorthandQuery1<BindToEntityType>>,
 ) {
     data class Builder(
@@ -41,12 +42,18 @@ data class EntityTrackingModule(
                 type.key
             }
         },
-        var build: Geary.() -> EntityTrackingModule = { EntityTrackingModule(entityTypeBinds = bindsQuery()) },
+        var build: Geary.() -> EntityTrackingModule = {
+            EntityTrackingModule(
+                bukkitEntityComponent = componentId<BukkitEntity>(),
+                query = GearyMobPrefabQuery(this),
+                entityTypeBinds = bindsQuery()
+            )
+        },
     )
 
 }
 
-val EntityTracking = createAddon<Builder, EntityTrackingModule>("Entity Tracking", ::Builder) {
+val EntityTracking: Addon<Builder, EntityTrackingModule> = createAddon<Builder, EntityTrackingModule>("Entity Tracking", { Builder() }) {
     val module = configuration.build(geary)
 
     onPluginEnable {
@@ -57,8 +64,8 @@ val EntityTracking = createAddon<Builder, EntityTrackingModule>("Entity Tracking
         markBindEntityTypeAsCustomMob()
         plugin.listeners(
             EntityWorldEventTracker(this, module),
-            ConvertEntityTypesListener(),
-            RemoveVanillaMobsListener(),
+            ConvertEntityTypesListener(this),
+            RemoveVanillaMobsListener(this),
         )
     }
 

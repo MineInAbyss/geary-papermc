@@ -3,25 +3,24 @@ package com.mineinabyss.geary.papermc.tracking.entities.helpers
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.helpers.contains
-import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.tracking.entities.components.ShowInMobQueries
 import com.mineinabyss.geary.papermc.tracking.entities.components.SpawnableByGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
-import com.mineinabyss.geary.systems.builders.cache
 import com.mineinabyss.geary.systems.query.CachedQuery
 import com.mineinabyss.geary.systems.query.GearyQuery
 import com.mineinabyss.geary.systems.query.ShorthandQuery1
 import com.mineinabyss.geary.systems.query.query
 
-class GearyMobPrefabQuery : GearyQuery() {
+class GearyMobPrefabQuery(world: Geary) : GearyQuery(world) {
     private val mobQuery = family {
         has<Prefab>()
         has<ShowInMobQueries>()
     }
 
-    val prefabs = geary.cache(query<PrefabKey> { add(mobQuery) })
-    val spawnablePrefabs = geary.cache(query<PrefabKey> {
+    val prefabs = cache(query<PrefabKey> { add(mobQuery) })
+    val spawnablePrefabs = cache(query<PrefabKey> {
         has<Prefab>()
         has<SpawnableByGeary>()
     })

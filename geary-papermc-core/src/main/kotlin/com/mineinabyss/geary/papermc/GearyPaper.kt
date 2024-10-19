@@ -2,19 +2,14 @@ package com.mineinabyss.geary.papermc
 
 import com.mineinabyss.geary.addons.dsl.AddonSetup
 import com.mineinabyss.geary.modules.Geary
-import com.mineinabyss.geary.modules.GearyModule
-import com.mineinabyss.idofront.di.DIContext
 
 class GearyPaper(
     val plugin: GearyPlugin,
-    module: GearyModule,
-    context: DIContext,
-) : Geary(module, context) {
-}
+    world: Geary,
+) : Geary by world
 
 inline fun AddonSetup<*>.onPluginEnable(crossinline run: GearyPaper.() -> Unit) {
     onStart {
-        TODO()
-//        run(GearyPaper(gearyPaper.plugin as GearyPlugin, module, context))
+        GearyPaper(application.koin.get<GearyPlugin>(), this).run()
     }
 }

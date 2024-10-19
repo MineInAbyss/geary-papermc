@@ -25,7 +25,7 @@ import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.Prefabs
 import com.mineinabyss.geary.prefabs.prefabs
-import com.mineinabyss.geary.serialization.FileSystemAddon
+import com.mineinabyss.geary.serialization.FileSystem
 import com.mineinabyss.geary.serialization.dsl.withCommonComponentNames
 import com.mineinabyss.geary.serialization.formats.YamlFormat
 import com.mineinabyss.geary.serialization.helpers.withSerialName
@@ -39,11 +39,11 @@ import com.mineinabyss.idofront.messaging.injectLogger
 import com.mineinabyss.idofront.messaging.observeLogger
 import com.mineinabyss.idofront.serialization.LocationSerializer
 import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
-import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
+import org.koin.dsl.module
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.isDirectory
@@ -75,9 +75,9 @@ class GearyPluginImpl : GearyPlugin() {
 
         DI.add<GearyPaperModule>(configModule)
 
-        val geary = geary(PaperEngineModule, PaperEngineModule(this)) {
+        val geary = geary(PaperEngineModule()) {
             // Install default addons
-            val a = install(FileSystemAddon(FileSystem.SYSTEM))
+            install(FileSystem { okio.FileSystem.SYSTEM })
             install(UUIDTracking { SynchronizedUUID2GearyMap() })
 
             val mobs = if (configModule.config.trackEntities) install(EntityTracking) else null
@@ -119,7 +119,7 @@ class GearyPluginImpl : GearyPlugin() {
             // Start engine ticking
             createAddon("Engine Ticking") {
                 onStart {
-                    getAddon(mobs)?.let {
+                    getAddonOrNull(mobs)?.let {
                         server.worlds.forEach { world ->
                             world.entities.forEach entities@{ entity ->
                                 it.bukkit2Geary.getOrCreate(entity)
@@ -127,21 +127,25 @@ class GearyPluginImpl : GearyPlugin() {
                         }
                     }
 
-                    getAddon(items)?.let {
-                        context.add<SerializablePrefabItemService>(object : SerializablePrefabItemService {
-                            override fun encodeFromPrefab(item: ItemStack, prefabName: String): ItemStack {
-                                val result = it.createItem(PrefabKey.of(prefabName), item)
-                                require(result != null) { "Failed to create serializable ItemStack from $prefabName, does the prefab exist and have a geary:set.item component?" }
-                                return result
+                    getAddonOrNull(items)?.let { addon ->
+                        application.koin.loadModules(listOf(module {
+                            single<SerializablePrefabItemService> {
+                                object : SerializablePrefabItemService {
+                                    override fun encodeFromPrefab(item: ItemStack, prefabName: String): ItemStack {
+                                        val result = addon.createItem(PrefabKey.of(prefabName), item)
+                                        require(result != null) { "Failed to create serializable ItemStack from $prefabName, does the prefab exist and have a geary:set.item component?" }
+                                        return result
+                                    }
+                                }
                             }
-                        })
+                        }))
                     }
 
                     gearyPaper.logger.s(
                         """Loaded prefabs:
-                            |   Mobs: ${getAddon(mobs)?.query?.prefabs?.getKeys()?.size ?: "disabled"}
-                            |   Blocks: ${getAddon(blocks)?.prefabs?.getKeys()?.size ?: "disabled"}
-                            |   Items: ${getAddon(items)?.prefabs?.getKeys()?.size ?: "disabled"}""".trimMargin()
+                            |   Mobs: ${getAddonOrNull(mobs)?.query?.prefabs?.getKeys()?.size ?: "disabled"}
+                            |   Blocks: ${getAddonOrNull(blocks)?.prefabs?.getKeys()?.size ?: "disabled"}
+                            |   Items: ${getAddonOrNull(items)?.prefabs?.getKeys()?.size ?: "disabled"}""".trimMargin()
                     )
                 }
             }

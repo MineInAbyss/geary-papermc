@@ -1,6 +1,6 @@
 package com.mineinabyss.geary.papermc.mythicmobs.spawning
 
-import com.mineinabyss.geary.modules.GearyModule
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.observers.events.OnSet
 import com.mineinabyss.geary.papermc.tracking.entities.components.ShowInMobQueries
 import com.mineinabyss.geary.papermc.tracking.entities.components.SpawnableByGeary
