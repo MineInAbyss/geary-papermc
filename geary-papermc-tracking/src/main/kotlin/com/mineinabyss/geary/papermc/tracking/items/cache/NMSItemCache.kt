@@ -1,14 +1,18 @@
 package com.mineinabyss.geary.papermc.tracking.items.cache
 
 import com.mineinabyss.geary.datatypes.GearyEntity
-import com.mineinabyss.geary.papermc.tracking.items.gearyItems
+import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.papermc.tracking.items.GearyItemProvider
 import com.mineinabyss.geary.papermc.tracking.items.systems.LoginListener
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
 import com.mineinabyss.idofront.nms.aliases.toBukkit
 import com.mineinabyss.idofront.nms.nbt.fastPDC
 import org.bukkit.inventory.ItemStack
 
-class NMSItemCache : PlayerItemCache<NMSItemStack>(64) {
+class NMSItemCache(
+    world: Geary,
+    val itemProvider: GearyItemProvider,
+) : PlayerItemCache<NMSItemStack>(world, 64) {
     override fun readItemInfo(item: NMSItemStack): ItemInfo {
         return LoginListener.readItemInfo(item)
     }
@@ -18,7 +22,7 @@ class NMSItemCache : PlayerItemCache<NMSItemStack>(64) {
     }
 
     override fun deserializeItem(item: NMSItemStack): GearyEntity? {
-        return gearyItems.itemProvider.deserializeItemStackToEntity(item.fastPDC)
+        return itemProvider.deserializeItemStackToEntity(item.fastPDC)
     }
 
     /**

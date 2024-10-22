@@ -1,17 +1,17 @@
 package com.mineinabyss.geary.papermc.tracking.items.inventory
 
 import com.mineinabyss.geary.datatypes.GearyEntity
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.CatchType
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
+import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
-import com.mineinabyss.geary.papermc.tracking.items.gearyItems
 import net.minecraft.world.entity.player.Inventory
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.PlayerInventory
 import org.spigotmc.AsyncCatcher
-
 
 class GearyPlayerInventory(
     val inventory: PlayerInventory,
@@ -69,6 +69,7 @@ class GearyPlayerInventory(
     val itemInBoots get() = get(inventory.size - 5)
 }
 
+context(Geary)
 fun PlayerInventory.toGeary(): GearyPlayerInventory? {
     try {
 
@@ -78,6 +79,6 @@ fun PlayerInventory.toGeary(): GearyPlayerInventory? {
         // Allow running in tests
     }
     val player = holder ?: return null
-    val wrap = gearyItems.getCacheWrapper(player.toGearyOrNull() ?: return null) ?: return null
+    val wrap = getAddon(ItemTracking).getCacheWrapper(player.toGearyOrNull() ?: return null) ?: return null
     return GearyPlayerInventory(this, wrap)
 }

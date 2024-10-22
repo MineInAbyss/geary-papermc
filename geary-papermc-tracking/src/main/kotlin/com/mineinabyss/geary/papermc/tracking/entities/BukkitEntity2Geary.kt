@@ -63,8 +63,10 @@ class BukkitEntity2Geary(
     }
 
     fun fireRemoveFromWorldEvent(bukkit: BukkitEntity, entity: GearyEntity) = synchronized(entityMap) {
-        entity.remove<AddedToWorld>()
-        GearyEntityRemoveFromWorldEvent(entity, bukkit).callEvent()
-        entity.encodeComponentsTo(bukkit)
+        with(entity.world) {
+            entity.remove<AddedToWorld>()
+            GearyEntityRemoveFromWorldEvent(entity, bukkit).callEvent()
+            entity.encodeComponentsTo(bukkit)
+        }
     }
 }

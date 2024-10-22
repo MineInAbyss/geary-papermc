@@ -16,12 +16,9 @@ import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsFeature
 import com.mineinabyss.geary.papermc.plugin.commands.registerGearyCommands
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
-import com.mineinabyss.geary.papermc.tracking.blocks.helpers.getKeys
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
-import com.mineinabyss.geary.papermc.tracking.entities.helpers.getKeys
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
-import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery.Companion.getKeys
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.Prefabs
 import com.mineinabyss.geary.prefabs.prefabs
@@ -71,14 +68,16 @@ class GearyPluginImpl : GearyPlugin() {
             override val config: GearyPaperConfig by configHolder
             override val logger by plugin.observeLogger()
             override val features get() = this@GearyPluginImpl.features
+            override val gearyModule: UninitializedGearyModule = geary(PaperEngineModule())
+            override val worldManager = WorldManager()
         }
 
         DI.add<GearyPaperModule>(configModule)
 
-        val geary = geary(PaperEngineModule()) {
+        gearyPaper.configure {
             // Install default addons
-            install(FileSystem { okio.FileSystem.SYSTEM })
-            install(UUIDTracking { SynchronizedUUID2GearyMap() })
+            install(FileSystem.withConfig { okio.FileSystem.SYSTEM })
+            install(UUIDTracking.withConfig { SynchronizedUUID2GearyMap() })
 
             val mobs = if (configModule.config.trackEntities) install(EntityTracking) else null
             val items = if (configModule.config.items.enabled) install(ItemTracking) else null
@@ -143,22 +142,20 @@ class GearyPluginImpl : GearyPlugin() {
 
                     gearyPaper.logger.s(
                         """Loaded prefabs:
-                            |   Mobs: ${getAddonOrNull(mobs)?.query?.prefabs?.getKeys()?.size ?: "disabled"}
-                            |   Blocks: ${getAddonOrNull(blocks)?.prefabs?.getKeys()?.size ?: "disabled"}
-                            |   Items: ${getAddonOrNull(items)?.prefabs?.getKeys()?.size ?: "disabled"}""".trimMargin()
+                            |   Mobs: ${getAddonOrNull(mobs)?.query?.prefabs?.count() ?: "disabled"}
+                            |   Blocks: ${getAddonOrNull(blocks)?.prefabs?.count() ?: "disabled"}
+                            |   Items: ${getAddonOrNull(items)?.prefabs?.count() ?: "disabled"}""".trimMargin()
                     )
                 }
             }
         }
-        DI.add<UninitializedGearyModule>(geary)
 
         features.loadAll()
         registerGearyCommands()
     }
 
     override fun onEnable() {
-        DI.get<UninitializedGearyModule>().start()
-        DI.remove<UninitializedGearyModule>() //TODO support context per world
+        gearyPaper.worldManager.setGlobalEngine(gearyPaper.gearyModule.start())
 
         features.enableAll()
     }
@@ -166,10 +163,12 @@ class GearyPluginImpl : GearyPlugin() {
     override fun onDisable() {
         features.disableAll()
         server.worlds.forEach { world ->
-            world.entities.forEach entities@{ entity ->
-                val gearyEntity = entity.toGearyOrNull() ?: return@entities
-                gearyEntity.encodeComponentsTo(entity)
-                gearyEntity.removeEntity()
+            with(world.toGeary()) {
+                world.entities.forEach entities@{ entity ->
+                    val gearyEntity = entity.toGearyOrNull() ?: return@entities
+                    gearyEntity.encodeComponentsTo(entity)
+                    gearyEntity.removeEntity()
+                }
             }
         }
         server.scheduler.cancelTasks(this)

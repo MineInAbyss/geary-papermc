@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.features.common.event_bridge.entities
 
+import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -18,7 +19,7 @@ sealed class OnDamageOther
 
 class EntityDamageBridge : Listener {
     @EventHandler(ignoreCancelled = true)
-    fun EntityDamageByEntityEvent.emitEntityDamaged() {
+    fun EntityDamageByEntityEvent.emitEntityDamaged() = with(entity.world.toGeary()) {
         val gearyEntity = entity.toGearyOrNull()
         val damager = damager.toGearyOrNull()
         gearyEntity?.emit<OnDamaged>()
@@ -26,7 +27,7 @@ class EntityDamageBridge : Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun ProjectileHitEvent.emitProjectileDamaged() {
+    fun ProjectileHitEvent.emitProjectileDamaged() = with(entity.world.toGeary()) {
         val projectile = entity.toGearyOrNull()
         val gearyEntity = hitEntity?.toGearyOrNull()
         gearyEntity?.emit<OnDamaged>()

@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.items.migration
 
 import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.observe
 import com.mineinabyss.geary.observers.events.OnSet
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.systems.query.query

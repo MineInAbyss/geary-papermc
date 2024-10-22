@@ -2,7 +2,6 @@ package com.mineinabyss.geary.papermc.tracking.items
 
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.modules.Geary
-import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.tracking.items.cache.BukkitItemCache
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery
@@ -14,9 +13,9 @@ import org.bukkit.inventory.ItemStack
 class BukkitBackedItemTracking(
     val world: Geary,
 ) : ItemTrackingModule {
-    override val itemProvider = GearyItemProvider()
-    override val loginListener = LoginListener { BukkitItemCache(world.getAddon(ItemTracking)) }
-    override val prefabs = world.cache(GearyItemPrefabQuery())
+    override val itemProvider = GearyItemProvider(world)
+    override val loginListener = LoginListener(world) { BukkitItemCache(world, world.getAddon(ItemTracking)) }
+    override val prefabs = world.cache(::GearyItemPrefabQuery)
 
     override fun getCacheWrapper(entity: GearyEntity): InventoryCacheWrapper? {
         val cache = entity.get<PlayerItemCache<ItemStack>>() ?: return null

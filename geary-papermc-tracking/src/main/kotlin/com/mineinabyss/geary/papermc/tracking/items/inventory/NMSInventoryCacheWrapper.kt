@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.items.inventory
 
 import com.mineinabyss.geary.datatypes.GearyEntity
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.cache.NMSItemCache
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
@@ -14,7 +15,7 @@ class NMSInventoryCacheWrapper(
     override val cache: PlayerItemCache<NMSItemStack>,
     val holder: GearyEntity,
 ) : InventoryCacheWrapper {
-    override fun updateToMatch(inventory: Inventory, ignoreCached: Boolean) {
+    override fun updateToMatch(inventory: Inventory, ignoreCached: Boolean) = with(holder.world) {
         require(inventory is PlayerInventory) { "Inventory must be a player inventory" }
         require(cache is NMSItemCache) { "Cache must be an NMS cache" }
         cache.updateToMatch(toArray(inventory.toNMS()), inventory.holder?.toGearyOrNull(), ignoreCached)
