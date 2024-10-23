@@ -4,12 +4,14 @@ import be.seeseemelk.mockbukkit.MockBukkit
 import com.mineinabyss.geary.papermc.Features
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.GearyPaperModule
+import com.mineinabyss.geary.papermc.WorldManager
+import com.mineinabyss.geary.test.GearyTest
 import com.mineinabyss.idofront.config.IdofrontConfig
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import org.junit.jupiter.api.AfterAll
 
-abstract class MockedServerTest {
+abstract class MockedServerTest : GearyTest() {
     init {
         MockBukkit.unmock()
     }
@@ -26,7 +28,9 @@ abstract class MockedServerTest {
             override val config = GearyPaperConfig()
 
             override val logger: ComponentLogger = ComponentLogger.fallback()
-            override val features: Features = Features(this@MockedServerTest.plugin)
+            override val features: Features = Features(this@MockedServerTest.plugin, { this@MockedServerTest })
+            override val gearyModule get() = error("Should not access module here in tests")
+            override val worldManager = WorldManager()
         })
     }
 

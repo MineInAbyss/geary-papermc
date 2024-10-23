@@ -5,20 +5,16 @@ import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.helpers.MockedServerTest
 import com.mineinabyss.geary.papermc.helpers.TestEntityTracking
 import com.mineinabyss.geary.papermc.helpers.withTestSerializers
-import com.mineinabyss.geary.serialization.dsl.serialization
 import com.mineinabyss.geary.serialization.serialization
 import com.mineinabyss.geary.uuid.UUIDTracking
 
-class EntityTrackingTests: MockedServerTest() {
-    init {
-        geary(TestEngineModule) {
-            serialization {
-                withTestSerializers()
-            }
-            install(TestEntityTracking)
-            install(UUIDTracking)
+class EntityTrackingTests : MockedServerTest() {
+    override fun setupGeary() = geary(TestEngineModule) {
+        serialization {
+            withTestSerializers()
         }
-        geary.pipeline.runStartupTasks()
+        install(TestEntityTracking)
+        install(UUIDTracking)
     }
 
 //    @Test

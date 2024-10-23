@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc
 
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.injectedLogger
 import com.mineinabyss.idofront.messaging.success
@@ -11,12 +12,13 @@ typealias FeatureBuilder = (FeatureContext) -> Feature
 
 class Features(
     val plugin: Plugin,
+    val world: () -> Geary,
     vararg val features: FeatureBuilder,
 ) {
     val featuresByClass = mutableMapOf<KClass<*>, FeatureBuilder>()
     val loaded = mutableListOf<Feature>()
     val enabled = mutableListOf<Feature>()
-    val context get() = FeatureContext(plugin, plugin.injectedLogger(), isFirstEnable)
+    val context get() = FeatureContext(plugin, plugin.injectedLogger(), isFirstEnable, world())
     private var isFirstEnable = true
 
     fun loadAll() {

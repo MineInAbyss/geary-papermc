@@ -1,10 +1,9 @@
 package com.mineinabyss.geary.papermc.features.items.resourcepacks
 
-import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
-import com.mineinabyss.geary.systems.builders.cache
 import com.mineinabyss.geary.systems.query.GearyQuery
 import com.mineinabyss.idofront.resourcepacks.ResourcePacks
 import net.kyori.adventure.key.Key
@@ -13,10 +12,10 @@ import team.unnamed.creative.model.Model
 import team.unnamed.creative.model.ModelTexture
 import team.unnamed.creative.model.ModelTextures
 
-class ResourcePackGenerator {
-
-    private val resourcePackQuery = geary.cache(ResourcePackQuery())
-    private val includedPackPath = gearyPaper.config.resourcePack.includedPackPath.takeUnless(String::isEmpty)?.let { gearyPaper.plugin.dataFolder.resolve(it) }
+class ResourcePackGenerator(world: Geary) : Geary by world {
+    private val resourcePackQuery = cache(::ResourcePackQuery)
+    private val includedPackPath = gearyPaper.config.resourcePack.includedPackPath.takeUnless(String::isEmpty)
+        ?.let { gearyPaper.plugin.dataFolder.resolve(it) }
     private val resourcePack = includedPackPath?.let(ResourcePacks::readToResourcePack) ?: ResourcePack.resourcePack()
 
     fun generateResourcePack() {
@@ -59,7 +58,7 @@ class ResourcePackGenerator {
     private fun generatePredicateModels(
         resourcePack: ResourcePack,
         resourcePackContent: ResourcePackContent,
-        prefabKey: PrefabKey
+        prefabKey: PrefabKey,
     ) {
         fun predicateModel(modelKey: Key, suffix: String) {
             Model.model().key(Key.key(prefabKey.namespace, prefabKey.key.plus(suffix)))
@@ -85,7 +84,7 @@ class ResourcePackGenerator {
     }
 
     companion object {
-        class ResourcePackQuery : GearyQuery() {
+        class ResourcePackQuery(world: Geary) : GearyQuery(world) {
             private val prefabKey by get<PrefabKey>()
             private val resourcePackContent by get<ResourcePackContent>()
 

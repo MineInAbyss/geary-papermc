@@ -3,12 +3,15 @@ package com.mineinabyss.geary.papermc.plugin.commands
 import com.mineinabyss.geary.components.relations.InstanceOf
 import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.helpers.parent
+import com.mineinabyss.geary.modules.findEntities
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.UpdateMob
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.PrefabLoader.PrefabLoadResult
+import com.mineinabyss.geary.prefabs.Prefabs
+import com.mineinabyss.geary.prefabs.entityOfOrNull
 import com.mineinabyss.geary.prefabs.helpers.inheritPrefabsIfNeeded
 import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.idofront.commands.brigadier.Args
@@ -23,49 +26,52 @@ import org.bukkit.inventory.ItemStack
 import kotlin.io.path.Path
 import kotlin.io.path.nameWithoutExtension
 
-private val prefabLoader get() = prefabs.loader
-private val prefabManager get() = prefabs.manager
-
 internal fun IdoCommand.prefabs() = "prefab" {
     requiresPermission("geary.admin.prefab")
     "count" {
         val prefabArg by GearyArgs.prefab()
 
         executes {
-            val prefab = PrefabKey.of(prefabArg().asString()).toEntityOrNull() ?: commandException("No such prefab $prefabArg")
-            val count = geary.queryManager.getEntitiesMatching(family {
-                hasRelation<InstanceOf?>(prefab)
-                not { has<PrefabKey>() }
-            }).count()
-            sender.success("There are $count direct instances of ${prefabArg().asString()}")
+            val geary = gearyPaper.worldManager.global
+            with(geary) {
+                val prefab = entityOfOrNull(PrefabKey.of(prefabArg().asString()))
+                    ?: commandException("No such prefab $prefabArg")
+                val count = geary.queryManager.getEntitiesMatching(family {
+                    hasRelation<InstanceOf?>(prefab)
+                    not { has<PrefabKey>() }
+                }).count()
+                sender.success("There are $count direct instances of ${prefabArg().asString()}")
+            }
         }
     }
     "reload" {
         val prefabArg by GearyArgs.prefab()
 
         executes {
-            val prefab = PrefabKey.of(prefabArg().asString())
-            val prefabEntity = prefab.toEntityOrNull() ?: commandException("No such prefab $prefabArg")
-            runCatching { prefabLoader.reload(prefabEntity) }
-                .onSuccess { sender.success("Reread prefab $prefab") }
-                .onFailure { sender.error("Failed to reread prefab $prefab:\n${it.message}") }
+            with(gearyPaper.worldManager.global) {
+                val prefab = PrefabKey.of(prefabArg().asString())
+                val prefabEntity = entityOfOrNull(prefab) ?: commandException("No such prefab $prefabArg")
+                runCatching { getAddon(Prefabs).loader.reload(prefabEntity) }
+                    .onSuccess { sender.success("Reread prefab $prefab") }
+                    .onFailure { sender.error("Failed to reread prefab $prefab:\n${it.message}") }
 
 
-            // Reload entities
-            geary.queryManager.getEntitiesMatching(family {
+                // Reload entities
+                findEntities {
+                    hasRelation<InstanceOf?>(prefabEntity)
+                    has<BukkitEntity>()
+                }.forEach {
+                    UpdateMob.recreateGearyEntity(it.get<BukkitEntity>() ?: return@forEach)
+                }
+
+                // Reload items
+                findEntities {
                 hasRelation<InstanceOf?>(prefabEntity)
-                has<BukkitEntity>()
-            }).forEach {
-                UpdateMob.recreateGearyEntity(it.get<BukkitEntity>() ?: return@forEach)
+                    has<ItemStack>()
+                }.toSet()
+                    .mapNotNull { it.parent }
+                    .forEach { it.get<Player>()?.inventory?.toGeary()?.forceRefresh(ignoreCached = true) }
             }
-
-            // Reload items
-            geary.queryManager.getEntitiesMatching(family {
-                hasRelation<InstanceOf?>(prefabEntity)
-                has<ItemStack>()
-            }).toSet()
-                .mapNotNull { it.parent }
-                .forEach { it.get<Player>()?.inventory?.toGeary()?.forceRefresh(ignoreCached = true) }
         }
     }
     "load" {
@@ -91,13 +97,14 @@ internal fun IdoCommand.prefabs() = "prefab" {
             val namespace = namespaceArg()
             val path = pathArg()
 
+            val prefabs = gearyPaper.worldManager.global.getAddon(Prefabs)
             // Ensure not already registered
-            if (prefabManager[PrefabKey.of(namespace, Path(path).nameWithoutExtension)] != null) {
+            if (prefabs.manager[PrefabKey.of(namespace, Path(path).nameWithoutExtension)] != null) {
                 commandException("Prefab $namespace:$path already exists")
             }
 
             // Try to load from file
-            val load = prefabLoader.loadFromPath(
+            val load = prefabs.loader.loadFromPath(
                 namespace,
                 gearyPaper.plugin.dataFolder.resolve(namespace).resolve(path).toOkioPath()
             )

@@ -4,6 +4,7 @@ import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.CatchType
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
@@ -69,16 +70,17 @@ class GearyPlayerInventory(
     val itemInBoots get() = get(inventory.size - 5)
 }
 
-context(Geary)
+//context(Geary)
 fun PlayerInventory.toGeary(): GearyPlayerInventory? {
     try {
-
         if (gearyPaper.config.catch.asyncEntityConversion == CatchType.ERROR)
             AsyncCatcher.catchOp("Async geary inventory access for $holder")
     } catch (_: NoClassDefFoundError) {
         // Allow running in tests
     }
     val player = holder ?: return null
-    val wrap = getAddon(ItemTracking).getCacheWrapper(player.toGearyOrNull() ?: return null) ?: return null
-    return GearyPlayerInventory(this, wrap)
+    with(player.world.toGeary()) {
+        val wrap = getAddon(ItemTracking).getCacheWrapper(player.toGearyOrNull() ?: return null) ?: return null
+        return GearyPlayerInventory(this@toGeary, wrap)
+    }
 }

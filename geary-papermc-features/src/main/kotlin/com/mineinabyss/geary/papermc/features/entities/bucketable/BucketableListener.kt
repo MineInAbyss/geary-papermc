@@ -20,15 +20,13 @@ class Bucketable(
 class BucketableListener : Listener {
     @EventHandler
     fun PlayerBucketEntityEvent.cancelBucketEntity() {
-        if (!entity.toGeary()
-                .has<com.mineinabyss.geary.papermc.features.entities.bucketable.Bucketable>()
-        ) isCancelled = true
+        if (!entity.toGeary().has<Bucketable>()) isCancelled = true
     }
 
     @EventHandler(ignoreCancelled = true)
     fun PlayerInteractEntityEvent.onPickupMob() {
         val bucketable =
-            rightClicked.toGeary().get<com.mineinabyss.geary.papermc.features.entities.bucketable.Bucketable>()
+            rightClicked.toGeary().get<Bucketable>()
                 ?: return
         val requiredBucket = Material.valueOf(bucketable.bucketLiquidRequired.toString() + "_BUCKET")
         val item = bucketable.bucketItem.toItemStack()

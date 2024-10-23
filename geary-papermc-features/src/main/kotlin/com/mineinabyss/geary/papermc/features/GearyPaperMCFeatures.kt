@@ -12,6 +12,7 @@ import com.mineinabyss.geary.papermc.features.items.resourcepacks.ResourcePackGe
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.onPluginEnable
 import com.mineinabyss.idofront.plugin.listeners
+import org.koin.dsl.module
 
 val GearyPaperMCFeatures = createAddon("Geary Paper Features") {
     systems {
@@ -20,7 +21,7 @@ val GearyPaperMCFeatures = createAddon("Geary Paper Features") {
     }
 
     entities {
-        ResourcePackGenerator().generateResourcePack()
+        ResourcePackGenerator(geary).generateResourcePack()
     }
 
     onPluginEnable {

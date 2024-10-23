@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.plugin.schema_generator
 
 import com.mineinabyss.geary.datatypes.GearyComponent
 import com.mineinabyss.geary.serialization.SerializableComponents
+import com.mineinabyss.geary.serialization.SerializableComponentsModule
 import com.mineinabyss.geary.serialization.SerializersByMap
 import com.mineinabyss.geary.serialization.serializers.InnerSerializer
 import com.mineinabyss.idofront.serialization.BaseSerializableItemStack
@@ -21,7 +22,7 @@ inline fun String.isGearyPrefab(): Boolean {
 
 class GearySchema(
     val output: Path,
-    val serialization: SerializableComponents,
+    val serialization: SerializableComponentsModule,
 ) {
     fun generate() {
         // TODO automatically read these off geary

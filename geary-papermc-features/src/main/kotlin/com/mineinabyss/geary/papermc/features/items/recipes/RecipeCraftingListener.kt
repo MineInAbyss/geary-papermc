@@ -1,15 +1,14 @@
 package com.mineinabyss.geary.papermc.features.items.recipes
 
-import com.mineinabyss.geary.papermc.datastore.decode
 import com.mineinabyss.geary.papermc.datastore.decodePrefabs
-import com.mineinabyss.geary.papermc.datastore.encode
 import com.mineinabyss.geary.papermc.datastore.hasComponentsEncoded
-import com.mineinabyss.idofront.items.editItemMeta
+import com.mineinabyss.geary.papermc.toGeary
+import com.mineinabyss.geary.prefabs.entityOfOrNull
 import com.mineinabyss.idofront.nms.nbt.fastPDC
-import com.mineinabyss.idofront.serialization.BaseSerializableItemStack
 import com.mineinabyss.idofront.serialization.toSerializable
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -17,7 +16,6 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent
 import org.bukkit.event.inventory.PrepareSmithingEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.SmithingTransformRecipe
-import java.util.*
 
 class RecipeCraftingListener : Listener {
     /**
@@ -25,15 +23,16 @@ class RecipeCraftingListener : Listener {
      * when they have a [DenyInVanillaRecipes] component, by setting result to null.
      */
     @EventHandler(priority = EventPriority.HIGHEST)
-    fun PrepareItemCraftEvent.onCraftWithCustomItem() {
+    fun PrepareItemCraftEvent.onCraftWithCustomItem() = with((inventory.holder as Player).world.toGeary()) {
         // Ensure this only cancels vanilla recipes
         if (recipe == null || (recipe as? Keyed)?.key()?.namespace() != "minecraft") return
 
         if (inventory.matrix.any {
-                it?.itemMeta?.persistentDataContainer
-                    ?.decodePrefabs()
-                    ?.firstOrNull()
-                    ?.toEntityOrNull()
+                entityOfOrNull(
+                    it?.itemMeta?.persistentDataContainer
+                        ?.decodePrefabs()
+                        ?.firstOrNull()
+                )
                     ?.has<DenyInVanillaRecipes>() == true
             }) {
             inventory.result = null
@@ -41,7 +40,7 @@ class RecipeCraftingListener : Listener {
     }
 
     @EventHandler
-    fun PrepareSmithingEvent.onCustomSmithingTransform() {
+    fun PrepareSmithingEvent.onCustomSmithingTransform() = with((inventory.holder as Player).world.toGeary()) {
         // Smithing will cache the last recipe, so even with 0 input
         // recipe will return as not null if say a Diamond Hoe was put in before
         if (inventory.contents.any { it?.isEmpty != false }) return

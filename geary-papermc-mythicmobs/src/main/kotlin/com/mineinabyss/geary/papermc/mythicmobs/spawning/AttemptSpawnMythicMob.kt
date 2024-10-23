@@ -1,8 +1,8 @@
 package com.mineinabyss.geary.papermc.mythicmobs.spawning
 
 import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.observeWithData
 import com.mineinabyss.geary.papermc.tracking.entities.components.AttemptSpawn
-import com.mineinabyss.geary.systems.builders.observeWithData
 import com.mineinabyss.geary.systems.query.query
 import io.lumine.mythic.api.mobs.entities.SpawnReason
 import io.lumine.mythic.bukkit.BukkitAdapter

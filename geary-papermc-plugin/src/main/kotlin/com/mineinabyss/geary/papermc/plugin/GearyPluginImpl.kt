@@ -50,6 +50,7 @@ import kotlin.io.path.name
 class GearyPluginImpl : GearyPlugin() {
     val features = Features(
         this,
+        { gearyPaper.worldManager.global },
         ::SpawningFeature,
         ::RecipeFeature,
         ::EntityFeatures,
