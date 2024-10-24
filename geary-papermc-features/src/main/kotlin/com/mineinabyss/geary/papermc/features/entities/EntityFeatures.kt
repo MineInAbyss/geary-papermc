@@ -2,7 +2,6 @@ package com.mineinabyss.geary.papermc.features.entities
 
 import com.mineinabyss.geary.papermc.Feature
 import com.mineinabyss.geary.papermc.FeatureContext
-import com.mineinabyss.geary.papermc.Features
 import com.mineinabyss.geary.papermc.features.entities.bucketable.BucketableListener
 import com.mineinabyss.geary.papermc.features.entities.displayname.ShowDisplayNameOnKillerListener
 import com.mineinabyss.geary.papermc.features.entities.prevent.PreventEventsFeature
@@ -26,3 +25,18 @@ class EntityFeatures(context: FeatureContext) : Feature(context) {
         )
     }
 }
+//
+//val EntityFeatures = createAddon("Entity features") {
+//    if(!gearyPaper.config.trackEntities) return@createAddon
+//
+//    geary.loadAddon(AmbientSoundsFeature)
+//    geary.loadAddon(PreventEventsFeature)
+//
+//    onPluginEnable {
+//        plugin.listeners(
+//            BucketableListener(),
+//            ShowDisplayNameOnKillerListener(),
+//            TamingListener(),
+//        )
+//    }
+//}

@@ -4,6 +4,7 @@ import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.helpers.contains
 import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.components.ShowInMobQueries
 import com.mineinabyss.geary.papermc.tracking.entities.components.SpawnableByGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
@@ -14,7 +15,7 @@ import com.mineinabyss.geary.systems.query.ShorthandQuery1
 import com.mineinabyss.geary.systems.query.query
 
 class GearyMobPrefabQuery(world: Geary) : GearyQuery(world) {
-    private val mobQuery = family {
+    val mobQuery = family {
         has<Prefab>()
         has<ShowInMobQueries>()
     }
@@ -25,12 +26,14 @@ class GearyMobPrefabQuery(world: Geary) : GearyQuery(world) {
         has<SpawnableByGeary>()
     })
 
-    fun isMob(entity: GearyEntity): Boolean {
-        return entity.prefabs.any { it.type in mobQuery }
-    }
+    companion object {
+        fun isMob(entity: GearyEntity): Boolean = with(entity.world) {
+            return entity.prefabs.any { it.type in getAddon(EntityTracking).query.mobQuery }
+        }
 
-    fun isMobPrefab(entity: GearyEntity): Boolean {
-        return entity.type in mobQuery
+        fun isMobPrefab(entity: GearyEntity): Boolean = with(entity.world) {
+            return entity.type in getAddon(EntityTracking).query.mobQuery
+        }
     }
 }
 

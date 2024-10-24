@@ -2,6 +2,8 @@ package com.mineinabyss.geary.papermc.mythicmobs
 
 import com.mineinabyss.geary.papermc.Feature
 import com.mineinabyss.geary.papermc.FeatureContext
+import com.mineinabyss.geary.papermc.configure
+import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.mythicmobs.actions.runMMSkillAction
 import com.mineinabyss.geary.papermc.mythicmobs.items.MythicMobDropListener
 import com.mineinabyss.geary.papermc.mythicmobs.skills.MythicSkillRegisterListener
@@ -14,9 +16,11 @@ class MythicMobsFeature(context: FeatureContext) : Feature(context) {
     }
 
     override fun enable() {
-        runMMSkillAction()
-        mythicMobSpawner()
-        markMMAsCustomMob()
+        gearyPaper.configure {
+            geary.runMMSkillAction()
+            geary.mythicMobSpawner()
+            geary.markMMAsCustomMob()
+        }
 
         listeners(
             MythicMobDropListener(),

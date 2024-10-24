@@ -4,18 +4,16 @@ import com.mineinabyss.geary.components.relations.InstanceOf
 import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.helpers.parent
 import com.mineinabyss.geary.modules.findEntities
-import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.UpdateMob
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.PrefabLoader.PrefabLoadResult
 import com.mineinabyss.geary.prefabs.Prefabs
-import com.mineinabyss.geary.prefabs.entityOfOrNull
 import com.mineinabyss.geary.prefabs.helpers.inheritPrefabsIfNeeded
-import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.IdoCommand
+import com.mineinabyss.idofront.commands.brigadier.executes
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.success
 import com.mineinabyss.idofront.messaging.warn
@@ -29,36 +27,28 @@ import kotlin.io.path.nameWithoutExtension
 internal fun IdoCommand.prefabs() = "prefab" {
     requiresPermission("geary.admin.prefab")
     "count" {
-        val prefabArg by GearyArgs.prefab()
-
-        executes {
+        executes(GearyArgs.prefab()) { prefab ->
             val geary = gearyPaper.worldManager.global
             with(geary) {
-                val prefab = entityOfOrNull(PrefabKey.of(prefabArg().asString()))
-                    ?: commandException("No such prefab $prefabArg")
                 val count = geary.queryManager.getEntitiesMatching(family {
                     hasRelation<InstanceOf?>(prefab)
                     not { has<PrefabKey>() }
                 }).count()
-                sender.success("There are $count direct instances of ${prefabArg().asString()}")
+                sender.success("There are $count direct instances of ${prefab.get<PrefabKey>()}")
             }
         }
     }
     "reload" {
-        val prefabArg by GearyArgs.prefab()
-
-        executes {
+        executes(GearyArgs.prefab()) { prefab ->
             with(gearyPaper.worldManager.global) {
-                val prefab = PrefabKey.of(prefabArg().asString())
-                val prefabEntity = entityOfOrNull(prefab) ?: commandException("No such prefab $prefabArg")
-                runCatching { getAddon(Prefabs).loader.reload(prefabEntity) }
+                runCatching { getAddon(Prefabs).loader.reload(prefab) }
                     .onSuccess { sender.success("Reread prefab $prefab") }
                     .onFailure { sender.error("Failed to reread prefab $prefab:\n${it.message}") }
 
 
                 // Reload entities
                 findEntities {
-                    hasRelation<InstanceOf?>(prefabEntity)
+                    hasRelation<InstanceOf?>(prefab)
                     has<BukkitEntity>()
                 }.forEach {
                     UpdateMob.recreateGearyEntity(it.get<BukkitEntity>() ?: return@forEach)
@@ -66,7 +56,7 @@ internal fun IdoCommand.prefabs() = "prefab" {
 
                 // Reload items
                 findEntities {
-                hasRelation<InstanceOf?>(prefabEntity)
+                    hasRelation<InstanceOf?>(prefab)
                     has<ItemStack>()
                 }.toSet()
                     .mapNotNull { it.parent }
@@ -75,14 +65,12 @@ internal fun IdoCommand.prefabs() = "prefab" {
         }
     }
     "load" {
-        val namespaceArg by Args.word().suggests {
-            suggest(plugin.dataFolder.resolve("prefabs").listFiles()?.filter {
-                it.isDirectory && it.name.startsWith(suggestions.remaining.lowercase())
-            }?.map { it.name } ?: emptyList())
-        }
-        val pathArg by Args.word().suggests {
-            //TODO get previous argument in suggestion
-//                plugin.dataFolder.resolve("prefabs").resolve(namespaceArg()).walk()
+        executes(
+            GearyArgs.namespace(),
+            Args.word().suggests {
+                //TODO get previous argument in suggestion
+                val namespace = input.split(" ").dropLast(1).lastOrNull() ?: return@suggests
+//                plugin.dataFolder.resolve("prefabs").resolve(namespace).walk()
 //                    .filter {
 //                        it.name.startsWith(args[3].lowercase()) && it.extension == "yml" && prefabManager[PrefabKey.of(
 //                            args[2],
@@ -92,15 +80,12 @@ internal fun IdoCommand.prefabs() = "prefab" {
 //                        it.relativeTo(plugin.dataFolder.resolve(args[2])).toString()
 //                    }
 //                    .toList()
-        }
-        executes {
-            val namespace = namespaceArg()
-            val path = pathArg()
-
+            }
+        ) { namespace, path ->
             val prefabs = gearyPaper.worldManager.global.getAddon(Prefabs)
             // Ensure not already registered
             if (prefabs.manager[PrefabKey.of(namespace, Path(path).nameWithoutExtension)] != null) {
-                commandException("Prefab $namespace:$path already exists")
+                fail("Prefab $namespace:$path already exists")
             }
 
             // Try to load from file

@@ -19,7 +19,7 @@ sealed class OnDamageOther
 
 class EntityDamageBridge : Listener {
     @EventHandler(ignoreCancelled = true)
-    fun EntityDamageByEntityEvent.emitEntityDamaged() = with(entity.world.toGeary()) {
+    fun EntityDamageByEntityEvent.emitEntityDamaged() {
         val gearyEntity = entity.toGearyOrNull()
         val damager = damager.toGearyOrNull()
         gearyEntity?.emit<OnDamaged>()
@@ -27,7 +27,7 @@ class EntityDamageBridge : Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun ProjectileHitEvent.emitProjectileDamaged() = with(entity.world.toGeary()) {
+    fun ProjectileHitEvent.emitProjectileDamaged() {
         val projectile = entity.toGearyOrNull()
         val gearyEntity = hitEntity?.toGearyOrNull()
         gearyEntity?.emit<OnDamaged>()

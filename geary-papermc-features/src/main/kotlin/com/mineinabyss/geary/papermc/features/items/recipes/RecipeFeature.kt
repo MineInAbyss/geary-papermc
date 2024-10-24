@@ -1,5 +1,7 @@
 package com.mineinabyss.geary.papermc.features.items.recipes
 
+import co.touchlab.kermit.Logger
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.Feature
 import com.mineinabyss.geary.papermc.FeatureContext
@@ -9,6 +11,7 @@ import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.Prefabs
 import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.geary.systems.query.query
+import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.serialization.recipes.options.ingredientOptionsListener
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
@@ -18,6 +21,7 @@ class RecipeFeature(val context: FeatureContext) : Feature(context) {
     private val recipes = cache(query<SetRecipes, PrefabKey>())
     private val potionMixes = cache(query<SetPotionMixes, PrefabKey>())
     private val gearyItems = getAddon(ItemTracking)
+    override val logger: ComponentLogger = context.logger
 
     override fun enable() {
         if (!context.isFirstEnable) {
