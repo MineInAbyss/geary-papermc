@@ -12,13 +12,12 @@ typealias FeatureBuilder = (FeatureContext) -> Feature
 
 class Features(
     val plugin: Plugin,
-    val world: () -> Geary,
     vararg val features: FeatureBuilder,
 ) {
     val featuresByClass = mutableMapOf<KClass<*>, FeatureBuilder>()
     val loaded = mutableListOf<Feature>()
     val enabled = mutableListOf<Feature>()
-    val context get() = FeatureContext(plugin, plugin.injectedLogger(), isFirstEnable, world())
+    val context get() = FeatureContext(plugin, plugin.injectedLogger(), isFirstEnable)
     private var isFirstEnable = true
 
     fun loadAll() {

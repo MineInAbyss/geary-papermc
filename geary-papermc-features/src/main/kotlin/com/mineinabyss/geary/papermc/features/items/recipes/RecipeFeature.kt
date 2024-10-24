@@ -17,11 +17,11 @@ import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 
-class RecipeFeature(val context: FeatureContext) : Feature(context) {
+class RecipeFeature(val context: FeatureContext) : Feature(context), Geary by gearyPaper.worldManager.global {
     private val recipes = cache(query<SetRecipes, PrefabKey>())
     private val potionMixes = cache(query<SetPotionMixes, PrefabKey>())
     private val gearyItems = getAddon(ItemTracking)
-    override val logger: ComponentLogger = context.logger
+    override val logger: ComponentLogger get() = context.logger
 
     override fun enable() {
         if (!context.isFirstEnable) {

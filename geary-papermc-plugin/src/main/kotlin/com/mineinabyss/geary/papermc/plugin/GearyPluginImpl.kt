@@ -8,6 +8,7 @@ import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.*
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
+import com.mineinabyss.geary.papermc.events.GearyWorldLoadEvent
 import com.mineinabyss.geary.papermc.features.GearyPaperMCFeatures
 import com.mineinabyss.geary.papermc.features.entities.EntityFeatures
 import com.mineinabyss.geary.papermc.features.items.ItemFeatures
@@ -50,7 +51,6 @@ import kotlin.io.path.name
 class GearyPluginImpl : GearyPlugin() {
     val features = Features(
         this,
-        { gearyPaper.gearyModule.setup.geary },
         ::SpawningFeature,
         ::RecipeFeature,
         ::EntityFeatures,
@@ -151,13 +151,14 @@ class GearyPluginImpl : GearyPlugin() {
             }
         }
 
-        features.loadAll()
         registerGearyCommands()
     }
 
     override fun onEnable() {
         gearyPaper.worldManager.setGlobalEngine(gearyPaper.gearyModule.start())
-
+        //TODO api for registering geary per world once we have per world ticking
+        GearyWorldLoadEvent(gearyPaper.gearyModule.setup).callEvent()
+        features.loadAll()
         features.enableAll()
     }
 

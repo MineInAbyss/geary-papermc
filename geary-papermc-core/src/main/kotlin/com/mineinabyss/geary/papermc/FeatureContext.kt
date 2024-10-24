@@ -8,5 +8,4 @@ data class FeatureContext(
     val plugin: Plugin,
     val logger: ComponentLogger,
     val isFirstEnable: Boolean,
-    val world: Geary,
 )

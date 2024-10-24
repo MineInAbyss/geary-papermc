@@ -7,15 +7,15 @@ import org.bukkit.Bukkit
 import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 
-abstract class Feature(context: FeatureContext) : Geary by context.world {
+abstract class Feature(context: FeatureContext) {
     open val name = this::class.simpleName
     val plugin = context.plugin
-    override val logger = context.logger
+    open val logger = context.logger
     val listeners = mutableListOf<Listener>()
     val tasks = mutableListOf<Job>()
     private var pluginDeps = listOf<String>()
 
-    open val subFeatures = Features(plugin, { context.world })
+    open val subFeatures = Features(plugin)
 
     fun pluginDeps(vararg plugins: String) {
         pluginDeps = plugins.toList()
@@ -92,5 +92,5 @@ abstract class Feature(context: FeatureContext) : Geary by context.world {
         tasks.add(task)
     }
 
-    fun subFeatures(vararg features: FeatureBuilder) = Features(plugin, { this }, *features)
+    fun subFeatures(vararg features: FeatureBuilder) = Features(plugin, *features)
 }
