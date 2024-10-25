@@ -1,14 +1,12 @@
 package com.mineinabyss.geary.papermc.plugin
 
 import com.mineinabyss.geary.actions.GearyActions
-import com.mineinabyss.geary.addons.dsl.createAddon
 import com.mineinabyss.geary.autoscan.autoscan
 import com.mineinabyss.geary.modules.UninitializedGearyModule
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.*
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
-import com.mineinabyss.geary.papermc.events.GearyWorldLoadEvent
 import com.mineinabyss.geary.papermc.features.GearyPaperMCFeatures
 import com.mineinabyss.geary.papermc.features.entities.EntityFeatures
 import com.mineinabyss.geary.papermc.features.items.ItemFeatures
@@ -41,7 +39,6 @@ import okio.Path.Companion.toOkioPath
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
-import org.koin.dsl.module
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.isDirectory
@@ -107,7 +104,6 @@ class GearyPluginImpl : GearyPlugin() {
                 .forEach { folder ->
                     namespace(folder.name) {
                         prefabs {
-                            logger.i("Loading prefabs from $folder")
                             fromRecursive(folder.toOkioPath())
                         }
                     }
@@ -116,8 +112,19 @@ class GearyPluginImpl : GearyPlugin() {
             install(GearyActions)
             install(GearyPaperMCFeatures)
 
-            // Start engine ticking
-            createAddon("Engine Ticking") {
+            install("PaperMC init") {
+                components {
+                    getAddonOrNull(items)?.let { addon ->
+                        DI.add<SerializablePrefabItemService>(object : SerializablePrefabItemService {
+                            override fun encodeFromPrefab(item: ItemStack, prefabName: String): ItemStack {
+                                val result = addon.createItem(PrefabKey.of(prefabName), item)
+                                require(result != null) { "Failed to create serializable ItemStack from $prefabName, does the prefab exist and have a geary:set.item component?" }
+                                return result
+                            }
+                        })
+                    }
+                }
+
                 onStart {
                     getAddonOrNull(mobs)?.let {
                         server.worlds.forEach { world ->
@@ -127,25 +134,12 @@ class GearyPluginImpl : GearyPlugin() {
                         }
                     }
 
-                    getAddonOrNull(items)?.let { addon ->
-                        application.koin.loadModules(listOf(module {
-                            single<SerializablePrefabItemService> {
-                                object : SerializablePrefabItemService {
-                                    override fun encodeFromPrefab(item: ItemStack, prefabName: String): ItemStack {
-                                        val result = addon.createItem(PrefabKey.of(prefabName), item)
-                                        require(result != null) { "Failed to create serializable ItemStack from $prefabName, does the prefab exist and have a geary:set.item component?" }
-                                        return result
-                                    }
-                                }
-                            }
-                        }))
-                    }
-
                     gearyPaper.logger.s(
-                        """Loaded prefabs:
-                            |   Mobs: ${getAddonOrNull(mobs)?.query?.prefabs?.count() ?: "disabled"}
-                            |   Blocks: ${getAddonOrNull(blocks)?.prefabs?.count() ?: "disabled"}
-                            |   Items: ${getAddonOrNull(items)?.prefabs?.count() ?: "disabled"}""".trimMargin()
+                        """Loaded prefabs
+                            | mobs: ${getAddonOrNull(mobs)?.query?.prefabs?.count() ?: "disabled"}
+                            | blocks: ${getAddonOrNull(blocks)?.prefabs?.count() ?: "disabled"}
+                            | items: ${getAddonOrNull(items)?.prefabs?.count() ?: "disabled"}""".replaceIndentByMargin(",")
+                            .replace("\n", "")
                     )
                 }
             }
@@ -155,9 +149,8 @@ class GearyPluginImpl : GearyPlugin() {
     }
 
     override fun onEnable() {
-        gearyPaper.worldManager.setGlobalEngine(gearyPaper.gearyModule.start())
         //TODO api for registering geary per world once we have per world ticking
-        GearyWorldLoadEvent(gearyPaper.gearyModule.setup).callEvent()
+        gearyPaper.worldManager.setGlobalEngine(gearyPaper.gearyModule.start())
         features.loadAll()
         features.enableAll()
     }

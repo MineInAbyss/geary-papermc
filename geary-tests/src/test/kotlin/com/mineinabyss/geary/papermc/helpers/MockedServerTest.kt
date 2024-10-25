@@ -28,7 +28,7 @@ abstract class MockedServerTest : GearyTest() {
             override val config = GearyPaperConfig()
 
             override val logger: ComponentLogger = ComponentLogger.fallback()
-            override val features: Features = Features(this@MockedServerTest.plugin, { this@MockedServerTest })
+            override val features: Features = Features(this@MockedServerTest.plugin)
             override val gearyModule get() = error("Should not access module here in tests")
             override val worldManager = WorldManager()
         })

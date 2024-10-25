@@ -40,37 +40,37 @@ class GearyArguments(
     }
 
     fun mob() = with(context) {
-        Args.word().suggests {
+        ArgsMinecraft.namespacedKey().suggests {
             with(stack.location.world.toGeary()) {
                 suggest(getAddon(EntityTracking).query.spawnablePrefabs.getKeys().filterPrefabs(suggestions.remaining))
             }
         }.map {
             with(stack.location.world.toGeary()) {
-                entityOfOrNull(PrefabKey.of(it)) ?: fail("No such mob key: $it")
+                entityOfOrNull(PrefabKey.of(it.asString())) ?: fail("No such mob key: $it")
             }
         }
     }
 
     fun item() = with(context) {
-        Args.word().suggests {
+        ArgsMinecraft.namespacedKey().suggests {
             with(stack.location.world.toGeary()) {
                 suggest(getAddon(ItemTracking).prefabs.getKeys().filterPrefabs(suggestions.remaining))
             }
         }.map {
             with(stack.location.world.toGeary()) {
-                entityOfOrNull(PrefabKey.of(it)) ?: fail("No such item key: $it")
+                entityOfOrNull(PrefabKey.of(it.asString())) ?: fail("No such item key: $it")
             }
         }
     }
 
     fun block() = with(context) {
-        Args.word().suggests {
+        ArgsMinecraft.namespacedKey().suggests {
             with(stack.location.world.toGeary()) {
                 suggest(getAddon(ItemTracking).prefabs.getKeys().filterPrefabs(suggestions.remaining))
             }
         }.map {
             with(stack.location.world.toGeary()) {
-                entityOfOrNull(PrefabKey.of(it)) ?: fail("No such block key: $it")
+                entityOfOrNull(PrefabKey.of(it.asString())) ?: fail("No such block key: $it")
             }
         }
     }

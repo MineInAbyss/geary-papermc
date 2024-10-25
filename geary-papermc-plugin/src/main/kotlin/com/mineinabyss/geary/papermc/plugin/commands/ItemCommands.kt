@@ -12,7 +12,10 @@ import com.mineinabyss.idofront.commands.brigadier.playerExecutes
 internal fun IdoCommand.items() {
     "give" {
         requiresPermission("geary.items.give")
-        playerExecutes(GearyArgs.item(), Args.integer(min = 1)) { item, amount ->
+        playerExecutes(
+            GearyArgs.item().named("item"),
+            Args.integer(min = 1).default { 1 }.named("amount")
+        ) { item, amount ->
             giveItem(item, amount)
         }
     }
