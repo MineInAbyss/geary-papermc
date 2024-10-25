@@ -11,7 +11,7 @@ import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.entityOfOrNull
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.IdoCommand
-import com.mineinabyss.idofront.commands.brigadier.IdoPlayerCommandContext
+import com.mineinabyss.idofront.commands.brigadier.context.IdoPlayerCommandContext
 import com.mineinabyss.idofront.commands.brigadier.playerExecutes
 import com.mineinabyss.idofront.messaging.info
 import com.mineinabyss.idofront.messaging.success

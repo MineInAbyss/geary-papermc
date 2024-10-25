@@ -2,7 +2,6 @@ package com.mineinabyss.geary.papermc.plugin.commands
 
 import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
-import com.mineinabyss.geary.papermc.tracking.entities.helpers.getKeyStrings
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.getKeys
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.helpers.getKeys
@@ -18,7 +17,7 @@ class GearyArguments(
 ) /*: Geary by gearyPaper.worldManager.global*/ {
     fun prefabKey() = with(context) {
         ArgsMinecraft.namespacedKey().suggests {
-            with(stack.location.world.toGeary()) {
+            with(location.world.toGeary()) {
                 suggest(getAddon(Prefabs).manager.keys.filter {
                     val arg = argument.lowercase()
                     it.key.startsWith(arg) || it.full.startsWith(arg)
@@ -28,12 +27,12 @@ class GearyArguments(
     }
 
     fun prefab() = prefabKey().map {
-        stack.location.world.toGeary().entityOfOrNull(it) ?: fail("No such prefab $it")
+        location.world.toGeary().entityOfOrNull(it) ?: fail("No such prefab $it")
     }
 
     fun namespace() = with(context) {
         Args.word().suggests {
-            suggest(plugin.dataFolder.resolve("prefabs").listFiles()?.filter {
+            suggest(this@with.plugin.dataFolder.resolve("prefabs").listFiles()?.filter {
                 it.isDirectory && it.name.startsWith(suggestions.remaining.lowercase())
             }?.map { it.name } ?: emptyList())
         }
@@ -41,11 +40,11 @@ class GearyArguments(
 
     fun mob() = with(context) {
         ArgsMinecraft.namespacedKey().suggests {
-            with(stack.location.world.toGeary()) {
+            with(location.world.toGeary()) {
                 suggest(getAddon(EntityTracking).query.spawnablePrefabs.getKeys().filterPrefabs(suggestions.remaining))
             }
         }.map {
-            with(stack.location.world.toGeary()) {
+            with(location.world.toGeary()) {
                 entityOfOrNull(PrefabKey.of(it.asString())) ?: fail("No such mob key: $it")
             }
         }
@@ -53,11 +52,13 @@ class GearyArguments(
 
     fun item() = with(context) {
         ArgsMinecraft.namespacedKey().suggests {
-            with(stack.location.world.toGeary()) {
-                suggest(getAddon(ItemTracking).prefabs.getKeys().filterPrefabs(suggestions.remaining))
+            with(location.world.toGeary()) {
+                suggest(getAddon(ItemTracking).prefabs.getKeys().filterPrefabs(suggestions.remaining).also {
+                    if (it.isEmpty()) fail("Prefab ${suggestions.remaining} not found")
+                })
             }
         }.map {
-            with(stack.location.world.toGeary()) {
+            with(location.world.toGeary()) {
                 entityOfOrNull(PrefabKey.of(it.asString())) ?: fail("No such item key: $it")
             }
         }
@@ -65,11 +66,11 @@ class GearyArguments(
 
     fun block() = with(context) {
         ArgsMinecraft.namespacedKey().suggests {
-            with(stack.location.world.toGeary()) {
+            with(location.world.toGeary()) {
                 suggest(getAddon(ItemTracking).prefabs.getKeys().filterPrefabs(suggestions.remaining))
             }
         }.map {
-            with(stack.location.world.toGeary()) {
+            with(location.world.toGeary()) {
                 entityOfOrNull(PrefabKey.of(it.asString())) ?: fail("No such block key: $it")
             }
         }

@@ -6,7 +6,7 @@ import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.IdoCommand
-import com.mineinabyss.idofront.commands.brigadier.IdoPlayerCommandContext
+import com.mineinabyss.idofront.commands.brigadier.context.IdoPlayerCommandContext
 import com.mineinabyss.idofront.commands.brigadier.playerExecutes
 
 internal fun IdoCommand.items() {
