@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.features.items.food
 
-import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.itemEntityContext
+import com.mineinabyss.geary.papermc.withGeary
 import com.mineinabyss.idofront.serialization.SerializableItemStack
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -19,7 +19,7 @@ value class ReplaceBurnedDrop(
 
 class ReplaceBurnedDropListener : Listener {
     @EventHandler
-    fun EntityDeathEvent.replaceBurnedDrops() = with(entity.world.toGeary()) {
+    fun EntityDeathEvent.replaceBurnedDrops() = entity.withGeary {
         if (entity.fireTicks == 0) return
 
         itemEntityContext {

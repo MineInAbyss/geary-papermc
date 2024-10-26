@@ -9,6 +9,7 @@ plugins {
 dependencies {
     api(libs.geary.core)
     api(libs.geary.serialization)
+    api(libs.geary.prefabs)
     compileOnly(libs.geary.actions)
 
     // MineInAbyss platform
