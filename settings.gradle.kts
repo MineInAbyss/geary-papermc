@@ -25,7 +25,7 @@ dependencyResolutionManagement {
 }
 
 
-val includeGeary: String by settings
+val includeGeary: String? by settings
 
 if(includeGeary.toBoolean()) includeBuild("../geary")
 

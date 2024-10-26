@@ -1,5 +1,5 @@
 [versions]
-geary = "0.26.3"
+geary = "0.27.0-dev.0"
 
 [libraries]
 geary-core = { module = "com.mineinabyss:geary-core", version.ref = "geary" }
