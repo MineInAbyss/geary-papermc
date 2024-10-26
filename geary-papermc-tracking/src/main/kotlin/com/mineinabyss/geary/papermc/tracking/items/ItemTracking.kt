@@ -25,7 +25,7 @@ interface ItemTrackingModule {
     ): ItemStack? = itemProvider.serializePrefabToItemStack(prefabKey, writeTo)
 }
 
-val ItemTracking = createAddon<ItemTrackingModule>("Item Tracking", { NMSBackedItemTracking(this) }) {
+val ItemTracking = createAddon<ItemTrackingModule>("Item Tracking", { NMSBackedItemTracking(geary) }) {
     onStart {
         createItemMigrationListener()
         createInventoryTrackerSystem()

@@ -20,8 +20,8 @@ import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.Prefabs
+import com.mineinabyss.geary.prefabs.PrefabsDSLExtensions.fromDirectory
 import com.mineinabyss.geary.prefabs.prefabs
-import com.mineinabyss.geary.serialization.FileSystem
 import com.mineinabyss.geary.serialization.dsl.withCommonComponentNames
 import com.mineinabyss.geary.serialization.formats.YamlFormat
 import com.mineinabyss.geary.serialization.helpers.withSerialName
@@ -35,7 +35,6 @@ import com.mineinabyss.idofront.messaging.injectLogger
 import com.mineinabyss.idofront.messaging.observeLogger
 import com.mineinabyss.idofront.serialization.LocationSerializer
 import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
-import okio.Path.Companion.toOkioPath
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
@@ -74,12 +73,11 @@ class GearyPluginImpl : GearyPlugin() {
 
         gearyPaper.configure {
             // Install default addons
-            install(FileSystem.withConfig { okio.FileSystem.SYSTEM })
             install(UUIDTracking.withConfig { SynchronizedUUID2GearyMap() })
 
-            val mobs = if (configModule.config.trackEntities) install(EntityTracking) else null
-            val items = if (configModule.config.items.enabled) install(ItemTracking) else null
-            val blocks = if (configModule.config.trackBlocks) install(BlockTracking) else null
+            if (configModule.config.trackEntities) install(EntityTracking)
+            if (configModule.config.items.enabled) install(ItemTracking)
+            if (configModule.config.trackBlocks) install(BlockTracking)
 
             serialization {
                 format("yml", ::YamlFormat)
@@ -104,7 +102,7 @@ class GearyPluginImpl : GearyPlugin() {
                 .forEach { folder ->
                     namespace(folder.name) {
                         prefabs {
-                            fromRecursive(folder.toOkioPath())
+                            fromDirectory(folder)
                         }
                     }
                 }
@@ -114,7 +112,7 @@ class GearyPluginImpl : GearyPlugin() {
 
             install("PaperMC init") {
                 components {
-                    getAddonOrNull(items)?.let { addon ->
+                    getAddonOrNull(ItemTracking)?.let { addon ->
                         DI.add<SerializablePrefabItemService>(object : SerializablePrefabItemService {
                             override fun encodeFromPrefab(item: ItemStack, prefabName: String): ItemStack {
                                 val result = addon.createItem(PrefabKey.of(prefabName), item)
@@ -126,7 +124,7 @@ class GearyPluginImpl : GearyPlugin() {
                 }
 
                 onStart {
-                    getAddonOrNull(mobs)?.let {
+                    getAddonOrNull(EntityTracking)?.let {
                         server.worlds.forEach { world ->
                             world.entities.forEach entities@{ entity ->
                                 it.bukkit2Geary.getOrCreate(entity)
@@ -136,9 +134,11 @@ class GearyPluginImpl : GearyPlugin() {
 
                     gearyPaper.logger.s(
                         """Loaded prefabs
-                            | mobs: ${getAddonOrNull(mobs)?.query?.prefabs?.count() ?: "disabled"}
-                            | blocks: ${getAddonOrNull(blocks)?.prefabs?.count() ?: "disabled"}
-                            | items: ${getAddonOrNull(items)?.prefabs?.count() ?: "disabled"}""".replaceIndentByMargin(",")
+                            | mobs: ${getAddonOrNull(EntityTracking)?.query?.prefabs?.count() ?: "disabled"}
+                            | blocks: ${getAddonOrNull(BlockTracking)?.prefabs?.count() ?: "disabled"}
+                            | items: ${getAddonOrNull(ItemTracking)?.prefabs?.count() ?: "disabled"}""".replaceIndentByMargin(
+                            ","
+                        )
                             .replace("\n", "")
                     )
                 }

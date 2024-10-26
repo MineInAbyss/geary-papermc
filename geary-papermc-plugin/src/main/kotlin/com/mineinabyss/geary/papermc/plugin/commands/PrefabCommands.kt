@@ -18,7 +18,6 @@ import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.success
 import com.mineinabyss.idofront.messaging.warn
 import com.mineinabyss.idofront.typealiases.BukkitEntity
-import okio.Path.Companion.toOkioPath
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import kotlin.io.path.Path
@@ -91,7 +90,7 @@ internal fun IdoCommand.prefabs() = "prefab" {
             // Try to load from file
             val load = prefabs.loader.loadFromPath(
                 namespace,
-                gearyPaper.plugin.dataFolder.resolve(namespace).resolve(path).toOkioPath()
+                kotlinx.io.files.Path(gearyPaper.plugin.dataFolder.resolve(namespace).resolve(path).path)
             )
             when (load) {
                 is PrefabLoadResult.Failure -> {

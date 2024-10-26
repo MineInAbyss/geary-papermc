@@ -17,7 +17,6 @@ fun GearySetup.withMockTracking(
         withTestSerializers()
     }
     if (entities) install(TestEntityTracking)
-    if (items) install(ItemTracking.withConfig { BukkitBackedItemTracking(this) })
+    if (items) install(ItemTracking.withConfig { BukkitBackedItemTracking(geary) })
     install(Prefabs)
-    geary.pipeline.runStartupTasks()
 }
