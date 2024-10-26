@@ -1,64 +1,33 @@
 package com.mineinabyss.geary.papermc.plugin
 
-import com.mineinabyss.geary.datatypes.maps.SynchronizedArrayTypeMap
+import co.touchlab.kermit.Logger
+import com.mineinabyss.geary.engine.Engine
 import com.mineinabyss.geary.engine.archetypes.ArchetypeEngine
-import com.mineinabyss.geary.engine.archetypes.ArchetypeProvider
-import com.mineinabyss.geary.engine.archetypes.EntityByArchetypeProvider
-import com.mineinabyss.geary.engine.archetypes.operations.ArchetypeMutateOperations
-import com.mineinabyss.geary.engine.archetypes.operations.ArchetypeReadOperations
 import com.mineinabyss.geary.modules.ArchetypeEngineModule
-import com.mineinabyss.geary.modules.GearyModuleProvider
-import com.mineinabyss.geary.papermc.Catching.Companion.asyncCheck
+import com.mineinabyss.geary.modules.GearyModule
 import com.mineinabyss.geary.papermc.GearyPlugin
-import com.mineinabyss.geary.papermc.gearyPaper
-import com.mineinabyss.idofront.di.DI
-import com.mineinabyss.idofront.messaging.observeLogger
-import com.mineinabyss.idofront.time.ticks
+import com.mineinabyss.idofront.messaging.injectedLogger
+import org.koin.core.module.dsl.bind
+import org.koin.core.module.dsl.withOptions
+import org.koin.dsl.koinApplication
+import org.koin.dsl.module
 
-class PaperEngineModule(
-    val plugin: GearyPlugin
-) : ArchetypeEngineModule(tickDuration = 1.ticks) {
-    override val engine: ArchetypeEngine = PaperMCEngine()
-    override val logger by plugin.observeLogger()
-
-    override val entityProvider: EntityByArchetypeProvider
-        get() {
-            asyncCheck(gearyPaper.config.catch.asyncWrite, "Async entityProvider access!")
-            return super.entityProvider
-        }
-    override val read: ArchetypeReadOperations
-        get() {
-            asyncCheck(gearyPaper.config.catch.asyncRead, "Async entity read!")
-            return super.read
-        }
-    override val write: ArchetypeMutateOperations
-        get() {
-            asyncCheck(gearyPaper.config.catch.asyncWrite, "Async entity write!")
-            return super.write
-        }
-
-    private val syncTypeMap = SynchronizedArrayTypeMap()
-
-    override val records: SynchronizedArrayTypeMap
-        get() {
-            asyncCheck(gearyPaper.config.catch.asyncRecordsAccess, "Async records access!")
-            return syncTypeMap
-        }
-
-
-    override val archetypeProvider: ArchetypeProvider
-        get() {
-            asyncCheck(gearyPaper.config.catch.asyncArchetypeProviderAccess, "Async archetype provider access!")
-            return super.archetypeProvider
-        }
-
-    companion object : GearyModuleProvider<PaperEngineModule> {
-        override fun start(module: PaperEngineModule) {
-            DI.add<PaperEngineModule>(module)
-        }
-
-        override fun init(module: PaperEngineModule) {
-            ArchetypeEngineModule.init(module)
-        }
+private fun GearyPlugin.paperModule() = module {
+    single<Logger> { this@paperModule.injectedLogger() }
+    single<GearyPlugin> { this@paperModule }
+    single {
+        PaperMCEngine(get(), get(), getProperty("engineThread"))
+    } withOptions {
+        bind<Engine>(); bind<ArchetypeEngine>()
     }
+}
+fun GearyPlugin.PaperEngineModule(): GearyModule {
+    val engine = ArchetypeEngineModule(useSynchronized = true)
+
+    return GearyModule(
+        module {
+            includes(paperModule(), engine.module)
+        },
+        engine.properties
+    )
 }

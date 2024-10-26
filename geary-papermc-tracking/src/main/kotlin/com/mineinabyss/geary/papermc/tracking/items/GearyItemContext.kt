@@ -2,11 +2,15 @@ package com.mineinabyss.geary.papermc.tracking.items
 
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.entity
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.idofront.nms.nbt.fastPDC
 import org.bukkit.inventory.ItemStack
 import java.io.Closeable
 
-class GearyItemContext : Closeable {
+class GearyItemContext(
+    world: Geary,
+) : Closeable, Geary by world {
+    val gearyItems = world.getAddon(ItemTracking)
     val cached = mutableMapOf<ItemStack, GearyEntity>()
     fun ItemStack.toGeary(): GearyEntity {
         return cached.getOrPut(this) {
@@ -23,11 +27,10 @@ class GearyItemContext : Closeable {
     }
 
     override fun close() {
-        cached.forEach { item, entity -> entity.removeEntity() }
+        cached.forEach { (item, entity) -> entity.removeEntity() }
     }
 }
 
-
-inline fun <T> itemEntityContext(run: GearyItemContext.() -> T): T {
-    return GearyItemContext().use(run)
+inline fun <T> Geary.itemEntityContext(run: GearyItemContext.() -> T): T {
+    return GearyItemContext(this).use(run)
 }

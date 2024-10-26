@@ -1,9 +1,8 @@
 package com.mineinabyss.geary.papermc.plugin
 
 import com.mineinabyss.geary.actions.GearyActions
-import com.mineinabyss.geary.addons.GearyPhase.ENABLE
 import com.mineinabyss.geary.autoscan.autoscan
-import com.mineinabyss.geary.modules.ArchetypeEngineModule
+import com.mineinabyss.geary.modules.UninitializedGearyModule
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.*
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
@@ -16,23 +15,17 @@ import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsFeature
 import com.mineinabyss.geary.papermc.plugin.commands.registerGearyCommands
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
-import com.mineinabyss.geary.papermc.tracking.blocks.gearyBlocks
-import com.mineinabyss.geary.papermc.tracking.blocks.helpers.getKeys
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
-import com.mineinabyss.geary.papermc.tracking.entities.gearyMobs
-import com.mineinabyss.geary.papermc.tracking.entities.helpers.getKeys
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
-import com.mineinabyss.geary.papermc.tracking.items.gearyItems
-import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery.Companion.getKeys
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.Prefabs
 import com.mineinabyss.geary.prefabs.prefabs
-import com.mineinabyss.geary.serialization.FileSystemAddon
-import com.mineinabyss.geary.serialization.dsl.serialization
+import com.mineinabyss.geary.serialization.FileSystem
 import com.mineinabyss.geary.serialization.dsl.withCommonComponentNames
 import com.mineinabyss.geary.serialization.formats.YamlFormat
 import com.mineinabyss.geary.serialization.helpers.withSerialName
+import com.mineinabyss.geary.serialization.serialization
 import com.mineinabyss.geary.uuid.SynchronizedUUID2GearyMap
 import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.config.config
@@ -42,7 +35,6 @@ import com.mineinabyss.idofront.messaging.injectLogger
 import com.mineinabyss.idofront.messaging.observeLogger
 import com.mineinabyss.idofront.serialization.LocationSerializer
 import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
-import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
@@ -74,18 +66,20 @@ class GearyPluginImpl : GearyPlugin() {
             override val config: GearyPaperConfig by configHolder
             override val logger by plugin.observeLogger()
             override val features get() = this@GearyPluginImpl.features
+            override val gearyModule: UninitializedGearyModule = geary(PaperEngineModule())
+            override val worldManager = WorldManager()
         }
 
         DI.add<GearyPaperModule>(configModule)
 
-        geary(PaperEngineModule, PaperEngineModule(this)) {
+        gearyPaper.configure {
             // Install default addons
-            install(FileSystemAddon, FileSystem.SYSTEM)
-            install(UUIDTracking, SynchronizedUUID2GearyMap())
+            install(FileSystem.withConfig { okio.FileSystem.SYSTEM })
+            install(UUIDTracking.withConfig { SynchronizedUUID2GearyMap() })
 
-            if (configModule.config.trackEntities) install(EntityTracking)
-            if (configModule.config.items.enabled) install(ItemTracking)
-            if (configModule.config.trackBlocks) install(BlockTracking)
+            val mobs = if (configModule.config.trackEntities) install(EntityTracking) else null
+            val items = if (configModule.config.items.enabled) install(ItemTracking) else null
+            val blocks = if (configModule.config.trackBlocks) install(BlockTracking) else null
 
             serialization {
                 format("yml", ::YamlFormat)
@@ -110,56 +104,66 @@ class GearyPluginImpl : GearyPlugin() {
                 .forEach { folder ->
                     namespace(folder.name) {
                         prefabs {
-                            geary.logger.i("Loading prefabs from $folder")
                             fromRecursive(folder.toOkioPath())
                         }
                     }
                 }
 
-            // Start engine ticking
-            on(ENABLE) {
-                if (configModule.config.trackEntities) {
-                    server.worlds.forEach { world ->
-                        world.entities.forEach entities@{ entity ->
-                            gearyMobs.bukkit2Geary.getOrCreate(entity)
-                        }
-                    }
-                }
-                gearyPaper.logger.s(
-                    "Loaded prefabs - Mobs: ${gearyMobs.query.prefabs.getKeys().size}, Blocks: ${gearyBlocks.prefabs.getKeys().size}, Items: ${gearyItems.prefabs.getKeys().size}"
-                )
-            }
-
             install(GearyActions)
             install(GearyPaperMCFeatures)
+
+            install("PaperMC init") {
+                components {
+                    getAddonOrNull(items)?.let { addon ->
+                        DI.add<SerializablePrefabItemService>(object : SerializablePrefabItemService {
+                            override fun encodeFromPrefab(item: ItemStack, prefabName: String): ItemStack {
+                                val result = addon.createItem(PrefabKey.of(prefabName), item)
+                                require(result != null) { "Failed to create serializable ItemStack from $prefabName, does the prefab exist and have a geary:set.item component?" }
+                                return result
+                            }
+                        })
+                    }
+                }
+
+                onStart {
+                    getAddonOrNull(mobs)?.let {
+                        server.worlds.forEach { world ->
+                            world.entities.forEach entities@{ entity ->
+                                it.bukkit2Geary.getOrCreate(entity)
+                            }
+                        }
+                    }
+
+                    gearyPaper.logger.s(
+                        """Loaded prefabs
+                            | mobs: ${getAddonOrNull(mobs)?.query?.prefabs?.count() ?: "disabled"}
+                            | blocks: ${getAddonOrNull(blocks)?.prefabs?.count() ?: "disabled"}
+                            | items: ${getAddonOrNull(items)?.prefabs?.count() ?: "disabled"}""".replaceIndentByMargin(",")
+                            .replace("\n", "")
+                    )
+                }
+            }
         }
 
-        DI.add<SerializablePrefabItemService>(
-            object : SerializablePrefabItemService {
-                override fun encodeFromPrefab(item: ItemStack, prefabName: String): ItemStack {
-                    val result = gearyItems.createItem(PrefabKey.of(prefabName), item)
-                    require(result != null) { "Failed to create serializable ItemStack from $prefabName, does the prefab exist and have a geary:set.item component?" }
-                    return result
-                }
-            })
-
-        features.loadAll()
         registerGearyCommands()
     }
 
     override fun onEnable() {
-        ArchetypeEngineModule.start(DI.get<PaperEngineModule>())
-
+        //TODO api for registering geary per world once we have per world ticking
+        gearyPaper.worldManager.setGlobalEngine(gearyPaper.gearyModule.start())
+        features.loadAll()
         features.enableAll()
     }
 
     override fun onDisable() {
         features.disableAll()
         server.worlds.forEach { world ->
-            world.entities.forEach entities@{ entity ->
-                val gearyEntity = entity.toGearyOrNull() ?: return@entities
-                gearyEntity.encodeComponentsTo(entity)
-                gearyEntity.removeEntity()
+            with(world.toGeary()) {
+                world.entities.forEach entities@{ entity ->
+                    val gearyEntity = entity.toGearyOrNull() ?: return@entities
+                    gearyEntity.encodeComponentsTo(entity)
+                    gearyEntity.removeEntity()
+                }
             }
         }
         server.scheduler.cancelTasks(this)

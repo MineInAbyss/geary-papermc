@@ -24,6 +24,11 @@ dependencyResolutionManagement {
     }
 }
 
+
+val includeGeary: String? by settings
+
+if(includeGeary.toBoolean()) includeBuild("../geary")
+
 include(
     "geary-papermc-features",
     "geary-papermc-mythicmobs",

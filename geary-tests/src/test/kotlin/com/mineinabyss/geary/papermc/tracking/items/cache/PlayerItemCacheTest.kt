@@ -2,17 +2,22 @@ package com.mineinabyss.geary.papermc.tracking.items.cache
 
 import be.seeseemelk.mockbukkit.MockBukkit
 import com.mineinabyss.geary.helpers.entity
+import com.mineinabyss.geary.modules.ArchetypeEngineModule
 import com.mineinabyss.geary.modules.TestEngineModule
+import com.mineinabyss.geary.modules.UninitializedGearyModule
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.Prefabs
+import com.mineinabyss.geary.prefabs.PrefabsModule
+import com.mineinabyss.geary.test.GearyTest
 
-class PlayerItemCacheTest {
+class PlayerItemCacheTest: GearyTest() {
+    override fun setupGeary()= geary(ArchetypeEngineModule(beginTickingOnStart = false, reuseIDsAfterRemoval = false)) {
+        install(Prefabs)
+    }
+
     init {
         MockBukkit.unmock()
-        geary(TestEngineModule, TestEngineModule(reuseIDsAfterRemoval = false)) {
-            install(Prefabs)
-        }
         MockBukkit.mock()
     }
 

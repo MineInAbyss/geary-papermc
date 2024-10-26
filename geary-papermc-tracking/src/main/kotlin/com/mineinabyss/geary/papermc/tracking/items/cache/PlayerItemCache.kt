@@ -3,8 +3,7 @@ package com.mineinabyss.geary.papermc.tracking.items.cache
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.addParent
 import com.mineinabyss.geary.helpers.fastForEachWithIndex
-import com.mineinabyss.geary.helpers.toGeary
-import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.EntityEncoded
 import com.mineinabyss.geary.papermc.tracking.items.components.InInventory
@@ -12,10 +11,9 @@ import com.mineinabyss.geary.prefabs.PrefabKey
 import org.bukkit.inventory.ItemStack
 
 abstract class PlayerItemCache<T>(
+    world: Geary,
     val maxSize: Int = 64,
-) {
-    private val logger get() = geary.logger
-
+) : Geary by world {
     /** Entity associated with an inventory slot */
     private val entities = ULongArray(maxSize)
 
@@ -50,7 +48,7 @@ abstract class PlayerItemCache<T>(
             if (!ignoreCached && skipUpdate(slot, item)) return@fastForEachWithIndex
             if (!ignoreCached && skipReserialization(slot, item)) {
                 cachedItems[slot] = item
-                if(item != null) get(slot)?.set<ItemStack>(convertToItemStack(item))
+                if (item != null) get(slot)?.set<ItemStack>(convertToItemStack(item))
                 return@fastForEachWithIndex
             }
             cachedItems[slot] = item

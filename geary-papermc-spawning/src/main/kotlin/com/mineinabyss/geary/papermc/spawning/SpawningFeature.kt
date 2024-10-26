@@ -16,7 +16,7 @@ import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.mythic.MythicSpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.tasks.SpawnTask
-import com.mineinabyss.geary.serialization.serializableComponents
+import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.idofront.config.config
 
 class SpawningFeature(context: FeatureContext) : Feature(context) {
@@ -36,7 +36,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
 
         val reader = SpawnEntryReader(
             gearyPaper.plugin, Yaml(
-                serializersModule = serializableComponents.serializers.module,
+                serializersModule = gearyPaper.worldManager.global.getAddon(SerializableComponents).serializers.module,
                 configuration = YamlConfiguration(
                     strictMode = false
                 )

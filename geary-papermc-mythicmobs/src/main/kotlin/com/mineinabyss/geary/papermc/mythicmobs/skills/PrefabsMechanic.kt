@@ -2,8 +2,10 @@ package com.mineinabyss.geary.papermc.mythicmobs.skills
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
+import com.mineinabyss.geary.prefabs.entityOfOrNull
 import io.lumine.mythic.api.adapters.AbstractEntity
 import io.lumine.mythic.api.config.MythicLineConfig
 import io.lumine.mythic.api.skills.ITargetedEntitySkill
@@ -21,9 +23,11 @@ class PrefabsMechanic(
 
     override fun castAtEntity(meta: SkillMetadata?, target: AbstractEntity?): SkillResult {
         val bukkit = BukkitAdapter.adapt(target)
-        gearyPaper.plugin.launch {
-            prefabs.mapNotNull { PrefabKey.of(it).toEntityOrNull() }
-                .forEach(bukkit.toGeary()::extend)
+        with(bukkit.world.toGeary()) {
+            gearyPaper.plugin.launch {
+                prefabs.mapNotNull { entityOfOrNull(PrefabKey.of(it)) }
+                    .forEach(bukkit.toGeary()::extend)
+            }
         }
         return SkillResult.SUCCESS
     }

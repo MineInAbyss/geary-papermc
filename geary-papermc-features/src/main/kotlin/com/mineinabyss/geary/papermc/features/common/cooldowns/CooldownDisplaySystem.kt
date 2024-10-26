@@ -1,10 +1,9 @@
 package com.mineinabyss.geary.papermc.features.common.cooldowns
 
-import com.mineinabyss.geary.modules.GearyModule
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.features.common.cooldowns.CooldownDisplayProps.INTERVAL
 import com.mineinabyss.geary.papermc.features.common.cooldowns.CooldownDisplayProps.displayChar
 import com.mineinabyss.geary.papermc.features.common.cooldowns.CooldownDisplayProps.displayLength
-import com.mineinabyss.geary.systems.builders.system
 import com.mineinabyss.geary.systems.query.query
 import com.mineinabyss.idofront.time.ticks
 import net.kyori.adventure.text.Component
@@ -14,8 +13,9 @@ import org.bukkit.entity.Player
 import kotlin.math.roundToInt
 import kotlin.time.DurationUnit
 
-fun GearyModule.cooldownDisplaySystem() =
-    system(query<Player, Cooldowns>()).every(INTERVAL).exec { (player, cooldowns) ->
+fun Geary.cooldownDisplaySystem() = system(query<Player, Cooldowns>())
+    .every(INTERVAL)
+    .exec { (player, cooldowns) ->
         val cooldownsWithDisplay = cooldowns.cooldowns.values.filter {
             it.display != null
         }

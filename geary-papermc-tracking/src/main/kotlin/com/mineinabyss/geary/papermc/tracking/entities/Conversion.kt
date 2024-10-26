@@ -1,18 +1,22 @@
 package com.mineinabyss.geary.papermc.tracking.entities
 
 import com.mineinabyss.geary.datatypes.GearyEntity
+import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import org.bukkit.entity.Entity
 
-fun BukkitEntity.toGeary(): GearyEntity {
+fun BukkitEntity.toGeary(): GearyEntity = with(world.toGeary()) {
     return toGearyOrNull() ?: error("Entity $this is not being tracked by Geary!")
 }
 
 fun BukkitEntity.toGearyOrNull(): GearyEntity? =
-    gearyMobs.bukkit2Geary[this]
+    with(world.toGeary()) { getAddon(EntityTracking).bukkit2Geary[this@toGearyOrNull] }
 
-fun GearyEntity.toBukkit(): BukkitEntity? = get(gearyMobs.bukkitEntityComponent) as? BukkitEntity
+fun GearyEntity.toBukkit(): BukkitEntity? =
+    with(world) { get(getAddon(EntityTracking).bukkitEntityComponent) as? BukkitEntity }
 
+context(Geary)
 @JvmName("toBukkitAndCast")
 inline fun <reified T : Entity> GearyEntity.toBukkit(): T? =
-    get(gearyMobs.bukkitEntityComponent) as? T
+    get(getAddon(EntityTracking).bukkitEntityComponent) as? T

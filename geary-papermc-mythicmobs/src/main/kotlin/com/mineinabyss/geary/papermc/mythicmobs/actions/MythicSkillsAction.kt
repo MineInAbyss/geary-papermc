@@ -1,9 +1,9 @@
 package com.mineinabyss.geary.papermc.mythicmobs.actions
 
 import com.google.common.collect.Lists
-import com.mineinabyss.geary.modules.GearyModule
+import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.observeWithData
 import com.mineinabyss.geary.serialization.serializers.InnerSerializer
-import com.mineinabyss.geary.systems.builders.observeWithData
 import com.mineinabyss.geary.systems.query.query
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import io.lumine.mythic.api.adapters.AbstractEntity
@@ -28,7 +28,7 @@ class MythicSkillsAction(
     )
 }
 
-fun GearyModule.runMMSkillAction() = observeWithData<MythicSkillsAction>()
+fun Geary.runMMSkillAction() = observeWithData<MythicSkillsAction>()
     .exec(query<BukkitEntity>()) { (bukkit) ->
         event.keys.forEach { line ->
             val entity = BukkitAdapter.adapt(bukkit)

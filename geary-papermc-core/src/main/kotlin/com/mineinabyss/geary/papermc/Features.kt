@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc
 
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.injectedLogger
 import com.mineinabyss.idofront.messaging.success
@@ -28,7 +29,7 @@ class Features(
         isFirstEnable = false
     }
 
-    fun load(builder: FeatureBuilder): Result<Feature> {
+    fun load(builder: FeatureBuilder): Result<Feature> = runCatching {
         val feature = builder(context)
         featuresByClass[feature::class] = builder
         if (!feature.canLoad()) return Result.failure(IllegalStateException("Feature ${feature.name} could not be loaded"))

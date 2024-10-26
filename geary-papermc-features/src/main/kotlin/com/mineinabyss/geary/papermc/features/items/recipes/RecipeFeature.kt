@@ -1,27 +1,32 @@
 package com.mineinabyss.geary.papermc.features.items.recipes
 
+import co.touchlab.kermit.Logger
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.Feature
 import com.mineinabyss.geary.papermc.FeatureContext
 import com.mineinabyss.geary.papermc.gearyPaper
-import com.mineinabyss.geary.papermc.tracking.items.gearyItems
+import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.PrefabKey
+import com.mineinabyss.geary.prefabs.Prefabs
 import com.mineinabyss.geary.prefabs.prefabs
-import com.mineinabyss.geary.systems.builders.cache
 import com.mineinabyss.geary.systems.query.query
+import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.serialization.recipes.options.ingredientOptionsListener
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 
-class RecipeFeature(val context: FeatureContext) : Feature(context) {
-    private val recipes = geary.cache(query<SetRecipes, PrefabKey>())
-    private val potionMixes = geary.cache(query<SetPotionMixes, PrefabKey>())
+class RecipeFeature(val context: FeatureContext) : Feature(context), Geary by gearyPaper.worldManager.global {
+    private val recipes = cache(query<SetRecipes, PrefabKey>())
+    private val potionMixes = cache(query<SetPotionMixes, PrefabKey>())
+    private val gearyItems = getAddon(ItemTracking)
+    override val logger: ComponentLogger get() = context.logger
 
     override fun enable() {
         if (!context.isFirstEnable) {
             (recipes.entities().toSet() + potionMixes.entities().toSet()).forEach {
-                prefabs.loader.reload(it)
+                getAddon(Prefabs).loader.reload(it)
             }
         }
 
@@ -61,7 +66,7 @@ class RecipeFeature(val context: FeatureContext) : Feature(context) {
             }.getOrNull()
 
             if (result == null) {
-                geary.logger.w { "Recipe ${prefabKey.key} is missing result item" }
+                logger.w { "Recipe ${prefabKey.key} is missing result item" }
                 return@forEach
             }
 
@@ -69,8 +74,8 @@ class RecipeFeature(val context: FeatureContext) : Feature(context) {
                 runCatching {
                     Bukkit.removeRecipe(NamespacedKey.fromString(recipe)!!)
                 }.onFailure {
-                    geary.logger.w { "Failed to remove recipe $recipe in ${prefabKey.key}, ${it.message}" }
-                    geary.logger.v { it.stackTraceToString() }
+                    logger.w { "Failed to remove recipe $recipe in ${prefabKey.key}, ${it.message}" }
+                    logger.v { it.stackTraceToString() }
                 }
             }
 
@@ -90,8 +95,8 @@ class RecipeFeature(val context: FeatureContext) : Feature(context) {
                     }
                     if (recipes.discoverRecipes) discoveredRecipes += key
                 }.onFailure {
-                    geary.logger.w { "Failed to register recipe ${prefabKey.key} #$i, ${it.message}" }
-                    geary.logger.v { it.stackTraceToString() }
+                    logger.w { "Failed to register recipe ${prefabKey.key} #$i, ${it.message}" }
+                    logger.v { it.stackTraceToString() }
                 }
             }
         }

@@ -3,8 +3,7 @@ package com.mineinabyss.geary.papermc.datastore
 import com.mineinabyss.geary.components.relations.InstanceOf
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.component
-import com.mineinabyss.geary.helpers.toGeary
-import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.serialization.components.Persists
 import com.mineinabyss.geary.serialization.getAllPersisting
 import com.mineinabyss.geary.serialization.setAllPersisting
@@ -14,7 +13,7 @@ import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataHolder
 
 /** Encodes this entity's persisting components into a [PersistentDataContainer] */
-fun GearyEntity.encodeComponentsTo(pdc: PersistentDataContainer) {
+fun GearyEntity.encodeComponentsTo(pdc: PersistentDataContainer) = with(world) {
     val persisting = getAllPersisting()
     if (persisting.isEmpty() && getRelations<InstanceOf?, Any?>().isEmpty()) {
         pdc.hasComponentsEncoded = false
@@ -27,12 +26,14 @@ fun GearyEntity.encodeComponentsTo(pdc: PersistentDataContainer) {
     pdc.encodeComponents(persisting, type)
 }
 
+context(Geary)
 fun GearyEntity.encodeComponentsTo(holder: PersistentDataHolder) {
     val bukkitHolder = holder as? BukkitEntity
-    geary.logger.v { "Encoding components for bukkit entity $id (${bukkitHolder?.type} ${bukkitHolder?.uniqueId})" }
+    world.logger.v { "Encoding components for bukkit entity $id (${bukkitHolder?.type} ${bukkitHolder?.uniqueId})" }
     encodeComponentsTo(holder.persistentDataContainer)
 }
 
+context(Geary)
 fun GearyEntity.encodeComponentsTo(item: ItemStack) {
     item.editMeta { encodeComponentsTo(it.persistentDataContainer) }
 }
@@ -40,7 +41,7 @@ fun GearyEntity.encodeComponentsTo(item: ItemStack) {
 
 /** Decodes a [PersistentDataContainer]'s components, adding them to this entity and its list of persisting components */
 fun GearyEntity.loadComponentsFrom(pdc: PersistentDataContainer) {
-    loadComponentsFrom(pdc.decodeComponents())
+    loadComponentsFrom(with(world) { pdc.decodeComponents() })
 }
 
 fun GearyEntity.loadComponentsFrom(decodedEntityData: DecodedEntityData) {
@@ -49,11 +50,15 @@ fun GearyEntity.loadComponentsFrom(decodedEntityData: DecodedEntityData) {
     // Components written to this entity's PDC will override the ones defined in type
     setAllPersisting(components)
     //TODO this should just add the id and a listener handle what addPrefab currently does
-    type.forEach { extend(it.toGeary()) }
+    with(world) {
+        type.forEach { extend(it.toGeary()) }
+    }
 }
 
+context(Geary)
 fun PersistentDataHolder.decodeComponents(): DecodedEntityData =
     persistentDataContainer.decodeComponents()
 
+context(Geary)
 fun ItemStack.decodeComponents(): DecodedEntityData =
     itemMeta.decodeComponents()

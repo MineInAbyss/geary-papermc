@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.features.common.event_bridge.entities
 
+import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.events.GearyEntityAddToWorldEvent
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import kotlinx.serialization.SerialName
@@ -28,13 +29,13 @@ class EntityLoadUnloadBridge : Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun EntitySpawnEvent.emitOnSpawn() {
+    fun EntitySpawnEvent.emitOnSpawn() = with(entity.world.toGeary()) {
         val gearyEntity = entity.toGearyOrNull() ?: return
         gearyEntity.emit<OnSpawn>()
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun EntityDeathEvent.emitOnDeath() {
+    fun EntityDeathEvent.emitOnDeath() = with(entity.world.toGeary()) {
         val gearyEntity = entity.toGearyOrNull() ?: return
         gearyEntity.emit<OnDeath>()
     }
