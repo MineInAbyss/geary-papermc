@@ -1,6 +1,6 @@
 package com.mineinabyss.geary.papermc.features.items.resourcepacks
 
-import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.idofront.serialization.KeySerializer
 import com.mineinabyss.idofront.serialization.MaterialByNameSerializer
@@ -22,7 +22,7 @@ data class ResourcePackContent(
     val model: @Serializable(KeySerializer::class) Key? = null,
     val parentModel: @Serializable(KeySerializer::class) Key = Key.key("minecraft:item/generated"),
     val textures: @Serializable(ModelTexturesSerializer::class) ModelTexturesSurrogate = ModelTexturesSurrogate(),
-    val itemPredicates: ItemPredicates = ItemPredicates(customModelData = null)
+    val itemPredicates: ItemPredicates = ItemPredicates(customModelData = null),
 ) {
 
     init {
@@ -32,7 +32,7 @@ data class ResourcePackContent(
     fun itemOverrides(modelKey: Key, prefabKey: PrefabKey, itemStack: ItemStack?): List<ItemOverride> {
         val overrides = mutableListOf<ItemOverride>()
         val cmdPredicate = itemPredicates.customModelData(itemStack) ?: run {
-            geary.logger.w("$prefabKey has no CustomModelData specified in either ResourcePackContent or SerializableItemStack components")
+            Geary.w("$prefabKey has no CustomModelData specified in either ResourcePackContent or SerializableItemStack components")
             ItemPredicate.customModelData(0)
         }
 
@@ -147,6 +147,8 @@ data class ResourcePackContent(
         @EncodeDefault(EncodeDefault.Mode.NEVER) val timeTextures: Map<@Serializable(KeySerializer::class) Key, Float> = emptyMap(),
     ) {
         fun customModelData(itemStack: ItemStack?): ItemPredicate? =
-            (customModelData ?: itemStack?.itemMeta?.takeIf { it.hasCustomModelData() }?.customModelData)?.let(ItemPredicate::customModelData)
+            (customModelData ?: itemStack?.itemMeta?.takeIf { it.hasCustomModelData() }?.customModelData)?.let(
+                ItemPredicate::customModelData
+            )
     }
 }

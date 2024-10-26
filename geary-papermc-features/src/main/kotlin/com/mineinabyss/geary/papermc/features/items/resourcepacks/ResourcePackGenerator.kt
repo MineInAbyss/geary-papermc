@@ -2,7 +2,7 @@ package com.mineinabyss.geary.papermc.features.items.resourcepacks
 
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.gearyPaper
-import com.mineinabyss.geary.papermc.tracking.items.gearyItems
+import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
 import com.mineinabyss.geary.systems.query.GearyQuery
@@ -45,7 +45,8 @@ class ResourcePackGenerator(world: Geary) : Geary by world {
                     .key(Key.key(prefabKey.namespace, prefabKey.key))
                     .parent(resourcePackContent.parentModel.key())
                     .textures(resourcePackContent.textures.modelTextures).build()
-                resourcePackContent.itemOverrides(model.key(), prefabKey, itemStack).forEach(defaultVanillaModel::addOverride)
+                resourcePackContent.itemOverrides(model.key(), prefabKey, itemStack)
+                    .forEach(defaultVanillaModel::addOverride)
                 model.let(ResourcePacks::ensureVanillaModelProperties)
                     .let(ResourcePacks::ensureItemOverridesSorted)
                     .addTo(resourcePack)
@@ -99,7 +100,7 @@ class ResourcePackGenerator(world: Geary) : Geary by world {
 
             operator fun component1() = prefabKey
             operator fun component2() = resourcePackContent
-            operator fun component3() = gearyItems.itemProvider.serializePrefabToItemStack(prefabKey)
+            operator fun component3() = world.getAddon(ItemTracking).itemProvider.serializePrefabToItemStack(prefabKey)
         }
     }
 }
