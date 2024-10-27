@@ -11,6 +11,8 @@ import com.mineinabyss.geary.papermc.features.GearyPaperMCFeatures
 import com.mineinabyss.geary.papermc.features.entities.EntityFeatures
 import com.mineinabyss.geary.papermc.features.items.ItemFeatures
 import com.mineinabyss.geary.papermc.features.items.recipes.RecipeFeature
+import com.mineinabyss.geary.papermc.features.items.resourcepacks.ResourcePackAddon
+import com.mineinabyss.geary.papermc.features.items.resourcepacks.resourcePack
 import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsFeature
 import com.mineinabyss.geary.papermc.plugin.commands.registerGearyCommands
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
@@ -109,6 +111,7 @@ class GearyPluginImpl : GearyPlugin() {
 
             install(GearyActions)
             install(GearyPaperMCFeatures)
+            install(ResourcePackAddon)
 
             install("PaperMC init") {
                 components {
