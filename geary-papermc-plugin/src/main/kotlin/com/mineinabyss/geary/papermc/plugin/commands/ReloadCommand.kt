@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.plugin.commands
 
 import com.mineinabyss.geary.papermc.features.items.recipes.RecipeFeature
+import com.mineinabyss.geary.papermc.features.items.resourcepacks.ResourcePackAddon
 import com.mineinabyss.geary.papermc.features.items.resourcepacks.ResourcePackGenerator
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.plugin.GearyPluginImpl
@@ -16,7 +17,7 @@ internal fun IdoCommand.reload(plugin: GearyPluginImpl) = "reload" {
         gearyPaper.configHolder.reload()
         with(gearyPaper.worldManager.global) {
             getAddon(Prefabs).loader.loadOrUpdatePrefabs()
-            ResourcePackGenerator(this).generateResourcePack()
+            getAddon(ResourcePackAddon).generateResourcePack()
             plugin.features.reloadAll()
         }
     }

@@ -9,11 +9,12 @@ import com.mineinabyss.geary.systems.query.GearyQuery
 import com.mineinabyss.idofront.resourcepacks.ResourcePacks
 import net.kyori.adventure.key.Key
 import team.unnamed.creative.ResourcePack
+import team.unnamed.creative.base.Writable
 import team.unnamed.creative.model.Model
 import team.unnamed.creative.model.ModelTexture
 import team.unnamed.creative.model.ModelTextures
 
-class ResourcePackGenerator(world: Geary) : Geary by world {
+class ResourcePackGenerator(world: Geary, val config: ResourcePackConfig) : Geary by world {
     private val resourcePackQuery = cache(::ResourcePackQuery)
     private val includedPackPath = gearyPaper.config.resourcePack.includedPackPath.takeUnless(String::isEmpty)
         ?.let { gearyPaper.plugin.dataFolder.resolve(it) }
@@ -23,6 +24,8 @@ class ResourcePackGenerator(world: Geary) : Geary by world {
         if (!gearyPaper.config.resourcePack.generate) return
         val resourcePackFile = gearyPaper.plugin.dataFolder.resolve(gearyPaper.config.resourcePack.outputPath)
         resourcePackFile.deleteRecursively()
+
+        resourcePack.packMeta(18, "Geary Resource Pack")
 
         resourcePackQuery.forEach { (prefabKey, resourcePackContent, itemStack) ->
             val vanillaModelKey = ResourcePacks.vanillaKeyForMaterial(
@@ -56,6 +59,12 @@ class ResourcePackGenerator(world: Geary) : Geary by world {
                 .let(ResourcePacks::ensureItemOverridesSorted)
                 .addTo(resourcePack)
         }
+
+        config.jarResources
+            .forEach {
+                val data = it.stream.use { Writable.copyInputStream(it) }
+                resourcePack.unknownFile(it.path, data)
+            }
 
         ResourcePacks.writeToFile(resourcePackFile, resourcePack)
     }
