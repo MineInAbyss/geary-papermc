@@ -13,6 +13,7 @@ import team.unnamed.creative.base.Writable
 import team.unnamed.creative.model.Model
 import team.unnamed.creative.model.ModelTexture
 import team.unnamed.creative.model.ModelTextures
+import team.unnamed.creative.resources.MergeStrategy
 
 class ResourcePackGenerator(world: Geary, val config: ResourcePackConfig) : Geary by world {
     private val resourcePackQuery = cache(::ResourcePackQuery)
@@ -62,11 +63,13 @@ class ResourcePackGenerator(world: Geary, val config: ResourcePackConfig) : Gear
 
         config.jarResources
             .forEach {
-                val data = it.stream.use { Writable.copyInputStream(it) }
-                resourcePack.unknownFile(it.path, data)
+                resourcePack.unknownFile(it.path, Writable.resource(it.classLoader, it.resource))
             }
 
+        config.resourcePacks.forEach { resourcePack.merge(it, MergeStrategy.mergeAndFailOnError()) }
+
         ResourcePacks.writeToFile(resourcePackFile, resourcePack)
+        gearyPaper.logger.s("Resource pack generated at $resourcePackFile")
     }
 
     private fun generatePredicateModels(
