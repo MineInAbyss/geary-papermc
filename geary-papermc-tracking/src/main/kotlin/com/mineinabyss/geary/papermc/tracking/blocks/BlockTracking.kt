@@ -16,7 +16,7 @@ data class BlockTrackingModule(
 
 val BlockTracking = createAddon<Block2Prefab, BlockTrackingModule>("Block Tracking", { Block2Prefab() }) {
     val module = BlockTrackingModule(configuration, prefabs = geary.cache(::GearyBlockPrefabQuery))
-    onStart {
+    entities {
         createTrackOnSetBlockComponentListener(module.block2Prefab)
     }
     module
