@@ -7,6 +7,7 @@ import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
 import com.mineinabyss.geary.systems.query.GearyQuery
 import com.mineinabyss.idofront.resourcepacks.ResourcePacks
+import com.mineinabyss.idofront.textcomponents.miniMsg
 import net.kyori.adventure.key.Key
 import team.unnamed.creative.ResourcePack
 import team.unnamed.creative.base.Writable
@@ -19,14 +20,14 @@ class ResourcePackGenerator(world: Geary, val config: ResourcePackConfig) : Gear
     private val resourcePackQuery = cache(::ResourcePackQuery)
     private val includedPackPath = gearyPaper.config.resourcePack.includedPackPath.takeUnless(String::isEmpty)
         ?.let { gearyPaper.plugin.dataFolder.resolve(it) }
-    private val resourcePack = includedPackPath?.let(ResourcePacks::readToResourcePack) ?: ResourcePack.resourcePack()
 
     fun generateResourcePack() {
         if (!gearyPaper.config.resourcePack.generate) return
+        val resourcePack = includedPackPath?.let(ResourcePacks::readToResourcePack) ?: ResourcePack.resourcePack()
         val resourcePackFile = gearyPaper.plugin.dataFolder.resolve(gearyPaper.config.resourcePack.outputPath)
         resourcePackFile.deleteRecursively()
 
-        resourcePack.packMeta(18, "Geary Resource Pack")
+        resourcePack.packMeta(34, "<rainbow>Geary</rainbow> Resource Pack".miniMsg())
 
         resourcePackQuery.forEach { (prefabKey, resourcePackContent, itemStack) ->
             val vanillaModelKey = ResourcePacks.vanillaKeyForMaterial(
