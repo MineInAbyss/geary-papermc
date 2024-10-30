@@ -1,11 +1,17 @@
 package com.mineinabyss.geary.papermc.plugin.commands
 
+import com.mineinabyss.geary.engine.archetypes.ArchetypeQueryManager
 import com.mineinabyss.geary.helpers.entity
-import com.mineinabyss.geary.modules.archetypes
+import com.mineinabyss.geary.modules.get
 import com.mineinabyss.geary.papermc.features.items.resourcepacks.ResourcePackContent
+import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.plugin.schema_generator.GearySchema
+import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
+import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
-import com.mineinabyss.geary.papermc.tracking.items.gearyItems
+import com.mineinabyss.geary.prefabs.entityOfOrNull
+import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.idofront.commands.brigadier.IdoCommand
 import com.mineinabyss.idofront.items.editItemMeta
 import com.mineinabyss.idofront.messaging.info
@@ -13,9 +19,17 @@ import org.bukkit.Material
 import org.bukkit.block.ShulkerBox
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.BlockStateMeta
+import kotlin.io.path.div
 
 internal fun IdoCommand.debug() = "debug" {
     requiresPermission("geary.admin.debug")
+    "generateschema" {
+        executes {
+            GearySchema(
+                gearyPaper.plugin.dataPath / "schema.ts", gearyPaper.worldManager.global.getAddon(SerializableComponents)
+            ).generate()
+        }
+    }
     "inventory" {
         playerExecutes {
             repeat(64) {
@@ -33,8 +47,10 @@ internal fun IdoCommand.debug() = "debug" {
     }
     "resourcepack_items" {
         playerExecutes {
+            val world = player.world.toGeary()
+            val gearyItems = world.getAddon(ItemTracking)
             val items = gearyItems.prefabs.mapNotNull {
-                it.key.toEntityOrNull()?.has<ResourcePackContent>()?.takeIf { it }
+                world.entityOfOrNull(it.key)?.has<ResourcePackContent>()?.takeIf { it }
                     ?.let { _ -> gearyItems.itemProvider.serializePrefabToItemStack(it.key) }
             }
                 .chunked(27)
@@ -51,11 +67,12 @@ internal fun IdoCommand.debug() = "debug" {
     }
     "stats" {
         executes {
-            val tempEntity = entity()
+            val world = gearyPaper.worldManager.global
+            val tempEntity = world.entity()
 
             sender.info(
                 """
-            |Archetype count: ${archetypes.queryManager.archetypeCount}
+            |Archetype count: ${world.get<ArchetypeQueryManager>().archetypeCount}
             |Next entity ID: ${tempEntity.id}
             |""".trimMargin()
             )

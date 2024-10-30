@@ -1,31 +1,23 @@
 package com.mineinabyss.geary.papermc.tracking.blocks
 
-import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
-import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.addons.dsl.createAddon
 import com.mineinabyss.geary.papermc.tracking.blocks.helpers.GearyBlockPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.blocks.systems.createTrackOnSetBlockComponentListener
 import com.mineinabyss.geary.prefabs.PrefabKey
-import com.mineinabyss.geary.systems.builders.cache
 import com.mineinabyss.geary.systems.query.CachedQuery
-import com.mineinabyss.idofront.di.DI
 import org.bukkit.block.data.BlockData
 
-val gearyBlocks by DI.observe<BlockTracking>()
-
-interface BlockTracking {
-    val block2Prefab: Block2Prefab
-    val prefabs: CachedQuery<GearyBlockPrefabQuery>
-
+data class BlockTrackingModule(
+    val block2Prefab: Block2Prefab,
+    val prefabs: CachedQuery<GearyBlockPrefabQuery>,
+) {
     fun createBlockData(prefabKey: PrefabKey): BlockData? = block2Prefab[prefabKey]
+}
 
-    companion object : GearyAddonWithDefault<BlockTracking> {
-        override fun default(): BlockTracking = object : BlockTracking {
-            override val prefabs = geary.cache(GearyBlockPrefabQuery())
-            override val block2Prefab = Block2Prefab()
-        }
-
-        override fun BlockTracking.install() {
-            createTrackOnSetBlockComponentListener()
-        }
+val BlockTracking = createAddon<Block2Prefab, BlockTrackingModule>("Block Tracking", { Block2Prefab() }) {
+    val module = BlockTrackingModule(configuration, prefabs = geary.cache(::GearyBlockPrefabQuery))
+    entities {
+        createTrackOnSetBlockComponentListener(module.block2Prefab)
     }
+    module
 }

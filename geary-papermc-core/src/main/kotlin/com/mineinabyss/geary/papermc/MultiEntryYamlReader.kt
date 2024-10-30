@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc
 
 import com.charleskorn.kaml.*
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.serialization.serializers.PolymorphicListAsMapSerializer
 import com.mineinabyss.geary.serialization.serializers.PolymorphicListAsMapSerializer.Companion.provideConfig
@@ -36,12 +37,12 @@ class MultiEntryYamlReader<T>(
                         nodes[nameStr] = decoded
                     }
                         .onSuccess {
-                            geary.logger.d { "Read entry $nameStr entry from $path" }
+                            Geary.d { "Read entry $nameStr entry from $path" }
                         }
                         .onFailure {
-                            geary.logger.w { "Failed to read entry $nameStr entry from $path" }
-                            geary.logger.w { it.localizedMessage }
-                            geary.logger.d { it.stackTraceToString() }
+                            Geary.w { "Failed to read entry $nameStr entry from $path" }
+                            Geary.w { it.localizedMessage }
+                            Geary.d { it.stackTraceToString() }
                         }
                 }
 
@@ -107,7 +108,6 @@ class MultiEntryYamlReader<T>(
 
             // If original is not a list, but we ask to inherit, remove these tags from the override
             override is YamlList -> {
-                println("Overriding! $override")
                 YamlList(override.items.filter { (it as? YamlScalar)?.content?.contains(specialMergeTags) != true }, override.path)
             }
 

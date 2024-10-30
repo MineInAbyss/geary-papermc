@@ -14,6 +14,7 @@ repositories {
 dependencies {
     implementation(project(":"))
 
+    testImplementation(libs.geary.test)
     testImplementation(idofrontLibs.minecraft.mockbukkit)
     testImplementation(idofrontLibs.kotlinx.serialization.kaml)
 }

@@ -4,18 +4,18 @@ import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.papermc.CatchType
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
+import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
-import com.mineinabyss.geary.papermc.tracking.items.gearyItems
+import com.mineinabyss.geary.papermc.withGeary
 import net.minecraft.world.entity.player.Inventory
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.PlayerInventory
 import org.spigotmc.AsyncCatcher
 
-
 class GearyPlayerInventory(
     val inventory: PlayerInventory,
-    val converter: InventoryCacheWrapper
+    val converter: InventoryCacheWrapper,
 ) {
     /**
      * Gets or loads a Geary entity associated with the item in slot [slot] of this player's inventory.
@@ -71,13 +71,14 @@ class GearyPlayerInventory(
 
 fun PlayerInventory.toGeary(): GearyPlayerInventory? {
     try {
-
         if (gearyPaper.config.catch.asyncEntityConversion == CatchType.ERROR)
             AsyncCatcher.catchOp("Async geary inventory access for $holder")
     } catch (_: NoClassDefFoundError) {
         // Allow running in tests
     }
     val player = holder ?: return null
-    val wrap = gearyItems.getCacheWrapper(player.toGearyOrNull() ?: return null) ?: return null
-    return GearyPlayerInventory(this, wrap)
+    player.withGeary {
+        val wrap = getAddon(ItemTracking).getCacheWrapper(player.toGearyOrNull() ?: return null) ?: return null
+        return GearyPlayerInventory(this@toGeary, wrap)
+    }
 }

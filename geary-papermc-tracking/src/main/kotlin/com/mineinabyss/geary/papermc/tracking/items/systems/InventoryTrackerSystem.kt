@@ -2,11 +2,10 @@
 
 package com.mineinabyss.geary.papermc.tracking.items.systems
 
-import com.mineinabyss.geary.modules.GearyModule
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
-import com.mineinabyss.geary.systems.builders.system
-import com.mineinabyss.geary.systems.query.Query
+import com.mineinabyss.geary.systems.query.query
 import com.mineinabyss.idofront.time.ticks
 import org.bukkit.entity.Player
 
@@ -22,11 +21,8 @@ import org.bukkit.entity.Player
  * - If an item isn't in our cache, we check the mismatches or deserialize it into the cache.
  * - All valid items get re-serialized TODO in the future there should be some form of dirty tag so we aren't unnecessarily serializing things
  */
-fun GearyModule.createInventoryTrackerSystem() = system(
-    object : Query() {
-        val player by get<Player>()
-        val itemCache by get<PlayerItemCache<*>>()
-    }
-).every(1.ticks).exec {
+fun Geary.createInventoryTrackerSystem() = system(
+    query<Player, PlayerItemCache<*>>()
+).every(1.ticks).exec { (player, _) ->
     player.inventory.toGeary()?.forceRefresh()
 }

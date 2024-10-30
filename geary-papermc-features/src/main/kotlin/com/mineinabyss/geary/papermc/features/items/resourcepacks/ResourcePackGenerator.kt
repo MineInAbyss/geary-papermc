@@ -1,10 +1,10 @@
 package com.mineinabyss.geary.papermc.features.items.resourcepacks
 
-import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
-import com.mineinabyss.geary.systems.builders.cache
 import com.mineinabyss.geary.systems.query.GearyQuery
 import com.mineinabyss.idofront.resourcepacks.ResourcePacks
 import net.kyori.adventure.key.Key
@@ -13,10 +13,10 @@ import team.unnamed.creative.model.Model
 import team.unnamed.creative.model.ModelTexture
 import team.unnamed.creative.model.ModelTextures
 
-class ResourcePackGenerator {
-
-    private val resourcePackQuery = geary.cache(ResourcePackQuery())
-    private val includedPackPath = gearyPaper.config.resourcePack.includedPackPath.takeUnless(String::isEmpty)?.let { gearyPaper.plugin.dataFolder.resolve(it) }
+class ResourcePackGenerator(world: Geary) : Geary by world {
+    private val resourcePackQuery = cache(::ResourcePackQuery)
+    private val includedPackPath = gearyPaper.config.resourcePack.includedPackPath.takeUnless(String::isEmpty)
+        ?.let { gearyPaper.plugin.dataFolder.resolve(it) }
     private val resourcePack = includedPackPath?.let(ResourcePacks::readToResourcePack) ?: ResourcePack.resourcePack()
 
     fun generateResourcePack() {
@@ -24,8 +24,11 @@ class ResourcePackGenerator {
         val resourcePackFile = gearyPaper.plugin.dataFolder.resolve(gearyPaper.config.resourcePack.outputPath)
         resourcePackFile.deleteRecursively()
 
-        resourcePackQuery.forEach { (prefabKey, resourcePackContent) ->
-            val vanillaModelKey = ResourcePacks.vanillaKeyForMaterial(resourcePackContent.baseMaterial)
+        resourcePackQuery.forEach { (prefabKey, resourcePackContent, itemStack) ->
+            val vanillaModelKey = ResourcePacks.vanillaKeyForMaterial(
+                resourcePackContent.baseMaterial ?: itemStack?.type
+                ?: return@forEach logger.w("$prefabKey has no type/baseMaterial defined in either ResourcePackContent or SerializableItemStack")
+            )
             val defaultVanillaModel = ((resourcePack.model(vanillaModelKey)
                 ?: ResourcePacks.defaultVanillaResourcePack?.model(vanillaModelKey)))
                 ?.toBuilder() ?: Model.model().key(vanillaModelKey)
@@ -35,14 +38,15 @@ class ResourcePackGenerator {
 
             // If a model is defined we assume it exists in the resourcepack already, and just add the override to the vanilla model
             if (resourcePackContent.model != null) {
-                resourcePackContent.itemOverrides(resourcePackContent.model.key())
+                resourcePackContent.itemOverrides(resourcePackContent.model.key(), prefabKey, itemStack)
                     .forEach(defaultVanillaModel::addOverride)
             } else { // If it only has textures we need to generate the model ourselves and add it
                 val model = Model.model()
                     .key(Key.key(prefabKey.namespace, prefabKey.key))
                     .parent(resourcePackContent.parentModel.key())
                     .textures(resourcePackContent.textures.modelTextures).build()
-                resourcePackContent.itemOverrides(model.key()).forEach(defaultVanillaModel::addOverride)
+                resourcePackContent.itemOverrides(model.key(), prefabKey, itemStack)
+                    .forEach(defaultVanillaModel::addOverride)
                 model.let(ResourcePacks::ensureVanillaModelProperties)
                     .let(ResourcePacks::ensureItemOverridesSorted)
                     .addTo(resourcePack)
@@ -59,7 +63,7 @@ class ResourcePackGenerator {
     private fun generatePredicateModels(
         resourcePack: ResourcePack,
         resourcePackContent: ResourcePackContent,
-        prefabKey: PrefabKey
+        prefabKey: PrefabKey,
     ) {
         fun predicateModel(modelKey: Key, suffix: String) {
             Model.model().key(Key.key(prefabKey.namespace, prefabKey.key.plus(suffix)))
@@ -85,9 +89,10 @@ class ResourcePackGenerator {
     }
 
     companion object {
-        class ResourcePackQuery : GearyQuery() {
+        class ResourcePackQuery(world: Geary) : GearyQuery(world) {
             private val prefabKey by get<PrefabKey>()
             private val resourcePackContent by get<ResourcePackContent>()
+            //private val itemstack by get<SerializableItemStack>().orNull()
 
             override fun ensure() = this {
                 has<Prefab>()
@@ -95,6 +100,7 @@ class ResourcePackGenerator {
 
             operator fun component1() = prefabKey
             operator fun component2() = resourcePackContent
+            operator fun component3() = world.getAddon(ItemTracking).itemProvider.serializePrefabToItemStack(prefabKey)
         }
     }
 }

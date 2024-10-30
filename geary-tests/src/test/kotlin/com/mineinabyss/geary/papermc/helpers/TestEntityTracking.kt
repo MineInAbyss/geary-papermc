@@ -1,13 +1,11 @@
 package com.mineinabyss.geary.papermc.helpers
 
-import com.mineinabyss.geary.addons.dsl.GearyAddonWithDefault
 import com.mineinabyss.geary.papermc.tracking.entities.BukkitEntity2Geary
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
+import com.mineinabyss.geary.papermc.tracking.entities.EntityTrackingModule
 
-class TestEntityTracking {
-    companion object : GearyAddonWithDefault<EntityTracking> by EntityTracking {
-        override fun default() = object : EntityTracking by EntityTracking.default() {
-            override val bukkit2Geary = BukkitEntity2Geary(forceMainThread = false)
-        }
+val TestEntityTracking = EntityTracking.withConfig {
+    EntityTrackingModule.Builder().apply {
+        build = { build().copy(bukkit2Geary = BukkitEntity2Geary(forceMainThread = false)) }
     }
 }

@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc
 
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.idofront.plugin.listeners
 import kotlinx.coroutines.Job
 import org.bukkit.Bukkit
@@ -9,7 +10,7 @@ import org.bukkit.event.Listener
 abstract class Feature(context: FeatureContext) {
     open val name = this::class.simpleName
     val plugin = context.plugin
-    val logger = context.logger
+    open val logger = context.logger
     val listeners = mutableListOf<Listener>()
     val tasks = mutableListOf<Job>()
     private var pluginDeps = listOf<String>()
@@ -39,6 +40,7 @@ abstract class Feature(context: FeatureContext) {
         }
         return canLoad()
     }
+
     fun defaultCanEnable(): Boolean {
         val unmet = pluginDeps.filter { !plugin.server.pluginManager.isPluginEnabled(it) }
         if (unmet.isNotEmpty()) {
@@ -89,4 +91,6 @@ abstract class Feature(context: FeatureContext) {
     fun task(task: Job) {
         tasks.add(task)
     }
+
+    fun subFeatures(vararg features: FeatureBuilder) = Features(plugin, *features)
 }

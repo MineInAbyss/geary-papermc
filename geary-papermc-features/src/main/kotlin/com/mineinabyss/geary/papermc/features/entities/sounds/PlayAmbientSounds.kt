@@ -1,14 +1,13 @@
 package com.mineinabyss.geary.papermc.features.entities.sounds
 
-import com.mineinabyss.geary.modules.GearyModule
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.features.entities.sounds.OverrideMobSoundsListener.Companion.makeSound
-import com.mineinabyss.geary.systems.builders.system
 import com.mineinabyss.geary.systems.query.Query
 import com.mineinabyss.idofront.time.ticks
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import kotlin.random.Random
 
-fun GearyModule.playAmbientSounds() = system(object : Query() {
+fun Geary.playAmbientSounds() = system(object : Query(this) {
     val bukkit by get<BukkitEntity>()
     val sounds by get<Sounds>()
 }).every(1.ticks).exec {

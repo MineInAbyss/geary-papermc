@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype
 
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.MobTypeConversion
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.components.SetEntityType
@@ -8,7 +9,7 @@ import com.mineinabyss.idofront.nms.aliases.toNMS
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
-class ConvertEntityTypesListener : Listener {
+class ConvertEntityTypesListener(world: Geary) : Listener, Geary by world {
     @EventHandler
     fun GearyEntityAddToWorldEvent.onAdd() {
         if (gearyPaper.config.mobTypeConversion == MobTypeConversion.IGNORE) return

@@ -21,6 +21,7 @@ paperweight.reobfArtifactConfiguration.set(ReobfArtifactConfiguration.MOJANG_PRO
 
 dependencies {
     implementation(project(":"))
+    implementation("dev.adamko.kxstsgen:kxs-ts-gen-core:0.2.4")
 
     // MineInAbyss platform
     compileOnly(idofrontLibs.kotlin.stdlib)

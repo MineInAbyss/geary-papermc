@@ -8,9 +8,11 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.PlayerInventory
 
-class BukkitInventoryCacheWrapper(override val cache: PlayerItemCache<ItemStack>) : InventoryCacheWrapper {
-    override fun updateToMatch(inventory: Inventory, ignoreCached: Boolean) {
-        cache.updateToMatch(inventory.toArray(), (inventory.holder as? BukkitEntity)?.toGearyOrNull(), ignoreCached)
+class BukkitInventoryCacheWrapper(
+    override val cache: PlayerItemCache<ItemStack>
+) : InventoryCacheWrapper {
+    override fun updateToMatch(inventory: Inventory, ignoreCached: Boolean) = with(cache) {
+        updateToMatch(inventory.toArray(), (inventory.holder as? BukkitEntity)?.toGearyOrNull(), ignoreCached)
     }
 
     override fun getOrUpdate(inventory: Inventory, slot: Int): GearyEntity? {

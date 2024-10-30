@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.features.common.event_bridge.items
 
+import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.idofront.entities.leftClicked
 import com.mineinabyss.idofront.entities.rightClicked
@@ -44,20 +45,20 @@ class ItemInteractBridge : Listener {
     private val rightClickCooldowns = Int2IntOpenHashMap()
 
     @EventHandler(ignoreCancelled = true)
-    fun PlayerInteractEntityEvent.onRightClickEntity() {
+    fun PlayerInteractEntityEvent.onRightClickEntity() = with(player.world.toGeary()) {
         val heldItem = player.inventory.toGeary()?.get(hand) ?: return
         heldItem.emit<OnItemRightClickEntity>()
     }
 
 
     @EventHandler
-    fun PlayerArmSwingEvent.onLeftClick() {
+    fun PlayerArmSwingEvent.onLeftClick() = with(player.world.toGeary()) {
         val heldItem = player.inventory.toGeary()?.get(hand) ?: return
         heldItem.emit<OnItemLeftClick>()
     }
 
     @EventHandler
-    fun PlayerInteractEvent.onClick() {
+    fun PlayerInteractEvent.onClick() = with(player.world.toGeary()) {
         if(useItemInHand() == Event.Result.DENY) return
         val heldItem = player.inventory.toGeary()?.get(hand ?: return) ?: return
 
