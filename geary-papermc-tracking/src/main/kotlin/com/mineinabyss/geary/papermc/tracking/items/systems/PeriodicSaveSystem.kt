@@ -13,7 +13,7 @@ fun Geary.createPeriodicSaveSystem() = system(
         val persisting by getRelationsWithData<Persists, Any>()
         val item by get<ItemStack>()
     }
-).every(5.seconds).exec {
+).every(5.seconds).exec { q ->
 //        val forceSave = every(iterations = 100)
 //
 //        if (forceSave) {
@@ -21,8 +21,8 @@ fun Geary.createPeriodicSaveSystem() = system(
 //            return
 //        }
 
-    item.editItemMeta {
-        persisting.forEach {
+    q.item.editItemMeta {
+        q.persisting.forEach {
             val newHash = it.targetData.hashCode()
             if (newHash != it.data.hash) {
                 it.data.hash = newHash
