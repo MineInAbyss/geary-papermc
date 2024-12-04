@@ -1,7 +1,6 @@
 package com.mineinabyss.geary.papermc.plugin.commands.mobs
 
 import com.mineinabyss.geary.papermc.plugin.commands.GearyArgs
-import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.spawnFromPrefab
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.idofront.commands.brigadier.Args
@@ -15,12 +14,10 @@ internal fun IdoCommand.mobs() = ("mobs" / "m") {
         requiresPermission("geary.mobs.spawn")
         playerExecutes(GearyArgs.mob(), Args.integer(min = 0)) { mob, numOfSpawns ->
             val key = mob.get<PrefabKey>()
-            with(player.location.world.toGeary()) {
-                repeat(numOfSpawns) {
-                    player.location.spawnFromPrefab(mob).onFailure {
-                        sender.error("Failed to spawn $key")
-                        it.printStackTrace()
-                    }
+            repeat(numOfSpawns) {
+                player.location.spawnFromPrefab(mob).onFailure {
+                    sender.error("Failed to spawn $key")
+                    it.printStackTrace()
                 }
             }
         }
