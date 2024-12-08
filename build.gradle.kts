@@ -1,19 +1,8 @@
-val idofrontVersion: String by project
-
 plugins {
-    java
+    `java-library`
     alias(idofrontLibs.plugins.mia.publication)
     alias(idofrontLibs.plugins.mia.kotlin.jvm)
-    alias(idofrontLibs.plugins.dokka) apply false
     alias(idofrontLibs.plugins.mia.autoversion)
-    idea
-}
-
-idea {
-    module {
-        isDownloadJavadoc = true
-        isDownloadSources = true
-    }
 }
 
 dependencies {
@@ -30,9 +19,6 @@ dependencies {
 }
 
 allprojects {
-    apply(plugin = "kotlin")
-    apply(plugin = "org.jetbrains.dokka")
-
     repositories {
         mavenCentral()
         google()
@@ -43,19 +29,23 @@ allprojects {
         mavenLocal()
     }
 
-    dependencies {
-        val libs = rootProject.idofrontLibs
-        compileOnly(libs.bundles.idofront.core)
-        testImplementation(libs.bundles.idofront.core)
-    }
 
-    kotlin {
-        compilerOptions {
-            freeCompilerArgs.addAll(
-                "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
-                "-opt-in=kotlin.ExperimentalUnsignedTypes",
-                "-Xcontext-receivers"
-            )
+    if (project.name != "schema-generator") {
+        apply(plugin = "kotlin")
+
+        dependencies {
+            compileOnly(rootProject.idofrontLibs.bundles.idofront.core)
+            testImplementation(rootProject.idofrontLibs.bundles.idofront.core)
+        }
+        kotlin {
+            compilerOptions {
+                freeCompilerArgs.addAll(
+                    "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+                    "-opt-in=kotlin.ExperimentalUnsignedTypes",
+                    "-Xcontext-receivers",
+                    "-Xsuppress-warning=CONTEXT_RECEIVERS_DEPRECATED" // We're aware of this, will be switching to context parameters once they release
+                )
+            }
         }
     }
 }

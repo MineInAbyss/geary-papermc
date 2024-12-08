@@ -16,7 +16,7 @@ interface SpawnType {
     fun spawnAt(location: Location): BukkitEntity
 
     object Serializer : InnerSerializer<String, SpawnType>(
-        serialName = "geary:spawn_type",
+        serialName = "SpawnType",
         inner = String.serializer(),
         transform = { getType(it) ?: error("Unknown spawn type $it") },
         inverseTransform = { it.key }

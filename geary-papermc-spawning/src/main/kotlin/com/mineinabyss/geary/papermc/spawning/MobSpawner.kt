@@ -7,13 +7,21 @@ import com.mineinabyss.geary.papermc.spawning.choosing.SpawnChooser
 import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
 import com.mineinabyss.idofront.util.randomOrMin
 import org.bukkit.Location
+import kotlin.random.Random
 
 class MobSpawner(
     val spawnChooser: SpawnChooser,
     val spreadRepo: LocationSpread,
 ) {
+    /**
+     * Choose and attempt a spawn at a [location] using allowed spawns based on [position].
+     *
+     * @return Whether the spawn succeeded.
+     */
     fun attemptSpawnAt(location: Location, position: SpawnPosition): Boolean {
         val spawn = spawnChooser.chooseAllowedSpawnNear(location, position) ?: return false
+
+        if (spawn.chance != 1.0 && Random.nextDouble() > spawn.chance) return false
 
         // Check dynamic conditions
         if (!spawn.conditions.all {

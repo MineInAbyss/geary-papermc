@@ -37,5 +37,6 @@ include(
     "geary-papermc-plugin",
     "geary-papermc-spawning",
     "geary-papermc-tracking",
-    "geary-tests"
+    "geary-tests",
+//    "schema-generator"
 )
