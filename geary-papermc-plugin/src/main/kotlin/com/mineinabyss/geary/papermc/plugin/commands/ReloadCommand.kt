@@ -6,7 +6,6 @@ import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.plugin.GearyPluginImpl
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.prefabs.Prefabs
-import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.idofront.commands.brigadier.IdoCommand
 
 
@@ -22,4 +21,5 @@ internal fun IdoCommand.reload(plugin: GearyPluginImpl) = "reload" {
     }
     "recipes" { executes { plugin.features.reload<RecipeFeature>(sender) } }
     "spawns" { executes { plugin.features.reload<SpawningFeature>(sender) } }
+    "commands" { executes { }}
 }

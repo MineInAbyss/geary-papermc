@@ -12,6 +12,7 @@ internal fun GearyPluginImpl.registerGearyCommands() = commands {
         prefabs()
         reload(this@registerGearyCommands)
         debug()
+        testCommands()
     }
 }
 

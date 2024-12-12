@@ -20,7 +20,3 @@ dependencies {
     implementation(project(":geary-papermc-tracking"))
     implementation(project(":geary-papermc-features"))
 }
-
-/*configurations.all {
-    resolutionStrategy.cacheChangingModulesFor( 0, "seconds")
-}*/
