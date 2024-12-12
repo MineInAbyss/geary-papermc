@@ -2,7 +2,6 @@ package com.mineinabyss.geary.papermc
 
 import com.charleskorn.kaml.*
 import com.mineinabyss.geary.modules.Geary
-import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.serialization.serializers.PolymorphicListAsMapSerializer
 import com.mineinabyss.geary.serialization.serializers.PolymorphicListAsMapSerializer.Companion.provideConfig
 import kotlinx.serialization.KSerializer
@@ -11,12 +10,21 @@ import kotlinx.serialization.modules.overwriteWith
 import java.nio.file.Path
 import kotlin.io.path.*
 
+data class EntryWithNode<T>(
+    val entry: T,
+    val node: YamlNode,
+)
+
 class MultiEntryYamlReader<T>(
     val serializer: KSerializer<T>,
     val yamlFormat: Yaml,
 ) {
+    fun decodeRecursiveEntries(rootDir: Path): List<T> {
+        return decodeRecursive(rootDir).values.map { it.entry }
+    }
+
     @OptIn(ExperimentalPathApi::class)
-    fun decodeRecursive(rootDir: Path): List<T> {
+    fun decodeRecursive(rootDir: Path): Map<String, EntryWithNode<T>> {
         val nodes = mutableMapOf<String, EntryWithNode<T>>()
         val entries = mutableListOf<T>()
         rootDir.walk()
@@ -47,13 +55,8 @@ class MultiEntryYamlReader<T>(
                 }
 
             }
-        return entries
+        return nodes
     }
-
-    data class EntryWithNode<T>(
-        val entry: T,
-        val node: YamlNode,
-    )
 
     fun decodeEntry(
         yaml: Yaml,

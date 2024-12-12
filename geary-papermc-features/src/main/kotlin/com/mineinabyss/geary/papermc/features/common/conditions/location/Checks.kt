@@ -6,13 +6,14 @@ class Checks() {
     inline fun check(name: String, run: () -> Boolean) {
         val result = runCatching { run() }
             .onFailure { exception ->
-                with(failed) {
-                    appendLine("$name: ${exception.message}")
-                }
-
+                if (failed.isNotEmpty()) failed.appendLine()
+                failed.append("$name: ${exception.message}")
             }
             .getOrNull() ?: return
-        if (!result) failed.appendLine("$name: Condition failed")
+        if (!result) {
+            if (failed.isNotEmpty()) failed.appendLine()
+            failed.append("$name: Condition failed")
+        }
     }
 
     inline fun <T> checkOptional(name: String, argument: T?, run: (T) -> Boolean) {
@@ -20,7 +21,7 @@ class Checks() {
         check(name) { run(argument) }
     }
 
-    val result get() = if(failed.isEmpty()) CheckResult.Success else CheckResult.Failure(failed.toString())
+    val result get() = if (failed.isEmpty()) CheckResult.Success else CheckResult.Failure(failed.toString())
 }
 
 inline fun checks(check: Checks.() -> Unit): CheckResult {

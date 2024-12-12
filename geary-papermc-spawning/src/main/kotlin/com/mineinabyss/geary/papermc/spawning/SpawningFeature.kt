@@ -11,6 +11,7 @@ import com.mineinabyss.geary.papermc.spawning.choosing.SpawnLocationChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpawning
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
+import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
@@ -21,6 +22,8 @@ import com.mineinabyss.idofront.config.config
 
 class SpawningFeature(context: FeatureContext) : Feature(context) {
     val config by config("spawning", plugin.dataPath, SpawnConfig())
+    var spawnTask: SpawnTask? = null
+    var spawnEntriesByName: Map<String, SpawnEntry>? = null
 
     init {
         pluginDeps("WorldGuard", "MythicMobs")
@@ -43,21 +46,22 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
             )
         )
         val spawns = reader.readSpawnEntries()
-        val wg = WorldGuardSpawning(spawns)
+        val wg = WorldGuardSpawning(spawns.values.map { it.entry })
         val caps = MobCaps(config.playerCaps, config.defaultCap, config.range.playerCapRadius)
         val spawnChooser = SpawnChooser(wg, caps)
         val spawnPositionReader = SpawnPositionReader()
-        task(
-            SpawnTask(
-                runTimes = config.runTimes,
-                locationChooser = SpawnLocationChooser(config.range),
-                spawnPositionReader = spawnPositionReader,
-                spawnAttempts = config.maxSpawnAttemptsPerPlayer,
-                mobSpawner = MobSpawner(
-                    spawnChooser,
-                    LocationSpread(spawnPositionReader, triesForNearbyLoc = 10)
-                ),
-            ).job
+        val task = SpawnTask(
+            runTimes = config.runTimes,
+            locationChooser = SpawnLocationChooser(config.range),
+            spawnPositionReader = spawnPositionReader,
+            spawnAttempts = config.maxSpawnAttemptsPerPlayer,
+            mobSpawner = MobSpawner(
+                spawnChooser,
+                LocationSpread(spawnPositionReader, triesForNearbyLoc = 10)
+            ),
         )
+        spawnTask = task
+        spawnEntriesByName = spawns.mapValues { it.value.entry }
+        task(task.job)
     }
 }

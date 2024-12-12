@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.config
 
 import com.charleskorn.kaml.Yaml
+import com.mineinabyss.geary.papermc.EntryWithNode
 import com.mineinabyss.geary.papermc.MultiEntryYamlReader
 import com.mineinabyss.geary.papermc.spawning.spawn_types.SpawnType
 import org.bukkit.plugin.Plugin
@@ -13,8 +14,8 @@ class SpawnEntryReader(
 ) {
     private val reader = MultiEntryYamlReader(SpawnEntry.serializer(), yamlFormat)
 
-    fun readSpawnEntries(): List<SpawnEntry> {
+    fun readSpawnEntries(): Map<String, EntryWithNode<SpawnEntry>> {
         return reader.decodeRecursive((plugin.dataPath / "spawns").createParentDirectories())
-            .filter { it.type != SpawnType.None }
+            .filterValues { it.entry.type != SpawnType.None }
     }
 }

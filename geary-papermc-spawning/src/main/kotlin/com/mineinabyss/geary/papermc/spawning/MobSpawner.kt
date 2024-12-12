@@ -4,6 +4,7 @@ import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.papermc.location
 import com.mineinabyss.geary.papermc.spawning.choosing.LocationSpread
 import com.mineinabyss.geary.papermc.spawning.choosing.SpawnChooser
+import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
 import com.mineinabyss.idofront.util.randomOrMin
 import org.bukkit.Location
@@ -13,6 +14,18 @@ class MobSpawner(
     val spawnChooser: SpawnChooser,
     val spreadRepo: LocationSpread,
 ) {
+    fun checkSpawnConditions(spawn: SpawnEntry, location: Location): Boolean {
+        // Check dynamic conditions
+        return spawn.conditions.all {
+            it.conditionsMet(
+                ActionGroupContext().apply {
+                    this.location = location.clone()
+                    environment["spawnTypes"] = listOf(spawn.type.key)
+                }
+            )
+        }
+    }
+
     /**
      * Choose and attempt a spawn at a [location] using allowed spawns based on [position].
      *
@@ -22,17 +35,7 @@ class MobSpawner(
         val spawn = spawnChooser.chooseAllowedSpawnNear(location, position) ?: return false
 
         if (spawn.chance != 1.0 && Random.nextDouble() > spawn.chance) return false
-
-        // Check dynamic conditions
-        if (!spawn.conditions.all {
-                it.conditionsMet(
-                    ActionGroupContext().apply {
-                        this.location = location.clone()
-                        environment["spawnTypes"] = listOf(spawn.type.key)
-                    }
-                )
-            }
-        ) return false
+        if (runCatching { !checkSpawnConditions(spawn, location) }.getOrDefault(true)) return false
 
         repeat(spawn.amount.randomOrMin()) {
             val spread = spawn.spread.randomOrMin().toDouble()
