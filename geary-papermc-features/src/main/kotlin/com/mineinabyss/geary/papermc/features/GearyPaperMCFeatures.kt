@@ -20,10 +20,6 @@ val GearyPaperMCFeatures = createAddon("Geary Paper Features") {
         clearOldCooldownsSystem()
     }
 
-    entities {
-        ResourcePackGenerator(geary).generateResourcePack()
-    }
-
     onPluginEnable {
         gearyPaper.plugin.listeners(
             EntityDamageBridge(),
