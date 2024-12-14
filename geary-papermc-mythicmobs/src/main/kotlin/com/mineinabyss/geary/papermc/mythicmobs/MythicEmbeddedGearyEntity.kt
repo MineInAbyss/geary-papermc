@@ -51,6 +51,7 @@ object MythicEmbeddedGearyEntity {
                 set(it, it::class)
             }
             observeComponent?.let { set(it, it::class) }
+            set(prefabKey)
         }
         prefabs.manager.registerPrefab(prefabKey, prefabEntity)
         prefabEntity
