@@ -11,13 +11,12 @@ import kotlin.coroutines.CoroutineContext
 class PaperMCEngine(
     logger: Logger,
     pipeline: Pipeline,
-    coroutineContext: CoroutineContext,
+    coroutineContext: () -> CoroutineContext,
 ) : ArchetypeEngine(pipeline, logger, tickDuration = 1.ticks, coroutineContext) {
     private val plugin get() = gearyPaper.plugin
 
     override fun scheduleSystemTicking() {
         //tick all systems every interval ticks
-
         Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, {
             tick(Bukkit.getServer().currentTick.toLong())
         }, 0, 1)

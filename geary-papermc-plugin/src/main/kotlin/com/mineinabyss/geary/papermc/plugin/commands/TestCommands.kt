@@ -1,7 +1,9 @@
 package com.mineinabyss.geary.papermc.plugin.commands
 
+import com.mineinabyss.geary.actions.Action
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.Condition
+import com.mineinabyss.geary.actions.execute
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
@@ -17,9 +19,9 @@ import com.mineinabyss.idofront.messaging.success
 object TestCommands {
     fun IdoCommand.test() = "test" {
         requiresPermission("geary.admin.test")
-        "condition" {
-            playerExecutes(Args.greedyString().named("Condition Yaml")) { yaml ->
-                testCondition(yaml)
+        "execute" {
+            playerExecutes(Args.greedyString().named("Action or condition Yaml")) { yaml ->
+                executeYaml(yaml)
             }
         }
         "spawn" {
@@ -42,18 +44,24 @@ object TestCommands {
         }
     }
 
-    fun IdoPlayerCommandContext.testCondition(yaml: String) {
+    private fun IdoPlayerCommandContext.executeYaml(yaml: String) {
         val decoded = gearyPaper.worldManager.global.getAddon(SerializableComponents)
             .formats["yml"]
             ?.decodeFromString(PolymorphicListAsMapSerializer.ofComponents(), yaml)
             ?: fail("Could not decode yaml")
-        decoded.forEach { condition ->
-            if (condition !is Condition) return@forEach
-            val conditionName = condition::class.simpleName ?: return@forEach
-            with(condition) {
-                runCatching { ActionGroupContext(player.toGeary()).execute() }
-                    .onSuccess { sender.success("Condition $conditionName passed") }
-                    .onFailure { exception -> sender.error("Condition $conditionName failed:\n${exception.message}") }
+        decoded.forEach { comp ->
+            val className = comp::class.simpleName ?: return@forEach
+            if (comp is Condition) {
+                with(comp) {
+                    runCatching { ActionGroupContext(player.toGeary()).execute() }
+                        .onSuccess { sender.success("Condition $className passed") }
+                        .onFailure { sender.error("Condition $className failed:\n${it.message}") }
+                }
+            }
+            if (comp is Action) {
+                runCatching { comp.execute(ActionGroupContext(player.toGeary())) }
+                    .onSuccess { sender.success("Action $className succeeded") }
+                    .onFailure { sender.error("Action $className failed:\n${it.message}") }
             }
         }
     }

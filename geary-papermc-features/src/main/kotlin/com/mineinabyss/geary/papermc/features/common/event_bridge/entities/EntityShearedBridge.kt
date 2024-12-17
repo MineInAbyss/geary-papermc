@@ -1,6 +1,5 @@
 package com.mineinabyss.geary.papermc.features.common.event_bridge.entities
 
-import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

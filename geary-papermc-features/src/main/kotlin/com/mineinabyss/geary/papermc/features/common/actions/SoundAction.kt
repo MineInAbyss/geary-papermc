@@ -35,7 +35,7 @@ class SoundAction(
             .volume(eval(volume))
             .source(eval(category))
             .build()
-        if (bukkit != null) location.world.playSound(sound, bukkit)
+        if (bukkit != null && !bukkit.isSilent) location.world.playSound(sound, bukkit)
         else location.world.playSound(sound, location.x, location.y, location.z)
     }
 }
