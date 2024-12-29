@@ -51,17 +51,20 @@ object TestCommands {
             ?: fail("Could not decode yaml")
         decoded.forEach { comp ->
             val className = comp::class.simpleName ?: return@forEach
-            if (comp is Condition) {
-                with(comp) {
-                    runCatching { ActionGroupContext(player.toGeary()).execute() }
-                        .onSuccess { sender.success("Condition $className passed") }
-                        .onFailure { sender.error("Condition $className failed:\n${it.message}") }
+            when (comp) {
+                is Condition -> {
+                    with(comp) {
+                        runCatching { ActionGroupContext(player.toGeary()).execute() }
+                            .onSuccess { if(it) return sender.success("Condition $className passed") else sender.error("Condition $className failed without extra info") }
+                            .onFailure { sender.error("Condition $className failed:\n${it.message}") }
+                    }
                 }
-            }
-            if (comp is Action) {
-                runCatching { comp.execute(ActionGroupContext(player.toGeary())) }
-                    .onSuccess { sender.success("Action $className succeeded") }
-                    .onFailure { sender.error("Action $className failed:\n${it.message}") }
+
+                is Action -> {
+                    runCatching { comp.execute(ActionGroupContext(player.toGeary())) }
+                        .onSuccess { sender.success("Action $className succeeded") }
+                        .onFailure { sender.error("Action $className failed:\n${it.message}") }
+                }
             }
         }
     }

@@ -13,7 +13,7 @@ data class BlockConditions(
         val material = location?.block?.type ?: return CheckResult.Success
         return checks {
             checkOptional("Allowed materials", allow) { it.matches(material) }
-            checkOptional("Denied materials", deny) { !it.matches(material) }
+            checkOptional("Denied materials", deny) { it.notMatches(material) }
             checkOptional("Solid", isSolid) { it == material.isSolid }
         }
     }

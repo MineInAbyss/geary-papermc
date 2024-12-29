@@ -21,6 +21,8 @@ data class MaterialOrTagMatcher(
     fun matches(material: Material) =
         (materials.isEmpty() || material in materials) && (tags.isEmpty() || tags.any { it.isTagged(material) })
 
+    fun notMatches(material: Material) = (materials.isEmpty() || material !in materials) && (tags.isEmpty() || tags.none { it.isTagged(material) })
+
     object Serializer : InnerSerializer<List<String>, MaterialOrTagMatcher>(
         "MaterialOrTagMatcher",
         ListSerializer(String.Companion.serializer()),
@@ -34,7 +36,7 @@ data class MaterialOrTagMatcher(
         fun decodeList(list: List<String>): MaterialOrTagMatcher {
             val (tags, materials) = list.partition { it.startsWith("#") }
             return MaterialOrTagMatcher(
-                materials.mapNotNull { Material.getMaterial(it) },
+                materials.mapNotNull { Material.getMaterial(it.uppercase()) },
                 tags.mapNotNull {
                     Bukkit.getTag<Material>(
                         Tag.REGISTRY_BLOCKS,
