@@ -19,8 +19,9 @@ data class MaterialOrTagMatcher(
     val materials: List<Material>,
     val tags: List<Tag<Material>>,
 ) {
-    fun matches(material: Material) =
-        (materials.isEmpty() || material in materials) || (tags.isEmpty() || tags.any { it.isTagged(material) })
+    fun matches(material: Material): Boolean {
+        return (materials.isEmpty() && tags.isEmpty()) || !notMatches(material)
+    }
 
     fun notMatches(material: Material) = (materials.isEmpty() || material !in materials) && (tags.isEmpty() || tags.none { it.isTagged(material) })
 
