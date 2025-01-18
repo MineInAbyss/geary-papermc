@@ -19,16 +19,22 @@ class GapCondition(
     }
 
     companion object {
-        fun checkGap(location: Location, gap: IntRange, isPartOfGap: (Location) -> Boolean): Boolean {
+        fun checkGap(
+            location: Location,
+            gap: IntRange,
+            checkBelow: Boolean = true,
+            checkAbove: Boolean = true,
+            isPartOfGap: (Location) -> Boolean,
+        ): Boolean {
             val y = location.y.roundToInt().coerceIn(location.world.minHeight..location.world.maxHeight)
             val topRange = (y + gap.max()).coerceAtMost(location.world.maxHeight)
             val bottomRange = (y - gap.max()).coerceAtLeast(location.world.minHeight)
-            val topGap = (y..topRange + 1).firstOrNull {
+            val topGap = if (!checkAbove) y + 1 else (y..topRange + 1).firstOrNull {
                 if (it > gap.min() && gap.max() == Int.MAX_VALUE) return true
                 !isPartOfGap(location.apply { this.y = it.toDouble() })
             } ?: (topRange + 1)
 
-            val bottomGap = (y downTo bottomRange - 1).firstOrNull {
+            val bottomGap = if (!checkBelow) y - 1 else (y downTo bottomRange - 1).firstOrNull {
                 if (topGap + it > gap.min() && gap.max() == Int.MAX_VALUE) return true
                 !isPartOfGap(location.apply { this.y = it.toDouble() })
             } ?: (bottomRange - 1)

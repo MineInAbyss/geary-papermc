@@ -45,10 +45,12 @@ object TestCommands {
     }
 
     private fun IdoPlayerCommandContext.executeYaml(yaml: String) {
-        val decoded = gearyPaper.worldManager.global.getAddon(SerializableComponents)
-            .formats["yml"]
-            ?.decodeFromString(PolymorphicListAsMapSerializer.ofComponents(), yaml)
-            ?: fail("Could not decode yaml")
+        val decoded = runCatching {
+            gearyPaper.worldManager.global.getAddon(SerializableComponents)
+                .formats["yml"]
+                ?.decodeFromString(PolymorphicListAsMapSerializer.ofComponents(), yaml)
+                ?: fail("Could not decode yaml")
+        }.getOrElse { fail("Could not decode yaml:\n${it.message}") }
         decoded.forEach { comp ->
             val className = comp::class.simpleName ?: return@forEach
             when (comp) {
