@@ -10,6 +10,7 @@ import com.mineinabyss.idofront.time.inWholeTicks
 import com.mineinabyss.idofront.time.ticks
 import kotlinx.coroutines.delay
 import org.bukkit.Bukkit
+import org.bukkit.GameMode.SPECTATOR
 import kotlin.time.Duration
 
 class SpawnTask(
@@ -36,7 +37,7 @@ class SpawnTask(
             .filter { currTick % runTimes.getOrDefault(it, 1.ticks).inWholeTicks == 0L }
             .toMutableSet()
         if (runForPositions.isEmpty()) return
-        val onlinePlayers = Bukkit.getOnlinePlayers().filter { !it.isDead }
+        val onlinePlayers = Bukkit.getOnlinePlayers().filter { !it.isDead && it.gameMode != SPECTATOR }
         if (onlinePlayers.isEmpty()) return
 
         onlinePlayers.forEach { player ->

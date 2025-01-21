@@ -6,6 +6,7 @@ import com.mineinabyss.geary.modules.get
 import com.mineinabyss.geary.papermc.features.items.resourcepacks.ResourcePackContent
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.plugin.schema_generator.GearySchema
+import com.mineinabyss.geary.papermc.spawning.statistics.EntityStatistics
 import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
@@ -13,6 +14,7 @@ import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.prefabs.entityOfOrNull
 import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.idofront.commands.brigadier.IdoCommand
+import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.items.editItemMeta
 import com.mineinabyss.idofront.messaging.info
 import org.bukkit.Material
@@ -78,6 +80,19 @@ internal fun IdoCommand.debug() = "debug" {
             )
 
             tempEntity.removeEntity()
+        }
+    }
+    "dumpStats" {
+        executes {
+            sender.info("Dumping stats...")
+            DI.get<EntityStatistics>().dumpData().invokeOnCompletion {
+                sender.info("Stat dump finished")
+            }
+        }
+    }
+    "resetStats" {
+        executes {
+            DI.get<EntityStatistics>().reset()
         }
     }
 }

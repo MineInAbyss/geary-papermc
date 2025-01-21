@@ -20,6 +20,7 @@ dependencies {
     compileOnly(libs.geary.actions)
     implementation(project(":geary-papermc-tracking"))
     compileOnly(idofrontLibs.minecraft.plugin.worldguard) { exclude(group = "org.bukkit") }
+    compileOnly(idofrontLibs.kotlinx.dataframe)
 //    implementation(project(":geary-papermc-features"))
 }
 

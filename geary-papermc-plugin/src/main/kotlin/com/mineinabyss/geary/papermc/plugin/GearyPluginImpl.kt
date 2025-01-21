@@ -14,6 +14,7 @@ import com.mineinabyss.geary.papermc.features.items.recipes.RecipeFeature
 import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsFeature
 import com.mineinabyss.geary.papermc.plugin.commands.registerGearyCommands
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
+import com.mineinabyss.geary.papermc.spawning.statistics.EntityStatistics
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
@@ -33,6 +34,7 @@ import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.messaging.injectLogger
 import com.mineinabyss.idofront.messaging.observeLogger
+import com.mineinabyss.idofront.plugin.listeners
 import com.mineinabyss.idofront.serialization.LocationSerializer
 import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
 import org.bukkit.Location
@@ -153,6 +155,10 @@ class GearyPluginImpl : GearyPlugin() {
         gearyPaper.worldManager.setGlobalEngine(gearyPaper.gearyModule.start())
         features.loadAll()
         features.enableAll()
+
+        val stats = EntityStatistics()
+        listeners(stats)
+        DI.add(stats)
     }
 
     override fun onDisable() {
