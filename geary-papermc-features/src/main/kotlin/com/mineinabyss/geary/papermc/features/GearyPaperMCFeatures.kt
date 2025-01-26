@@ -8,16 +8,17 @@ import com.mineinabyss.geary.papermc.features.common.event_bridge.entities.Entit
 import com.mineinabyss.geary.papermc.features.common.event_bridge.entities.EntityShearedBridge
 import com.mineinabyss.geary.papermc.features.common.event_bridge.items.ItemInteractBridge
 import com.mineinabyss.geary.papermc.features.common.event_bridge.items.ItemRemovedBridge
+import com.mineinabyss.geary.papermc.features.entities.pathfinders.addPathfindersSystem
 import com.mineinabyss.geary.papermc.features.items.resourcepacks.ResourcePackGenerator
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.onPluginEnable
 import com.mineinabyss.idofront.plugin.listeners
-import org.koin.dsl.module
 
 val GearyPaperMCFeatures = createAddon("Geary Paper Features") {
     systems {
         cooldownDisplaySystem()
         clearOldCooldownsSystem()
+        addPathfindersSystem()
     }
 
     entities {
@@ -28,7 +29,7 @@ val GearyPaperMCFeatures = createAddon("Geary Paper Features") {
         gearyPaper.plugin.listeners(
             EntityDamageBridge(),
             EntityLoadUnloadBridge(),
-            EntityShearedBridge()
+            EntityShearedBridge(),
         )
 
         gearyPaper.plugin.listeners(
