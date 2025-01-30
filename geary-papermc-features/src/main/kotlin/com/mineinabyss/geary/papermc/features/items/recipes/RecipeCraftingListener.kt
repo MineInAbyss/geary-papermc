@@ -40,7 +40,7 @@ class RecipeCraftingListener : Listener {
     }
 
     @EventHandler
-    fun PrepareSmithingEvent.onCustomSmithingTransform() = with((inventory.holder as Player).world.toGeary()) {
+    fun PrepareSmithingEvent.onCustomSmithingTransform() = with((inventory.viewers.first() as Player).world.toGeary()) {
         // Smithing will cache the last recipe, so even with 0 input
         // recipe will return as not null if say a Diamond Hoe was put in before
         if (inventory.contents.any { it?.isEmpty != false }) return
@@ -52,8 +52,8 @@ class RecipeCraftingListener : Listener {
 
         val inputGearyEntity = equipment.fastPDC?.decodePrefabs()?.firstOrNull() ?: return
         val smithingTransformRecipes = Bukkit.recipeIterator().asSequence()
-            .filter { (it as? SmithingTransformRecipe)?.result?.fastPDC?.hasComponentsEncoded == true }
             .filterIsInstance<SmithingTransformRecipe>()
+            .filter { it.result.fastPDC?.hasComponentsEncoded == true }
         val customRecipeResult = smithingTransformRecipes.filter {
             it.template.test(template) && it.addition.test(mineral) && it.base.itemStack.itemMeta?.persistentDataContainer?.decodePrefabs()
                 ?.firstOrNull() == inputGearyEntity
