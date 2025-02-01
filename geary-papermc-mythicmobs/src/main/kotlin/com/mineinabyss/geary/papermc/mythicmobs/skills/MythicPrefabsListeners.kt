@@ -1,6 +1,8 @@
 package com.mineinabyss.geary.papermc.mythicmobs.skills
 
 import co.touchlab.kermit.Logger
+import com.github.shynixn.mccoroutine.bukkit.launch
+import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.mythicmobs.GearyMythicConfigOptions.addPrefabs
 import com.mineinabyss.geary.papermc.mythicmobs.GearyMythicConfigOptions.prefabs
 import com.mineinabyss.geary.papermc.mythicmobs.MythicEmbeddedGearyEntity
@@ -48,6 +50,10 @@ class MythicPrefabsListeners(
     fun MythicTriggerEvent.onLoad() {
         if (trigger != SkillTriggers.LOAD) return
         val mob = skillMetadata.caster as? ActiveMob ?: return
-        addPrefabs(mob, "Load")
+
+        // Run on sync thread
+        gearyPaper.plugin.launch {
+            addPrefabs(mob, "Load")
+        }
     }
 }
