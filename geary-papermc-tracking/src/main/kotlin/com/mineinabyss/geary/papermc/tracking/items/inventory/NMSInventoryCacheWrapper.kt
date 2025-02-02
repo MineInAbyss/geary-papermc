@@ -18,7 +18,7 @@ class NMSInventoryCacheWrapper(
     override fun updateToMatch(inventory: Inventory, ignoreCached: Boolean) = with(holder.world) {
         require(inventory is PlayerInventory) { "Inventory must be a player inventory" }
         require(cache is NMSItemCache) { "Cache must be an NMS cache" }
-        cache.updateToMatch(toArray(inventory.toNMS()), inventory.holder?.toGearyOrNull(), ignoreCached)
+        Companion.updateToMatch(cache, holder, inventory, ignoreCached)
     }
 
     override fun getOrUpdate(inventory: Inventory, slot: Int): GearyEntity? {
@@ -35,6 +35,15 @@ class NMSInventoryCacheWrapper(
     }
 
     companion object {
+        fun updateToMatch(
+            cache: PlayerItemCache<NMSItemStack>,
+            holder: GearyEntity,
+            inventory: PlayerInventory,
+            ignoreCached: Boolean
+        ) {
+            cache.updateToMatch(toArray(inventory.toNMS()), holder, ignoreCached)
+        }
+
         fun toArray(inventory: NMSPlayerInventory): Array<NMSItemStack?> {
             val array = Array<NMSItemStack?>(PlayerItemCache.MAX_SIZE) { null }
             var slot = 0
