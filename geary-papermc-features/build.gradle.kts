@@ -20,4 +20,5 @@ dependencies {
     compileOnly(idofrontLibs.minecraft.mccoroutine)
     compileOnly(idofrontLibs.idofront.nms)
     compileOnly(idofrontLibs.creative.serializer.minecraft)
+    compileOnly(idofrontLibs.creative.api)
 }
