@@ -4,9 +4,10 @@ import co.touchlab.kermit.Logger
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.mineinabyss.geary.engine.Engine
 import com.mineinabyss.geary.engine.archetypes.ArchetypeEngine
+import com.mineinabyss.geary.helpers.async.IgnoringAsyncCatcher
 import com.mineinabyss.geary.modules.ArchetypeEngineModule
 import com.mineinabyss.geary.modules.GearyModule
-import com.mineinabyss.geary.papermc.GearyPlugin
+import com.mineinabyss.geary.papermc.*
 import com.mineinabyss.idofront.messaging.injectedLogger
 import kotlinx.coroutines.CoroutineName
 import org.koin.core.module.dsl.bind
@@ -23,10 +24,19 @@ private fun GearyPlugin.paperModule() = module {
     }
 }
 
-fun GearyPlugin.PaperEngineModule(): GearyModule {
+private fun chooseCatcher(catchType: CatchType) = when(catchType) {
+    CatchType.IGNORE -> IgnoringAsyncCatcher()
+    CatchType.WARN -> PaperWarningAsyncCatcher()
+    CatchType.ERROR -> PaperAsyncCatcher()
+}
+
+fun GearyPlugin.PaperEngineModule(config: GearyPaperConfig): GearyModule {
     val engine = ArchetypeEngineModule(
         useSynchronized = true,
-        engineThread = { minecraftDispatcher + CoroutineName("Geary Engine") }
+        engineThread = { minecraftDispatcher + CoroutineName("Geary Engine") },
+        properties = mapOf(
+            "asyncCatcher.write" to chooseCatcher(config.catch.asyncWrite),
+        )
     )
     return GearyModule(
         module {

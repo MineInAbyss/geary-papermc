@@ -1,5 +1,7 @@
 package com.mineinabyss.geary.papermc.plugin.commands
 
+import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
+import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.engine.archetypes.ArchetypeQueryManager
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.get
@@ -93,6 +95,22 @@ internal fun IdoCommand.debug() = "debug" {
     "resetStats" {
         executes {
             DI.get<EntityStatistics>().reset()
+        }
+    }
+    "async" {
+        "read" {
+            playerExecutes {
+                gearyPaper.plugin.launch(gearyPaper.plugin.asyncDispatcher) {
+                    player.toGeary().get<PlayerItemCache<*>>()
+                }
+            }
+        }
+        "write" {
+            playerExecutes {
+                gearyPaper.plugin.launch(gearyPaper.plugin.asyncDispatcher) {
+                    player.toGeary().set(DebugComponent())
+                }
+            }
         }
     }
 }

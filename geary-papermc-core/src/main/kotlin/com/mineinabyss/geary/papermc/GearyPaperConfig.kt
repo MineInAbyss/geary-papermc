@@ -29,14 +29,15 @@ class GearyPaperConfig(
 
 @Serializable
 class Catching(
-    @YamlComment("Whether to throw an error when an entity read operation occurs outside of the server thread.")
-    val asyncRead: CatchType = CatchType.IGNORE,
+    //TODO reimplement other catchers
+//    @YamlComment("Whether to throw an error when an entity read operation occurs outside of the server thread.")
+//    val asyncRead: CatchType = CatchType.IGNORE,
     @YamlComment("Whether to throw an error when an entity write operation occurs outside of the server thread.")
     val asyncWrite: CatchType = CatchType.ERROR,
     @YamlComment("Whether to throw an error when converting bukkit concepts to geary entities outside of the server thread.")
     val asyncEntityConversion: CatchType = CatchType.IGNORE,
-    val asyncRecordsAccess: CatchType = CatchType.IGNORE,
-    val asyncArchetypeProviderAccess: CatchType = CatchType.IGNORE,
+//    val asyncRecordsAccess: CatchType = CatchType.IGNORE,
+//    val asyncArchetypeProviderAccess: CatchType = CatchType.IGNORE,
 ) {
     companion object{
         fun asyncCheck(type: CatchType, message: String) {

@@ -67,7 +67,7 @@ class GearyPluginImpl : GearyPlugin() {
             override val config: GearyPaperConfig by configHolder
             override val logger by plugin.observeLogger()
             override val features get() = this@GearyPluginImpl.features
-            override val gearyModule: UninitializedGearyModule = geary(PaperEngineModule())
+            override val gearyModule: UninitializedGearyModule = geary(PaperEngineModule(config))
             override val worldManager = WorldManager()
         }
 
