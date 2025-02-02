@@ -11,11 +11,14 @@ import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
 fun Geary.cooldownDisplaySystem() = system(query<Player, Cooldowns>())
     .every(INTERVAL)
     .exec { (player, cooldowns) ->
+        if (!cooldowns.hasDisplayableCooldowns) return@exec
+
         val cooldownsWithDisplay = cooldowns.cooldowns.values.filter {
             it.display != null
         }
@@ -46,4 +49,5 @@ object CooldownDisplayProps {
     const val displayLength = 10
     const val displayChar = '■'
     val INTERVAL = 1.ticks
+    val CLEAR_OLD_COOLDOWNS_INTERVAL = 1.seconds
 }

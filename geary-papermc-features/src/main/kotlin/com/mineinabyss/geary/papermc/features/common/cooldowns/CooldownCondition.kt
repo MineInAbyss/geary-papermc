@@ -27,6 +27,9 @@ data class StartedCooldown(
 data class Cooldowns(
     val cooldowns: Map<String, StartedCooldown>,
 ) {
+    @Transient
+    val hasDisplayableCooldowns = cooldowns.values.any { it.display != null }
+
     object Serializer : InnerSerializer<Map<String, StartedCooldown>, Cooldowns>(
         "geary:cooldowns",
         MapSerializer(String.serializer(), StartedCooldown.serializer()),
