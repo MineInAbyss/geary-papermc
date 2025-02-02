@@ -18,14 +18,14 @@ import org.bukkit.event.world.EntitiesUnloadEvent
 
 class EntityWorldEventTracker(
     world: Geary,
-    val gearyMobs: EntityTrackingModule
+    val gearyMobs: EntityTrackingModule,
 ) : Listener, Geary by world {
-    /** Remove entities from ECS when they are removed from Bukkit for any reason (Uses PaperMC event) */
+    /** Add entities to ECS when they are added to Bukkit for any reason (Uses PaperMC event) */
     @EventHandler(priority = EventPriority.LOWEST)
     fun EntityAddToWorldEvent.onBukkitEntityAdd() {
         // Only remove player from ECS on disconnect, not death
-        if (entity is Player) return
-        logger.v { "EntityAddToWorldEvent: Tracking bukkit entity ${entity.toGearyOrNull()?.id} (${entity.type} ${entity.uniqueId})" }
+        if (entity is Player) logger.v { "PlayerJoinEvent: Track ${entity.name}" }
+        else logger.v { "EntityAddToWorldEvent: Tracking bukkit entity ${entity.toGearyOrNull()?.id} (${entity.type} ${entity.uniqueId})" }
         gearyMobs.bukkit2Geary.getOrCreate(entity)
     }
 
@@ -54,12 +54,6 @@ class EntityWorldEventTracker(
             val gearyEntity = it.toGearyOrNull() ?: return@forEach
             gearyEntity.encodeComponentsTo(it)
         }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    fun PlayerJoinEvent.onPlayerLogin() {
-        logger.v { "PlayerJoinEvent: Track ${player.name}" }
-        gearyMobs.bukkit2Geary.getOrCreate(player)
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

@@ -7,7 +7,7 @@ import com.mineinabyss.idofront.typealiases.BukkitEntity
 import org.bukkit.entity.Entity
 
 fun BukkitEntity.toGeary(): GearyEntity = withGeary {
-    return toGearyOrNull() ?: error("Entity $this is not being tracked by Geary!")
+    return toGearyOrNull() ?: error("Entity ${this@toGeary} is not being tracked by Geary!")
 }
 
 fun BukkitEntity.toGearyOrNull(): GearyEntity? =

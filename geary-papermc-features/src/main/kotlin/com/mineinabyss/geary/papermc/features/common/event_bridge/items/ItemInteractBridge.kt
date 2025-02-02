@@ -52,13 +52,13 @@ class ItemInteractBridge : Listener {
 
 
     @EventHandler
-    fun PlayerArmSwingEvent.onLeftClick() = with(player.world.toGeary()) {
+    fun PlayerArmSwingEvent.onLeftClick() {
         val heldItem = player.inventory.toGeary()?.get(hand) ?: return
         heldItem.emit<OnItemLeftClick>()
     }
 
     @EventHandler
-    fun PlayerInteractEvent.onClick() = with(player.world.toGeary()) {
+    fun PlayerInteractEvent.onClick() {
         if(useItemInHand() == Event.Result.DENY) return
         val heldItem = player.inventory.toGeary()?.get(hand ?: return) ?: return
 

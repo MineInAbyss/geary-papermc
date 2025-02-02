@@ -23,6 +23,7 @@ class NMSInventoryCacheWrapper(
 
     override fun getOrUpdate(inventory: Inventory, slot: Int): GearyEntity? {
         require(inventory is PlayerInventory) { "Geary only supports player inventories currently" }
+        require(slot in 0 until PlayerItemCache.MAX_SIZE) { "Slot $slot out of bounds, must be in range 0..${PlayerItemCache.MAX_SIZE}" }
         return if (slot == PlayerItemCache.CURSOR_SLOT) {
             cache.getOrUpdate(
                 PlayerItemCache.CURSOR_SLOT,
