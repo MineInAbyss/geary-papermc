@@ -6,7 +6,6 @@ import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.inventory.NMSInventoryCacheWrapper
-import com.mineinabyss.geary.systems.TrackedSystem
 import com.mineinabyss.geary.systems.query.query
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
 import com.mineinabyss.idofront.time.ticks
@@ -26,13 +25,14 @@ import org.bukkit.entity.Player
  */
 fun Geary.createInventoryTrackerSystem() = system(
     query<Player, PlayerItemCache<*>>()
-).every(1.ticks).exec { query ->
-    val (player, itemCache) = query
-    NMSInventoryCacheWrapper.updateToMatch(
-        itemCache as PlayerItemCache<NMSItemStack>,
-        @OptIn(UnsafeAccessors::class) // updateToMatch doesn't call any entity writes on this entity
-        query.unsafeEntity.toGeary(),
-        player.inventory,
-        ignoreCached = false
-    )
+).every(1.ticks).execOnAll {
+    @OptIn(UnsafeAccessors::class)
+    forEachMutating { entity, (player, itemCache) ->
+        NMSInventoryCacheWrapper.updateToMatch(
+            itemCache as PlayerItemCache<NMSItemStack>,
+            entity,
+            player.inventory,
+            ignoreCached = false
+        )
+    }
 }

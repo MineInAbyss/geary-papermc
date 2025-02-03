@@ -55,7 +55,7 @@ abstract class PlayerItemCache<T>(
 
             if (item == null) {
                 removeEntity(slot)
-            } else when (val itemInfo = readItemInfo(item)) {
+            } else when (readItemInfo(item)) {
                 is EntityEncoded -> {
                     removeEntity(slot)
                     val newEntity = deserializeItem(item)
@@ -63,7 +63,7 @@ abstract class PlayerItemCache<T>(
                     if (holder != null) newEntity?.addParent(holder)
                     newEntity?.set<ItemStack>(convertToItemStack(item))
                     newEntity?.add<InInventory>()
-                    logger.v("Adding $newEntity (${newEntity?.prefabs?.map { it.get<PrefabKey>() }}) in slot $slot")
+                    logger.v { "Adding $newEntity (${newEntity?.prefabs?.map { it.get<PrefabKey>() }}) in slot $slot" }
                 }
 
                 else -> removeEntity(slot)

@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.spawning.spawn_types.mythic
 
+import com.google.common.cache.CacheBuilder
 import com.mineinabyss.geary.papermc.spawning.components.SpawnCategory
 import com.mineinabyss.geary.papermc.spawning.spawn_types.GearyReadEntityTypeEvent
 import com.mineinabyss.geary.papermc.spawning.spawn_types.GearyReadSpawnCategoryEvent
@@ -8,9 +9,15 @@ import com.mineinabyss.geary.prefabs.PrefabKey
 import io.lumine.mythic.bukkit.MythicBukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import kotlin.jvm.optionals.getOrNull
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.toJavaDuration
 
 class MythicSpawnTypeListener : Listener {
     val mobsManager = MythicBukkit.inst().mobManager
+    val mobSpawnCategoryCache = CacheBuilder.newBuilder()
+        .expireAfterAccess(1.minutes.toJavaDuration())
+        .build<String, String>()
 
     @EventHandler
     fun GearyReadTypeEvent.readMythicType() {
@@ -26,19 +33,18 @@ class MythicSpawnTypeListener : Listener {
     @EventHandler
     fun GearyReadSpawnCategoryEvent.readSpawnCategory() {
         if (category != null) return
-
-        if (mobsManager.isMythicMob(entity)) {
-            val cat = mobsManager.getMythicMobInstance(entity)?.type?.config?.getString("SpawnCategory") ?: return
-            category = SpawnCategory(cat)
+        val mob = mobsManager.getActiveMob(entity.uniqueId).getOrNull() ?: return
+        // MM's config string reading is super slow, so cache it
+        val category = mobSpawnCategoryCache.get(mob.mobType) {
+            mob.type.config.getString("SpawnCategory") ?: "default"
         }
+        this.category = SpawnCategory(category)
     }
 
     @EventHandler
     fun GearyReadEntityTypeEvent.readEntityType() {
         if (type != null) return
-        if (mobsManager.isMythicMob(entity)) {
-            val typeName = mobsManager.getMythicMobInstance(entity)?.type?.internalName ?: return
-            type = "mm:$typeName"
-        }
+        val typeName = mobsManager.getActiveMob(entity.uniqueId).getOrNull()?.mobType ?: return
+        type = "mm:$typeName"
     }
 }
