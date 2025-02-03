@@ -33,22 +33,22 @@ class SpawnTask(
 
     fun run() {
         val currTick = Bukkit.getCurrentTick()
-        val runForPositions: MutableSet<SpawnPosition> = SpawnPosition.entries
+        val allowedSpawnPositions: List<SpawnPosition> = SpawnPosition.entries
             .filter { currTick % runTimes.getOrDefault(it, 1.ticks).inWholeTicks == 0L }
-            .toMutableSet()
-        if (runForPositions.isEmpty()) return
+        if (allowedSpawnPositions.isEmpty()) return
         val onlinePlayers = Bukkit.getOnlinePlayers().filter { !it.isDead && it.gameMode != SPECTATOR }
         if (onlinePlayers.isEmpty()) return
 
         onlinePlayers.forEach { player ->
+            val attemptedPositions = allowedSpawnPositions.toMutableSet()
             repeat(spawnAttempts) {
+                if (attemptedPositions.isEmpty()) return@forEach
                 val spawnLoc = locationChooser.chooseSpawnLocationNear(onlinePlayers, player.location) ?: return@repeat
                 val type = spawnPositionReader.spawnPositionFor(spawnLoc)
-                if (type in runForPositions) {
-                    runForPositions.remove(type)
+                if (type in attemptedPositions) {
+                    attemptedPositions.remove(type)
                     mobSpawner.attemptSpawnAt(spawnLoc, type)
                 }
-                if (runForPositions.isEmpty()) return@forEach
             }
         }
     }

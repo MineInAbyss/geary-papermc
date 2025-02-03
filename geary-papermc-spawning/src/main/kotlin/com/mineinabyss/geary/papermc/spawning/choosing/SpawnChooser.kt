@@ -21,7 +21,6 @@ class SpawnChooser(
         if (spawnsInRegion.isEmpty()) return emptyList()
 
         // Check mob caps
-        val allowedCategories = caps.getAllowedCategoriesAt(location).toSet()
         val allowedSpawns = caps
             .filterAllowedAt(location, spawnsInRegion.filter { it.position == position })
 

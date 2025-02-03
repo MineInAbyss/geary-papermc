@@ -17,6 +17,7 @@ import io.lumine.mythic.api.mobs.MythicMob
 object MythicEmbeddedGearyEntity {
     const val NODE_GEARY = "Geary"
     const val NODE_OBSERVE = "Observe"
+    const val LOADED_ENTITY_KEY = "LoadedGearyEntity"
 
     /**
      * Gets the embedded prefab based on the mob name or parses and loads it.
@@ -24,8 +25,16 @@ object MythicEmbeddedGearyEntity {
     fun getOrLoadEmbeddedPrefab(world: Geary, mob: MythicMob): GearyEntity? = with(world) {
         // Check for existing prefab
         val config = mob.config
+        val loadedEntity = mob.config.getString(LOADED_ENTITY_KEY)
+        if(loadedEntity != null) {
+            if (loadedEntity == "none") return null
+            val prefab = PrefabKey.ofOrNull(loadedEntity)?.toEntityOrNull()
+            if (prefab != null) return prefab
+        }
+
+        mob.config.set(LOADED_ENTITY_KEY, "none") // If we return early, don't try to load again
+
         val prefabKey = PrefabKey.of("mythicmobs", config.key)
-        prefabKey.toEntityOrNull()?.let { return it }
 
         // Load prefab
         // TODO create some helper functions for this in PrefabLoader
@@ -46,6 +55,8 @@ object MythicEmbeddedGearyEntity {
         val observeComponent = observeNode?.let { yaml.decodeFromYamlNode(EntityObservers.serializer(), it) }
 
         // Register and return
+        val newEntity = prefabKey.toEntityOrNull() ?: entity()
+        newEntity.clear()
         val prefabEntity = entity {
             components?.forEach {
                 set(it, it::class)
@@ -53,6 +64,7 @@ object MythicEmbeddedGearyEntity {
             observeComponent?.let { set(it, it::class) }
             set(prefabKey)
         }
+        mob.config.set(LOADED_ENTITY_KEY, prefabKey.toString())
         prefabs.manager.registerPrefab(prefabKey, prefabEntity)
         prefabEntity
     }
