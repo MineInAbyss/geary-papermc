@@ -1,6 +1,5 @@
 package com.mineinabyss.geary.papermc
 
-import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.idofront.plugin.listeners
 import kotlinx.coroutines.Job
 import org.bukkit.Bukkit

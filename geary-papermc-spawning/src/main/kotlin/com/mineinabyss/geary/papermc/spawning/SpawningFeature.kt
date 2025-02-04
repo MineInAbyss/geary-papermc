@@ -9,6 +9,7 @@ import com.mineinabyss.geary.papermc.spawning.choosing.LocationSpread
 import com.mineinabyss.geary.papermc.spawning.choosing.SpawnChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.SpawnLocationChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
+import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.SpawningWorldGuardFlags
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpawning
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
@@ -19,6 +20,7 @@ import com.mineinabyss.geary.papermc.spawning.spawn_types.mythic.MythicSpawnType
 import com.mineinabyss.geary.papermc.spawning.tasks.SpawnTask
 import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.idofront.config.config
+import com.sk89q.worldguard.WorldGuard
 
 class SpawningFeature(context: FeatureContext) : Feature(context) {
     val config by config("spawning", plugin.dataPath, SpawnConfig())
@@ -30,6 +32,16 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
     }
 
     override fun canEnable() = gearyPaper.config.spawning
+
+    override fun load() {
+        runCatching {
+            val registry = WorldGuard.getInstance().flagRegistry
+            registry.register(SpawningWorldGuardFlags.OVERRIDE_LOWER_PRIORITY_SPAWNS)
+        }.onFailure {
+            logger.w { "Failed to register WorldGuard flags for Geary spawning" }
+            it.printStackTrace()
+        }
+    }
 
     override fun enable() {
         listeners(

@@ -58,7 +58,6 @@ class Features(
 
     fun reloadAll() {
         disableAll()
-        loadAll()
         enableAll()
     }
 

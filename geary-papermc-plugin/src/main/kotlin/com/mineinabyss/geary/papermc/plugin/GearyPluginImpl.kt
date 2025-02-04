@@ -146,6 +146,7 @@ class GearyPluginImpl : GearyPlugin() {
                 }
             }
         }
+        features.loadAll()
 
         registerGearyCommands()
     }
@@ -153,7 +154,6 @@ class GearyPluginImpl : GearyPlugin() {
     override fun onEnable() {
         //TODO api for registering geary per world once we have per world ticking
         gearyPaper.worldManager.setGlobalEngine(gearyPaper.gearyModule.start())
-        features.loadAll()
         features.enableAll()
 
         val stats = EntityStatistics()

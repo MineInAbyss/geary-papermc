@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.spawning.choosing.worldguard
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldguard.WorldGuard
+import com.sk89q.worldguard.protection.flags.StateFlag
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import org.bukkit.Location
 
@@ -16,11 +17,16 @@ class WorldGuardSpawning(
     private val regionContainer = WorldGuard.getInstance().platform.regionContainer
 
     fun getRegionsAt(location: Location): List<ProtectedRegion> {
-        return regionContainer
+        val allRegions = regionContainer
             .createQuery()
             .getApplicableRegions(BukkitAdapter.adapt(location))
             .regions
-            .sorted()
+            .sortedBy { it.priority }
+            // Any regions with the override flag set to true will ignore lower priority spawns
+        val dropAt = allRegions
+            .indexOfLast { it.getFlag(SpawningWorldGuardFlags.OVERRIDE_LOWER_PRIORITY_SPAWNS) == true }
+            .coerceAtLeast(0)
+        return allRegions.drop(dropAt)
     }
 
     fun getSpawnsForRegions(
