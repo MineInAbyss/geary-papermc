@@ -64,9 +64,9 @@ abstract class Feature(context: FeatureContext) {
         tasks.clear()
     }
 
-    fun defaultLoad() = runCatching {
-        subFeatures.loadAll()
-        load()
+    fun defaultLoad(isFirstLoad: Boolean) = runCatching {
+        subFeatures.loadAll(isFirstLoad)
+        if (isFirstLoad) load()
     }.onSuccess {
         logger.s("Loaded ${this::class.simpleName}")
     }.onFailure {

@@ -1,6 +1,5 @@
 package com.mineinabyss.geary.papermc
 
-import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.injectedLogger
 import com.mineinabyss.idofront.messaging.success
@@ -20,8 +19,8 @@ class Features(
     val context get() = FeatureContext(plugin, plugin.injectedLogger(), isFirstEnable)
     private var isFirstEnable = true
 
-    fun loadAll() {
-        features.forEach(::load)
+    fun loadAll(isFirstLoad: Boolean = true) {
+        features.forEach { load(it, isFirstLoad) }
     }
 
     fun enableAll() {
@@ -29,11 +28,11 @@ class Features(
         isFirstEnable = false
     }
 
-    fun load(builder: FeatureBuilder): Result<Feature> = runCatching {
+    fun load(builder: FeatureBuilder, isFirstLoad: Boolean): Result<Feature> = runCatching {
         val feature = builder(context)
         featuresByClass[feature::class] = builder
         if (!feature.canLoad()) return Result.failure(IllegalStateException("Feature ${feature.name} could not be loaded"))
-        return feature.defaultLoad()
+        return feature.defaultLoad(isFirstLoad)
             .onSuccess { loaded.add(feature) }
             .onFailure { it.printStackTrace() }
             .map { feature }
@@ -58,6 +57,7 @@ class Features(
 
     fun reloadAll() {
         disableAll()
+        loadAll(isFirstLoad = false)
         enableAll()
     }
 
@@ -70,7 +70,7 @@ class Features(
         val feature = getOrNull<T>()!!
         feature.defaultDisable()
         enabled.remove(feature)
-        load(builder)
+        load(builder, isFirstLoad = false)
             .map { enable(it) }
             .onSuccess { notify?.success("Reloaded ${T::class.simpleName}") }
             .onFailure { notify?.error("Failed to reload ${T::class.simpleName}\n${it.stackTraceToString()}") }

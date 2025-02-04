@@ -14,7 +14,7 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
 
 class MythicSpawnTypeListener : Listener {
-    val mobsManager = MythicBukkit.inst().mobManager
+    val mobsRegistry = MythicBukkit.inst().mobManager.mobRegistry
     val mobSpawnCategoryCache = CacheBuilder.newBuilder()
         .expireAfterAccess(1.minutes.toJavaDuration())
         .build<String, String>()
@@ -33,7 +33,7 @@ class MythicSpawnTypeListener : Listener {
     @EventHandler
     fun GearyReadSpawnCategoryEvent.readSpawnCategory() {
         if (category != null) return
-        val mob = mobsManager.getActiveMob(entity.uniqueId).getOrNull() ?: return
+        val mob = mobsRegistry.getActiveMob(entity.uniqueId).getOrNull() ?: return
         // MM's config string reading is super slow, so cache it
         val category = mobSpawnCategoryCache.get(mob.mobType) {
             mob.type.config.getString("SpawnCategory") ?: "default"
@@ -44,7 +44,7 @@ class MythicSpawnTypeListener : Listener {
     @EventHandler
     fun GearyReadEntityTypeEvent.readEntityType() {
         if (type != null) return
-        val typeName = mobsManager.getActiveMob(entity.uniqueId).getOrNull()?.mobType ?: return
+        val typeName = mobsRegistry.getActiveMob(entity.uniqueId).getOrNull()?.mobType ?: return
         type = "mm:$typeName"
     }
 }
