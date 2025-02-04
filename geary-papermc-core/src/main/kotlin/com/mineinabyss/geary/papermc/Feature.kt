@@ -68,7 +68,7 @@ abstract class Feature(context: FeatureContext) {
         subFeatures.loadAll(isFirstLoad)
         if (isFirstLoad) load()
     }.onSuccess {
-        logger.s("Loaded ${this::class.simpleName}")
+        if (isFirstLoad) logger.s("Loaded ${this::class.simpleName}")
     }.onFailure {
         logger.f("Failed to load ${this::class.simpleName}")
     }

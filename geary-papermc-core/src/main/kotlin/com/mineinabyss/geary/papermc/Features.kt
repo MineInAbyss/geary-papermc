@@ -36,6 +36,9 @@ class Features(
             .onSuccess { loaded.add(feature) }
             .onFailure { it.printStackTrace() }
             .map { feature }
+    }.onFailure {
+        context.logger.e { "Failed to create feature from constructor: $builder" }
+        it.printStackTrace()
     }
 
     fun enable(feature: Feature): Result<Feature> {

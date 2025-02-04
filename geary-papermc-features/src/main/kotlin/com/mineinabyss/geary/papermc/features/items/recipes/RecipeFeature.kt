@@ -1,15 +1,11 @@
 package com.mineinabyss.geary.papermc.features.items.recipes
 
-import co.touchlab.kermit.Logger
-import com.mineinabyss.geary.modules.Geary
-import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.Feature
 import com.mineinabyss.geary.papermc.FeatureContext
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.Prefabs
-import com.mineinabyss.geary.prefabs.prefabs
 import com.mineinabyss.geary.systems.query.query
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.serialization.recipes.options.ingredientOptionsListener
@@ -17,16 +13,17 @@ import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 
-class RecipeFeature(val context: FeatureContext) : Feature(context), Geary by gearyPaper.worldManager.global {
-    private val recipes = cache(query<SetRecipes, PrefabKey>())
-    private val potionMixes = cache(query<SetPotionMixes, PrefabKey>())
-    private val gearyItems = getAddon(ItemTracking)
+class RecipeFeature(val context: FeatureContext) : Feature(context) {
+    val world get() = gearyPaper.worldManager.global
+    private val recipes by lazy { with(world) { cache(query<SetRecipes, PrefabKey>()) } }
+    private val potionMixes by lazy { with(world) { cache(query<SetPotionMixes, PrefabKey>()) } }
+    private val gearyItems by lazy { with(world) { getAddon(ItemTracking) } }
     override val logger: ComponentLogger get() = context.logger
 
     override fun enable() {
         if (!context.isFirstEnable) {
             (recipes.entities().toSet() + potionMixes.entities().toSet()).forEach {
-                getAddon(Prefabs).loader.reload(it)
+                world.getAddon(Prefabs).loader.reload(it)
             }
         }
 
