@@ -7,22 +7,27 @@ import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
 import com.mineinabyss.geary.systems.query.GearyQuery
 import com.mineinabyss.idofront.resourcepacks.ResourcePacks
+import com.mineinabyss.idofront.textcomponents.miniMsg
 import net.kyori.adventure.key.Key
 import team.unnamed.creative.ResourcePack
+import team.unnamed.creative.base.Writable
 import team.unnamed.creative.model.Model
 import team.unnamed.creative.model.ModelTexture
 import team.unnamed.creative.model.ModelTextures
+import team.unnamed.creative.resources.MergeStrategy
 
-class ResourcePackGenerator(world: Geary) : Geary by world {
+class ResourcePackGenerator(world: Geary, val config: ResourcePackConfig) : Geary by world {
     private val resourcePackQuery = cache(::ResourcePackQuery)
     private val includedPackPath = gearyPaper.config.resourcePack.includedPackPath.takeUnless(String::isEmpty)
         ?.let { gearyPaper.plugin.dataFolder.resolve(it) }
-    private val resourcePack = includedPackPath?.let(ResourcePacks::readToResourcePack) ?: ResourcePack.resourcePack()
 
     fun generateResourcePack() {
         if (!gearyPaper.config.resourcePack.generate) return
+        val resourcePack = includedPackPath?.let(ResourcePacks::readToResourcePack) ?: ResourcePack.resourcePack()
         val resourcePackFile = gearyPaper.plugin.dataFolder.resolve(gearyPaper.config.resourcePack.outputPath)
         resourcePackFile.deleteRecursively()
+
+        resourcePack.packMeta(34, "<rainbow>Geary</rainbow> Resource Pack".miniMsg())
 
         resourcePackQuery.forEach { (prefabKey, resourcePackContent, itemStack) ->
             val vanillaModelKey = ResourcePacks.vanillaKeyForMaterial(
@@ -57,7 +62,15 @@ class ResourcePackGenerator(world: Geary) : Geary by world {
                 .addTo(resourcePack)
         }
 
+        config.jarResources
+            .forEach {
+                resourcePack.unknownFile(it.path, Writable.resource(it.classLoader, it.resource))
+            }
+
+        config.resourcePacks.forEach { resourcePack.merge(it, MergeStrategy.mergeAndFailOnError()) }
+
         ResourcePacks.writeToFile(resourcePackFile, resourcePack)
+        gearyPaper.logger.s("Resource pack generated at $resourcePackFile")
     }
 
     private fun generatePredicateModels(
