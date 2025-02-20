@@ -19,6 +19,7 @@ import team.unnamed.creative.model.ItemPredicate
 @SerialName("geary:resourcepack")
 data class ResourcePackContent(
     @EncodeDefault(EncodeDefault.Mode.NEVER) val baseMaterial: @Serializable(MaterialByNameSerializer::class) Material? = null,
+    val itemModel: @Serializable(KeySerializer::class) Key? = null,
     val model: @Serializable(KeySerializer::class) Key? = null,
     val parentModel: @Serializable(KeySerializer::class) Key = Key.key("minecraft:item/generated"),
     val textures: @Serializable(ModelTexturesSerializer::class) ModelTexturesSurrogate = ModelTexturesSurrogate(),
@@ -26,7 +27,7 @@ data class ResourcePackContent(
 ) {
 
     init {
-        require(model != null || textures.layers.isNotEmpty() || textures.variables.isNotEmpty()) { "ResourcePackContent must contain atleast a model or texture reference" }
+        require(itemModel != null || model != null || textures.layers.isNotEmpty() || textures.variables.isNotEmpty()) { "ResourcePackContent must contain atleast an itemModel, model or texture reference" }
     }
 
     fun itemOverrides(modelKey: Key, prefabKey: PrefabKey, itemStack: ItemStack?): List<ItemOverride> {
