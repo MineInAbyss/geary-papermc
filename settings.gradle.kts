@@ -22,6 +22,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("idofrontLibs") {
             from("com.mineinabyss:catalog:$idofrontVersion")
+            version("mythic-dist", "5.8.1-SNAPSHOT")
         }
     }
 }
