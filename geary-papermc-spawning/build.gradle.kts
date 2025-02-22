@@ -19,8 +19,13 @@ dependencies {
 
     compileOnly(libs.geary.actions)
     implementation(project(":geary-papermc-tracking"))
-    compileOnly(idofrontLibs.minecraft.plugin.worldguard) { exclude(group = "org.bukkit") }
-    compileOnly(idofrontLibs.kotlinx.dataframe)
+    compileOnly(idofrontLibs.minecraft.plugin.worldguard) {
+        exclude(group = "org.bukkit")
+        exclude(group = "com.google.guava")
+        exclude(group = "com.google.code.gson")
+        exclude(group = "it.unimi.dsi")
+    }
+//    compileOnly(idofrontLibs.kotlinx.dataframe)
 //    implementation(project(":geary-papermc-features"))
 }
 
