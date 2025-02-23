@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 /**
  * Sets item properties for a geary item entity.
  */
+@JvmInline
 @Serializable
 @SerialName("geary:set.item")
-class SetItem(val item: SerializableItemStack)
+value class SetItem(val item: SerializableItemStack)
