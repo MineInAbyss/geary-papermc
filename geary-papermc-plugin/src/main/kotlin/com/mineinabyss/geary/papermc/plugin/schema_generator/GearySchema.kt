@@ -1,16 +1,14 @@
 package com.mineinabyss.geary.papermc.plugin.schema_generator
 
 import com.mineinabyss.geary.datatypes.GearyComponent
-import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.geary.serialization.SerializableComponentsModule
 import com.mineinabyss.geary.serialization.SerializersByMap
 import com.mineinabyss.geary.serialization.serializers.InnerSerializer
-import com.mineinabyss.idofront.serialization.BaseSerializableItemStack
+import com.mineinabyss.idofront.serialization.SerializableItemStack
 import dev.adamko.kxstsgen.KxsTsConfig
 import dev.adamko.kxstsgen.core.TsDeclaration
 import dev.adamko.kxstsgen.core.TsElementId
 import kotlinx.serialization.KSerializer
-import org.intellij.lang.annotations.Language
 import java.nio.file.Path
 import kotlin.io.path.writeText
 
@@ -30,8 +28,9 @@ class GearySchema(
             listOf("geary", "minecraft", "mineinabyss", "blocky", "bonfire", "climb", "chatty", "packy", "cosmetics")
         val tsGenerator = CustomKxsTsGenerator(KxsTsConfig())
         val serializers = buildSet<KSerializer<*>> {
-            add(BaseSerializableItemStack.serializer())
-            addAll((serialization.serializers as SerializersByMap)
+            add(SerializableItemStack.serializer())
+            addAll(
+                (serialization.serializers as SerializersByMap)
                 .serialName2Component.keys
                 .filter { it.isGearyPrefab() }
 //                .map { ComponentSerializers.run { it.fromCamelCaseToSnakeCase() } }
