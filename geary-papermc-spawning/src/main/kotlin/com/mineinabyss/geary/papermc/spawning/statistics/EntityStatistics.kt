@@ -45,7 +45,7 @@ class EntityStatistics : Listener {
 
     @EventHandler
     fun EntityDeathEvent.logDeaths() {
-        val mm = MythicBukkit.inst().mobManager
+        val mm = runCatching { MythicBukkit.inst().mobManager }.getOrNull() ?: return
         val mythicMob = if (mm.isMythicMob(entity)) mm.getMythicMobInstance(entity) else null
         val deathData = DeathData(
             x = entity.location.blockX,
