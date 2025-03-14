@@ -1,8 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.items.inventory
 
 import com.mineinabyss.geary.datatypes.GearyEntity
-import com.mineinabyss.geary.modules.Geary
-import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
+import com.mineinabyss.geary.helpers.fastForEach
 import com.mineinabyss.geary.papermc.tracking.items.cache.NMSItemCache
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
@@ -18,7 +17,7 @@ class NMSInventoryCacheWrapper(
     override fun updateToMatch(inventory: Inventory, ignoreCached: Boolean) = with(holder.world) {
         require(inventory is PlayerInventory) { "Inventory must be a player inventory" }
         require(cache is NMSItemCache) { "Cache must be an NMS cache" }
-        Companion.updateToMatch(cache, holder, inventory, ignoreCached)
+        updateToMatch(cache, holder, inventory, ignoreCached)
     }
 
     override fun getOrUpdate(inventory: Inventory, slot: Int): GearyEntity? {
@@ -39,16 +38,16 @@ class NMSInventoryCacheWrapper(
             cache: PlayerItemCache<NMSItemStack>,
             holder: GearyEntity,
             inventory: PlayerInventory,
-            ignoreCached: Boolean
+            ignoreCached: Boolean,
         ) {
-            cache.updateToMatch(toArray(inventory.toNMS()), holder, ignoreCached)
+            cache.updateToMatch(toArray(inventory.toNMS()), holder, ignoreCached, inventory.heldItemSlot)
         }
 
         fun toArray(inventory: NMSPlayerInventory): Array<NMSItemStack?> {
             val array = Array<NMSItemStack?>(PlayerItemCache.MAX_SIZE) { null }
             var slot = 0
-            inventory.compartments.forEach { comp ->
-                comp.forEach { item ->
+            inventory.compartments.fastForEach { comp ->
+                comp.fastForEach { item ->
                     array[slot] = item
                     slot++
                 }

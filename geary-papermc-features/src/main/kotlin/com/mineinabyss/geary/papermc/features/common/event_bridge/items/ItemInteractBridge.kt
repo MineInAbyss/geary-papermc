@@ -59,7 +59,7 @@ class ItemInteractBridge : Listener {
 
     @EventHandler
     fun PlayerInteractEvent.onClick() {
-        if(useItemInHand() == Event.Result.DENY) return
+        if (useItemInHand() == Event.Result.DENY) return
         val heldItem = player.inventory.toGeary()?.get(hand ?: return) ?: return
 
         // Right click gets fired twice, so we manually prevent two right-clicks within several ticks of each other.

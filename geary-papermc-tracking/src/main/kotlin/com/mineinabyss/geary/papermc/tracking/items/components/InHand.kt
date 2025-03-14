@@ -3,12 +3,9 @@ package com.mineinabyss.geary.papermc.tracking.items.components
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-sealed class SlotType {
-    sealed class Held
-
-    sealed class Offhand
-
-    sealed class Hotbar
-
-    sealed class Equipped
-}
+/**
+ * Added to items in the player's hand (only the main hand)
+ */
+@Serializable
+@SerialName("geary:in_hand")
+sealed class InHand

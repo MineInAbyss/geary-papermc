@@ -4,8 +4,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * Added to items located in the player's inventory
+ * Added to items equipped in an armor slot
  */
 @Serializable
-@SerialName("geary:in_inventory")
-sealed class InInventory
+@SerialName("geary:equipped")
+sealed class Equipped

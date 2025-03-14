@@ -6,6 +6,8 @@ import com.mineinabyss.geary.helpers.fastForEachWithIndex
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.EntityEncoded
+import com.mineinabyss.geary.papermc.tracking.items.components.Equipped
+import com.mineinabyss.geary.papermc.tracking.items.components.InHand
 import com.mineinabyss.geary.papermc.tracking.items.components.InInventory
 import com.mineinabyss.geary.prefabs.PrefabKey
 import org.bukkit.inventory.ItemStack
@@ -20,9 +22,11 @@ abstract class PlayerItemCache<T>(
     /** Cache of up-to-date item references for slots. Used to avoid set calls when reference doesn't change. */
     private val cachedItems = MutableList<T?>(maxSize) { null }
 
+    var previousHeldSlot = -1
+
     private fun removeEntity(slot: Int) {
         val entity = entities[slot].takeIf { it != 0uL }?.toGeary() ?: return
-        logger.v("Removing ${entities[slot]} in slot $slot")
+        logger.v { "Removing ${entities[slot]} in slot $slot" }
         val pdc = entity.get<ItemStack>()?.itemMeta?.persistentDataContainer
         if (pdc != null) entity.encodeComponentsTo(pdc)
         entity.removeEntity()
@@ -40,7 +44,12 @@ abstract class PlayerItemCache<T>(
     }
 
     /** Updates cache to match passed [inventory] */
-    fun updateToMatch(inventory: Array<T?>, holder: GearyEntity? = null, ignoreCached: Boolean = false) {
+    fun updateToMatch(
+        inventory: Array<T?>,
+        holder: GearyEntity? = null,
+        ignoreCached: Boolean = false,
+        heldSlot: Int = -1,
+    ) {
         inventory.fastForEachWithIndex { slot, item ->
             // Generally an identical item reference => the same item, but not vice versa
             // To avoid expensive equality checks, we do a quick check to skip updates followed by an equality check for re-serialization.
@@ -60,14 +69,29 @@ abstract class PlayerItemCache<T>(
                     removeEntity(slot)
                     val newEntity = deserializeItem(item)
                     entities[slot] = newEntity?.id ?: 0uL
-                    if (holder != null) newEntity?.addParent(holder)
-                    newEntity?.set<ItemStack>(convertToItemStack(item))
-                    newEntity?.add<InInventory>()
-                    logger.v { "Adding $newEntity (${newEntity?.prefabs?.map { it.get<PrefabKey>() }}) in slot $slot" }
+                    if (newEntity == null) {
+                        logger.v { "Decoded null entity in $slot" }
+                        return@fastForEachWithIndex
+                    }
+                    if (holder != null) newEntity.addParent(holder)
+                    newEntity.set<ItemStack>(convertToItemStack(item))
+                    newEntity.add<InInventory>()
+
+                    // Add components based on slot
+                    when (slot) {
+                        in 37..40 -> newEntity.add<Equipped>()
+                    }
+
+                    logger.v { "Adding $newEntity (${newEntity.prefabs.map { it.get<PrefabKey>() }}) in slot $slot" }
                 }
 
                 else -> removeEntity(slot)
             }
+        }
+        if (heldSlot != previousHeldSlot) {
+            if (previousHeldSlot != -1) entities[previousHeldSlot].toGeary().remove<InHand>()
+            if (heldSlot != -1) entities[heldSlot].toGeary().add<InHand>()
+            previousHeldSlot = heldSlot
         }
     }
 
