@@ -2,6 +2,8 @@ package com.mineinabyss.geary.papermc.features.common.conditions.entity
 
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.Condition
+import com.mineinabyss.idofront.serialization.DoubleRangeSerializer
+import com.mineinabyss.idofront.util.DoubleRange
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.bukkit.entity.LivingEntity
@@ -35,6 +37,7 @@ class EntityConditions(
     val invurnerable: Boolean? = null,
     val silent: Boolean? = null,
     val leashed: Boolean? = null,
+    val health: @Serializable(with= DoubleRangeSerializer::class) DoubleRange? = null,
 ) : Condition {
     infix fun Boolean?.nullOrEquals(other: Boolean) = this == null || this == other
 
@@ -59,6 +62,7 @@ class EntityConditions(
                 glowing nullOrEquals livingEntity.isGlowing &&
                 invurnerable nullOrEquals livingEntity.isInvulnerable &&
                 silent nullOrEquals livingEntity.isSilent &&
-                leashed nullOrEquals livingEntity.isLeashed
+                leashed nullOrEquals livingEntity.isLeashed &&
+                (health == null || livingEntity.health in health)
     }
 }

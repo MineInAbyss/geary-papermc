@@ -2,6 +2,9 @@ package com.mineinabyss.geary.papermc.features.common.conditions.entity
 
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.Condition
+import com.mineinabyss.idofront.serialization.FloatRangeSerializer
+import com.mineinabyss.idofront.serialization.IntRangeSerializer
+import com.mineinabyss.idofront.util.FloatRange
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.bukkit.entity.Player
@@ -35,6 +38,8 @@ class PlayerConditions(
     val invurnerable: Boolean? = null,
     val silent: Boolean? = null,
     val op: Boolean? = null,
+    val foodLevel: @Serializable(with= IntRangeSerializer::class) IntRange? = null,
+    val saturation: @Serializable(with= FloatRangeSerializer::class) FloatRange? = null,
 ) : Condition {
     infix fun Boolean?.nullOrEquals(other: Boolean) = this == null || this == other
     override fun ActionGroupContext.execute(): Boolean {
@@ -65,6 +70,8 @@ class PlayerConditions(
                 glowing nullOrEquals player.isGlowing &&
                 invurnerable nullOrEquals player.isInvulnerable &&
                 silent nullOrEquals player.isSilent &&
-                op nullOrEquals player.isOp
+                op nullOrEquals player.isOp &&
+                (foodLevel == null || player.foodLevel in foodLevel) &&
+                (saturation == null || player.saturation in saturation)
     }
 }
