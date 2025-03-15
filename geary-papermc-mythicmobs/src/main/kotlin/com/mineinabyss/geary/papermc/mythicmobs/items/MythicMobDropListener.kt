@@ -60,7 +60,7 @@ class GearyDrop(
         val isOnFire = (metadata?.dropper?.getOrNull()?.entity?.bukkitEntity?.fireTicks ?: 0) > 0
         val itemInKillerHand = (BukkitAdapter.adapt(metadata?.cause?.getOrNull()) as? Player)?.inventory?.itemInMainHand
         val lootingLvl = if (noLooting) 0 else itemInKillerHand?.enchantments?.get(Enchantment.LOOTING) ?: 0
-        val amount = (0..(randomAmount.max.toInt() + lootingLvl)).random().toDouble()
+        val amount = (randomAmount.min.toInt()..(randomAmount.max.toInt() + lootingLvl)).random().toDouble()
         return if (isOnFire && cookedDrop != null) cookedDrop.getDrop(metadata, amount)
         else super.getDrop(metadata, amount)
     }
