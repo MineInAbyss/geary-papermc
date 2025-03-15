@@ -14,6 +14,7 @@ class PreventEventsFeature(context: FeatureContext) : Feature(context) {
             PreventInteractionListener(),
             PreventRegenerationListener(),
             PreventRidingListener(),
+            PreventEnchantingListener(),
         )
     }
 }

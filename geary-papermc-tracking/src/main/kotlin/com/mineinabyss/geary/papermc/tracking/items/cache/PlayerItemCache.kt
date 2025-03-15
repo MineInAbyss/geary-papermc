@@ -79,7 +79,7 @@ abstract class PlayerItemCache<T>(
 
                     // Add components based on slot
                     when (slot) {
-                        in 37..40 -> newEntity.add<Equipped>()
+                        in 36..39 -> newEntity.add<Equipped>()
                     }
 
                     logger.v { "Adding $newEntity (${newEntity.prefabs.map { it.get<PrefabKey>() }}) in slot $slot" }
