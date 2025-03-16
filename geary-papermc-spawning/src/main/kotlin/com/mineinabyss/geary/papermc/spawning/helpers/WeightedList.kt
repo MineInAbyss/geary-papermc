@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.helpers
 
 import com.mineinabyss.idofront.util.DoubleRange
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import java.util.concurrent.ThreadLocalRandom
 
 /**
@@ -16,7 +17,7 @@ class WeightedList<T>(val probabilities: Map<T, Double>) {
         prob.asSequence().sortedBy { it.value }
             .map { it.key to binStart..(it.value + binStart) }
             .onEach { binStart = it.second.endInclusive }
-            .toMap()
+            .toMap(Object2ObjectOpenHashMap())
     }
 
     /**

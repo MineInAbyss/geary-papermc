@@ -19,11 +19,8 @@ class MobCaps(
 
     fun filterAllowedAt(location: Location, spawns: List<SpawnEntry>): List<SpawnEntry> {
         val mobCaps = calculateCategoriesNear(location)
-        return spawns.filter {
-            mobCaps.getOrDefault(it.type.category, 0) < caps.getOrDefault(
-                it.type.category,
-                defaultCapLimit,
-            )
+        return spawns.filterTo(ObjectArrayList()) {
+            mobCaps.getOrDefault(it.type.category, 0) < caps.getOrDefault(it.type.category, defaultCapLimit)
         }
     }
 

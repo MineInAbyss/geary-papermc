@@ -3,8 +3,8 @@ package com.mineinabyss.geary.papermc.spawning.choosing.worldguard
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldguard.WorldGuard
-import com.sk89q.worldguard.protection.flags.StateFlag
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
+import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import org.bukkit.Location
 
 class WorldGuardSpawning(
@@ -31,5 +31,5 @@ class WorldGuardSpawning(
 
     fun getSpawnsForRegions(
         regions: List<ProtectedRegion>,
-    ): List<SpawnEntry> = regions.flatMap { regionToSpawns[it.id] ?: emptyList() }
+    ): List<SpawnEntry> = regions.flatMapTo(ObjectArrayList()) { regionToSpawns[it.id] ?: emptyList() }
 }
