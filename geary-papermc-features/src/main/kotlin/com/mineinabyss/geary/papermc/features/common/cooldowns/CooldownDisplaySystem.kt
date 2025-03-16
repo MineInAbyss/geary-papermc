@@ -20,7 +20,7 @@ fun Geary.cooldownDisplaySystem() = system(query<Player, Cooldowns>())
         if (!cooldowns.hasDisplayableCooldowns) return@exec
 
         val cooldownsWithDisplay = cooldowns.cooldowns.values.filter {
-            it.display != null
+            it.display != null && it.isVisible()
         }
 
         if (cooldownsWithDisplay.isEmpty()) return@exec
