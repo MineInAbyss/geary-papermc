@@ -8,7 +8,6 @@ import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import com.mineinabyss.idofront.time.inWholeTicks
 import com.mineinabyss.idofront.time.ticks
-import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import kotlinx.coroutines.delay
 import org.bukkit.Bukkit
@@ -36,12 +35,12 @@ class SpawnTask(
     fun run() {
         val currTick = Bukkit.getCurrentTick()
         val allowedSpawnPositions: List<SpawnPosition> = SpawnPosition.entries
-            .filterTo(ObjectArrayList()) { currTick % runTimes.getOrDefault(it, 1.ticks).inWholeTicks == 0L }
+            .filter { currTick % runTimes.getOrDefault(it, 1.ticks).inWholeTicks == 0L }
             .takeUnless { it.isEmpty() } ?: return
-        val onlinePlayers = Bukkit.getOnlinePlayers().filterTo(ObjectArrayList()) { !it.isDead && it.gameMode != SPECTATOR }
+        val onlinePlayers = Bukkit.getOnlinePlayers().filter { !it.isDead && it.gameMode != SPECTATOR }
 
         onlinePlayers.forEach { player ->
-            val attemptedPositions = ObjectOpenHashSet(allowedSpawnPositions)
+            val attemptedPositions = allowedSpawnPositions.toMutableSet()
             repeat(spawnAttempts) {
                 if (attemptedPositions.isEmpty()) return@forEach
                 val spawnLoc = locationChooser.chooseSpawnLocationNear(onlinePlayers, player.location) ?: return@repeat

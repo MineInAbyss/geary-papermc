@@ -4,7 +4,6 @@ import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldguard.WorldGuard
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
-import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import org.bukkit.Location
 
 class WorldGuardSpawning(
@@ -16,7 +15,7 @@ class WorldGuardSpawning(
 
     private val regionContainer = WorldGuard.getInstance().platform.regionContainer
 
-    fun getRegionsAt(location: Location): ObjectArrayList<ProtectedRegion> {
+    fun getRegionsAt(location: Location): List<ProtectedRegion> {
         val allRegions = regionContainer
             .createQuery()
             .getApplicableRegions(BukkitAdapter.adapt(location))
@@ -26,10 +25,10 @@ class WorldGuardSpawning(
         val dropAt = allRegions
             .indexOfLast { it.getFlag(SpawningWorldGuardFlags.OVERRIDE_LOWER_PRIORITY_SPAWNS) == true }
             .coerceAtLeast(0)
-        return ObjectArrayList(allRegions.drop(dropAt))
+        return allRegions.drop(dropAt)
     }
 
     fun getSpawnsForRegions(
-        regions: ObjectArrayList<ProtectedRegion>,
-    ): ObjectArrayList<SpawnEntry> = regions.flatMapTo(ObjectArrayList()) { regionToSpawns[it.id] ?: emptyList() }
+        regions: List<ProtectedRegion>,
+    ): List<SpawnEntry> = regions.flatMap { regionToSpawns[it.id] ?: emptyList() }
 }

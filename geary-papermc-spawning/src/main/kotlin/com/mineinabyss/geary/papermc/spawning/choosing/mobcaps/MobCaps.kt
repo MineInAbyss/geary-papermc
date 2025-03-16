@@ -3,8 +3,6 @@ package com.mineinabyss.geary.papermc.spawning.choosing.mobcaps
 import com.mineinabyss.geary.papermc.spawning.components.SpawnCategory
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.spawn_types.GearyReadSpawnCategoryEvent
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap
-import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import org.bukkit.Location
 import org.bukkit.entity.EntityType
@@ -35,14 +33,14 @@ class MobCaps(
         return location.world.getNearbyEntities(boundingBox) { it.type !in IGNORED_ENTITY_TYPES }
             .groupingBy {
                 GearyReadSpawnCategoryEvent(it).also { it.callEvent() }.category ?: SpawnCategory.of(it)
-            }.eachCountTo(Object2IntArrayMap())
+            }.eachCount()
     }
 
-    fun filterAllowedAt(location: Location, spawns: List<SpawnEntry>, predicate: Predicate<SpawnEntry>): ObjectArrayList<SpawnEntry> {
+    fun filterAllowedAt(location: Location, spawns: List<SpawnEntry>, predicate: Predicate<SpawnEntry>): List<SpawnEntry> {
         val mobCaps = calculateCategoriesNear(location)
         val defaultLimit = this.defaultCapLimit
 
-        return spawns.filterTo(ObjectArrayList(spawns.size)) { spawn ->
+        return spawns.filter { spawn ->
             val category = spawn.type.category
             val currentCount = mobCaps.getOrDefault(category, 0)
             val limit = caps.getOrDefault(category, defaultLimit)
