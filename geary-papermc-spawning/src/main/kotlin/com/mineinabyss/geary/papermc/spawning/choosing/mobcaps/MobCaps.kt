@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import org.bukkit.Location
 import org.bukkit.entity.EntityType
 import org.bukkit.util.BoundingBox
+import java.util.function.Predicate
 
 class MobCaps(
     val caps: Map<SpawnCategory, Int>,
@@ -37,10 +38,15 @@ class MobCaps(
             }.eachCountTo(Object2IntArrayMap())
     }
 
-    fun filterAllowedAt(location: Location, spawns: List<SpawnEntry>): List<SpawnEntry> {
+    fun filterAllowedAt(location: Location, spawns: List<SpawnEntry>, predicate: Predicate<SpawnEntry>): ObjectArrayList<SpawnEntry> {
         val mobCaps = calculateCategoriesNear(location)
-        return spawns.filterTo(ObjectArrayList()) {
-            mobCaps.getOrDefault(it.type.category, 0) < caps.getOrDefault(it.type.category, defaultCapLimit)
+        val defaultLimit = this.defaultCapLimit
+
+        return spawns.filterTo(ObjectArrayList(spawns.size)) { spawn ->
+            val category = spawn.type.category
+            val currentCount = mobCaps.getOrDefault(category, 0)
+            val limit = caps.getOrDefault(category, defaultLimit)
+            currentCount < limit && predicate.test(spawn)
         }
     }
 

@@ -13,18 +13,15 @@ class SpawnChooser(
     val wg: WorldGuardSpawning,
     val caps: MobCaps,
 ) {
-    fun getAllowedSpawnsNear(
-        location: Location,
-        position: SpawnPosition,
-    ): List<SpawnEntry>? {
-        // Get spawns from regions
+    fun getAllowedSpawnsNear(location: Location, position: SpawnPosition): ObjectArrayList<SpawnEntry>? {
         val regions = wg.getRegionsAt(location)
         val spawnsInRegion = wg.getSpawnsForRegions(regions).takeUnless { it.isEmpty() } ?: return null
 
-        // Check mob caps
-        val allowedSpawns = caps.filterAllowedAt(location, spawnsInRegion.filterTo(ObjectArrayList()) { it.position == position })
+        // a predicate for the filter
+        val positionPredicate = { spawn: SpawnEntry -> spawn.position == position }
 
-        return allowedSpawns
+        // allow MobCaps to directly handle the filter predicate
+        return caps.filterAllowedAt(location, spawnsInRegion, positionPredicate)
     }
 
     fun chooseAllowedSpawnNear(location: Location, position: SpawnPosition): SpawnEntry? {

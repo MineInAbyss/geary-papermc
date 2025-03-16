@@ -16,7 +16,7 @@ class WorldGuardSpawning(
 
     private val regionContainer = WorldGuard.getInstance().platform.regionContainer
 
-    fun getRegionsAt(location: Location): List<ProtectedRegion> {
+    fun getRegionsAt(location: Location): ObjectArrayList<ProtectedRegion> {
         val allRegions = regionContainer
             .createQuery()
             .getApplicableRegions(BukkitAdapter.adapt(location))
@@ -26,10 +26,10 @@ class WorldGuardSpawning(
         val dropAt = allRegions
             .indexOfLast { it.getFlag(SpawningWorldGuardFlags.OVERRIDE_LOWER_PRIORITY_SPAWNS) == true }
             .coerceAtLeast(0)
-        return allRegions.drop(dropAt)
+        return ObjectArrayList(allRegions.drop(dropAt))
     }
 
     fun getSpawnsForRegions(
-        regions: List<ProtectedRegion>,
-    ): List<SpawnEntry> = regions.flatMapTo(ObjectArrayList()) { regionToSpawns[it.id] ?: emptyList() }
+        regions: ObjectArrayList<ProtectedRegion>,
+    ): ObjectArrayList<SpawnEntry> = regions.flatMapTo(ObjectArrayList()) { regionToSpawns[it.id] ?: emptyList() }
 }

@@ -38,7 +38,6 @@ class SpawnTask(
         val allowedSpawnPositions: List<SpawnPosition> = SpawnPosition.entries
             .filterTo(ObjectArrayList()) { currTick % runTimes.getOrDefault(it, 1.ticks).inWholeTicks == 0L }
             .takeUnless { it.isEmpty() } ?: return
-        if (allowedSpawnPositions.isEmpty()) return
         val onlinePlayers = Bukkit.getOnlinePlayers().filterTo(ObjectArrayList()) { !it.isDead && it.gameMode != SPECTATOR }
 
         onlinePlayers.forEach { player ->
