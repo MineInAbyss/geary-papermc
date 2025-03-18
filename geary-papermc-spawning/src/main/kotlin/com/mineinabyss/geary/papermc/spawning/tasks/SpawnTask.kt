@@ -8,6 +8,7 @@ import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import com.mineinabyss.idofront.time.inWholeTicks
 import com.mineinabyss.idofront.time.ticks
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import kotlinx.coroutines.delay
 import org.bukkit.Bukkit
 import org.bukkit.GameMode.SPECTATOR
@@ -35,9 +36,8 @@ class SpawnTask(
         val currTick = Bukkit.getCurrentTick()
         val allowedSpawnPositions: List<SpawnPosition> = SpawnPosition.entries
             .filter { currTick % runTimes.getOrDefault(it, 1.ticks).inWholeTicks == 0L }
-        if (allowedSpawnPositions.isEmpty()) return
+            .takeUnless { it.isEmpty() } ?: return
         val onlinePlayers = Bukkit.getOnlinePlayers().filter { !it.isDead && it.gameMode != SPECTATOR }
-        if (onlinePlayers.isEmpty()) return
 
         onlinePlayers.forEach { player ->
             val attemptedPositions = allowedSpawnPositions.toMutableSet()
@@ -45,7 +45,7 @@ class SpawnTask(
                 if (attemptedPositions.isEmpty()) return@forEach
                 val spawnLoc = locationChooser.chooseSpawnLocationNear(onlinePlayers, player.location) ?: return@repeat
                 val type = spawnPositionReader.spawnPositionFor(spawnLoc)
-                if (type in attemptedPositions) {
+                if (type in allowedSpawnPositions) {
                     attemptedPositions.remove(type)
                     mobSpawner.attemptSpawnAt(spawnLoc, type)
                 }
