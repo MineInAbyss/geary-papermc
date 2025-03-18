@@ -55,8 +55,8 @@ class RecipeCraftingListener : Listener {
             .filterIsInstance<SmithingTransformRecipe>()
             .filter { it.result.fastPDC?.hasComponentsEncoded == true }
         val customRecipeResult = smithingTransformRecipes.filter {
-            it.template.test(template) && it.addition.test(mineral) && it.base.itemStack.itemMeta?.persistentDataContainer?.decodePrefabs()
-                ?.firstOrNull() == inputGearyEntity
+            it.base.itemStack.itemMeta?.persistentDataContainer?.decodePrefabs()?.firstOrNull() == inputGearyEntity
+                    && it.template.test(template) && it.addition.test(mineral)
         }.firstOrNull()?.result
 
         result = (customRecipeResult ?: ItemStack.empty()).let {

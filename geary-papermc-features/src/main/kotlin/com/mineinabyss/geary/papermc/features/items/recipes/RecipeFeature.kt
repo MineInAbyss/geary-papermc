@@ -81,11 +81,7 @@ class RecipeFeature(val context: FeatureContext) : Feature(context) {
                     val key = NamespacedKey(prefabKey.namespace, "${prefabKey.key}$i")
                     // Register recipe only if not present
                     Bukkit.getRecipe(key) ?: run {
-                        val (bukkitRecipe, options) = recipe.toRecipeWithOptions(
-                            key, result,
-                            recipes.group,
-                            recipes.category
-                        )
+                        val (bukkitRecipe, options) = recipe.toRecipeWithOptions(key, result, recipes.group, recipes.category)!!
                         ingredientOptionsListener.keyToOptions[key.asString()] = options
                         //TODO add resend option to recipe.registerRecipeWithOptions
                         Bukkit.addRecipe(bukkitRecipe, true)

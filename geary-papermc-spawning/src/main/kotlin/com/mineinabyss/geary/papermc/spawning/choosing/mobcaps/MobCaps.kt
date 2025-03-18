@@ -16,15 +16,20 @@ class MobCaps(
 ) {
     companion object {
         private val IGNORED_ENTITY_TYPES = ObjectOpenHashSet.of<EntityType>(
-            EntityType.ITEM, EntityType.ITEM_FRAME, EntityType.GLOW_ITEM_FRAME, EntityType.BOAT, EntityType.CHEST_BOAT,
-            EntityType.MINECART, EntityType.HOPPER_MINECART, EntityType.COMMAND_BLOCK_MINECART, EntityType.CHEST_MINECART,
-            EntityType.FURNACE_MINECART, EntityType.SPAWNER_MINECART, EntityType.TNT_MINECART,
-            EntityType.EXPERIENCE_ORB, EntityType.FALLING_BLOCK, EntityType.ARROW, EntityType.SPECTRAL_ARROW,
-            EntityType.AREA_EFFECT_CLOUD, EntityType.INTERACTION, EntityType.BREEZE_WIND_CHARGE,
-            EntityType.DRAGON_FIREBALL, EntityType.EGG, EntityType.ENDER_PEARL, EntityType.EYE_OF_ENDER, EntityType.EVOKER_FANGS,
-            EntityType.EXPERIENCE_BOTTLE, EntityType.FIREBALL, EntityType.FIREWORK_ROCKET, EntityType.FISHING_BOBBER,
-            EntityType.LEASH_KNOT, EntityType.LIGHTNING_BOLT, EntityType.LLAMA_SPIT, EntityType.OMINOUS_ITEM_SPAWNER,
-            EntityType.TRIDENT, EntityType.POTION, EntityType.SHULKER_BULLET, EntityType.SMALL_FIREBALL, EntityType.SNOWBALL, EntityType.WIND_CHARGE
+            EntityType.ITEM, EntityType.ITEM_FRAME, EntityType.GLOW_ITEM_FRAME, EntityType.ACACIA_BOAT, EntityType.BIRCH_BOAT,
+            EntityType.CHERRY_BOAT, EntityType.DARK_OAK_BOAT, EntityType.JUNGLE_BOAT, EntityType.MANGROVE_BOAT,
+            EntityType.OAK_BOAT, EntityType.PALE_OAK_BOAT, EntityType.SPRUCE_BOAT, EntityType.ACACIA_CHEST_BOAT,
+            EntityType.BIRCH_CHEST_BOAT, EntityType.CHERRY_CHEST_BOAT, EntityType.DARK_OAK_CHEST_BOAT,
+            EntityType.JUNGLE_CHEST_BOAT, EntityType.MANGROVE_CHEST_BOAT, EntityType.OAK_CHEST_BOAT,
+            EntityType.PALE_OAK_CHEST_BOAT, EntityType.SPRUCE_CHEST_BOAT, EntityType.MINECART, EntityType.HOPPER_MINECART,
+            EntityType.COMMAND_BLOCK_MINECART, EntityType.CHEST_MINECART, EntityType.FURNACE_MINECART,
+            EntityType.SPAWNER_MINECART, EntityType.TNT_MINECART, EntityType.EXPERIENCE_ORB, EntityType.FALLING_BLOCK,
+            EntityType.ARROW, EntityType.SPECTRAL_ARROW, EntityType.AREA_EFFECT_CLOUD, EntityType.INTERACTION,
+            EntityType.BREEZE_WIND_CHARGE, EntityType.DRAGON_FIREBALL, EntityType.EGG, EntityType.ENDER_PEARL,
+            EntityType.EYE_OF_ENDER, EntityType.EVOKER_FANGS, EntityType.EXPERIENCE_BOTTLE, EntityType.FIREBALL,
+            EntityType.FIREWORK_ROCKET, EntityType.FISHING_BOBBER, EntityType.LEASH_KNOT, EntityType.LIGHTNING_BOLT,
+            EntityType.LLAMA_SPIT, EntityType.OMINOUS_ITEM_SPAWNER, EntityType.TRIDENT, EntityType.POTION,
+            EntityType.SHULKER_BULLET, EntityType.SMALL_FIREBALL, EntityType.SNOWBALL, EntityType.WIND_CHARGE
         )
     }
 
