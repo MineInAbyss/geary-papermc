@@ -27,7 +27,7 @@ import com.mineinabyss.geary.serialization.dsl.withCommonComponentNames
 import com.mineinabyss.geary.serialization.formats.YamlFormat
 import com.mineinabyss.geary.serialization.helpers.withSerialName
 import com.mineinabyss.geary.serialization.serialization
-import com.mineinabyss.geary.serialization.serializers.DeferredLoadException
+import com.mineinabyss.geary.prefabs.DeferredLoadException
 import com.mineinabyss.geary.uuid.SynchronizedUUID2GearyMap
 import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.config.config
