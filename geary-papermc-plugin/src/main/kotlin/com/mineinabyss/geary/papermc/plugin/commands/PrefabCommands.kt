@@ -106,6 +106,10 @@ internal fun IdoCommand.prefabs() = "prefab" {
                     load.entity.inheritPrefabsIfNeeded()
                     sender.warn("Read prefab $namespace:$path with warnings")
                 }
+
+                is PrefabLoadResult.Defer -> {
+                    sender.error("Failed to read prefab $namespace:$path:\n Dependent on unloaded prefab")
+                }
             }
         }
     }

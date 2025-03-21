@@ -27,6 +27,7 @@ import com.mineinabyss.geary.serialization.dsl.withCommonComponentNames
 import com.mineinabyss.geary.serialization.formats.YamlFormat
 import com.mineinabyss.geary.serialization.helpers.withSerialName
 import com.mineinabyss.geary.serialization.serialization
+import com.mineinabyss.geary.prefabs.DeferredLoadException
 import com.mineinabyss.geary.uuid.SynchronizedUUID2GearyMap
 import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.config.config
@@ -118,8 +119,12 @@ class GearyPluginImpl : GearyPlugin() {
                         DI.add<SerializablePrefabItemService>(object : SerializablePrefabItemService {
                             override fun encodeFromPrefab(item: ItemStack, prefabName: String): ItemStack {
                                 val result = addon.createItem(PrefabKey.of(prefabName), item)
-                                require(result != null) { "Failed to create serializable ItemStack from $prefabName, does the prefab exist and have a geary:set.item component?" }
-                                return result
+                                if (result == null) {
+                                    throw DeferredLoadException() // Dependent prefab is not registered yet; deferring load of this prefab
+                                }
+                                else {
+                                    return result
+                                }
                             }
                         })
                     }
