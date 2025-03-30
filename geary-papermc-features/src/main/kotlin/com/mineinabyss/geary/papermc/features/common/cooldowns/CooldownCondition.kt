@@ -19,8 +19,8 @@ data class StartedCooldown(
     val display: @Serializable(with = MiniMessageSerializer::class) net.kyori.adventure.text.Component? = null,
 ) {
     val timeLeft: Duration get() = (endTime - System.currentTimeMillis()).milliseconds
-    val startDuration: Int = 1000 // Hardcoded
-    val endDuration: Int = 1000   // Hardcoded
+    val startDuration: Int = 2000 // Hardcoded
+    val endDuration: Int = 2000   // Hardcoded
     val startTime: Long = endTime - length.inWholeMilliseconds
     fun isVisible(): Boolean = System.currentTimeMillis() <= startTime + startDuration || System.currentTimeMillis() >= endTime - endDuration
     fun isComplete(): Boolean = System.currentTimeMillis() >= endTime
