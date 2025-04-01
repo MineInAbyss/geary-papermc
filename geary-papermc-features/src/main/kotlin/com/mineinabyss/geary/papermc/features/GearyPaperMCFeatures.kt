@@ -21,10 +21,6 @@ val GearyPaperMCFeatures = createAddon("Geary Paper Features") {
         addPathfindersSystem()
     }
 
-    entities {
-        ResourcePackGenerator(geary).generateResourcePack()
-    }
-
     onPluginEnable {
         gearyPaper.plugin.listeners(
             EntityDamageBridge(),
