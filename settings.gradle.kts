@@ -41,5 +41,7 @@ include(
     "geary-papermc-spawning",
     "geary-papermc-tracking",
     "geary-tests",
+    "geary-papermc-kts",
+    "geary-papermc-script-host"
 //    "schema-generator"
 )

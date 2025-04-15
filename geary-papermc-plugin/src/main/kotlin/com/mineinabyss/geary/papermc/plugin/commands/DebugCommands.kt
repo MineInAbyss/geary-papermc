@@ -5,6 +5,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.engine.archetypes.ArchetypeQueryManager
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.get
+import com.mineinabyss.geary.papermc.api.GearyItemDSL
 import com.mineinabyss.geary.papermc.features.items.resourcepacks.ResourcePackContent
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.plugin.schema_generator.GearySchema
@@ -14,19 +15,53 @@ import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.prefabs.entityOfOrNull
+import com.mineinabyss.geary.scripting.GearyScriptHost
 import com.mineinabyss.geary.serialization.SerializableComponents
+import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.IdoCommand
+import com.mineinabyss.idofront.commands.brigadier.executes
+import com.mineinabyss.idofront.commands.brigadier.playerExecutes
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.items.editItemMeta
 import com.mineinabyss.idofront.messaging.info
 import org.bukkit.Material
 import org.bukkit.block.ShulkerBox
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.BlockStateMeta
 import kotlin.io.path.div
 
 internal fun IdoCommand.debug() = "debug" {
     requiresPermission("geary.admin.debug")
+    "script" {
+        "string" {
+            executes(Args.word()) { path ->
+                val file = gearyPaper.plugin.dataFolder.resolve(path)
+                gearyPaper.plugin.launch {
+                    val evaluated = GearyScriptHost.evaluateObject<(String) -> String>(file)
+                    println("Success: ${evaluated.invoke("test")}")
+                }
+            }
+        }
+        "player" {
+            playerExecutes(Args.word()) { path ->
+                gearyPaper.plugin.launch {
+                    val file = gearyPaper.plugin.dataFolder.resolve(path)
+                    GearyScriptHost.evaluateObject<(Player) -> Unit>(file)
+                        .invoke(player)
+                }
+            }
+        }
+        "customItem" {
+            executes(Args.word()) { path ->
+                gearyPaper.plugin.launch {
+                    val file = gearyPaper.plugin.dataFolder.resolve(path)
+                    val evaluated = GearyScriptHost.evaluateObject<GearyItemDSL>(file)
+                    println(evaluated)
+                }
+            }
+        }
+    }
     "generateschema" {
         executes {
             GearySchema(

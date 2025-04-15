@@ -21,6 +21,8 @@ paperweight.reobfArtifactConfiguration.set(ReobfArtifactConfiguration.MOJANG_PRO
 
 dependencies {
     implementation(project(":"))
+    implementation(project(":geary-papermc-script-host"))
+    implementation(project(":geary-papermc-kts"))
     implementation(libs.kts.to.typescript)
 
     // MineInAbyss platform
