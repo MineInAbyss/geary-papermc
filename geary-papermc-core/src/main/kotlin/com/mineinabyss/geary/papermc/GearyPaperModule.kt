@@ -10,7 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin
 val gearyPaper: GearyPaperModule by DI.observe()
 
 interface GearyPaperModule {
-    val plugin: JavaPlugin
+    val plugin: GearyPlugin
     val configHolder: IdofrontConfig<GearyPaperConfig>
     val config: GearyPaperConfig
     val logger: ComponentLogger

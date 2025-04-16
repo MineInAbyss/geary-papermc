@@ -2,10 +2,12 @@ package com.mineinabyss.geary.papermc.plugin.commands
 
 import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.launch
+import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.mineinabyss.geary.engine.archetypes.ArchetypeQueryManager
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.get
-import com.mineinabyss.geary.papermc.api.GearyItemDSL
+import com.mineinabyss.geary.papermc.scripting.dsl.GearyItemBuilder
+import com.mineinabyss.geary.papermc.scripting.dsl.GearyItemDSL
 import com.mineinabyss.geary.papermc.features.items.resourcepacks.ResourcePackContent
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.plugin.schema_generator.GearySchema
@@ -14,8 +16,9 @@ import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
-import com.mineinabyss.geary.prefabs.entityOfOrNull
-import com.mineinabyss.geary.scripting.GearyScriptHost
+import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
+import com.mineinabyss.geary.prefabs.*
+import com.mineinabyss.geary.papermc.scripting.GearyScriptHost
 import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.IdoCommand
@@ -24,40 +27,54 @@ import com.mineinabyss.idofront.commands.brigadier.playerExecutes
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.items.editItemMeta
 import com.mineinabyss.idofront.messaging.info
+import com.mineinabyss.idofront.serialization.SerializableItemStack
+import kotlinx.coroutines.withContext
 import org.bukkit.Material
 import org.bukkit.block.ShulkerBox
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.BlockStateMeta
+import org.koin.core.component.get
 import kotlin.io.path.div
 
 internal fun IdoCommand.debug() = "debug" {
     requiresPermission("geary.admin.debug")
+    val scriptHost = gearyPaper.plugin.get<GearyScriptHost>()
     "script" {
         "string" {
             executes(Args.word()) { path ->
                 val file = gearyPaper.plugin.dataFolder.resolve(path)
-                gearyPaper.plugin.launch {
-                    val evaluated = GearyScriptHost.evaluateObject<(String) -> String>(file)
+                gearyPaper.plugin.launch(gearyPaper.plugin.asyncDispatcher) {
+                    val evaluated = scriptHost.evalObject<(String) -> String>(file).getOrThrow()
                     println("Success: ${evaluated.invoke("test")}")
                 }
             }
         }
         "player" {
             playerExecutes(Args.word()) { path ->
-                gearyPaper.plugin.launch {
+                gearyPaper.plugin.launch(gearyPaper.plugin.asyncDispatcher) {
                     val file = gearyPaper.plugin.dataFolder.resolve(path)
-                    GearyScriptHost.evaluateObject<(Player) -> Unit>(file)
+                    scriptHost.evalObject<(Player) -> Unit>(file).getOrThrow()
                         .invoke(player)
                 }
             }
         }
-        "customItem" {
-            executes(Args.word()) { path ->
-                gearyPaper.plugin.launch {
+        "prefab" {
+            executes(Args.string(), Args.string()) { path, prefabKey ->
+                gearyPaper.plugin.launch(gearyPaper.plugin.asyncDispatcher) {
                     val file = gearyPaper.plugin.dataFolder.resolve(path)
-                    val evaluated = GearyScriptHost.evaluateObject<GearyItemDSL>(file)
-                    println(evaluated)
+                    val evaluated = scriptHost.evalObject<GearyItemBuilder>(file).getOrThrow()
+                    withContext(gearyPaper.plugin.minecraftDispatcher) {
+                        val prefabKey = PrefabKey.of(prefabKey)
+                        with(gearyPaper.worldManager.global) {
+                            val prefabEntity = getAddon(Prefabs).manager[prefabKey]?.also { it.clear() } ?: entity()
+                            prefabEntity.apply {
+                                set(SetItem(SerializableItemStack(Material.STONE)))
+                                evaluated.block.invoke(GearyItemDSL(this))
+                                PrefabLoader.markAsPrefab(this, prefabKey)
+                            }
+                        }
+                    }
                 }
             }
         }

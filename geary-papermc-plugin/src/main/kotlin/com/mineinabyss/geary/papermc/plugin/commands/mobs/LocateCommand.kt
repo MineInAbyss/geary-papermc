@@ -13,7 +13,7 @@ import com.mineinabyss.idofront.destructure.component3
 import com.mineinabyss.idofront.messaging.info
 import org.bukkit.Bukkit
 
-fun IdoCommand.locate() = "locate" {
+internal fun IdoCommand.locate() = "locate" {
     requiresPermission("geary.mobs.locate")
     playerExecutes(GearyArgs.mob(), Args.integer(min = 0).default { 0 }) { mob, radius ->
         val prefabKey = mob.get<PrefabKey>()

@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.features.items.recipes
 
+import com.github.shynixn.mccoroutine.bukkit.scope
 import com.mineinabyss.geary.papermc.Feature
 import com.mineinabyss.geary.papermc.FeatureContext
 import com.mineinabyss.geary.papermc.gearyPaper

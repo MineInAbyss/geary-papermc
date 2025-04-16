@@ -1,52 +1,47 @@
-package com.mineinabyss.geary.scripting
+package com.mineinabyss.geary.papermc.scripting
 
-import com.mineinabyss.geary.modules.geary
+import co.touchlab.kermit.Logger
 import com.mineinabyss.geary.papermc.GearyPaper
-import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.idofront.config.IdofrontConfig
-import kotlinx.coroutines.CoroutineScope
 import java.io.File
 import java.security.MessageDigest
 import kotlin.script.experimental.api.*
 import kotlin.script.experimental.host.ScriptingHostConfiguration
 import kotlin.script.experimental.host.toScriptSource
-import kotlin.script.experimental.jvm.*
-import kotlin.script.experimental.jvm.impl.createScriptFromClassLoader
-import kotlin.script.experimental.jvm.util.classpathFromClassloader
+import kotlin.script.experimental.jvm.compilationCache
+import kotlin.script.experimental.jvm.dependenciesFromClassContext
+import kotlin.script.experimental.jvm.jvm
+import kotlin.script.experimental.jvm.jvmTarget
 import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
 import kotlin.script.experimental.jvmhost.CompiledScriptJarsCache
-import kotlin.script.experimental.jvmhost.createJvmCompilationConfigurationFromTemplate
 
 private const val COMPILED_SCRIPTS_CACHE_DIR_ENV_VAR = "KOTLIN_SIMPLE_MAIN_KTS_COMPILED_SCRIPTS_CACHE_DIR"
 private const val COMPILED_SCRIPTS_CACHE_DIR_PROPERTY = "kotlin.simple.main.kts.compiled.scripts.cache.dir"
 
-object GearyScriptHost {
-    private val host = BasicJvmScriptingHost(/*ScriptingHostConfiguration {
-        jvm {
-            baseClassLoader.put(IdofrontConfig::class.java.classLoader)
-        }
-    }*/)
+class GearyScriptHost(
+    val logger: Logger,
+) {
+    private val host = BasicJvmScriptingHost()
 
     fun evalFile(scriptFile: File): ResultWithDiagnostics<EvaluationResult> {
+        logger.d { "Evaluting $scriptFile..." }
         Thread.currentThread().contextClassLoader = GearyPaper::class.java.classLoader
-        return host.eval(scriptFile.toScriptSource(), ScriptWithMavenDepsConfiguration, null)
+        return host.eval(scriptFile.toScriptSource(), ScriptWithMavenDepsConfiguration, null).also {
+            logger.d { "Finished evaluating $scriptFile" }
+        }
     }
 
-    fun <T : Any> evaluateObject(scriptFile: File): T {
-        return (evalFile(scriptFile = scriptFile).valueOrThrow().returnValue as ResultValue.Value).value as T
+    fun <T : Any> evalObject(scriptFile: File): Result<T> = runCatching {
+        when(val returned = evalFile(scriptFile = scriptFile).valueOrThrow().returnValue) {
+            is ResultValue.Value -> returned.value as T
+            is ResultValue.Error -> throw returned.error
+            else -> error("Script $scriptFile did not return a value")
+        }
     }
 }
 
 private object ScriptWithMavenDepsConfiguration : ScriptCompilationConfiguration(body = {
-//    defaultImports(DependsOn::class, Repository::class)
     jvm {
-//        dependenciesFromCurrentContext(wholeClasspath = true)
-//        dependenciesFromClassloader(
-//            classLoader = gearyPaper.plugin.javaClass.classLoader,
-////             "kotlin-stdlib", "kotlin-reflect", "kotlin-scripting-dependencies"
-//            wholeClasspath = true
-//        )
-//        dependenciesFromCurrentContext(wholeClasspath = true)
         dependenciesFromClassContext(
             GearyPaper::class,
             wholeClasspath = true,
@@ -55,15 +50,12 @@ private object ScriptWithMavenDepsConfiguration : ScriptCompilationConfiguration
             IdofrontConfig::class,
             wholeClasspath = true,
         )
+        jvmTarget.put("21")
     }
     ide {
         acceptedLocations(ScriptAcceptedLocation.Project)
     }
     hostConfiguration(ScriptingHostConfiguration {
-//        jvm {
-//            baseClassLoader.put(IdofrontConfig::class.java.classLoader)
-//        }
-//    })
         jvm {
             val cacheExtSetting = System.getProperty(COMPILED_SCRIPTS_CACHE_DIR_PROPERTY)
                 ?: System.getenv(COMPILED_SCRIPTS_CACHE_DIR_ENV_VAR)
@@ -71,6 +63,7 @@ private object ScriptWithMavenDepsConfiguration : ScriptCompilationConfiguration
                 cacheExtSetting == null -> System.getProperty("java.io.tmpdir")
                     ?.let(::File)?.takeIf { it.exists() && it.isDirectory }
                     ?.let { File(it, "main.kts.compiled.cache").apply { mkdir() } }
+
                 cacheExtSetting.isBlank() -> null
                 else -> File(cacheExtSetting)
             }?.takeIf { it.exists() && it.isDirectory }
@@ -85,7 +78,10 @@ private object ScriptWithMavenDepsConfiguration : ScriptCompilationConfiguration
 })
 
 @OptIn(ExperimentalStdlibApi::class)
-private fun compiledScriptUniqueName(script: SourceCode, scriptCompilationConfiguration: ScriptCompilationConfiguration): String {
+private fun compiledScriptUniqueName(
+    script: SourceCode,
+    scriptCompilationConfiguration: ScriptCompilationConfiguration,
+): String {
     val digestWrapper = MessageDigest.getInstance("MD5")
     digestWrapper.update(script.text.toByteArray())
     scriptCompilationConfiguration.notTransientData.entries

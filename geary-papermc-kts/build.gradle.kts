@@ -13,4 +13,5 @@ kotlin {
 dependencies {
     api(project(":geary-papermc-features"))
     api(project(":geary-papermc-tracking"))
+    compileOnly(idofrontLibs.minecraft.mccoroutine)
 }

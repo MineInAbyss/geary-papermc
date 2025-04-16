@@ -12,6 +12,8 @@ import com.mineinabyss.geary.papermc.features.entities.EntityFeatures
 import com.mineinabyss.geary.papermc.features.items.ItemFeatures
 import com.mineinabyss.geary.papermc.features.items.recipes.RecipeFeature
 import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsFeature
+import com.mineinabyss.geary.papermc.plugin.GearyKoinModules.logging
+import com.mineinabyss.geary.papermc.plugin.GearyKoinModules.scripting
 import com.mineinabyss.geary.papermc.plugin.commands.registerGearyCommands
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.spawning.statistics.EntityStatistics
@@ -40,6 +42,8 @@ import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
+import org.koin.core.KoinApplication
+import org.koin.dsl.koinApplication
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.isDirectory
@@ -56,10 +60,17 @@ class GearyPluginImpl : GearyPlugin() {
         ::MythicMobsFeature,
     )
 
+    override val application = koinApplication {
+        modules(
+            logging(this@GearyPluginImpl),
+            scripting()
+        )
+    }
+
     override fun onLoad() {
         // Register DI
         val configModule = object : GearyPaperModule {
-            override val plugin: JavaPlugin = this@GearyPluginImpl
+            override val plugin = this@GearyPluginImpl
             override val configHolder = config(
                 "config", plugin.dataPath, GearyPaperConfig(),
                 onLoad = { plugin.injectLogger(ComponentLogger.forPlugin(plugin, minSeverity = it.logLevel)) }
