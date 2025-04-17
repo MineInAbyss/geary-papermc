@@ -3,12 +3,9 @@ package com.mineinabyss.geary.papermc.tracking.items.cache
 import be.seeseemelk.mockbukkit.MockBukkit
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.ArchetypeEngineModule
-import com.mineinabyss.geary.modules.TestEngineModule
-import com.mineinabyss.geary.modules.UninitializedGearyModule
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.Prefabs
-import com.mineinabyss.geary.prefabs.PrefabsModule
 import com.mineinabyss.geary.test.GearyTest
 
 class PlayerItemCacheTest: GearyTest() {
