@@ -30,7 +30,7 @@ class ResourcePackGenerator(world: Geary) : Geary by world {
                 ?: return@forEach logger.w("$prefabKey has no type/baseMaterial defined in either ResourcePackContent or SerializableItemStack")
             )
             val defaultVanillaModel = ((resourcePack.model(vanillaModelKey)
-                ?: ResourcePacks.defaultVanillaResourcePack?.model(vanillaModelKey)))
+                ?: ResourcePacks.vanillaResourcePack.model(vanillaModelKey)))
                 ?.toBuilder() ?: Model.model().key(vanillaModelKey)
 
             // Generates any missing models for predicates if only textures are provided
@@ -47,12 +47,12 @@ class ResourcePackGenerator(world: Geary) : Geary by world {
                     .textures(resourcePackContent.textures.modelTextures).build()
                 resourcePackContent.itemOverrides(model.key(), prefabKey, itemStack)
                     .forEach(defaultVanillaModel::addOverride)
-                model.let(ResourcePacks::ensureVanillaModelProperties)
+                model
                     .let(ResourcePacks::ensureItemOverridesSorted)
                     .addTo(resourcePack)
             }
 
-            defaultVanillaModel.build().let(ResourcePacks::ensureVanillaModelProperties)
+            defaultVanillaModel.build()
                 .let(ResourcePacks::ensureItemOverridesSorted)
                 .addTo(resourcePack)
         }
