@@ -7,8 +7,12 @@ import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
 import com.mineinabyss.geary.systems.query.GearyQuery
 import com.mineinabyss.idofront.resourcepacks.ResourcePacks
+import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.key.Key
+import org.bukkit.inventory.ItemType
 import team.unnamed.creative.ResourcePack
+import team.unnamed.creative.item.Item
+import team.unnamed.creative.item.ItemModel
 import team.unnamed.creative.model.Model
 import team.unnamed.creative.model.ModelTexture
 import team.unnamed.creative.model.ModelTextures
@@ -50,6 +54,12 @@ class ResourcePackGenerator(world: Geary) : Geary by world {
                 model
                     .let(ResourcePacks::ensureItemOverridesSorted)
                     .addTo(resourcePack)
+
+                val itemKey = itemStack?.getData(DataComponentTypes.ITEM_MODEL)
+                    ?.takeUnless { itemStack.type.asItemType()?.getDefaultData(DataComponentTypes.ITEM_MODEL) == it }
+                    ?: Key.key(prefabKey.full)
+                val item = Item.item(itemKey, ItemModel.reference(model.key()))
+                if (resourcePack.item(itemKey) == null) resourcePack.item(item)
             }
 
             defaultVanillaModel.build()
