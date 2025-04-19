@@ -54,13 +54,13 @@ class ResourcePackGenerator(world: Geary) : Geary by world {
                 model
                     .let(ResourcePacks::ensureItemOverridesSorted)
                     .addTo(resourcePack)
-
-                val itemKey = itemStack?.getData(DataComponentTypes.ITEM_MODEL)
-                    ?.takeUnless { itemStack.type.asItemType()?.getDefaultData(DataComponentTypes.ITEM_MODEL) == it }
-                    ?: Key.key(prefabKey.full)
-                val item = Item.item(itemKey, ItemModel.reference(model.key()))
-                if (resourcePack.item(itemKey) == null) resourcePack.item(item)
             }
+
+            val itemKey = itemStack?.getData(DataComponentTypes.ITEM_MODEL)
+                ?.takeUnless { itemStack.type.asItemType()?.getDefaultData(DataComponentTypes.ITEM_MODEL) == it }
+                ?: Key.key(prefabKey.full)
+            val item = Item.item(itemKey, ItemModel.reference(resourcePackContent.model ?: Key.key(prefabKey.namespace, prefabKey.key)))
+            if (resourcePack.item(itemKey) == null) resourcePack.item(item)
 
             defaultVanillaModel.build()
                 .let(ResourcePacks::ensureItemOverridesSorted)
