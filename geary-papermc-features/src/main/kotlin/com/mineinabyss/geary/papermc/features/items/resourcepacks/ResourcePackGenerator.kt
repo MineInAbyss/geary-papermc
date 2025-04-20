@@ -29,42 +29,21 @@ class ResourcePackGenerator(world: Geary) : Geary by world {
         resourcePackFile.deleteRecursively()
 
         resourcePackQuery.forEach { (prefabKey, resourcePackContent, itemStack) ->
-            val vanillaModelKey = ResourcePacks.vanillaKeyForMaterial(
-                resourcePackContent.baseMaterial ?: itemStack?.type
-                ?: return@forEach logger.w("$prefabKey has no type/baseMaterial defined in either ResourcePackContent or SerializableItemStack")
-            )
-            val defaultVanillaModel = ((resourcePack.model(vanillaModelKey)
-                ?: ResourcePacks.vanillaResourcePack.model(vanillaModelKey)))
-                ?.toBuilder() ?: Model.model().key(vanillaModelKey)
-
             // Generates any missing models for predicates if only textures are provided
             generatePredicateModels(resourcePack, resourcePackContent, prefabKey)
 
-            // If a model is defined we assume it exists in the resourcepack already, and just add the override to the vanilla model
-            if (resourcePackContent.model != null) {
-                resourcePackContent.itemOverrides(resourcePackContent.model.key(), prefabKey, itemStack)
-                    .forEach(defaultVanillaModel::addOverride)
-            } else { // If it only has textures we need to generate the model ourselves and add it
-                val model = Model.model()
+            if (resourcePackContent.model == null) resourcePack.model(
+                Model.model()
                     .key(Key.key(prefabKey.namespace, prefabKey.key))
                     .parent(resourcePackContent.parentModel.key())
                     .textures(resourcePackContent.textures.modelTextures).build()
-                resourcePackContent.itemOverrides(model.key(), prefabKey, itemStack)
-                    .forEach(defaultVanillaModel::addOverride)
-                model
-                    .let(ResourcePacks::ensureItemOverridesSorted)
-                    .addTo(resourcePack)
-            }
+            )
 
             val itemKey = itemStack?.getData(DataComponentTypes.ITEM_MODEL)
                 ?.takeUnless { itemStack.type.asItemType()?.getDefaultData(DataComponentTypes.ITEM_MODEL) == it }
                 ?: Key.key(prefabKey.full)
             val item = Item.item(itemKey, ItemModel.reference(resourcePackContent.model ?: Key.key(prefabKey.namespace, prefabKey.key)))
             if (resourcePack.item(itemKey) == null) resourcePack.item(item)
-
-            defaultVanillaModel.build()
-                .let(ResourcePacks::ensureItemOverridesSorted)
-                .addTo(resourcePack)
         }
 
         ResourcePacks.writeToFile(resourcePackFile, resourcePack)
