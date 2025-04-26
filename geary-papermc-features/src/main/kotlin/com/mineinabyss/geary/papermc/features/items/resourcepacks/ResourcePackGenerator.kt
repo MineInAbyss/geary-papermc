@@ -42,7 +42,7 @@ class ResourcePackGenerator(world: Geary) : Geary by world {
             val itemKey = itemStack?.getData(DataComponentTypes.ITEM_MODEL)
                 ?.takeUnless { itemStack.type.asItemType()?.getDefaultData(DataComponentTypes.ITEM_MODEL) == it }
                 ?: Key.key(prefabKey.full)
-            val item = Item.item(itemKey, ItemModel.reference(resourcePackContent.model ?: Key.key(prefabKey.namespace, prefabKey.key)))
+            val item = Item.item(itemKey, ItemModel.reference(resourcePackContent.model ?: Key.key(prefabKey.namespace, prefabKey.key), resourcePackContent.tintSources))
             if (resourcePack.item(itemKey) == null) resourcePack.item(item)
         }
 

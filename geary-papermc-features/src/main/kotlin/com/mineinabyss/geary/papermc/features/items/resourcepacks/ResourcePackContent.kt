@@ -6,12 +6,14 @@ import com.mineinabyss.idofront.serialization.KeySerializer
 import com.mineinabyss.idofront.serialization.MaterialByNameSerializer
 import com.mineinabyss.idofront.serialization.ModelTexturesSerializer
 import com.mineinabyss.idofront.serialization.ModelTexturesSurrogate
+import com.mineinabyss.idofront.serialization.TintSourceSerializer
 import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import net.kyori.adventure.key.Key
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
+import team.unnamed.creative.item.tint.TintSource
 import team.unnamed.creative.model.ItemOverride
 import team.unnamed.creative.model.ItemPredicate
 
@@ -23,6 +25,7 @@ data class ResourcePackContent(
     val model: @Serializable(KeySerializer::class) Key? = null,
     val parentModel: @Serializable(KeySerializer::class) Key = Key.key("minecraft:item/generated"),
     val textures: @Serializable(ModelTexturesSerializer::class) ModelTexturesSurrogate = ModelTexturesSurrogate(),
+    val tintSources: List<@Serializable(TintSourceSerializer::class) TintSource> = listOf(),
     val itemPredicates: ItemPredicates = ItemPredicates(customModelData = null),
 ) {
 
