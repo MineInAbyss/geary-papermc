@@ -18,7 +18,7 @@ class TamingListener : Listener {
     fun PlayerInteractEntityEvent.tameMob() {
         val mob = (rightClicked as? LivingEntity) ?: return
         val gearyEntity = rightClicked.toGearyOrNull() ?: return
-        val maxHealth = mob.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: 20.0
+        val maxHealth = mob.getAttribute(Attribute.MAX_HEALTH)?.value ?: 20.0
         val itemInHand = player.inventory.itemInMainHand
 
         gearyEntity.with { tamable: Tamable ->

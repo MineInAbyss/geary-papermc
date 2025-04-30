@@ -9,7 +9,7 @@ import com.mineinabyss.idofront.nms.aliases.toBukkit
 import com.mineinabyss.idofront.nms.aliases.toNMS
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import net.minecraft.core.BlockPos
-import net.minecraft.world.entity.MobSpawnType
+import net.minecraft.world.entity.EntitySpawnReason
 import org.bukkit.event.entity.CreatureSpawnEvent
 
 fun Geary.createAttemptSpawnListener() = observeWithData<AttemptSpawn>()
@@ -21,7 +21,7 @@ fun Geary.createAttemptSpawnListener() = observeWithData<AttemptSpawn>()
             // This is called before adding to the world.
             { mob -> entity.set(mob.toBukkit()) },
             BlockPos(loc.blockX, loc.blockY, loc.blockZ),
-            MobSpawnType.NATURAL,
+            EntitySpawnReason.NATURAL,
             false,
             false,
             CreatureSpawnEvent.SpawnReason.COMMAND
