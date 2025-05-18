@@ -11,15 +11,13 @@ import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.prefabs.entityOfOrNull
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
 import com.mineinabyss.idofront.nms.nbt.fastPDC
-import net.minecraft.world.item.Items
-import org.bukkit.Material
+import io.papermc.paper.persistence.PersistentDataContainerView
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
-import org.bukkit.persistence.PersistentDataContainer
 import java.util.*
 
 class LoginListener(
@@ -41,20 +39,20 @@ class LoginListener(
     companion object {
         context(Geary)
         fun readItemInfo(item: NMSItemStack): ItemInfo {
-            if (item.item == Items.AIR) return ItemInfo.NothingEncoded
+            if (item.isEmpty) return ItemInfo.NothingEncoded
             val pdc = item.fastPDC ?: return ItemInfo.NothingEncoded
             return readItemInfo(pdc)
         }
 
         context(Geary)
         fun readItemInfo(item: ItemStack): ItemInfo {
-            if (item.type == Material.AIR) return ItemInfo.NothingEncoded
-            val pdc = item.itemMeta.persistentDataContainer
+            if (item.isEmpty) return ItemInfo.NothingEncoded
+            val pdc = item.persistentDataContainer
             return readItemInfo(pdc)
         }
 
         context(Geary)
-        fun readItemInfo(pdc: PersistentDataContainer): ItemInfo {
+        fun readItemInfo(pdc: PersistentDataContainerView): ItemInfo {
             if (!pdc.hasComponentsEncoded) return ItemInfo.NothingEncoded
 
             val prefabKeys = pdc.decodePrefabs()

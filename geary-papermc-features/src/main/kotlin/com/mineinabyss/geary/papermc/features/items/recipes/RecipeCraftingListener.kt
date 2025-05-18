@@ -28,11 +28,7 @@ class RecipeCraftingListener : Listener {
         if (recipe == null || (recipe as? Keyed)?.key()?.namespace() != "minecraft") return
 
         if (inventory.matrix.any {
-                entityOfOrNull(
-                    it?.itemMeta?.persistentDataContainer
-                        ?.decodePrefabs()
-                        ?.firstOrNull()
-                )
+                entityOfOrNull(it?.persistentDataContainer?.decodePrefabs()?.firstOrNull())
                     ?.has<DenyInVanillaRecipes>() == true
             }) {
             inventory.result = null
@@ -50,12 +46,12 @@ class RecipeCraftingListener : Listener {
         val (template, mineral) = (inventory.inputTemplate ?: return) to (inventory.inputMineral ?: return)
         val equipment = inventory.inputEquipment ?: return
 
-        val inputGearyEntity = equipment.fastPDC?.decodePrefabs()?.firstOrNull() ?: return
+        val inputGearyEntity = equipment.persistentDataContainer.decodePrefabs().firstOrNull() ?: return
         val smithingTransformRecipes = Bukkit.recipeIterator().asSequence()
             .filterIsInstance<SmithingTransformRecipe>()
             .filter { it.result.fastPDC?.hasComponentsEncoded == true }
         val customRecipeResult = smithingTransformRecipes.filter {
-            it.base.itemStack.itemMeta?.persistentDataContainer?.decodePrefabs()?.firstOrNull() == inputGearyEntity
+            it.base.itemStack.persistentDataContainer.decodePrefabs().firstOrNull() == inputGearyEntity
                     && it.template.test(template) && it.addition.test(mineral)
         }.firstOrNull()?.result
 
