@@ -1,15 +1,12 @@
 package com.mineinabyss.geary.papermc.features.items.resourcepacks
 
 import com.mineinabyss.idofront.serialization.*
-import io.papermc.paper.datacomponent.DataComponentTypes
 import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import net.kyori.adventure.key.Key
 import org.bukkit.Material
-import org.bukkit.inventory.ItemStack
 import team.unnamed.creative.item.tint.TintSource
-import team.unnamed.creative.model.ItemPredicate
 
 @Serializable
 @SerialName("geary:resourcepack")
@@ -55,10 +52,5 @@ data class ResourcePackContent(
         @EncodeDefault(EncodeDefault.Mode.NEVER) val pullingTextures: Map<@Serializable(KeySerializer::class) Key, Float> = emptyMap(),
         @EncodeDefault(EncodeDefault.Mode.NEVER) val timeModels: Map<@Serializable(KeySerializer::class) Key, Float> = emptyMap(),
         @EncodeDefault(EncodeDefault.Mode.NEVER) val timeTextures: Map<@Serializable(KeySerializer::class) Key, Float> = emptyMap(),
-    ) {
-        fun customModelData(itemStack: ItemStack?): ItemPredicate? =
-            (customModelData ?: itemStack?.getData(DataComponentTypes.CUSTOM_MODEL_DATA)?.floats()?.firstOrNull()?.toInt())?.let(
-                ItemPredicate::customModelData
-            )
-    }
+    )
 }

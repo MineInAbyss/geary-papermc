@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.spawning.choosing.mobcaps
 import com.mineinabyss.geary.papermc.spawning.components.SpawnCategory
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.spawn_types.GearyReadSpawnCategoryEvent
+import com.mineinabyss.idofront.events.call
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import org.bukkit.Location
 import org.bukkit.entity.EntityType
@@ -35,10 +36,10 @@ class MobCaps(
 
     fun calculateCategoriesNear(location: Location): Map<SpawnCategory, Int> {
         val boundingBox = BoundingBox.of(location, searchRadius.toDouble(), searchRadius.toDouble(), searchRadius.toDouble())
-        return location.world.getNearbyEntities(boundingBox) { it.type !in IGNORED_ENTITY_TYPES }
-            .groupingBy {
-                GearyReadSpawnCategoryEvent(it).also { it.callEvent() }.category ?: SpawnCategory.of(it)
-            }.eachCount()
+        val entities = location.world.getNearbyEntities(boundingBox) { it.type !in IGNORED_ENTITY_TYPES }
+        return entities.groupingBy {
+            GearyReadSpawnCategoryEvent(it).also { it.call() }.category ?: SpawnCategory.of(it)
+        }.eachCount()
     }
 
     fun filterAllowedAt(location: Location, spawns: List<SpawnEntry>, predicate: Predicate<SpawnEntry>): List<SpawnEntry> {

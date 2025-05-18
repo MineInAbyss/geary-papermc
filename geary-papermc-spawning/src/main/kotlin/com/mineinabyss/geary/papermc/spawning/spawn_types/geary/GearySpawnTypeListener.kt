@@ -9,9 +9,7 @@ import org.bukkit.event.Listener
 class GearySpawnTypeListener : Listener {
     @EventHandler
     fun GearyReadSpawnCategoryEvent.readSpawnCategory() {
-        if (category != null) return
-        val cat = entity.toGearyOrNull()?.get<SpawnCategory>() ?: return
-        category = cat
+        if (category == null) category = entity.toGearyOrNull()?.get<SpawnCategory>()
     }
 }
 
