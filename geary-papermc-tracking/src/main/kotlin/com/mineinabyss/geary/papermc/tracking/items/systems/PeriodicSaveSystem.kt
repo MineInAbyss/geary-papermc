@@ -4,7 +4,6 @@ import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.datastore.encode
 import com.mineinabyss.geary.serialization.components.Persists
 import com.mineinabyss.geary.systems.query.Query
-import com.mineinabyss.idofront.items.editItemMeta
 import org.bukkit.inventory.ItemStack
 import kotlin.time.Duration.Companion.seconds
 
@@ -21,12 +20,12 @@ fun Geary.createPeriodicSaveSystem() = system(
 //            return
 //        }
 
-    q.item.editItemMeta {
+    q.item.editPersistentDataContainer { pdc ->
         q.persisting.forEach {
             val newHash = it.targetData.hashCode()
             if (newHash != it.data.hash) {
                 it.data.hash = newHash
-                persistentDataContainer.encode(it.targetData)
+                pdc.encode(it.targetData)
             }
         }
     }

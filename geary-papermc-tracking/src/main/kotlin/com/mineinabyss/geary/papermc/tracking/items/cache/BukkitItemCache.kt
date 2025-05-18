@@ -19,7 +19,11 @@ class BukkitItemCache(
     }
 
     override fun deserializeItem(item: ItemStack): GearyEntity? {
-        return gearyItems.itemProvider.deserializeItemStackToEntity(item.itemMeta.persistentDataContainer)
+        var entity: GearyEntity? = null
+        item.editPersistentDataContainer {
+            entity = gearyItems.itemProvider.deserializeItemStackToEntity(it)
+        }
+        return entity
     }
 
     override fun skipUpdate(slot: Int, newItem: ItemStack?): Boolean {

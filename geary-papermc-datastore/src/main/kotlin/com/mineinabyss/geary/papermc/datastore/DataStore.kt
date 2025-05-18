@@ -1,7 +1,9 @@
 package com.mineinabyss.geary.papermc.datastore
 
 import com.mineinabyss.geary.components.relations.InstanceOf
-import com.mineinabyss.geary.datatypes.*
+import com.mineinabyss.geary.datatypes.GearyComponent
+import com.mineinabyss.geary.datatypes.GearyEntityType
+import com.mineinabyss.geary.datatypes.toRelation
 import com.mineinabyss.geary.helpers.componentId
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.modules.relationOf
@@ -9,9 +11,9 @@ import com.mineinabyss.geary.papermc.datastore.PaperDatastore.COMPONENTS_KEY
 import com.mineinabyss.geary.papermc.datastore.PaperDatastore.PREFABS_KEY
 import com.mineinabyss.geary.papermc.datastore.namespacedkey.*
 import com.mineinabyss.geary.prefabs.PrefabKey
-import com.mineinabyss.geary.prefabs.entityOf
 import com.mineinabyss.geary.prefabs.entityOfOrNull
 import com.mineinabyss.geary.serialization.SerializableComponents
+import io.papermc.paper.persistence.PersistentDataContainerView
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.builtins.SetSerializer
@@ -59,7 +61,7 @@ fun <T : GearyComponent> PersistentDataContainer.encode(
  * found via [Formats].
  */
 context(Geary)
-inline fun <reified T : GearyComponent> PersistentDataContainer.decode(): T? {
+inline fun <reified T : GearyComponent> PersistentDataContainerView.decode(): T? {
     return decode(
         serializer = serializers.getSerializerFor(T::class) ?: return null,
         key = serializers.getSerialNameFor(T::class)?.toComponentKey() ?: return null
@@ -71,7 +73,7 @@ inline fun <reified T : GearyComponent> PersistentDataContainer.decode(): T? {
  * via [Formats] given a [key].
  */
 context(Geary)
-inline fun <reified T : GearyComponent> PersistentDataContainer.decode(
+inline fun <reified T : GearyComponent> PersistentDataContainerView.decode(
     key: NamespacedKey,
     serializer: DeserializationStrategy<out T>? =
         serializers.getSerializerForNamespaced(key, T::class),
@@ -128,7 +130,7 @@ fun PersistentDataContainer.encodePrefabs(
 
 /** Decodes [PrefabKey]s under the key `geary:prefabs`. */
 context(Geary)
-fun PersistentDataContainer.decodePrefabs(): Set<PrefabKey> =
+fun PersistentDataContainerView.decodePrefabs(): Set<PrefabKey> =
     decode(PREFABS_KEY, SetSerializer(PrefabKey.serializer()))
         ?.map { key ->
             // Migrate namespace if needed
@@ -139,12 +141,12 @@ fun PersistentDataContainer.decodePrefabs(): Set<PrefabKey> =
         ?: emptySet()
 
 /**
- * Decodes a set of components from this [PersistentDataContainer].
+ * Decodes a set of components from this [PersistentDataContainerView].
  *
  * @see decode
  */
 context(Geary)
-fun PersistentDataContainer.decodeComponents(): DecodedEntityData =
+fun PersistentDataContainerView.decodeComponents(): DecodedEntityData =
     DecodedEntityData(
         // only include keys that start with the component prefix and remove it to get the serial name
         persistingComponents = keys
@@ -158,10 +160,14 @@ fun PersistentDataContainer.decodeComponents(): DecodedEntityData =
 
 /** Verifies a [PersistentDataContainer] has a tag identifying it as containing Geary components. */
 var PersistentDataContainer.hasComponentsEncoded: Boolean
-    get() = has(COMPONENTS_KEY, PersistentDataType.BYTE) || has(PREFABS_KEY, PersistentDataType.BYTE_ARRAY)
+    get() = has(COMPONENTS_KEY, PersistentDataType.BYTE) || has(PREFABS_KEY, BYTE_ARRAY)
     set(value) {
         when {
             value -> if (!hasComponentsEncoded) set(COMPONENTS_KEY, PersistentDataType.BYTE, 1)
             else -> remove(COMPONENTS_KEY)
         }
     }
+
+/** Verifies a [PersistentDataContainerView] has a tag identifying it as containing Geary components. */
+val PersistentDataContainerView.hasComponentsEncoded
+    get() = has(COMPONENTS_KEY, PersistentDataType.BYTE) || has(PREFABS_KEY, BYTE_ARRAY)

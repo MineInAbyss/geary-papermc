@@ -5,7 +5,7 @@ import com.mineinabyss.geary.modules.observe
 import com.mineinabyss.geary.observers.events.OnSet
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.systems.query.query
-import com.mineinabyss.idofront.items.editItemMeta
+import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.inventory.ItemStack
 
@@ -17,14 +17,10 @@ fun Geary.createItemMigrationListener() = observe<OnSet>()
         setItem.item.toItemStack(applyTo = item)
 
         // Migrate display name -> item name
-        val newItem = setItem.item
-        val oldCustomName = item.itemMeta.displayName()
-        val newItemName = newItem.itemName
+        val itemName = setItem.item.takeIf { it.itemName != null && it.customName == null }?.itemName ?: return@exec
+        val customName = item.getData(DataComponentTypes.CUSTOM_NAME) ?: return@exec
 
         // if old item name matches new one, ignoring formatting, remove it
-        if (newItem.customName == null && newItemName != null && oldCustomName != null &&
-            plainTextSerializer.serialize(oldCustomName) == plainTextSerializer.serialize(newItemName)
-        ) item.editItemMeta {
-            displayName(null)
-        }
+        if (plainTextSerializer.serialize(customName) == plainTextSerializer.serialize(itemName))
+            item.unsetData(DataComponentTypes.CUSTOM_NAME)
     }

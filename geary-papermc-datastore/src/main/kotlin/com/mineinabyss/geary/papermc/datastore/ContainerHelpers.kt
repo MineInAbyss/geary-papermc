@@ -8,6 +8,7 @@ import com.mineinabyss.geary.serialization.components.Persists
 import com.mineinabyss.geary.serialization.getAllPersisting
 import com.mineinabyss.geary.serialization.setAllPersisting
 import com.mineinabyss.idofront.typealiases.BukkitEntity
+import io.papermc.paper.persistence.PersistentDataContainerView
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataHolder
@@ -35,12 +36,12 @@ fun GearyEntity.encodeComponentsTo(holder: PersistentDataHolder) {
 
 context(Geary)
 fun GearyEntity.encodeComponentsTo(item: ItemStack) {
-    item.editMeta { encodeComponentsTo(it.persistentDataContainer) }
+    item.editPersistentDataContainer(::encodeComponentsTo)
 }
 
 
 /** Decodes a [PersistentDataContainer]'s components, adding them to this entity and its list of persisting components */
-fun GearyEntity.loadComponentsFrom(pdc: PersistentDataContainer) {
+fun GearyEntity.loadComponentsFrom(pdc: PersistentDataContainerView) {
     loadComponentsFrom(with(world) { pdc.decodeComponents() })
 }
 
@@ -61,4 +62,4 @@ fun PersistentDataHolder.decodeComponents(): DecodedEntityData =
 
 context(Geary)
 fun ItemStack.decodeComponents(): DecodedEntityData =
-    itemMeta.decodeComponents()
+    persistentDataContainer.decodeComponents()

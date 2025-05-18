@@ -27,8 +27,7 @@ abstract class PlayerItemCache<T>(
     private fun removeEntity(slot: Int) {
         val entity = entities[slot].takeIf { it != 0uL }?.toGeary() ?: return
         logger.v { "Removing ${entities[slot]} in slot $slot" }
-        val pdc = entity.get<ItemStack>()?.itemMeta?.persistentDataContainer
-        if (pdc != null) entity.encodeComponentsTo(pdc)
+        entity.get<ItemStack>()?.editPersistentDataContainer(entity::encodeComponentsTo)
         entity.removeEntity()
         entities[slot] = 0uL
     }

@@ -11,7 +11,6 @@ import com.mineinabyss.geary.papermc.datastore.loadComponentsFrom
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.entityOfOrNull
-import com.mineinabyss.idofront.items.editItemMeta
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
@@ -24,8 +23,8 @@ class GearyItemProvider(world: Geary) : Geary by world {
     fun serializePrefabToItemStack(prefabKey: PrefabKey, existing: ItemStack? = null): ItemStack? {
         val prefab = entityOfOrNull(prefabKey) ?: return null
 
-        return prefab.get<SetItem>()?.item?.toItemStackOrNull(existing ?: ItemStack(Material.AIR))?.editItemMeta {
-            persistentDataContainer.encodePrefabs(listOf(prefabKey))
+        return prefab.get<SetItem>()?.item?.toItemStackOrNull(existing ?: ItemStack(Material.AIR))?.apply {
+            editPersistentDataContainer { it.encodePrefabs(listOf(prefabKey)) }
         }
     }
 

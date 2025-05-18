@@ -3,7 +3,6 @@ package com.mineinabyss.geary.papermc.tracking.items
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.Geary
-import com.mineinabyss.idofront.nms.nbt.fastPDC
 import org.bukkit.inventory.ItemStack
 import java.io.Closeable
 
@@ -20,14 +19,18 @@ class GearyItemContext(
 
     fun ItemStack.toGearyOrNull(): GearyEntity? {
         return cached.getOrPut(this) {
-            gearyItems.itemProvider.deserializeItemStackToEntity(this.fastPDC)?.apply {
-                set<ItemStack>(this@toGearyOrNull)
-            } ?: return null
+            var entity: GearyEntity? = null
+            editPersistentDataContainer {
+                entity = gearyItems.itemProvider.deserializeItemStackToEntity(it)?.apply {
+                    set<ItemStack>(this@toGearyOrNull)
+                }
+            }
+            return entity
         }
     }
 
     override fun close() {
-        cached.forEach { (item, entity) -> entity.removeEntity() }
+        cached.forEach { (_, entity) -> entity.removeEntity() }
     }
 }
 

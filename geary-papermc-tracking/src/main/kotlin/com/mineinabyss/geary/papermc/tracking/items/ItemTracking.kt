@@ -31,8 +31,6 @@ val ItemTracking = createAddon<ItemTrackingModule>("Item Tracking", { NMSBackedI
         createInventoryTrackerSystem()
     }
     onPluginEnable {
-        plugin.listeners(
-            configuration.loginListener,
-        )
+        plugin.listeners(configuration.loginListener)
     }
 }
