@@ -14,13 +14,6 @@ private val plainTextSerializer by lazy { PlainTextComponentSerializer.plainText
 fun Geary.createItemMigrationListener() = observe<OnSet>()
     .involving(query<SetItem, ItemStack>())
     .exec { (setItem, item) ->
-        val itemModel = setItem.item.takeIf { it.customModelData == null }?.itemModel
-        val oldCmd = item.getData(DataComponentTypes.CUSTOM_MODEL_DATA)
-        val oldItemModel = item.getData(DataComponentTypes.ITEM_MODEL)
-
-        if (itemModel != null && oldCmd != null && oldItemModel != itemModel)
-            item.unsetData(DataComponentTypes.CUSTOM_MODEL_DATA)
-
         setItem.item.toItemStack(applyTo = item)
 
         // Migrate display name -> item name
@@ -30,4 +23,7 @@ fun Geary.createItemMigrationListener() = observe<OnSet>()
         // if old item name matches new one, ignoring formatting, remove it
         if (itemName != null && customName != null && plainTextSerializer.serialize(customName) == plainTextSerializer.serialize(itemName))
             item.unsetData(DataComponentTypes.CUSTOM_NAME)
+
+        if (item.hasData(DataComponentTypes.CUSTOM_MODEL_DATA) && setItem.item.customModelData == null)
+            item.unsetData(DataComponentTypes.CUSTOM_MODEL_DATA)
     }
