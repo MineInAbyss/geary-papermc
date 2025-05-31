@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.features.entities.prevent
 
 import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.itemEntityContext
+import io.papermc.paper.datacomponent.DataComponentTypes
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.bukkit.World
@@ -45,6 +46,8 @@ class PreventEnchantingListener() : Listener {
 
     fun shouldPrevent(world: World, item: ItemStack?): Boolean {
         if (item == null) return false
+        // If an item cannot normally be enchanted, we dont want it to be unenchantable either
+        if (item.getData(DataComponentTypes.ENCHANTABLE) == null) return true
         with(world.toGeary()) {
             itemEntityContext {
                 if (item.toGearyOrNull()?.has<PreventEnchanting>() == true) {
