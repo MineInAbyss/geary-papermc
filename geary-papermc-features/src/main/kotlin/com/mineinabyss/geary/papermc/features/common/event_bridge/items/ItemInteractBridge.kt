@@ -9,6 +9,7 @@ import io.papermc.paper.event.player.PlayerArmSwingEvent
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -28,8 +29,16 @@ class OnItemInteract
 class OnItemLeftClick
 
 @Serializable
+@SerialName("geary:equipment_left_click")
+class OnEquipmentLeftClick
+
+@Serializable
 @SerialName("geary:item_left_click_sneak")
 class OnItemLeftClickSneak
+
+@Serializable
+@SerialName("geary:equipment_left_click_sneak")
+class OnEquipmentLeftClickSneak
 
 @Serializable
 @SerialName("geary:item_left_click_block")
@@ -40,8 +49,16 @@ class OnItemLeftClickBlock
 class OnItemRightClick
 
 @Serializable
+@SerialName("geary:equipment_right_click")
+class OnEquipmentRightClick
+
+@Serializable
 @SerialName("geary:item_right_click_sneak")
 class OnItemRightClickSneak
+
+@Serializable
+@SerialName("geary:equipment_right_click_sneak")
+class OnEquipmentRightClickSneak
 
 @Serializable
 @SerialName("geary:item_right_click_block")
@@ -60,21 +77,17 @@ class OnItemSwapIn
 class OnItemSwapOut
 
 @Serializable
-@SerialName("geary:item_sneak")
-class OnItemSneak
+@SerialName("geary:equipment_sneak")
+class OnEquipmentSneak
 
 
 
 class ItemInteractBridge : Listener {
     private val rightClickCooldowns = Int2IntOpenHashMap()
 
-    @EventHandler(ignoreCancelled = true)
-    fun PlayerInteractEntityEvent.onRightClickEntity() = with(player.world.toGeary()) {
-        val heldItem = player.inventory.toGeary()?.get(hand) ?: return
-        heldItem.emit<OnItemRightClickEntity>()
-    }
+    private inline fun <reified E : Any>emitToAll(player: Player) {
+        val inventory = player.inventory.toGeary()
 
-    private inline fun <reified E : Any>emitToAll(inventory: GearyPlayerInventory?) {
         // Armor Slots
         inventory?.itemInHelmet?.emit<E>()
         inventory?.itemInChestplate?.emit<E>()
@@ -86,14 +99,21 @@ class ItemInteractBridge : Listener {
         inventory?.get(10)?.emit<E>()
     }
 
+    @EventHandler(ignoreCancelled = true)
+    fun PlayerInteractEntityEvent.onRightClickEntity() = with(player.world.toGeary()) {
+        val heldItem = player.inventory.toGeary()?.get(hand) ?: return
+        heldItem.emit<OnItemRightClickEntity>()
+    }
+
     @EventHandler
     fun PlayerArmSwingEvent.onLeftClick() {
         val heldItem = player.inventory.toGeary()?.get(hand)
         heldItem?.emit<OnItemLeftClick>()
-        emitToAll<OnItemLeftClick>(player.inventory.toGeary())
+        emitToAll<OnEquipmentLeftClick>(player)
+
         if (player.isSneaking) {
-            emitToAll<OnItemLeftClickSneak>(player.inventory.toGeary())
-            heldItem?.emit<OnItemLeftClick>()
+            heldItem?.emit<OnItemLeftClickSneak>()
+            emitToAll<OnEquipmentLeftClickSneak>(player)
         }
     }
 
@@ -109,17 +129,14 @@ class ItemInteractBridge : Listener {
 
         if (leftClicked) {
             heldItem?.emit<OnItemLeftClickBlock>()
-            if (player.isSneaking) {
-                heldItem?.emit<OnItemLeftClickSneak>()
-            }
         }
 
         if (rightClicked) {
             heldItem?.emit<OnItemRightClick>()
-            emitToAll<OnItemRightClick>(player.inventory.toGeary())
+            emitToAll<OnEquipmentRightClick>(player)
             if (player.isSneaking) {
                 heldItem?.emit<OnItemRightClickSneak>()
-                emitToAll<OnItemRightClickSneak>(player.inventory.toGeary())
+                emitToAll<OnEquipmentRightClickSneak>(player)
             }
         }
         if (action == Action.RIGHT_CLICK_BLOCK) heldItem?.emit<OnItemRightClickBlock>()
@@ -138,18 +155,16 @@ class ItemInteractBridge : Listener {
         val mainHand = inventory?.itemInMainHand
         val offHand = inventory?.itemInOffhand
 
-        // Emit both swaps for the items
-
-        mainHand?.emit<OnItemSwapIn>()
+        // Mainhand swaps into offhand
+        // Offhand swaps into mainhand
         mainHand?.emit<OnItemSwapOut>()
         offHand?.emit<OnItemSwapIn>()
-        offHand?.emit<OnItemSwapOut>()
     }
 
     @EventHandler
     fun PlayerToggleSneakEvent.onItemSneak() {
         if (!player.isSneaking) {
-            emitToAll<OnItemSneak>(player.inventory.toGeary())
+            emitToAll<OnEquipmentSneak>(player)
         }
     }
 }
