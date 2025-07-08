@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.features.items
 
 import com.mineinabyss.geary.papermc.Feature
 import com.mineinabyss.geary.papermc.FeatureContext
+import com.mineinabyss.geary.papermc.features.items.cycleproperty.CyclePropertyListener
 import com.mineinabyss.geary.papermc.features.items.food.ReplaceBurnedDropListener
 import com.mineinabyss.geary.papermc.features.items.holdsentity.SpawnHeldPrefabListener
 import com.mineinabyss.geary.papermc.features.items.nointeraction.DisableItemInteractionsListener
@@ -15,6 +16,7 @@ class ItemFeatures(context: FeatureContext) : Feature(context) {
             SpawnHeldPrefabListener(),
             DisableItemInteractionsListener(),
             ReplaceBurnedDropListener(),
+            CyclePropertyListener()
         )
     }
 }
