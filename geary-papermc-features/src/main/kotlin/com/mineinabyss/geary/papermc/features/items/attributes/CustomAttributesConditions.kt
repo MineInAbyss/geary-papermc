@@ -25,6 +25,7 @@ class AttributeCondition(
             AttributeComparison.EQUALS -> {
                 currentValue == value
             }
+
             AttributeComparison.GREATER_THAN -> {
                 if (currentValue is AttributeValue.IntValue && value is AttributeValue.IntValue) {
                     currentValue.value > value.value
@@ -34,6 +35,7 @@ class AttributeCondition(
                     false
                 }
             }
+
             AttributeComparison.LESS_THAN -> {
                 if (currentValue is AttributeValue.IntValue && value is AttributeValue.IntValue) {
                     currentValue.value < value.value

@@ -36,17 +36,23 @@ class ModifyAttributeAction(
             AttributeOperation.ADD -> when {
                 currentValue is AttributeValue.IntValue && value is AttributeValue.IntValue ->
                     AttributeValue.IntValue(currentValue.value + value.value)
+
                 currentValue is AttributeValue.DoubleValue && value is AttributeValue.DoubleValue ->
                     AttributeValue.DoubleValue(currentValue.value + value.value)
+
                 else -> value
             }
+
             AttributeOperation.MULTIPLY -> when {
                 currentValue is AttributeValue.IntValue && value is AttributeValue.IntValue ->
                     AttributeValue.IntValue(currentValue.value * value.value)
+
                 currentValue is AttributeValue.DoubleValue && value is AttributeValue.DoubleValue ->
                     AttributeValue.DoubleValue(currentValue.value * value.value)
+
                 else -> value
             }
+
             AttributeOperation.SET -> value
         }
 
