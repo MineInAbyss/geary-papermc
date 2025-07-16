@@ -47,6 +47,11 @@ class AttributeCondition(
             }
         }
 
+        /*
+        Bandaid fix to account for the fact that conditions are executed twice.
+        This allows to prevent the "onFail" block from being executed in case
+        the condition succeeds the first time.
+         */
         if (result) {
             lastComp = true
             return true

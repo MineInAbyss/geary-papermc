@@ -6,21 +6,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("geary:set_attribute")
-class SetAttributeAction(
-    val name: String,
-    val value: AttributeValue
-) : Action {
-    override fun ActionGroupContext.execute() {
-        val current = entity?.get<CustomAttributes>() ?: CustomAttributes()
-        val updated = current.copy(
-            attributes = current.attributes + (name to value)
-        )
-        entity?.set(updated)
-    }
-}
-
-@Serializable
 @SerialName("geary:modify_attribute")
 class ModifyAttributeAction(
     val name: String,
@@ -31,7 +16,6 @@ class ModifyAttributeAction(
         val current = entity?.get<CustomAttributes>() ?: CustomAttributes()
         val currentValue = current.attributes[name]
 
-        println("value is ${value}")
         val newValue = when (operation) {
             AttributeOperation.ADD -> when {
                 currentValue is AttributeValue.IntValue && value is AttributeValue.IntValue ->
