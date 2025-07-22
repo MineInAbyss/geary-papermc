@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.features.entities.pathfinders
 
 import com.charleskorn.kaml.Yaml
-import com.destroystokyo.paper.entity.ai.PaperVanillaGoal
+import com.destroystokyo.paper.entity.ai.PaperGoal
 import com.mineinabyss.geary.serialization.serializers.InnerSerializer
 import com.mineinabyss.idofront.nms.aliases.NMSMob
 import com.mineinabyss.idofront.nms.aliases.toNMS
@@ -36,8 +36,8 @@ data class PathfinderWrapper(
         Yaml.default.decodeFromString(serializer, parameters[name] ?: error("Missing parameter $name"))
     }.toTypedArray()
 
-    fun toPaperPathfinder(mob: Mob): PaperVanillaGoal<Mob> =
-        PaperVanillaGoal<Mob>(constructor.newInstance(mob.toNMS(), *decoded) as Goal)
+    fun toPaperPathfinder(mob: Mob): PaperGoal<Mob> =
+        PaperGoal<Mob>(constructor.newInstance(mob.toNMS(), *decoded) as Goal)
 
     object Serializer : InnerSerializer<Map<String, String>, PathfinderWrapper>(
         serialName = "geary:pathfinder",
