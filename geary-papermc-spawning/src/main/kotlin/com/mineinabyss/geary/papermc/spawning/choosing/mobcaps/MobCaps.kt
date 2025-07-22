@@ -29,7 +29,7 @@ class MobCaps(
             EntityType.BREEZE_WIND_CHARGE, EntityType.DRAGON_FIREBALL, EntityType.EGG, EntityType.ENDER_PEARL,
             EntityType.EYE_OF_ENDER, EntityType.EVOKER_FANGS, EntityType.EXPERIENCE_BOTTLE, EntityType.FIREBALL,
             EntityType.FIREWORK_ROCKET, EntityType.FISHING_BOBBER, EntityType.LEASH_KNOT, EntityType.LIGHTNING_BOLT,
-            EntityType.LLAMA_SPIT, EntityType.OMINOUS_ITEM_SPAWNER, EntityType.TRIDENT, EntityType.POTION,
+            EntityType.LLAMA_SPIT, EntityType.OMINOUS_ITEM_SPAWNER, EntityType.TRIDENT, EntityType.SPLASH_POTION, EntityType.LINGERING_POTION,
             EntityType.SHULKER_BULLET, EntityType.SMALL_FIREBALL, EntityType.SNOWBALL, EntityType.WIND_CHARGE
         )
     }

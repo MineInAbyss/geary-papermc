@@ -1,6 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.items.cache
 
-import be.seeseemelk.mockbukkit.MockBukkit
+//import be.seeseemelk.mockbukkit.MockBukkit
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.ArchetypeEngineModule
 import com.mineinabyss.geary.modules.TestEngineModule
@@ -16,10 +16,10 @@ class PlayerItemCacheTest: GearyTest() {
         install(Prefabs)
     }
 
-    init {
-        MockBukkit.unmock()
-        MockBukkit.mock()
-    }
+//    init {
+//        MockBukkit.unmock()
+//        MockBukkit.mock()
+//    }
 
     val prefabKey1 = PrefabKey.of("test:1")
     val prefabKey2 = PrefabKey.of("test:2")

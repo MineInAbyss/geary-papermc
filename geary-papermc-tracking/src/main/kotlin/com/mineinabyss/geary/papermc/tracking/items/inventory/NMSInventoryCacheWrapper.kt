@@ -46,11 +46,9 @@ class NMSInventoryCacheWrapper(
         fun toArray(inventory: NMSPlayerInventory): Array<NMSItemStack?> {
             val array = Array<NMSItemStack?>(PlayerItemCache.MAX_SIZE) { null }
             var slot = 0
-            inventory.compartments.fastForEach { comp ->
-                comp.fastForEach { item ->
-                    array[slot] = item
-                    slot++
-                }
+            inventory.contents.fastForEach { item ->
+                array[slot] = item
+                slot++
             }
             // Include cursor as last slot
             array[PlayerItemCache.CURSOR_SLOT] = inventory.player.containerMenu.carried
