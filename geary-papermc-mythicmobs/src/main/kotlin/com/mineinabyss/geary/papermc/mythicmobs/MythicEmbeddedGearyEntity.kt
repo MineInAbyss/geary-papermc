@@ -40,7 +40,7 @@ object MythicEmbeddedGearyEntity {
         // TODO create some helper functions for this in PrefabLoader
         val prefabs = getAddon(Prefabs)
         val yamlFormat = getAddon(SerializableComponents).formats["yml"] as? YamlFormat ?: return@with null
-        val mobNode = yamlFormat.regularYaml.parseToYamlNode(config.fileConfiguration.saveToString())
+        val mobNode = yamlFormat.regularYaml.parseToYamlNode(config.file.readText())
             .yamlMap.get<YamlMap>(config.key) ?: return null
 
         // Get special nodes and decode them
