@@ -16,7 +16,7 @@ fun BukkitEntity.toGearyOrNull(): GearyEntity? =
 fun GearyEntity.toBukkit(): BukkitEntity? =
     with(world) { get(getAddon(EntityTracking).bukkitEntityComponent) as? BukkitEntity }
 
-context(Geary)
+context(world: Geary)
 @JvmName("toBukkitAndCast")
 inline fun <reified T : Entity> GearyEntity.toBukkit(): T? =
-    get(getAddon(EntityTracking).bukkitEntityComponent) as? T
+    get(world.getAddon(EntityTracking).bukkitEntityComponent) as? T
