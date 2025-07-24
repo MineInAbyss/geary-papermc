@@ -6,11 +6,17 @@ plugins {
     alias(idofrontLibs.plugins.kotlinx.serialization)
 }
 
+repositories {
+    mavenLocal()
+}
+
 dependencies {
+    implementation("me.dvyy:sqlite-kt:0.0.1")
     // Plugins
     compileOnly(idofrontLibs.minecraft.plugin.mythic.dist)
     compileOnly(idofrontLibs.idofront.nms)
     compileOnly(idofrontLibs.idofront.util)
+    implementation(idofrontLibs.minecraft.mockbukkit)
 
     // Other deps
     compileOnly(idofrontLibs.kotlinx.serialization.json)

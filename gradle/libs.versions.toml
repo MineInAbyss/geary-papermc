@@ -1,5 +1,7 @@
 [versions]
 geary = "0.27.1-dev.7"
+sqlite = "2.5.1"
+sqlitenow = "0.1.15"
 
 [libraries]
 geary-core = { module = "com.mineinabyss:geary-core", version.ref = "geary" }
@@ -9,5 +11,10 @@ geary-prefabs = { module = "com.mineinabyss:geary-prefabs", version.ref = "geary
 geary-serialization = { module = "com.mineinabyss:geary-serialization", version.ref = "geary" }
 geary-uuid = { module = "com.mineinabyss:geary-uuid", version.ref = "geary" }
 geary-test = { module = "com.mineinabyss:geary-test", version.ref = "geary" }
+sqlitenow-kmp = { module = "dev.goquick.sqlitenow:core", version.ref = "sqlitenow" }
+sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 
 kts-to-typescript = "dev.adamko.kxstsgen:kxs-ts-gen-core:0.2.4"
+
+[plugins]
+sqlitenow = { id = "dev.goquick.sqlitenow", version.ref = "sqlitenow" }
