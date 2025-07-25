@@ -13,6 +13,8 @@ import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
+import kotlin.time.Clock
+import kotlin.time.Duration
 
 internal val json: Json = Json { ignoreUnknownKeys = true }
 
@@ -84,6 +86,11 @@ class SpawnLocationsDAO {
     context(tx: WriteTransaction)
     fun deleteSpawnLocation(world: World, id: Int) {
         tx.exec("DELETE FROM ${dataTable(world)} WHERE id = :id", id)
-        tx.exec("DELETE FROM ${rtree(world)} WHERE id = :id", id)
+    }
+
+    context(tx: WriteTransaction)
+    fun deleteSpawnsOlderThan(world: World, age: Duration) {
+        val epochSeconds = (Clock.System.now() - age).epochSeconds
+        tx.exec("DELETE FROM ${dataTable(world)} WHERE data ->> 'createdTime' < :epochSeconds", epochSeconds)
     }
 }

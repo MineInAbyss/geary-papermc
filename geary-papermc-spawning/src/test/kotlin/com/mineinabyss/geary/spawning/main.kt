@@ -10,6 +10,7 @@ import me.dvyy.sqlite.Database
 import org.bukkit.Location
 import org.bukkit.World
 import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 
 //TODO write an actual test
 suspend fun main() {
@@ -22,6 +23,7 @@ suspend fun main() {
     val locs = SpawnLocationsDAO()
     db.write {
         locs.insertSpawnLocation(Location(world, 1000.0, 0.0, 0.0), StoredEntity("hello"))
+        locs.deleteSpawnsOlderThan(world, 10.seconds)
         locs.getSpawnsNear(Location(world, 1000.0, 0.0, 0.0), 10.0)
     }.let { println(it) }
 }

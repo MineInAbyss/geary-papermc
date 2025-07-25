@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.spawning.database.schema
 
+import me.dvyy.sqlite.WriteTransaction
 import me.dvyy.sqlite.tables.Table
 import me.dvyy.sqlite.tables.View
 import org.bukkit.World
@@ -27,14 +28,31 @@ object SpawnLocationTables {
     )
 
 
-    fun dataTable(world: World): Table = Table(
-        """
-        CREATE TABLE IF NOT EXISTS spawn_locations_data_${world.tableSuffix} (
-            id INTEGER PRIMARY KEY,
-            data TEXT NOT NULL
-        ) STRICT;
-        """
-    )
+    fun dataTable(world: World): Table {
+        val name = "spawn_locations_data_${world.tableSuffix}"
+        return object: Table(
+            """
+            CREATE TABLE IF NOT EXISTS $name (
+                id INTEGER PRIMARY KEY,
+                data TEXT NOT NULL
+            ) STRICT;
+            """.trimIndent()
+        ) {
+            context(tx: WriteTransaction)
+            override fun create() {
+                super.create()
+                // Index json data
+                tx.exec("CREATE INDEX IF NOT EXISTS ${name}_created_time ON $name (data ->> 'createdTime');")
+
+                // Delete from rtree when removed from here
+                tx.exec("""
+                CREATE TRIGGER IF NOT EXISTS ${name}_on_delete AFTER DELETE ON $name FOR EACH ROW BEGIN 
+                    DELETE FROM ${rtree(world)} WHERE id = OLD.id;
+                END;
+                """.trimIndent())
+            }
+        }
+    }
 
     // We use uid instead of name to not deal with possible sqlite injections or having to parse anything further
     @OptIn(ExperimentalUuidApi::class)

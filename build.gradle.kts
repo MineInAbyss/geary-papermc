@@ -48,6 +48,9 @@ allprojects {
                     "-opt-in=kotlin.ExperimentalUnsignedTypes",
                     "-Xcontext-parameters",
                 )
+                optIn.addAll(
+                    "kotlin.time.ExperimentalTime"
+                )
             }
         }
     }
