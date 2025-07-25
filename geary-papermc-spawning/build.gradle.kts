@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    implementation("me.dvyy:sqlite-kt:0.0.1")
+    implementation("me.dvyy:sqlite-kt:0.0.2-alpha.1")
     // Plugins
     compileOnly(idofrontLibs.minecraft.plugin.mythic.dist)
     compileOnly(idofrontLibs.idofront.nms)
@@ -21,6 +21,7 @@ dependencies {
     compileOnly(idofrontLibs.kotlinx.serialization.json)
     compileOnly(idofrontLibs.kotlinx.serialization.kaml)
     compileOnly(idofrontLibs.minecraft.mccoroutine)
+    testImplementation(idofrontLibs.mockk)
 
     compileOnly(libs.geary.actions)
     implementation(project(":geary-papermc-tracking"))

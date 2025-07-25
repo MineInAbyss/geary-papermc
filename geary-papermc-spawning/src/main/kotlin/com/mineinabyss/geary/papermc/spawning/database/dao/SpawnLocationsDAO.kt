@@ -1,5 +1,8 @@
 package com.mineinabyss.geary.papermc.spawning.database.dao
 
+import com.mineinabyss.geary.papermc.spawning.database.schema.SpawnLocationTables.dataTable
+import com.mineinabyss.geary.papermc.spawning.database.schema.SpawnLocationTables.locationsView
+import com.mineinabyss.geary.papermc.spawning.database.schema.SpawnLocationTables.rtree
 import com.mineinabyss.idofront.destructure.component1
 import com.mineinabyss.idofront.destructure.component2
 import com.mineinabyss.idofront.destructure.component3
@@ -8,6 +11,8 @@ import me.dvyy.sqlite.Transaction
 import me.dvyy.sqlite.WriteTransaction
 import org.bukkit.Chunk
 import org.bukkit.Location
+import org.bukkit.World
+import org.bukkit.util.BoundingBox
 
 internal val json: Json = Json { ignoreUnknownKeys = true }
 
@@ -15,33 +20,39 @@ internal val json: Json = Json { ignoreUnknownKeys = true }
 class SpawnLocationsDAO {
     /** Gets all stored spawn locations at most [radius] blocks away from [location] (in a cube.) */
     context(tx: Transaction)
-    fun getSpawnsNear(location: Location, radius: Double): List<SpreadSpawnLocation> {
-        return tx.getList(
-            """
-            SELECT id, data, minX, minY, minZ FROM SpawnLocations
-            WHERE minX > :x - :rad AND minY > :y - :rad AND minZ > :z - :rad
-            AND maxX < :x + :rad AND maxY < :y + :rad AND maxZ < :z + :rad
-            ORDER BY abs(minX - :x) + abs(minY - :y) + abs(minZ - :z);
-            """.trimIndent(),
-            location.x, radius, location.y, location.z,
-        ) {
-            SpreadSpawnLocation.fromStatement(this)
-        }
+    fun getSpawnsNear(location: Location, radius: Double): List<SpreadSpawnLocation> = tx.select(
+        """
+        SELECT id, data, minX, minY, minZ FROM ${locationsView(location.world)}
+        WHERE minX > :x - :rad AND minY > :y - :rad AND minZ > :z - :rad
+        AND maxX < :x + :rad AND maxY < :y + :rad AND maxZ < :z + :rad
+        ORDER BY abs(minX - :x) + abs(minY - :y) + abs(minZ - :z);
+        """.trimIndent(),
+        location.x, radius, location.y, location.z,
+    ).map {
+        SpreadSpawnLocation.fromStatement(this)
     }
 
-    /**
-     * Gets all stored spawn positions that land in this [chunk]
-     */
+    /** Counts the number of spawns stored inside a bounding [box] for a given [world]. */
     context(tx: Transaction)
-    fun getSpawnsInChunk(chunk: Chunk): List<SpreadSpawnLocation> =
-        tx.getList<SpreadSpawnLocation>(
-            """
-            SELECT id, data, minX, minY, minZ FROM SpawnLocations
-            WHERE minX > :x AND minZ > :z
-            AND maxX < :x + 16 AND maxZ < :z + 16;
-            """,
-            chunk.x shl 4, chunk.z shl 4
-        ) { SpreadSpawnLocation.fromStatement(this) }
+    fun countSpawnsInBB(world: World, box: BoundingBox): Int = tx.select(
+        """
+        SELECT count(*) FROM ${rtree(world)}
+        WHERE minX > :minX AND minY > :minY AND minZ > :minZ
+        AND maxX < :maxX AND maxY < :maxY AND maxZ < :maxZ
+        """.trimIndent(),
+        box.minX, box.minY, box.minZ, box.maxZ, box.maxY, box.maxZ,
+    ).first { getInt(0) }
+
+    /** Gets all stored spawn positions that land in this [chunk]. */
+    context(tx: Transaction)
+    fun getSpawnsInChunk(chunk: Chunk): List<SpreadSpawnLocation> = tx.select(
+        """
+        SELECT id, data, minX, minY, minZ FROM ${locationsView(chunk.world)}
+        WHERE minX > :x AND minZ > :z
+        AND maxX < :x + 16 AND maxZ < :z + 16;
+        """.trimIndent(),
+        chunk.x shl 4, chunk.z shl 4
+    ).map { SpreadSpawnLocation.fromStatement(this) }
 
     /**
      * Gets the stored spawn with [preferred]'s id if it is within [radius],
@@ -58,21 +69,21 @@ class SpawnLocationsDAO {
         val (x, y, z) = location
         tx.exec(
             """
-            INSERT INTO SpawnLocationsRtree(minX, maxX, minY, maxY, minZ, maxZ)
+            INSERT INTO ${rtree(location.world)}(minX, maxX, minY, maxY, minZ, maxZ)
             VALUES (:x, :x, :y, :y, :z, :z)
             """.trimIndent(),
             x, y, z
         )
         tx.exec(
-            "INSERT INTO SpawnLocationsTable(id, data) VALUES (last_insert_rowid(), json(:data))",
+            "INSERT INTO ${dataTable(location.world)}(id, data) VALUES (last_insert_rowid(), json(:data))",
             json.encodeToString(store)
         )
     }
 
     /** Deletes a stored spawn location by its row [id]. */
     context(tx: WriteTransaction)
-    fun deleteSpawnLocation(id: Int) {
-        tx.exec("DELETE FROM SpawnLocationsTable WHERE id = :id", id)
-        tx.exec("DELETE FROM SpawnLocationsRtree WHERE id = :id", id)
+    fun deleteSpawnLocation(world: World, id: Int) {
+        tx.exec("DELETE FROM ${dataTable(world)} WHERE id = :id", id)
+        tx.exec("DELETE FROM ${rtree(world)} WHERE id = :id", id)
     }
 }

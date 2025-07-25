@@ -1,6 +1,6 @@
 package com.mineinabyss.geary.papermc.spawning.database.dao
 
-import me.dvyy.sqlite.binds.NamedColumnSqliteStatement
+import me.dvyy.sqlite.statement.NamedColumnSqliteStatement
 import org.bukkit.Location
 
 /**
