@@ -16,7 +16,6 @@ dependencies {
     compileOnly(idofrontLibs.minecraft.plugin.mythic.dist)
     compileOnly(idofrontLibs.idofront.nms)
     compileOnly(idofrontLibs.idofront.util)
-    implementation(idofrontLibs.minecraft.mockbukkit)
 
     // Other deps
     compileOnly(idofrontLibs.kotlinx.serialization.json)
