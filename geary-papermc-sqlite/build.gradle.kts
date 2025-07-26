@@ -6,7 +6,7 @@ plugins {
 
 dependencies {
     api(libs.sqlite.kt)
-    api(idofrontLibs.kotlinx.serialization.json)
-    api(idofrontLibs.kotlinx.coroutines)
-    api(idofrontLibs.minecraft.mccoroutine)
+    compileOnly(idofrontLibs.kotlinx.serialization.json)
+    compileOnly(idofrontLibs.kotlinx.coroutines)
+    compileOnly(idofrontLibs.minecraft.mccoroutine)
 }
