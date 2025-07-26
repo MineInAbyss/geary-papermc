@@ -8,29 +8,37 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.toKotlinUuid
 
 object SpawnLocationTables {
-    //TODO cache object creations
-    fun locationsView(world: World): View = View(
-        "spawn_locations_${world.tableSuffix}",
-        """
-        SELECT rtree.id as id, data.data as data, minX, minY, minZ, maxX, maxY, maxZ
-        FROM ${rtree(world)} rtree
-        INNER JOIN ${dataTable(world)} data ON rtree.id = data.id
-        """.trimIndent(),
-        involves = setOf() //TODO
-    )
+    val locationsViews = mutableMapOf<World, View>()
+    val rtrees = mutableMapOf<World, Table>()
+    val dataTables = mutableMapOf<World, Table>()
 
-    fun rtree(world: World): Table = Table(
-        """
-        CREATE VIRTUAL TABLE IF NOT EXISTS spawn_locations_rtree_${world.tableSuffix} USING rtree(
-            id, minX, maxX, minY, maxY, minZ, maxZ,
-        );
+    fun locationsView(world: World): View = locationsViews.getOrPut(world) {
+        View(
+            "spawn_locations_${world.tableSuffix}",
+            """
+            SELECT rtree.id as id, data.data as data, minX, minY, minZ, maxX, maxY, maxZ
+            FROM ${rtree(world)} rtree
+            INNER JOIN ${dataTable(world)} data ON rtree.id = data.id
+            """.trimIndent(),
+            involves = setOf() //TODO
+        )
+    }
+
+    fun rtree(world: World): Table = rtrees.getOrPut(world) {
+        Table(
+            """
+            CREATE VIRTUAL TABLE IF NOT EXISTS spawn_locations_rtree_${world.tableSuffix} USING rtree_i32(
+                id, minX, maxX, minY, maxY, minZ, maxZ,
+            );
         """.trimIndent()
-    )
+        )
+    }
 
 
-    fun dataTable(world: World): Table {
+    //TODO let sqlite library manage indexes more nicely
+    fun dataTable(world: World): Table = dataTables.getOrPut(world) {
         val name = "spawn_locations_data_${world.tableSuffix}"
-        return object: Table(
+        object : Table(
             """
             CREATE TABLE IF NOT EXISTS $name (
                 id INTEGER PRIMARY KEY,
@@ -45,11 +53,13 @@ object SpawnLocationTables {
                 tx.exec("CREATE INDEX IF NOT EXISTS ${name}_created_time ON $name (data ->> 'createdTime');")
 
                 // Delete from rtree when removed from here
-                tx.exec("""
+                tx.exec(
+                    """
                 CREATE TRIGGER IF NOT EXISTS ${name}_on_delete AFTER DELETE ON $name FOR EACH ROW BEGIN 
                     DELETE FROM ${rtree(world)} WHERE id = OLD.id;
                 END;
-                """.trimIndent())
+                """.trimIndent()
+                )
             }
         }
     }

@@ -39,10 +39,10 @@ class SpawnLocationsDAO {
     fun countSpawnsInBB(world: World, box: BoundingBox): Int = tx.select(
         """
         SELECT count(*) FROM ${rtree(world)}
-        WHERE minX > :minX AND minY > :minY AND minZ > :minZ
+        WHERE minX >= :minX AND minY >= :minY AND minZ >= :minZ
         AND maxX < :maxX AND maxY < :maxY AND maxZ < :maxZ
         """.trimIndent(),
-        box.minX, box.minY, box.minZ, box.maxZ, box.maxY, box.maxZ,
+        box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
     ).first { getInt(0) }
 
     /** Gets all stored spawn positions that land in this [chunk]. */
@@ -50,7 +50,7 @@ class SpawnLocationsDAO {
     fun getSpawnsInChunk(chunk: Chunk): List<SpreadSpawnLocation> = tx.select(
         """
         SELECT id, data, minX, minY, minZ FROM ${locationsView(chunk.world)}
-        WHERE minX > :x AND minZ > :z
+        WHERE minX >= :x AND minZ >= :z
         AND maxX < :x + 16 AND maxZ < :z + 16;
         """.trimIndent(),
         chunk.x shl 4, chunk.z shl 4

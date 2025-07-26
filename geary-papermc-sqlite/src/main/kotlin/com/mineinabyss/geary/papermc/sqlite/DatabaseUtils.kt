@@ -19,13 +19,13 @@ import kotlin.io.path.div
  *
  * Can only run on the primary server thread, use suspending api in other contexts.
  */
-fun Database.blockingRead(block: Transaction.() -> Unit) {
+fun <T> Database.blockingRead(block: Transaction.() -> T): T {
     if (!Bukkit.isPrimaryThread()) {
         error("Cannot block database read from non-tick thread, use non-blocking api instead. Current thread was: ${Thread.currentThread()}")
     }
 
     val conn = getOrCreateReadConnectionForCurrentThread()
-    Transaction(conn).block()
+    return Transaction(conn).block()
 }
 
 /**
