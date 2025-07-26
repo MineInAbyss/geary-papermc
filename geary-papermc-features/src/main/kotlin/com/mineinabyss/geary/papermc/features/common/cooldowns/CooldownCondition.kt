@@ -19,11 +19,21 @@ data class StartedCooldown(
     val display: @Serializable(with = MiniMessageSerializer::class) net.kyori.adventure.text.Component? = null,
 ) {
     val timeLeft: Duration get() = (endTime - System.currentTimeMillis()).milliseconds
-    val startDuration: Int = 1000 // Hardcoded
-    val endDuration: Int = 1000   // Hardcoded
+    val startDuration: Int = 2000 // Hardcoded
+    val endDuration: Int = 2000   // Hardcoded
+    val refreshDuration: Int = 500 // Hardcoded
     val startTime: Long = endTime - length.inWholeMilliseconds
-    fun isVisible(): Boolean = System.currentTimeMillis() <= startTime + startDuration || System.currentTimeMillis() >= endTime - endDuration
+    var refreshTime:  Long = 0
+    fun isVisible(): Boolean {
+        val now = System.currentTimeMillis()
+        val isInBorders = now <= startTime + startDuration || now >= endTime - endDuration
+        val isRefreshed = now <= refreshTime + refreshDuration
+        return isInBorders || isRefreshed
+    }
     fun isComplete(): Boolean = System.currentTimeMillis() >= endTime
+    fun refresh() {
+        refreshTime = System.currentTimeMillis()
+    }
 }
 
 @Serializable(with = Cooldowns.Serializer::class)
@@ -50,6 +60,16 @@ data class Cooldowns(
             val endTimes = entity.get<Cooldowns>()?.cooldowns ?: return true
             return ids.all { System.currentTimeMillis() >= (endTimes[it]?.endTime ?: return true) }
         }
+
+        fun refresh(entity: GearyEntity, ids: List<String>) {
+            val entityCooldowns = entity.get<Cooldowns>()?.cooldowns
+            if (entityCooldowns != null) {
+                for (id in ids) {
+                    val cooldown = entityCooldowns[id]
+                    cooldown?.refresh()
+                }
+            }
+        }
     }
 }
 
@@ -59,6 +79,7 @@ data class CooldownCondition(
 ) : Condition {
     override fun ActionGroupContext.execute(): Boolean {
         val entity = entity ?: return true
+        Cooldowns.refresh(entity, ids)
         return Cooldowns.areComplete(entity, ids)
     }
 
