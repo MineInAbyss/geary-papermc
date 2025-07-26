@@ -14,6 +14,7 @@ import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpaw
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
+import com.mineinabyss.geary.papermc.spawning.database.schema.SpawningSchema
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.mythic.MythicSpawnTypeListener
@@ -22,13 +23,16 @@ import com.mineinabyss.geary.papermc.sqlite.sqliteDatabase
 import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.idofront.config.config
 import com.sk89q.worldguard.WorldGuard
+import org.bukkit.Bukkit
 import kotlin.io.path.Path
 
 class SpawningFeature(context: FeatureContext) : Feature(context) {
     val config by config("spawning", plugin.dataPath, SpawnConfig())
     var spawnTask: SpawnTask? = null
     var spawnEntriesByName: Map<String, SpawnEntry>? = null
-    val db = plugin.sqliteDatabase(Path("spawns.db"))
+    val db = plugin.sqliteDatabase(Path("spawns.db")) {
+        SpawningSchema(listOf(Bukkit.getWorld("world")!!)).init()
+    }
 
     init {
         pluginDeps("WorldGuard", "MythicMobs")
