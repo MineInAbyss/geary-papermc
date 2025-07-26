@@ -5,7 +5,6 @@ plugins {
     //TODO revert back to alias after merging idofront bump
     kotlin("jvm") version "2.2.0"
     alias(idofrontLibs.plugins.mia.autoversion)
-    alias(libs.plugins.sqlitenow) apply false
 }
 
 dependencies {

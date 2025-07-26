@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    implementation("me.dvyy:sqlite-kt:0.0.2-alpha.1")
+    implementation(libs.sqlite.kt)
     // Plugins
     compileOnly(idofrontLibs.minecraft.plugin.mythic.dist)
     compileOnly(idofrontLibs.idofront.nms)
