@@ -24,7 +24,8 @@ dependencies {
     testImplementation(idofrontLibs.mockk)
 
     compileOnly(libs.geary.actions)
-    implementation(project(":geary-papermc-tracking"))
+    implementation(projects.gearyPapermcSqlite)
+    implementation(projects.gearyPapermcTracking)
     compileOnly(idofrontLibs.minecraft.plugin.worldguard) {
         exclude(group = "org.bukkit")
         exclude(group = "com.google.guava")

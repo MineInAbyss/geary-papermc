@@ -1,6 +1,5 @@
 package com.mineinabyss.geary.papermc.spawning
 
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.mineinabyss.geary.papermc.Feature
@@ -19,18 +18,17 @@ import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.mythic.MythicSpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.tasks.SpawnTask
+import com.mineinabyss.geary.papermc.sqlite.sqliteDatabase
 import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.idofront.config.config
 import com.sk89q.worldguard.WorldGuard
-import me.dvyy.sqlite.Database
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.div
+import kotlin.io.path.Path
 
 class SpawningFeature(context: FeatureContext) : Feature(context) {
     val config by config("spawning", plugin.dataPath, SpawnConfig())
     var spawnTask: SpawnTask? = null
     var spawnEntriesByName: Map<String, SpawnEntry>? = null
-    val db = Database(BundledSQLiteDriver(), path = (plugin.dataPath / "spawns.db").absolutePathString(), defaultIdentity = 0)
+    val db = plugin.sqliteDatabase(Path("spawns.db"))
 
     init {
         pluginDeps("WorldGuard", "MythicMobs")
