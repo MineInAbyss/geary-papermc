@@ -16,8 +16,7 @@ suspend fun main() {
     val world = mockkClass(World::class) {
         every { uid } returns UUID.fromString("887fe8dd-9a13-46b7-bb46-052150ef27d9")
     }
-    val db = Database(path = "test.db")
-    SpawningSchema(db, listOf(world)).init()
+    val db = Database(path = "test.db") { SpawningSchema(listOf(world)).init() }
 
     val locs = SpawnLocationsDAO()
     db.write {
