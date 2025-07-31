@@ -26,7 +26,6 @@ class QueryDBAction(val radii: List<Int>) : Action {
             for (i in radii.indices.reversed()) {
                 val radius = radii[i]
                 val nearby = spawner.getNBNear(player.location, radius.toDouble())
-                println("queried db, found $nearby entities within radius $radius for player ${player.name}")
                 if (nearby > 0) {
                     pings.add(i)
                 }
@@ -39,7 +38,7 @@ class QueryDBAction(val radii: List<Int>) : Action {
                     1.0f,
                     2.0.pow((pingIndex - 2) / 12.0).toFloat()
                 )
-                delay(300) // 0.3 seconds
+                delay(300)
             }
         }
     }

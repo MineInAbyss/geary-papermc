@@ -32,6 +32,7 @@ class SpreadEntityDeathListener(
                 dao.deleteSpawnLocation(spawner.world, id)
             }
         }
+        //get nearby entities (entity.location)
     }
 
 }

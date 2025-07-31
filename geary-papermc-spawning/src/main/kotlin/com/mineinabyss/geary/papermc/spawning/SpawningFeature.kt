@@ -107,21 +107,12 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
                 LocationSpread(spawnPositionReader, triesForNearbyLoc = 10)
             ),
         )
-
-
-//        println("about to init target spawn task\n\n\n\n\n\n\n\n\n")
-//        val targetedTask = TargetedSpawnTask(db)
-//
-//        targetedSpawnTask = targetedTask
-//
-//        println("done!!\n\n\n\n\n\n\n\n\n")
         val spreadTask = SpreadSpawnTask(db, Bukkit.getWorlds().firstOrNull() ?: error("No worlds found, cannot initialize spread spawning"), spreadConfig)
         spawnTask = task
         spreadSpawnTask = spreadTask
         spawnEntriesByName = spawns.mapValues { it.value.entry }
         task(task.job)
         task(spreadTask.job)
-//        task(targetedTask.job)
     }
 
     fun sendTpButton(player: Player, loc: Location) {
@@ -136,7 +127,6 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         val dao = spreadSpawnTask?.spreadSpawner?.dao ?: return println("no dao to dump db to")
         if (player == null)
             return println("no player to dump db to")
-        println("spread config is $spreadConfig")
         plugin.launch {
             db.read {
                 val locations = dao.getSpawnsNear(loc, 10000.0)
