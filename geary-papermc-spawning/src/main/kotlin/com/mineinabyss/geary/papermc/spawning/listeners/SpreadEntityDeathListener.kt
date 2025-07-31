@@ -15,11 +15,7 @@ class SpreadEntityDeathListener(
     private val spawner: TargetedSpawner,
     val db: Database,
     val plugin: Plugin
-) :
-    Listener {
-
-
-
+) : Listener {
     @EventHandler
     fun onEntityDeath(event: EntityDeathEvent) {
         val entity = event.entity.toGearyOrNull() ?: return
@@ -32,7 +28,5 @@ class SpreadEntityDeathListener(
                 dao.deleteSpawnLocation(spawner.world, id)
             }
         }
-        //get nearby entities (entity.location)
     }
-
 }

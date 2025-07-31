@@ -85,10 +85,6 @@ class SpreadSpawner(val db: Database, val world: World, val configs: SpreadSpawn
                 }
                 .toSet()
         }
-        // todo: async fix
-//        for (chunk in nearbySpawns) {
-//            triggerSpawn(chunk, db, dao)
-//        }
         return nearbySpawns.size
     }
 }
