@@ -61,10 +61,8 @@ class SpreadSpawner(val db: Database, val world: World, val configs: SpreadSpawn
     }
 
     private fun getBBFromRegion(region: ProtectedCuboidRegion): BoundingBox {
-        val min = region.minimumPoint
-        val max = region.maximumPoint
-        val minLoc = Location(world, min.x().toDouble(), min.y().toDouble(), min.z().toDouble())
-        val maxLoc = Location(world, max.x().toDouble(), max.y().toDouble(), max.z().toDouble())
+        val minLoc = BukkitAdapter.adapt(world, region.minimumPoint)
+        val maxLoc = BukkitAdapter.adapt(world, region.maximumPoint)
         return BoundingBox.of(minLoc, maxLoc)
     }
 
