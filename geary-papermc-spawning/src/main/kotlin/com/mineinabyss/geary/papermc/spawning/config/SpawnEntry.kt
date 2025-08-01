@@ -21,7 +21,7 @@ data class SpawnEntry(
      */
     val priority: Double = 1.0,
     /**
-     * A chance between 0 and 1 for this spawn to fail immediately when chosen.
+     * A chance between 0 and 1 for the spawn to succeed.
      * Useful when trying to make a spawn more rare.
      */
     val chance: Double = 1.0,
