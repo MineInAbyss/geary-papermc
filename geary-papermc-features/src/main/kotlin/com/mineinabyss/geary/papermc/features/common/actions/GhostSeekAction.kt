@@ -13,8 +13,8 @@ import org.bukkit.entity.Player
 import kotlin.math.pow
 
 @Serializable
-@SerialName("geary:query_db")
-class QueryDBAction(val radii: List<Int>) : Action {
+@SerialName("geary:ghost_seek")
+class GhostSeekAction(val radii: List<Int>) : Action {
 
     override fun ActionGroupContext.execute() {
         val feature = gearyPaper.features.getOrNull<SpawningFeature>() ?: return
