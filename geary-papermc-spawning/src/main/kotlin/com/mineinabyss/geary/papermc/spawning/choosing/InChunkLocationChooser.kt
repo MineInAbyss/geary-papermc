@@ -10,9 +10,9 @@ import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.World
 
-class InChunkLocationChooser {
+class InChunkLocationChooser(val spawner: SpreadSpawner) {
 
-    suspend fun chooseSpotInChunk(chunkLoc: Location, spawner: SpreadSpawner, config: SpreadSpawnConfig): Location? {
+    suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? {
         val chunk = chunkLoc.chunk
         if (chunkLoc.world == null || chunkLoc.world != spawner.world) return null
 

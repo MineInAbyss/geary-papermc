@@ -26,7 +26,7 @@ import org.bukkit.util.BoundingBox
 class SpreadSpawner(val db: Database, val world: World, val configs: SpreadSpawnSectionsConfig) {
     val dao = SpawnLocationsDAO()
     private val chunkChooser: SpreadChunkChooser = SpreadChunkChooser()
-    private val posChooser = InChunkLocationChooser()
+    private val posChooser = InChunkLocationChooser(this)
 
     suspend fun spawnSpreadEntities() {
         val container: RegionContainer = WorldGuard.getInstance().platform.regionContainer
@@ -57,7 +57,7 @@ class SpreadSpawner(val db: Database, val world: World, val configs: SpreadSpawn
     }
 
     suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? {
-        return posChooser.chooseSpotInChunk(chunkLoc,this, config)
+        return posChooser.chooseSpotInChunk(chunkLoc, config)
     }
 
     private fun getBBFromRegion(region: ProtectedCuboidRegion): BoundingBox {
