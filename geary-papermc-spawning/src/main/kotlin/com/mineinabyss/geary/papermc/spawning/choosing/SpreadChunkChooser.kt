@@ -12,7 +12,20 @@ import org.bukkit.util.Vector
 import kotlin.random.Random
 
 class SpreadChunkChooser {
-
+    /**
+     * Chose a random chunk inside a given bounding box, generally corresponding to a section.
+     *
+     * We start by dividing the section into a configurable amount of sub-sections (defined by config.splitSize).
+     * We then select a sample of theses sub-sections at random to avoid unnecessary calculations, theses become candidates.
+     * For each candidate, we calculate how isolated they are from existing spread entities.
+     * If the distance to the nearest entity is greater than the configured spread radius, we consider it a valid candidate.
+     * Finally, we return one candidate at random and add some noise to its coordinates to make the algorithm less deterministic.
+     *
+     * @param bb The bounding box of the section
+     * @param spawner the SpreadSpawner instance
+     * @param config the SpreadSpawnConfig containing the algorithm parameters
+     * @return a Location representing the chosen chunk, or null if no suitable chunk could be found
+     */
     suspend fun chooseChunkInBB(bb: BoundingBox, spawner: SpreadSpawner, config: SpreadSpawnConfig): Location? {
         data class Candidate(val x: Int, val z: Int, val score: Double)
         val radius = config.spreadRadius
