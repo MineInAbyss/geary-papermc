@@ -23,9 +23,13 @@ import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
 
-class SpreadSpawner(val db: Database, val world: World, val configs: SpreadSpawnSectionsConfig) {
-    val dao = SpawnLocationsDAO()
-    private val chunkChooser: SpreadChunkChooser = SpreadChunkChooser()
+class SpreadSpawner(
+    val db: Database,
+    val world: World,
+    val configs: SpreadSpawnSectionsConfig,
+    private val chunkChooser: SpreadChunkChooser = SpreadChunkChooser(),
+    val dao: SpawnLocationsDAO = SpawnLocationsDAO()
+) {
     private val posChooser = InChunkLocationChooser(this)
 
     suspend fun spawnSpreadEntities() {
