@@ -12,6 +12,7 @@ import org.bukkit.util.Vector
 import kotlin.random.Random
 
 class SpreadChunkChooser {
+    data class Candidate(val x: Int, val z: Int, val score: Double)
     /**
      * Chose a random chunk inside a given bounding box, generally corresponding to a section.
      *
@@ -27,7 +28,6 @@ class SpreadChunkChooser {
      * @return a Location representing the chosen chunk, or null if no suitable chunk could be found
      */
     suspend fun chooseChunkInBB(bb: BoundingBox, spawner: SpreadSpawner, config: SpreadSpawnConfig): Location? {
-        data class Candidate(val x: Int, val z: Int, val score: Double)
         val radius = config.spreadRadius
         val sectionX = bb.minX.toInt()..bb.maxX.toInt()
         val sectionZ = bb.minZ.toInt()..bb.maxZ.toInt()
