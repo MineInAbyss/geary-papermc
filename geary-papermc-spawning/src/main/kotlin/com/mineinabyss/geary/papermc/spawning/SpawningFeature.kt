@@ -107,7 +107,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
                 LocationSpread(spawnPositionReader, triesForNearbyLoc = 10)
             ),
         )
-        val spreadTask = SpreadSpawnTask(db, Bukkit.getWorld(spreadConfig.world_name) ?: error("No worlds found, cannot initialize spread spawning"), spreadConfig)
+        val spreadTask = SpreadSpawnTask(db, Bukkit.getWorld(spreadConfig.world_name) ?: error("'${spreadConfig.world_name}' world not found, cannot initialize spread spawning"), spreadConfig)
         spawnTask = task
         spreadSpawnTask = spreadTask
         spawnEntriesByName = spawns.mapValues { it.value.entry }
