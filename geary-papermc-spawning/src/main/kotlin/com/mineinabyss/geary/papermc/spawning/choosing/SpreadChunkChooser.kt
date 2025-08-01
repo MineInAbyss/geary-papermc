@@ -44,13 +44,12 @@ class SpreadChunkChooser {
         if (sectionCount >= config.spawnCap)
             return null
 
-        for (x in sectionX step splitSize) {
-            for (z in sectionZ step splitSize) {
-                allCandidates.add(x to z)
-            }
-        }
-
-        val sampledCandidates = allCandidates.shuffled().take(sampleSize)
+        // creates a sequance of all X coordinates for subsections
+        // map it to a sequence of pairs (x, z) for all Z coordinates
+        // then shuffle it and take a sample of size sampleSize
+        val sampledCandidates = (sectionX step splitSize).asSequence().flatMap { x ->
+            (sectionZ step splitSize).asSequence().map { z -> x to z }
+        }.shuffled(random).take(sampleSize)
 
         // candidate analysis
         for ((x, z) in sampledCandidates) {
