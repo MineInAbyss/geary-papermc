@@ -6,6 +6,7 @@ import com.mineinabyss.geary.papermc.spawning.helpers.launchWithTicket
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
 import com.mineinabyss.geary.papermc.spawning.targeted.TargetedSpawner
+import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.World
 
@@ -17,7 +18,7 @@ class InChunkLocationChooser {
 
         val pos = chunk.launchWithTicket {
             repeat(config.spawnAttempts) {
-                val candidate = getValidBlockOrNull(chunkLoc, spawner, config)
+                val candidate = getValidBlockOrNull(chunk, spawner, config)
                 if (candidate != null)
                     return@launchWithTicket candidate
             }
@@ -26,10 +27,9 @@ class InChunkLocationChooser {
         return pos.await()
     }
 
-    private fun getValidBlockOrNull(loc: Location, spawner: SpreadSpawner, config: SpreadSpawnConfig): Location? {
-        val chunk = loc.chunk
+    private fun getValidBlockOrNull(chunk: Chunk, spawner: SpreadSpawner, config: SpreadSpawnConfig): Location? {
         val spawnPositionReader = SpawnPositionReader()
-        val testloc = getRandomChunkCoord(chunk.x, chunk.z, loc.world, config)
+        val testloc = getRandomChunkCoord(chunk,  config)
         val type = spawnPositionReader.spawnPositionFor(testloc)
 
         // this check could also check for the config
@@ -39,12 +39,12 @@ class InChunkLocationChooser {
     }
 
     // chose a random spot within the chunk
-    private fun getRandomChunkCoord(chunkX: Int, chunkZ: Int, world: World, config: SpreadSpawnConfig): Location {
+    private fun getRandomChunkCoord(chunk: Chunk,config: SpreadSpawnConfig): Location {
         val yRange = config.sectionMinY.. config.sectionMaxY
-        val x = chunkX * 16 + (0..15).random()
-        val z = chunkZ * 16 + (0..15).random()
+        val x = chunk.x * 16 + (0..15).random()
+        val z = chunk.z * 16 + (0..15).random()
         val y = yRange.random()
-        return Location(world, x.toDouble(), y.toDouble(), z.toDouble())
+        return Location(chunk.world, x.toDouble(), y.toDouble(), z.toDouble())
     }
 
 
