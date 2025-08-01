@@ -4,6 +4,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnSectionsConfig
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
+import com.mineinabyss.idofront.time.ticks
 import kotlinx.coroutines.delay
 import me.dvyy.sqlite.Database
 import org.bukkit.World
@@ -19,7 +20,7 @@ class SpreadSpawnTask(db: Database, world: World, configs: SpreadSpawnSectionsCo
             }.onFailure {
                 gearyPaper.logger.e { it.stackTraceToString() }
             }
-            delay(2.seconds)
+            delay(configs.spawn_delay.ticks)
         }
     }
 

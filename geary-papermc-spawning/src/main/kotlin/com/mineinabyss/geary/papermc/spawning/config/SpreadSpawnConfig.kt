@@ -33,6 +33,7 @@ class SpreadSpawnConfig(
 @Serializable
 @SerialName("geary:spread_spawn_sections")
 data class SpreadSpawnSectionsConfig(
+    val spawn_delay: Long = 40,
     val world_name: String = "world",
     val sectionsConfig: Map<String, SpreadSpawnConfig> = emptyMap()
 )
