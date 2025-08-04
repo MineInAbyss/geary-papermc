@@ -21,33 +21,42 @@ import org.bukkit.inventory.ItemStack
 @SerialName("geary:prevent.enchanting")
 class PreventEnchanting
 
+enum class PreventType() {
+    ANVIL,
+    ENCHANTING_TABLE,
+    GRINDSTONE,
+    NONE;
+}
+
 class PreventEnchantingListener() : Listener {
     @EventHandler
     fun PrepareItemEnchantEvent.disableEnchantPreview() {
-        if (shouldPrevent(enchanter.world, item)) isCancelled = true
+        if (shouldPrevent(enchanter.world, item, PreventType.ENCHANTING_TABLE)) isCancelled = true
     }
 
     @EventHandler
     fun EnchantItemEvent.disableEnchanting() {
-        if (shouldPrevent(enchanter.world, item)) isCancelled = true
+        if (shouldPrevent(enchanter.world, item, PreventType.ENCHANTING_TABLE)) isCancelled = true
     }
 
     @EventHandler
     fun PrepareAnvilEvent.disableAnvilEnchant() {
         val world = viewers.firstOrNull()?.world ?: return
-        if (shouldPrevent(world, result)) result = null
+        if (shouldPrevent(world, result, PreventType.ANVIL)) result = null
     }
 
     @EventHandler
     fun PrepareGrindstoneEvent.disableGrindstone() {
         val world = viewers.firstOrNull()?.world ?: return
-        if (shouldPrevent(world, result)) result = null
+        if (shouldPrevent(world, result, PreventType.GRINDSTONE)) result = null
     }
 
-    fun shouldPrevent(world: World, item: ItemStack?): Boolean {
+    fun shouldPrevent(world: World, item: ItemStack?, preventType: PreventType = PreventType.NONE): Boolean {
         if (item == null) return false
         // If an item cannot normally be enchanted, we dont want it to be unenchantable either
-        if (item.getData(DataComponentTypes.ENCHANTABLE) == null) return true
+        if (preventType == PreventType.GRINDSTONE) {
+            if (item.getData(DataComponentTypes.ENCHANTABLE) == null) return true
+        }
         with(world.toGeary()) {
             itemEntityContext {
                 if (item.toGearyOrNull()?.has<PreventEnchanting>() == true) {
