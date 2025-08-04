@@ -46,7 +46,7 @@ class PreventEnchantingListener() : Listener {
 
     fun shouldPrevent(world: World, item: ItemStack?): Boolean {
         if (item == null) return false
-        // If an item cannot normally be enchanted, we dont want it to be unenchantable either
+        // If an item cannot normally be enchanted, we don't want it to be unenchantable either
         if (item.getData(DataComponentTypes.ENCHANTABLE) == null) return true
         with(world.toGeary()) {
             itemEntityContext {
