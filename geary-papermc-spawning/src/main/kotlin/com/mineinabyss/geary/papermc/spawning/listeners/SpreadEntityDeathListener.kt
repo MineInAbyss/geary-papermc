@@ -15,7 +15,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.plugin.Plugin
 
-class TargetEntityDeathListener(
+class SpreadEntityDeathListener(
     private val spawner: SpreadSpawner,
     val db: Database,
     val plugin: Plugin
