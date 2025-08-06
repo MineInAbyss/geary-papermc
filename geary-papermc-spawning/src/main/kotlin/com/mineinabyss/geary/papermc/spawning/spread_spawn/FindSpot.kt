@@ -1,13 +1,12 @@
-package com.mineinabyss.geary.papermc.spawning.targeted
+package com.mineinabyss.geary.papermc.spawning.spread_spawn
 
 import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
 import com.mineinabyss.geary.papermc.spawning.helpers.launchWithTicket
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
-import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.World
 
-suspend fun FindSpotInChunk(loc: Location, tgs: TargetedSpawner): Location? {
+suspend fun FindSpotInChunk(loc: Location, tgs: SpreadSpawner): Location? {
     val chunk = loc.chunk
     if (loc.world ==null) return null
     val pos = chunk.launchWithTicket {
@@ -22,7 +21,7 @@ suspend fun FindSpotInChunk(loc: Location, tgs: TargetedSpawner): Location? {
     return pos.await()
 }
 
-fun getValidBlockOrNull(loc: Location, tgs: TargetedSpawner): Location? {
+fun getValidBlockOrNull(loc: Location, tgs: SpreadSpawner): Location? {
     val chunk = loc.chunk
     val spawnPositionReader = SpawnPositionReader()
     val testloc = getRandomChunkCoord(chunk.x, chunk.z, loc.world, tgs)
@@ -34,7 +33,7 @@ fun getValidBlockOrNull(loc: Location, tgs: TargetedSpawner): Location? {
 }
 
 // chose a random spot within the chunk
-fun getRandomChunkCoord(chunkX: Int, chunkZ: Int, world: World, spawner: TargetedSpawner): Location {
+fun getRandomChunkCoord(chunkX: Int, chunkZ: Int, world: World, spawner: SpreadSpawner): Location {
     val x = chunkX * 16 + (0..15).random()
     val z = chunkZ * 16 + (0..15).random()
     val y = spawner.chunkYRange.random()
@@ -43,7 +42,7 @@ fun getRandomChunkCoord(chunkX: Int, chunkZ: Int, world: World, spawner: Targete
 
 
 // check a 5x5 area above a block to check if it is an open area
-fun isOpenArea(location: Location, spawner: TargetedSpawner): Boolean {
+fun isOpenArea(location: Location, spawner: SpreadSpawner): Boolean {
     val world = location.world ?: return false
     val chunk = location.chunk
     val chunkMinX = chunk.x * 16

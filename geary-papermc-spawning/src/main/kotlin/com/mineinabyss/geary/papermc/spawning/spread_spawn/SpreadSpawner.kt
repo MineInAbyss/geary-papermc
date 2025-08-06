@@ -1,10 +1,7 @@
-package com.mineinabyss.geary.papermc.spawning.targeted
+package com.mineinabyss.geary.papermc.spawning.spread_spawn
 
-import com.mineinabyss.geary.datatypes.Entity
-import com.mineinabyss.geary.datatypes.EntityType
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
 import org.bukkit.Bukkit.getWorlds
-import org.bukkit.Location
 
 // NOTE: the names/description of this file and everything associated with it is subject to change
 //       most of the names/descriptions are placeholder / semi placeholder
@@ -29,7 +26,7 @@ import org.bukkit.Location
  *
  *  The logic should trigger on chunk load (or whenever geary usually tries to run the spawn checks)
  **/
-class TargetedSpawner(
+class SpreadSpawner(
     val minRadius: Int = 500,
     val sectionXRange: IntRange = 80519..83321,
     val sectionZRange: IntRange = -1401..1397,

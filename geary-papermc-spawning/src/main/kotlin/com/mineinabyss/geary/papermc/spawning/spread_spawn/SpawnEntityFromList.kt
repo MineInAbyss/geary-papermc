@@ -1,8 +1,6 @@
-package com.mineinabyss.geary.papermc.spawning.targeted
+package com.mineinabyss.geary.papermc.spawning.spread_spawn
 
-import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpreadSpawnLocation
-import com.mineinabyss.geary.papermc.spawning.helpers.launchWithTicket
 import com.mineinabyss.geary.papermc.sqlite.blockingRead
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import me.dvyy.sqlite.Database
@@ -15,7 +13,7 @@ import org.bukkit.entity.Entity
 
 // listen to chunk load event and spawn entity if its in the list of entities
 class ListSpawnListener(
-    private val spawner: TargetedSpawner,
+    private val spawner: SpreadSpawner,
     val db: Database,
     val plugin: Plugin
 ) : Listener {

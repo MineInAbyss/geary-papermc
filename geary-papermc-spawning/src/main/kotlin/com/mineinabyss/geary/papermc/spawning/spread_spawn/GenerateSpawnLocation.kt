@@ -1,9 +1,9 @@
-package com.mineinabyss.geary.papermc.spawning.targeted
+package com.mineinabyss.geary.papermc.spawning.spread_spawn
 
 import com.mineinabyss.geary.papermc.spawning.database.dao.StoredEntity
 import me.dvyy.sqlite.Database
 
-suspend fun generateSpawnLocation(db: Database, tgs: TargetedSpawner) {
+suspend fun generateSpawnLocation(db: Database, tgs: SpreadSpawner) {
     val randomChunk = getValidChunk(tgs,db) ?: return println("no valid chunk")
     val pos = FindSpotInChunk(randomChunk, tgs)
     if (pos == null) {

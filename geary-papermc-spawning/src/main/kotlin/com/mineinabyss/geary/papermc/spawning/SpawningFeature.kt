@@ -2,7 +2,6 @@ package com.mineinabyss.geary.papermc.spawning
 
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
-import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.papermc.Feature
 import com.mineinabyss.geary.papermc.FeatureContext
 import com.mineinabyss.geary.papermc.gearyPaper
@@ -19,21 +18,17 @@ import com.mineinabyss.geary.papermc.spawning.database.schema.SpawningSchema
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.mythic.MythicSpawnTypeListener
-import com.mineinabyss.geary.papermc.spawning.targeted.ListSpawnListener
-import com.mineinabyss.geary.papermc.spawning.targeted.TargetEntityDeathListener
-import com.mineinabyss.geary.papermc.spawning.targeted.TargetedSpawnTask
-import com.mineinabyss.geary.papermc.spawning.targeted.TargetedSpawner
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.ListSpawnListener
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.TargetEntityDeathListener
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.TargetedSpawnTask
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
 import com.mineinabyss.geary.papermc.spawning.tasks.SpawnTask
 import com.mineinabyss.geary.papermc.sqlite.sqliteDatabase
 import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.idofront.config.config
 import com.sk89q.worldguard.WorldGuard
 import kotlin.io.path.Path
-import me.dvyy.sqlite.Database
 import org.bukkit.Bukkit
-
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.div
 
 class SpawningFeature(context: FeatureContext) : Feature(context) {
     val config by config("spawning", plugin.dataPath, SpawnConfig())
@@ -66,9 +61,9 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         listeners(
             GearySpawnTypeListener(),
             MythicSpawnTypeListener(),
-            ListSpawnListener(targetedSpawnTask?.tgs ?: TargetedSpawner(), db, plugin),
+            ListSpawnListener(targetedSpawnTask?.tgs ?: SpreadSpawner(), db, plugin),
             TargetEntityDeathListener(
-                targetedSpawnTask?.tgs ?: TargetedSpawner(), db, plugin
+                targetedSpawnTask?.tgs ?: SpreadSpawner(), db, plugin
             )
 
         )

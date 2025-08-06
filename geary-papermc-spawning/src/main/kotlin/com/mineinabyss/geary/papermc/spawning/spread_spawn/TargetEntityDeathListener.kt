@@ -1,4 +1,4 @@
-package com.mineinabyss.geary.papermc.spawning.targeted
+package com.mineinabyss.geary.papermc.spawning.spread_spawn
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
@@ -16,7 +16,7 @@ import org.bukkit.plugin.Plugin
 
 
 class TargetEntityDeathListener(
-    private val spawner: TargetedSpawner,
+    private val spawner: SpreadSpawner,
     val db: Database,
     val plugin: Plugin
 ) :

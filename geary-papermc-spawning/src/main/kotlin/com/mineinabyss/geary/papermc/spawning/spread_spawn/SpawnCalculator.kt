@@ -1,12 +1,9 @@
-package com.mineinabyss.geary.papermc.spawning.targeted
+package com.mineinabyss.geary.papermc.spawning.spread_spawn
 
-import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
 import me.dvyy.sqlite.Database
 import org.bukkit.Location
 import org.bukkit.World
-import org.bukkit.plugin.Plugin
-import kotlin.math.min
 import kotlin.random.Random
 import org.bukkit.util.BoundingBox
 import org.bukkit.util.Vector
@@ -21,7 +18,7 @@ import org.bukkit.util.Vector
  * ie: that has no entities within a certain radius
  */
 
-suspend fun getValidChunk(targetedSpawner: TargetedSpawner, db: Database): Location? {
+suspend fun getValidChunk(targetedSpawner: SpreadSpawner, db: Database): Location? {
     val radius = targetedSpawner.minRadius
     val sectionX = targetedSpawner.sectionXRange
     val sectionZ = targetedSpawner.sectionZRange

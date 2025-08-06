@@ -1,4 +1,4 @@
-package com.mineinabyss.geary.papermc.spawning.targeted
+package com.mineinabyss.geary.papermc.spawning.spread_spawn
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.papermc.gearyPaper
@@ -7,7 +7,7 @@ import me.dvyy.sqlite.Database
 import kotlin.time.Duration.Companion.seconds
 
 class TargetedSpawnTask(db: Database) {
-    val tgs = TargetedSpawner()
+    val tgs = SpreadSpawner()
     val job = gearyPaper.plugin.launch {
         while (true) {
             runCatching {
