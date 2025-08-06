@@ -2,13 +2,10 @@ package com.mineinabyss.geary.papermc.spawning.choosing
 
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
-import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
 import me.dvyy.sqlite.Database
-import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
-import org.bukkit.util.Vector
 import kotlin.random.Random
 
 class SpreadChunkChooser(
@@ -17,6 +14,7 @@ class SpreadChunkChooser(
     val world: World,
 ) {
     data class Candidate(val x: Int, val z: Int, val score: Double)
+
     /**
      * Chose a random chunk inside a given bounding box, generally corresponding to a section.
      *
@@ -81,20 +79,13 @@ class SpreadChunkChooser(
     }
 
     private suspend fun findNearestSq(x: Int, z: Int, database: Database, dao: SpawnLocationsDAO, world: World): Double {
-        var minDistSq = Double.MAX_VALUE
-        database.read {
+        return database.read {
             val loc = Location(world, x.toDouble(), 0.0, z.toDouble())
-            val spawns = dao.getSpawnsNear(loc, 1000.0)
-            for (spawn in spawns) {
-                val dx = spawn.location.x - x
-                val dz = spawn.location.z - z
-                val distSq = dx * dx + dz * dz
-                if (distSq < minDistSq) minDistSq = distSq
-            }
+            dao.getClosestSpawn(loc, 1000.0)
+                ?.location?.distanceSquared(loc)
+                ?: Double.MAX_VALUE
         }
-        return minDistSq
     }
-
 }
 
 

@@ -14,8 +14,7 @@ import kotlin.math.pow
 
 @Serializable
 @SerialName("geary:ghost_seek")
-class GhostSeekAction(val radii: List<Int>) : Action {
-
+class GhostSeekAction(val radii: List<Double>) : Action {
     override fun ActionGroupContext.execute() {
         val feature = gearyPaper.features.getOrNull<SpawningFeature>() ?: return
         val spawner = feature.spreadSpawnTask?.spreadSpawner ?: return
@@ -25,8 +24,7 @@ class GhostSeekAction(val radii: List<Int>) : Action {
             val pings = mutableListOf<Int>()
             for (i in radii.indices.reversed()) {
                 val radius = radii[i]
-                val nearby = spawner.getNBNear(player.location, radius.toDouble())
-                if (nearby > 0) {
+                if (spawner.areSpawnsNear(player.location, radius)) {
                     pings.add(i)
                 }
             }
