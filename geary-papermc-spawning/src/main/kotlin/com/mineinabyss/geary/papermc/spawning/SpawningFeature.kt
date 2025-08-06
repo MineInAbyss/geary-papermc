@@ -18,8 +18,8 @@ import com.mineinabyss.geary.papermc.spawning.database.schema.SpawningSchema
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.mythic.MythicSpawnTypeListener
-import com.mineinabyss.geary.papermc.spawning.spread_spawn.ListSpawnListener
-import com.mineinabyss.geary.papermc.spawning.spread_spawn.TargetEntityDeathListener
+import com.mineinabyss.geary.papermc.spawning.listeners.ListSpawnListener
+import com.mineinabyss.geary.papermc.spawning.listeners.TargetEntityDeathListener
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.TargetedSpawnTask
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
 import com.mineinabyss.geary.papermc.spawning.tasks.SpawnTask

@@ -1,6 +1,7 @@
-package com.mineinabyss.geary.papermc.spawning.spread_spawn
+package com.mineinabyss.geary.papermc.spawning.listeners
 
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpreadSpawnLocation
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
 import com.mineinabyss.geary.papermc.sqlite.blockingRead
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import me.dvyy.sqlite.Database

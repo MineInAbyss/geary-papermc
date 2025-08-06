@@ -1,19 +1,19 @@
-package com.mineinabyss.geary.papermc.spawning.spread_spawn
+package com.mineinabyss.geary.papermc.spawning.listeners
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpreadSpawnLocation
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import me.dvyy.sqlite.Database
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
+import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDeathEvent
-import org.bukkit.Location
 import org.bukkit.plugin.Plugin
-
 
 class TargetEntityDeathListener(
     private val spawner: SpreadSpawner,
@@ -61,4 +61,3 @@ class TargetEntityDeathListener(
         }
     }
 }
-
