@@ -1,8 +1,9 @@
-package com.mineinabyss.geary.papermc.spawning.spread_spawn
+package com.mineinabyss.geary.papermc.spawning.choosing
 
 import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
 import com.mineinabyss.geary.papermc.spawning.helpers.launchWithTicket
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
 import org.bukkit.Location
 import org.bukkit.World
 

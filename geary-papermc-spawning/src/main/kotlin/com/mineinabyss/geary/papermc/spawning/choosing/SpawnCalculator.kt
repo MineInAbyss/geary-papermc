@@ -1,6 +1,7 @@
-package com.mineinabyss.geary.papermc.spawning.spread_spawn
+package com.mineinabyss.geary.papermc.spawning.choosing
 
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
 import me.dvyy.sqlite.Database
 import org.bukkit.Location
 import org.bukkit.World
