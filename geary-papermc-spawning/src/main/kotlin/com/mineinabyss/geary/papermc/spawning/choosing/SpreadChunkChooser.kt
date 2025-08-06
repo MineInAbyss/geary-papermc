@@ -11,7 +11,11 @@ import org.bukkit.util.BoundingBox
 import org.bukkit.util.Vector
 import kotlin.random.Random
 
-class SpreadChunkChooser {
+class SpreadChunkChooser(
+    val db: Database,
+    val dao: SpawnLocationsDAO,
+    val world: World,
+) {
     data class Candidate(val x: Int, val z: Int, val score: Double)
     /**
      * Chose a random chunk inside a given bounding box, generally corresponding to a section.
@@ -27,16 +31,15 @@ class SpreadChunkChooser {
      * @param config the SpreadSpawnConfig containing the algorithm parameters
      * @return a Location representing the chosen chunk, or null if no suitable chunk could be found
      */
-    suspend fun chooseChunkInBB(bb: BoundingBox, spawner: SpreadSpawner, config: SpreadSpawnConfig): Location? {
+    suspend fun chooseChunkInBB(bb: BoundingBox, config: SpreadSpawnConfig): Location? {
         val radius = config.spreadRadius
         val sectionX = bb.minX.toInt()..bb.maxX.toInt()
         val sectionZ = bb.minZ.toInt()..bb.maxZ.toInt()
         val splitSize = config.splitSize
         val noiseRange = config.spawnNoise * 16
-        val sectionCount = spawner.db.read { spawner.dao.countSpawnsInBB(spawner.world, bb) }
+        val sectionCount = db.read { dao.countSpawnsInBB(world, bb) }
         val candidates = mutableListOf<Candidate>()
         val random = Random.Default
-        val allCandidates = mutableListOf<Pair<Int, Int>>()
         val sampleSize = (sectionX.last / splitSize) * (sectionX.last / splitSize)
         val scoreThreshold = radius * radius
 
@@ -49,7 +52,7 @@ class SpreadChunkChooser {
         val zRange = (sectionZ.first / splitSize)..(sectionZ.last / splitSize)
         val sampledCandidates = generateSequence {
             (xRange.random() * splitSize) to (zRange.random() * splitSize)
-        }.distinct().take(sampleSize)
+        }.take(sampleSize).distinct()
 
         // candidate analysis
         for ((x, z) in sampledCandidates) {
@@ -57,7 +60,7 @@ class SpreadChunkChooser {
                 candidates.add(Candidate(x, z, 0.0))
                 continue
             }
-            val minDistSq: Double = findNearestSq(x, z, spawner.db, spawner.dao, spawner.world)
+            val minDistSq: Double = findNearestSq(x, z, db, dao, world)
             if (minDistSq < scoreThreshold) continue
             candidates.add(Candidate(x, z, minDistSq))
         }
@@ -70,7 +73,7 @@ class SpreadChunkChooser {
         val noisyX = (chosen.x + random.nextInt(-noiseRange, noiseRange + 1)).coerceIn(sectionX)
         val noisyZ = (chosen.z + random.nextInt(-noiseRange, noiseRange + 1)).coerceIn(sectionZ)
         return Location(
-            spawner.world,
+            world,
             noisyX.toDouble(),
             0.0,
             noisyZ.toDouble()
