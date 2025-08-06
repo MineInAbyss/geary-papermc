@@ -8,6 +8,7 @@ plugins {
 
 dependencies {
     implementation(project(":geary-papermc-tracking"))
+    implementation(project(":geary-papermc-spawning"))
     implementation(libs.geary.serialization)
     implementation(libs.geary.autoscan)
     implementation(libs.geary.actions)
