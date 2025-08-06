@@ -1,37 +1,29 @@
 package com.mineinabyss.geary.papermc.spawning.spread_spawn
 
-import com.github.shynixn.mccoroutine.bukkit.launch
-import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.choosing.InChunkLocationChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.SpreadChunkChooser
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnSectionsConfig
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
 import com.mineinabyss.geary.papermc.spawning.database.dao.StoredEntity
-import com.mineinabyss.geary.papermc.spawning.targeted.FindSpotInChunk
-import com.mineinabyss.geary.papermc.spawning.targeted.getValidChunk
-import com.mineinabyss.geary.papermc.sqlite.blockingRead
 import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldguard.WorldGuard
 import com.sk89q.worldguard.protection.managers.RegionManager
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion
-import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import com.sk89q.worldguard.protection.regions.RegionContainer
 import me.dvyy.sqlite.Database
-import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
 
 class SpreadSpawner(
-    val db: Database,
-    val world: World,
-    val configs: SpreadSpawnSectionsConfig,
-    private val chunkChooser: SpreadChunkChooser = SpreadChunkChooser(),
-    val dao: SpawnLocationsDAO = SpawnLocationsDAO()
+    private val db: Database,
+    private val world: World,
+    private val configs: SpreadSpawnSectionsConfig,
+    private val posChooser: InChunkLocationChooser,
+    private val chunkChooser: SpreadChunkChooser,
+    private val dao: SpawnLocationsDAO,
 ) {
-    private val posChooser = InChunkLocationChooser(this)
-
     suspend fun spawnSpreadEntities() {
         val container: RegionContainer = WorldGuard.getInstance().platform.regionContainer
         val wgWorld: com.sk89q.worldedit.world.World = BukkitAdapter.adapt(world)
@@ -51,13 +43,13 @@ class SpreadSpawner(
 
             val chunkLoc = chooseChunkInRegion(cuboidRegion, config) ?: continue // No valid chunk found
             val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue // No valid position found in chunk
-            db.write { dao.insertSpawnLocation(spawnPos, StoredEntity(config.entityType)) }
+            db.write { dao.insertSpawnLocation(spawnPos, StoredEntity(config.entry.type.key)) }
         }
     }
 
     suspend fun chooseChunkInRegion(worldGuardRegion: ProtectedCuboidRegion, config: SpreadSpawnConfig): Location? {
         val boundingBox = getBBFromRegion(worldGuardRegion)
-        return chunkChooser.chooseChunkInBB(boundingBox, this, config)
+        return chunkChooser.chooseChunkInBB(boundingBox, config)
     }
 
     suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? {

@@ -1,8 +1,9 @@
-package com.mineinabyss.geary.papermc.spawning.targeted
+package com.mineinabyss.geary.papermc.spawning.listeners
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpreadSpawnLocation
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import me.dvyy.sqlite.Database
 import org.bukkit.Chunk
@@ -14,19 +15,19 @@ import kotlin.random.Random
 
 // listen to chunk load event and spawn entity if its in the list of entities
 class ListSpawnListener(
-    private val spawner: TargetedSpawner,
-    val db: Database,
-    val plugin: Plugin
+    private val dao: SpawnLocationsDAO,
+    private val db: Database,
+    private val plugin: Plugin
 ) : Listener {
 
     @EventHandler
     fun ChunkLoadEvent.onChunkLoad() {
         plugin.launch {
-            triggerSpawn(chunk, db, spawner.dao)
+            triggerSpawn(chunk)
         }
     }
 
-    suspend fun triggerSpawn(chunk: Chunk, db: Database, dao: SpawnLocationsDAO) {
+    suspend fun triggerSpawn(chunk: Chunk) {
         val world = chunk.world
         val chunkEntities = chunk.entities.toList()
         val list: List<SpreadSpawnLocation> =

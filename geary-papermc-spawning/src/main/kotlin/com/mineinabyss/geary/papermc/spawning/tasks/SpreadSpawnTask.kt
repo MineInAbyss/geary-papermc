@@ -2,16 +2,14 @@ package com.mineinabyss.geary.papermc.spawning.tasks
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.papermc.gearyPaper
-import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnSectionsConfig
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
-import com.mineinabyss.idofront.time.ticks
 import kotlinx.coroutines.delay
-import me.dvyy.sqlite.Database
-import org.bukkit.World
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration
 
-class SpreadSpawnTask( val spreadSpawner: SpreadSpawner) {
-
+class SpreadSpawnTask(
+    val spreadSpawner: SpreadSpawner,
+    val delay: Duration,
+) {
     val job = gearyPaper.plugin.launch {
         while (true) {
             runCatching {
@@ -19,7 +17,7 @@ class SpreadSpawnTask( val spreadSpawner: SpreadSpawner) {
             }.onFailure {
                 gearyPaper.logger.e { it.stackTraceToString() }
             }
-            delay(spreadSpawner.configs.spawn_delay.ticks)
+            delay(delay)
         }
     }
 

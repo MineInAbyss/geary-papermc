@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class SpreadSpawnConfig(
-    @YamlComment("Entity type, e.g. 'mm:prayingskeleton'")
-    val entityType: String,
+    @YamlComment("Entity type to spawn")
+    val entry: SpawnEntry,
     @YamlComment("How far the entity should be from another entity of the same type")
     val spreadRadius: Int,
     val spawnCap: Int,
@@ -33,7 +33,7 @@ class SpreadSpawnConfig(
 @Serializable
 @SerialName("geary:spread_spawn_sections")
 data class SpreadSpawnSectionsConfig(
-    val spawn_delay: Long = 40,
-    val world_name: String = "world",
+    val spawnDelay: Long = 40,
+    val worldName: String = "world",
     val sectionsConfig: Map<String, SpreadSpawnConfig> = emptyMap()
 )

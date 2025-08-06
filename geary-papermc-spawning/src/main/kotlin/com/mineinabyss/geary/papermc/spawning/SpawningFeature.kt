@@ -6,9 +6,11 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.papermc.Feature
 import com.mineinabyss.geary.papermc.FeatureContext
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.spawning.choosing.InChunkLocationChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.LocationSpread
 import com.mineinabyss.geary.papermc.spawning.choosing.SpawnChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.SpawnLocationChooser
+import com.mineinabyss.geary.papermc.spawning.choosing.SpreadChunkChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.SpawningWorldGuardFlags
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpawning
@@ -16,20 +18,20 @@ import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnSectionsConfig
+import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
 import com.mineinabyss.geary.papermc.spawning.database.schema.SpawningSchema
+import com.mineinabyss.geary.papermc.spawning.listeners.ListSpawnListener
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.mythic.MythicSpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
-import com.mineinabyss.geary.papermc.spawning.targeted.ListSpawnListener
 import com.mineinabyss.geary.papermc.spawning.listeners.SpreadEntityDeathListener
-import com.mineinabyss.geary.papermc.spawning.targeted.TargetedSpawnTask
-import com.mineinabyss.geary.papermc.spawning.targeted.TargetedSpawner
 import com.mineinabyss.geary.papermc.spawning.tasks.SpawnTask
 import com.mineinabyss.geary.papermc.spawning.tasks.SpreadSpawnTask
 import com.mineinabyss.geary.papermc.sqlite.sqliteDatabase
 import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.idofront.config.config
+import com.mineinabyss.idofront.time.ticks
 import com.sk89q.worldguard.WorldGuard
 import kotlin.io.path.Path
 import me.dvyy.sqlite.Database
@@ -37,14 +39,17 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.World
 import org.bukkit.entity.Player
+import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.koinApplication
+import org.koin.dsl.module
 
 class SpawningFeature(context: FeatureContext) : Feature(context) {
     val config by config("spawning", plugin.dataPath, SpawnConfig())
     val spreadConfig by config("spread_config", plugin.dataPath,
         SpreadSpawnSectionsConfig())
     var spawnTask: SpawnTask? = null
-    var targetedSpawnTask: TargetedSpawnTask? = null
     var spawnEntriesByName: Map<String, SpawnEntry>? = null
     var spreadSpawnTask: SpreadSpawnTask? = null
     var database: Database? = null
@@ -77,11 +82,6 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         listeners(
             GearySpawnTypeListener(),
             MythicSpawnTypeListener(),
-            ListSpawnListener(targetedSpawnTask?.tgs ?: TargetedSpawner(), db, plugin),
-            SpreadEntityDeathListener(
-                targetedSpawnTask?.tgs ?: TargetedSpawner(), db, plugin
-            )
-
         )
 
         val reader = SpawnEntryReader(
@@ -107,12 +107,24 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
                 LocationSpread(spawnPositionReader, triesForNearbyLoc = 10)
             ),
         )
+        val mainWorld = Bukkit.getWorld(spreadConfig.worldName) ?: error("'${spreadConfig.worldName}' world not found, cannot initialize spread spawning")
+        val posChooser = InChunkLocationChooser(mainWorld, task.mobSpawner)
+        val dao = SpawnLocationsDAO()
+        val chunkChooser = SpreadChunkChooser(db, dao, mainWorld)
+
         val spreadSpawner = SpreadSpawner(
-            db,
-            Bukkit.getWorld(spreadConfig.world_name) ?: error("'${spreadConfig.world_name}' world not found, cannot initialize spread spawning"),
-            spreadConfig
+            db = db,
+            world = mainWorld,
+            configs = spreadConfig,
+            posChooser = posChooser,
+            chunkChooser = chunkChooser,
+            dao = dao,
         )
-        val spreadTask = SpreadSpawnTask(spreadSpawner)
+        listeners(
+            ListSpawnListener(dao, db, plugin),
+            SpreadEntityDeathListener(mainWorld, dao, db, plugin),
+        )
+        val spreadTask = SpreadSpawnTask(spreadSpawner, spreadConfig.spawnDelay.ticks)
         spawnTask = task
         spreadSpawnTask = spreadTask
         spawnEntriesByName = spawns.mapValues { it.value.entry }
@@ -129,7 +141,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
 
     fun dumpDB(loc: Location, player : Player?) {
         val db = database ?: return println("no database to dump")
-        val dao = spreadSpawnTask?.spreadSpawner?.dao ?: return println("no dao to dump db to")
+        val dao = SpawnLocationsDAO()
         if (player == null)
             return println("no player to dump db to")
         plugin.launch {
