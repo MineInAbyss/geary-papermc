@@ -8,7 +8,6 @@ import com.mineinabyss.geary.modules.get
 import com.mineinabyss.geary.papermc.features.items.resourcepacks.ResourcePackContent
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.plugin.schema_generator.GearySchema
-import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.spawning.statistics.EntityStatistics
 import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
@@ -108,16 +107,10 @@ internal fun IdoCommand.debug() = "debug" {
         }
         "write" {
             playerExecutes {
-
                 gearyPaper.plugin.launch(gearyPaper.plugin.asyncDispatcher) {
                     player.toGeary().set(DebugComponent())
                 }
             }
-        }
-    }
-    "getNearbyDBEntries" {
-        playerExecutes {
-            gearyPaper.features.getOrNull<SpawningFeature>()?.dumpDB(player.location, player)
         }
     }
 }
