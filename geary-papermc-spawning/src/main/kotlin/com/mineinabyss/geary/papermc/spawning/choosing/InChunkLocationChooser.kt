@@ -35,9 +35,8 @@ class InChunkLocationChooser(
         val testloc = getRandomChunkCoord(chunk.x, chunk.z, loc.world, config)
         val type = spawnPositionReader.spawnPositionFor(testloc)
         val entry: SpawnEntry = config.entry
-
-        // this works by having a list of conditions assigned to the entry, in this case, the is open area condition will be defined in the yaml file of tne entry, and thus called in the check spawn conditions
-        if (type != entry.position || !mobSpawner.checkSpawnConditions(entry, testloc))
+        // this check could also check for the config
+        if (type != SpawnPosition.GROUND || !isOpenArea(testloc, config))
             return null
         return Location(spawner.world, testloc.x, testloc.y, testloc.z)
     }
@@ -49,5 +48,31 @@ class InChunkLocationChooser(
         val z = chunkZ * 16 + (0..15).random()
         val y = yRange.random()
         return Location(world, x.toDouble(), y.toDouble(), z.toDouble())
+    }
+
+
+    // check a 5x5 area above a block to check if it is an open area
+    private fun isOpenArea(location: Location, config: SpreadSpawnConfig): Boolean {
+        val world = location.world ?: return false
+        val chunk = location.chunk
+        val chunkMinX = chunk.x * 16
+        val chunkMinZ = chunk.z * 16
+        val blockX = location.blockX
+        val blockY = location.blockY
+        val blockZ = location.blockZ
+
+        for (x in -5..5) {
+            val checkX = (blockX + x).coerceIn(chunkMinX, chunkMinX + 15)
+            for (y in 0..3) {
+                val checkY = (blockY + y).coerceIn(config.sectionMinY, config.sectionMaxY)
+                for (z in -5..5) {
+                    val checkZ = (blockZ + z).coerceIn(chunkMinZ, chunkMinZ + 15)
+                    if (!world.getBlockAt(checkX, checkY, checkZ).isPassable) {
+                        return false
+                    }
+                }
+            }
+        }
+        return true
     }
 }
