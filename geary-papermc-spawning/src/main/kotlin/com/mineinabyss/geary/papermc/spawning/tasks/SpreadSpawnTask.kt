@@ -15,6 +15,7 @@ class SpreadSpawnTask(db: Database, world: World, configs: SpreadSpawnSectionsCo
     val job = gearyPaper.plugin.launch {
         while (true) {
             runCatching {
+                spreadSpawner.clearOldEntries(spreadSpawner.world)
                 spreadSpawner.spawnSpreadEntities()
             }.onFailure {
                 gearyPaper.logger.e { it.stackTraceToString() }

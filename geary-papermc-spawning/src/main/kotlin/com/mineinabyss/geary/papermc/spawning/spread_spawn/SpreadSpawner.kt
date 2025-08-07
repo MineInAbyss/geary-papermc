@@ -16,6 +16,9 @@ import me.dvyy.sqlite.Database
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
 
 class SpreadSpawner(val db: Database, val world: World, val configs: SpreadSpawnSectionsConfig, mobSpawner: MobSpawner) {
     val dao = SpawnLocationsDAO()
@@ -44,6 +47,14 @@ class SpreadSpawner(val db: Database, val world: World, val configs: SpreadSpawn
             db.write { dao.insertSpawnLocation(spawnPos, StoredEntity(config.type)) }
         }
     }
+
+    suspend fun clearOldEntries(world: World) {
+        db.write {
+            dao.deleteSpawnsOlderThan(world, 1.hours)
+        }
+    }
+
+
 
     suspend fun chooseChunkInRegion(worldGuardRegion: ProtectedCuboidRegion, config: SpreadSpawnConfig): Location? {
         val boundingBox = getBBFromRegion(worldGuardRegion)
