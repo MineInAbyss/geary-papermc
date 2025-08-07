@@ -91,6 +91,9 @@ class SpawnLocationsDAO {
     context(tx: WriteTransaction)
     fun deleteSpawnsOlderThan(world: World, age: Duration) {
         val epochSeconds = (Clock.System.now() - age).epochSeconds
+//        java.lang.NoClassDefFoundError: kotlin/time/Clock$System
+//        at SpawnLocationsDAO.kt:93
+
         tx.exec("DELETE FROM ${dataTable(world)} WHERE data ->> 'createdTime' < :epochSeconds", epochSeconds)
     }
 

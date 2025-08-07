@@ -166,6 +166,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         }
     }
 
+    // the db is locked when we try to run this function.
     fun clearDB(world: World) {
         val db = database ?: return println("no database to clear")
         val dao = spreadSpawnTask?.spreadSpawner?.dao ?: return println("no spread spawner to clear db from")
