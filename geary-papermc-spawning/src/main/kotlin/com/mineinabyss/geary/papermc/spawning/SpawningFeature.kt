@@ -16,6 +16,7 @@ import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnSectionsConfig
+import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
 import com.mineinabyss.geary.papermc.spawning.database.schema.SpawningSchema
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
@@ -118,7 +119,8 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         val spreadTask = SpreadSpawnTask(
             db = db,
             world = Bukkit.getWorlds().firstOrNull() ?: error("No worlds found, cannot initialize spread spawning"),
-            configs = spreadConfig
+            configs = spreadConfig,
+            spreadSpawner = spreadSpawner
         )
 
         // -- Tasks registration --
@@ -139,7 +141,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
 
     fun dumpDB(loc: Location, player : Player?) {
         val db = database ?: return println("no database to dump")
-        val dao = spreadSpawnTask?.spreadSpawner?.dao ?: return println("no dao to dump db to")
+        val dao = spreadSpawnTask?.spreadSpawner?.dao ?: return println("no spread spawner to dump db from")
         if (player == null)
             return println("no player to dump db to")
         println("spread config is $spreadConfig")

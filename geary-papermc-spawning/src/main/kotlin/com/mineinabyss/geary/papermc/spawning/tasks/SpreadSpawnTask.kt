@@ -10,8 +10,7 @@ import me.dvyy.sqlite.Database
 import org.bukkit.World
 import kotlin.time.Duration.Companion.seconds
 
-class SpreadSpawnTask(db: Database, world: World, configs: SpreadSpawnSectionsConfig) {
-    val spreadSpawner = SpreadSpawner(db, world, configs)
+class SpreadSpawnTask(db: Database, world: World, configs: SpreadSpawnSectionsConfig, val spreadSpawner: SpreadSpawner) {
 
     val job = gearyPaper.plugin.launch {
         while (true) {
