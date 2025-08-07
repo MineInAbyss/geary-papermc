@@ -41,7 +41,7 @@ class SpreadSpawner(val db: Database, val world: World, val configs: SpreadSpawn
 
             val chunkLoc = chooseChunkInRegion(cuboidRegion, config) ?: continue // No valid chunk found
             val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue // No valid position found in chunk
-            db.write { dao.insertSpawnLocation(spawnPos, StoredEntity(config.entry.type.key)) }
+            db.write { dao.insertSpawnLocation(spawnPos, StoredEntity(config.type)) }
         }
     }
 

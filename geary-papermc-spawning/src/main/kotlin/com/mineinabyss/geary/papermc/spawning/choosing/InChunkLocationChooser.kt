@@ -34,7 +34,6 @@ class InChunkLocationChooser(
         val spawnPositionReader = SpawnPositionReader()
         val testloc = getRandomChunkCoord(chunk.x, chunk.z, loc.world, config)
         val type = spawnPositionReader.spawnPositionFor(testloc)
-        val entry: SpawnEntry = config.entry
         // this check could also check for the config
         if (type != SpawnPosition.GROUND || !isOpenArea(testloc, config))
             return null
