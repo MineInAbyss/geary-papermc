@@ -97,14 +97,6 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
                 LocationSpread(spawnPositionReader, triesForNearbyLoc = 10)
             ),
         )
-
-
-//        println("about to init target spawn task\n\n\n\n\n\n\n\n\n")
-//        val targetedTask = TargetedSpawnTask(db)
-//
-//        targetedSpawnTask = targetedTask
-//
-//        println("done!!\n\n\n\n\n\n\n\n\n")
         val spreadSpawner = SpreadSpawner(db, Bukkit.getWorld("world")!!, spreadConfig)
         listeners(
             GearySpawnTypeListener(),
@@ -113,7 +105,6 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
             SpreadEntityDeathListener(
                 spreadSpawner, db, plugin
             )
-
         )
         val spreadTask = SpreadSpawnTask(db, Bukkit.getWorlds().firstOrNull() ?: error("No worlds found, cannot initialize spread spawning"), spreadConfig)
         spawnTask = task
@@ -126,7 +117,8 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
 
     fun sendTpButton(player: Player, loc: Location) {
         val command = "/tp ${loc.x} ${loc.y} ${loc.z}"
-        val message = Component.text("TP to (${loc.x}, ${loc.y}, ${loc.z})")
+        val distance = loc.distance(player.location).toInt()
+        val message = Component.text("TP to (${loc.x}, ${loc.y}, ${loc.z}) ($distance blocks away)")
             .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, command))
         player.sendMessage(message)
     }
