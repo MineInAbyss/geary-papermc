@@ -11,7 +11,7 @@ import org.bukkit.util.BoundingBox
 import org.bukkit.util.Vector
 import kotlin.random.Random
 
-class SpreadChunkChooser {
+class SpreadChunkChooser(val mainWorld: World) {
 
     data class Candidate(val x: Int, val z: Int, val score: Double)
     /**
@@ -32,15 +32,12 @@ class SpreadChunkChooser {
 
         val db = spawner.db
         val dao = spawner.dao
-        val world = spawner.world
-
-
         val radius = config.spreadRadius
         val sectionX = bb.minX.toInt()..bb.maxX.toInt()
         val sectionZ = bb.minZ.toInt()..bb.maxZ.toInt()
         val splitSize = config.splitSize
         val noiseRange = config.spawnNoise * 16
-        val sectionCount = db.read { dao.countSpawnsInBB(world, bb) }
+        val sectionCount = db.read { dao.countSpawnsInBB(mainWorld, bb) }
         val candidates = mutableListOf<Candidate>()
         val random = Random.Default
         val sampleSize = (sectionX.last / splitSize) * (sectionX.last / splitSize)
@@ -63,7 +60,7 @@ class SpreadChunkChooser {
                 candidates.add(Candidate(x, z, 0.0))
                 continue
             }
-            val minDistSq: Double = findNearestSq(x, z, db, dao, world)
+            val minDistSq: Double = findNearestSq(x, z, db, dao, mainWorld)
             if (minDistSq < scoreThreshold) continue
             candidates.add(Candidate(x, z, minDistSq))
         }
@@ -76,7 +73,7 @@ class SpreadChunkChooser {
         val noisyX = (chosen.x + random.nextInt(-noiseRange, noiseRange + 1)).coerceIn(sectionX)
         val noisyZ = (chosen.z + random.nextInt(-noiseRange, noiseRange + 1)).coerceIn(sectionZ)
         return Location(
-            world,
+            mainWorld,
             noisyX.toDouble(),
             0.0,
             noisyZ.toDouble()

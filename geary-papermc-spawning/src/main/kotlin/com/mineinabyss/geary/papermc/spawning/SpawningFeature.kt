@@ -3,12 +3,15 @@ package com.mineinabyss.geary.papermc.spawning
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.github.shynixn.mccoroutine.bukkit.launch
+import com.mineinabyss.geary.actions.main
 import com.mineinabyss.geary.papermc.Feature
 import com.mineinabyss.geary.papermc.FeatureContext
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.spawning.choosing.InChunkLocationChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.LocationSpread
 import com.mineinabyss.geary.papermc.spawning.choosing.SpawnChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.SpawnLocationChooser
+import com.mineinabyss.geary.papermc.spawning.choosing.SpreadChunkChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.SpawningWorldGuardFlags
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpawning
@@ -76,6 +79,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         database = db
 
         // -- Regular spawning logic --
+        val mainWorld = Bukkit.getWorlds().firstOrNull() ?: error("No worlds found, cannot initialize spawning")
         val reader = SpawnEntryReader(
             gearyPaper.plugin, Yaml(
                 serializersModule = gearyPaper.worldManager.global.getAddon(SerializableComponents).serializers.module,
@@ -101,11 +105,16 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         )
 
         // -- Spread Spawn logic --
+        val posChooser = InChunkLocationChooser(task.mobSpawner, mainWorld)
+        val chunkChooser = SpreadChunkChooser(mainWorld)
+
         val spreadSpawner = SpreadSpawner(
             db = db,
             world = Bukkit.getWorld("world")!!,
             configs = spreadConfig,
-            task.mobSpawner
+            chunkChooser = chunkChooser,
+            posChooser = posChooser,
+            dao = SpawnLocationsDAO()
         )
 
         listeners(
@@ -113,12 +122,11 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
             MythicSpawnTypeListener(),
             ListSpawnListener(spreadSpawner, db, plugin),
             SpreadEntityDeathListener(
-                spreadSpawner, db, plugin
+                spreadSpawner, db, plugin, mainWorld
             )
         )
 
         val spreadTask = SpreadSpawnTask(
-            db = db,
             world = Bukkit.getWorlds().firstOrNull() ?: error("No worlds found, cannot initialize spread spawning"),
             configs = spreadConfig,
             spreadSpawner = spreadSpawner

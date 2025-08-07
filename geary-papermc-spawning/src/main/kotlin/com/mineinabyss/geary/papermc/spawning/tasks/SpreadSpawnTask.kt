@@ -10,12 +10,12 @@ import me.dvyy.sqlite.Database
 import org.bukkit.World
 import kotlin.time.Duration.Companion.seconds
 
-class SpreadSpawnTask(db: Database, world: World, configs: SpreadSpawnSectionsConfig, val spreadSpawner: SpreadSpawner) {
+class SpreadSpawnTask(world: World, configs: SpreadSpawnSectionsConfig, val spreadSpawner: SpreadSpawner) {
 
     val job = gearyPaper.plugin.launch {
         while (true) {
             runCatching {
-                spreadSpawner.clearOldEntries(spreadSpawner.world)
+                spreadSpawner.clearOldEntries(world)
                 spreadSpawner.spawnSpreadEntities()
             }.onFailure {
                 gearyPaper.logger.e { it.stackTraceToString() }

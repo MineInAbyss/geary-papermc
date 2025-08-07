@@ -6,6 +6,7 @@ import com.mineinabyss.geary.papermc.spawning.database.dao.SpreadSpawnLocation
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import me.dvyy.sqlite.Database
+import org.bukkit.World
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDeathEvent
@@ -14,7 +15,8 @@ import org.bukkit.plugin.Plugin
 class SpreadEntityDeathListener(
     private val spawner: SpreadSpawner,
     val db: Database,
-    val plugin: Plugin
+    val plugin: Plugin,
+    val mainWorld: World,
 ) : Listener {
 
     @EventHandler
@@ -26,7 +28,7 @@ class SpreadEntityDeathListener(
 
         plugin.launch {
             db.write {
-                dao.deleteSpawnLocation(spawner.world, id)
+                dao.deleteSpawnLocation(mainWorld, id)
             }
         }
     }

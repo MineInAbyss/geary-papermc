@@ -1,6 +1,5 @@
 package com.mineinabyss.geary.papermc.spawning.spread_spawn
 
-import com.mineinabyss.geary.papermc.spawning.MobSpawner
 import com.mineinabyss.geary.papermc.spawning.choosing.InChunkLocationChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.SpreadChunkChooser
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
@@ -16,15 +15,16 @@ import me.dvyy.sqlite.Database
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
-import kotlin.time.Instant
 
-class SpreadSpawner(val db: Database, val world: World, val configs: SpreadSpawnSectionsConfig, mobSpawner: MobSpawner) {
-    val dao = SpawnLocationsDAO()
-    private val chunkChooser: SpreadChunkChooser = SpreadChunkChooser()
-    private val posChooser = InChunkLocationChooser(mobSpawner)
-
+class SpreadSpawner(
+    val db: Database,
+    private val world: World,
+    private val configs: SpreadSpawnSectionsConfig,
+    private val chunkChooser: SpreadChunkChooser,
+    private val posChooser: InChunkLocationChooser,
+    val dao: SpawnLocationsDAO
+) {
     suspend fun spawnSpreadEntities() {
         val container: RegionContainer = WorldGuard.getInstance().platform.regionContainer
         val wgWorld: com.sk89q.worldedit.world.World = BukkitAdapter.adapt(world)
@@ -53,7 +53,6 @@ class SpreadSpawner(val db: Database, val world: World, val configs: SpreadSpawn
             dao.deleteSpawnsOlderThan(world, 1.hours)
         }
     }
-
 
 
     suspend fun chooseChunkInRegion(worldGuardRegion: ProtectedCuboidRegion, config: SpreadSpawnConfig): Location? {

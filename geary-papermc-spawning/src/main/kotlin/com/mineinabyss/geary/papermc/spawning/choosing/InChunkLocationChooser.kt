@@ -12,11 +12,12 @@ import org.bukkit.World
 
 class InChunkLocationChooser(
     private val mobSpawner: MobSpawner,
+    private val mainWorld: World,
 ) {
 
     suspend fun chooseSpotInChunk(chunkLoc: Location, spawner: SpreadSpawner, config: SpreadSpawnConfig): Location? {
         val chunk = chunkLoc.chunk
-        if (chunkLoc.world == null || chunkLoc.world != spawner.world) return null
+        if (chunkLoc.world == null || chunkLoc.world != mainWorld) return null
 
         val pos = chunk.launchWithTicket {
             repeat(config.spawnAttempts) {
@@ -37,7 +38,7 @@ class InChunkLocationChooser(
         // this check could also check for the config
         if (type != SpawnPosition.GROUND || !isOpenArea(testloc, config))
             return null
-        return Location(spawner.world, testloc.x, testloc.y, testloc.z)
+        return Location(mainWorld, testloc.x, testloc.y, testloc.z)
     }
 
     // chose a random spot within the chunk
