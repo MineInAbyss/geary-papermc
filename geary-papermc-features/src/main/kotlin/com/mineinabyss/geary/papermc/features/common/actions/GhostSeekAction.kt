@@ -13,9 +13,8 @@ import org.bukkit.entity.Player
 import kotlin.math.pow
 
 @Serializable
-@SerialName("geary:query_db")
-class QueryDBAction(val radii: List<Int>) : Action {
-
+@SerialName("geary:ghost_seek")
+class GhostSeekAction(val radii: List<Double>) : Action {
     override fun ActionGroupContext.execute() {
         val feature = gearyPaper.features.getOrNull<SpawningFeature>() ?: return
         val spawner = feature.spreadSpawnTask?.spreadSpawner ?: return
@@ -25,9 +24,7 @@ class QueryDBAction(val radii: List<Int>) : Action {
             val pings = mutableListOf<Int>()
             for (i in radii.indices.reversed()) {
                 val radius = radii[i]
-                val nearby = spawner.getNBNear(player.location, radius.toDouble())
-                println("queried db, found $nearby entities within radius $radius for player ${player.name}")
-                if (nearby > 0) {
+                if (spawner.getNBNear(player.location, radius) > 0) {
                     pings.add(i)
                 }
             }
@@ -39,7 +36,7 @@ class QueryDBAction(val radii: List<Int>) : Action {
                     1.0f,
                     2.0.pow((pingIndex - 2) / 12.0).toFloat()
                 )
-                delay(300) // 0.3 seconds
+                delay(300)
             }
         }
     }

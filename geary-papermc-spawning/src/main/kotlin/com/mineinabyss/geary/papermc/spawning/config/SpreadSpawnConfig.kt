@@ -21,13 +21,7 @@ class SpreadSpawnConfig(
     val splitSize: Int,
     @YamlComment("How many times to try and spawn an entity in a chunk before giving up")
     val spawnAttempts: Int,
-    @YamlComment("Radius around the selected block to be valid")
-    val openAreaWidth: Int,
-    @YamlComment("Height of the open area around the selected block to be valid")
-    val openAreaHeight: Int,
-) {
-
-}
+)
 
 @Serializable
 @SerialName("geary:spread_spawn_sections")
