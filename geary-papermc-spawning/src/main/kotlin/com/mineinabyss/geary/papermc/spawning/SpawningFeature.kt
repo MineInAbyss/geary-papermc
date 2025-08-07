@@ -154,7 +154,6 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         val dao = spreadSpawnTask?.spreadSpawner?.dao ?: return println("no spread spawner to dump db from")
         if (player == null)
             return println("no player to dump db to")
-        println("spread config is $spreadConfig")
         plugin.launch {
             db.read {
                 val locations = dao.getSpawnsNear(loc, 10000.0)
