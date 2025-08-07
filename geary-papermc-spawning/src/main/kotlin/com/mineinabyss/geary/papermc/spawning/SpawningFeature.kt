@@ -38,6 +38,7 @@ import me.dvyy.sqlite.Database
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import org.bukkit.Bukkit
+import org.bukkit.Bukkit.getWorld
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Player
@@ -79,7 +80,6 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         database = db
 
         // -- Regular spawning logic --
-        val mainWorld = Bukkit.getWorlds().firstOrNull() ?: error("No worlds found, cannot initialize spawning")
         val reader = SpawnEntryReader(
             gearyPaper.plugin, Yaml(
                 serializersModule = gearyPaper.worldManager.global.getAddon(SerializableComponents).serializers.module,
@@ -105,6 +105,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         )
 
         // -- Spread Spawn logic --
+        val mainWorld = getWorld(spreadConfig.WorldName) ?: error("World ${spreadConfig.WorldName} not found, cannot initialize spread spawning")
         val posChooser = InChunkLocationChooser(task.mobSpawner, mainWorld)
         val chunkChooser = SpreadChunkChooser(mainWorld)
 
