@@ -133,7 +133,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
 
     fun sendTpButton(player: Player, loc: Location) {
         val command = "/tp ${loc.x} ${loc.y} ${loc.z}"
-        val distance = loc.distance(player.location).toInt()
+        val distance = if (loc.world != null) loc.distance(player.location).toInt() else -1
         val message = Component.text("TP to (${loc.x}, ${loc.y}, ${loc.z}) ($distance blocks away)")
             .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, command))
         player.sendMessage(message)

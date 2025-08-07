@@ -31,7 +31,7 @@ class SpawnLocationsDAO {
         """.trimIndent(),
         location.x, radius, location.y, location.z,
     ).map {
-        SpreadSpawnLocation.fromStatement(this)
+        SpreadSpawnLocation.fromStatement(this, location.world)
     }
 
     /** Counts the number of spawns stored inside a bounding [box] for a given [world]. */
@@ -54,7 +54,7 @@ class SpawnLocationsDAO {
         AND maxX < :x + 16 AND maxZ < :z + 16;
         """.trimIndent(),
         chunk.x shl 4, chunk.z shl 4
-    ).map { SpreadSpawnLocation.fromStatement(this) }
+    ).map { SpreadSpawnLocation.fromStatement(this, chunk.world) }
 
     /**
      * Gets the stored spawn with [preferred]'s id if it is within [radius],
