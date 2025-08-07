@@ -1,42 +1,93 @@
 package com.mineinabyss.geary.papermc.spawning.spread_spawn
 
+import com.github.shynixn.mccoroutine.bukkit.launch
+import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.spawning.choosing.InChunkLocationChooser
+import com.mineinabyss.geary.papermc.spawning.choosing.SpreadChunkChooser
+import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
+import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnSectionsConfig
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
-import org.bukkit.Bukkit.getWorlds
+import com.mineinabyss.geary.papermc.spawning.database.dao.StoredEntity
 
-// NOTE: the names/description of this file and everything associated with it is subject to change
-//       most of the names/descriptions are placeholder / semi placeholder
+import com.mineinabyss.geary.papermc.sqlite.blockingRead
+import com.sk89q.worldedit.bukkit.BukkitAdapter
+import com.sk89q.worldguard.WorldGuard
+import com.sk89q.worldguard.protection.managers.RegionManager
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion
+import com.sk89q.worldguard.protection.regions.ProtectedRegion
+import com.sk89q.worldguard.protection.regions.RegionContainer
+import me.dvyy.sqlite.Database
+import org.bukkit.Chunk
+import org.bukkit.Location
+import org.bukkit.World
+import org.bukkit.util.BoundingBox
 
-// TODO: Change the names/descriptions to be more fitting
-
-/**
- * Targeted Spawning: a system used to spawn entities in a non-regular way. Ie: in a targeted way.
- * A target could be one of many things; but for now its main purpose will be to allow us to spawn entities in a spread out way.
- *
- * The flow of a targeted spawn is as follows:
- *  - Determine a target in the world
- *  - Determine if the target is valid (ie: is there any skelies nearby ?)
- *  - Add the target to a list of targets
- *  - When a chunk containing a target is loaded: spawn it
- *
- *  The code should then execute the following steps: (for skelies)
- *  - Get the list of skelies of a section
- *  - Calculate where the closest is
- *  - If it is far away enough, attempt to spawn one
- *  - If the spawn was successful (ie: a valid location was found), add it to the list of skelies
- *
- *  The logic should trigger on chunk load (or whenever geary usually tries to run the spawn checks)
- **/
-class SpreadSpawner(
-    val minRadius: Int = 500,
-    val sectionXRange: IntRange = 80519..83321,
-    val sectionZRange: IntRange = -1401..1397,
-    val splitSize: Int = 250,
-    val noiseFactor: Double = 500.0,
-    val noiseRange: Int = 10,
-    val chunkYRange: IntRange = 0..220,
-    val openAreaSize: Int = 2, // for isOpenArea: checks -openAreaSize..openAreaSize
-    val openAreaHeight: IntRange = 0..4
-) {
+class SpreadSpawner(val db: Database, val world: World, val configs: SpreadSpawnSectionsConfig) {
     val dao = SpawnLocationsDAO()
-    val world = getWorlds().firstOrNull() ?: throw IllegalStateException("No world found")
+    private val chunkChooser: SpreadChunkChooser = SpreadChunkChooser()
+    private val posChooser = InChunkLocationChooser()
+
+    suspend fun spawnSpreadEntities() {
+        val container: RegionContainer = WorldGuard.getInstance().platform.regionContainer
+        val wgWorld: com.sk89q.worldedit.world.World = BukkitAdapter.adapt(world)
+        val regions: RegionManager? = container.get(wgWorld)
+
+        for ((regionName, config) in configs.sectionsConfig) {
+
+            val region = regions?.getRegion(regionName) ?: run {
+                println("Region $regionName not found in world ${world.name}")
+                continue
+            }
+
+            val cuboidRegion: ProtectedCuboidRegion = region as? ProtectedCuboidRegion ?: run {
+                println("Region $regionName is not a cuboid region in world ${world.name}")
+                continue
+            }
+
+            val chunkLoc = chooseChunkInRegion(cuboidRegion, config) ?: continue // No valid chunk found
+            val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue // No valid position found in chunk
+            db.write { dao.insertSpawnLocation(spawnPos, StoredEntity(config.entityType)) }
+        }
+    }
+
+    suspend fun chooseChunkInRegion(worldGuardRegion: ProtectedCuboidRegion, config: SpreadSpawnConfig): Location? {
+        val boundingBox = getBBFromRegion(worldGuardRegion)
+        return chunkChooser.chooseChunkInBB(boundingBox, this, config)
+    }
+
+    suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? {
+        return posChooser.chooseSpotInChunk(chunkLoc,this, config)
+    }
+
+    private fun getBBFromRegion(region: ProtectedCuboidRegion): BoundingBox {
+        val min = region.minimumPoint
+        val max = region.maximumPoint
+        val minLoc = Location(world, min.x().toDouble(), min.y().toDouble(), min.z().toDouble())
+        val maxLoc = Location(world, max.x().toDouble(), max.y().toDouble(), max.z().toDouble())
+        return BoundingBox.of(minLoc, maxLoc)
+    }
+
+    suspend fun getNBNear(location: Location, radius: Double): Int {
+        val radiusSq = radius * radius
+        val nearbySpawns = db.read {
+            dao.getSpawnsNear(location, radius)
+                .filter {
+                    val loc = it.location
+                    val dx = loc.x - location.x
+                    val dy = loc.y - location.y
+                    val dz = loc.z - location.z
+                    (dx * dx + dy * dy + dz * dz) <= radiusSq
+                }
+                .map {
+                    it.location.world = this@SpreadSpawner.world
+                    it.location.chunk
+                }
+                .toSet()
+        }
+        // todo: async fix
+//        for (chunk in nearbySpawns) {
+//            triggerSpawn(chunk, db, dao)
+//        }
+        return nearbySpawns.size
+    }
 }
