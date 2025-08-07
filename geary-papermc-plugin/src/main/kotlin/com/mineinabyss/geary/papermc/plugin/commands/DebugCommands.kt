@@ -120,4 +120,9 @@ internal fun IdoCommand.debug() = "debug" {
             gearyPaper.features.getOrNull<SpawningFeature>()?.dumpDB(player.location, player)
         }
     }
+    "clearDB" {
+        playerExecutes {
+            gearyPaper.features.getOrNull<SpawningFeature>()?.clearDB(player.world)
+        }
+    }
 }

@@ -36,6 +36,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.World
 import org.bukkit.entity.Player
 
 class SpawningFeature(context: FeatureContext) : Feature(context) {
@@ -155,4 +156,17 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
             }
         }
     }
+
+    fun clearDB(world: World) {
+        val db = database ?: return println("no database to clear")
+        val dao = spreadSpawnTask?.spreadSpawner?.dao ?: return println("no spread spawner to clear db from")
+        plugin.launch {
+            db.write {
+                dao.dropAll(world)
+            }
+        }
+        println("Cleared spawn locations from the database.")
+    }
+
+
 }
