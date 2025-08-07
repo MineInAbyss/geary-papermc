@@ -52,7 +52,6 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
     var spreadSpawnTask: SpreadSpawnTask? = null
     var database: Database? = null
 
-
     init {
         pluginDeps("WorldGuard", "MythicMobs")
         println("SpawningFeature initialized")
@@ -176,6 +175,4 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         }
         println("Cleared spawn locations from the database.")
     }
-
-
 }

@@ -54,7 +54,6 @@ class SpreadSpawner(
 //        }
     }
 
-
     suspend fun chooseChunkInRegion(worldGuardRegion: ProtectedCuboidRegion, config: SpreadSpawnConfig): Location? {
         val boundingBox = getBBFromRegion(worldGuardRegion)
         return chunkChooser.chooseChunkInBB(boundingBox, this, config)

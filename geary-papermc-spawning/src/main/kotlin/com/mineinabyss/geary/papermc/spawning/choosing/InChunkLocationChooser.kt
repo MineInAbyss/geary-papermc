@@ -52,7 +52,6 @@ class InChunkLocationChooser(
         return Location(mainWorld, x.toDouble(), y.toDouble(), z.toDouble())
     }
 
-
     // check a 5x5 area above a block to check if it is an open area
     private fun isOpenArea(location: Location, config: SpreadSpawnConfig): Boolean {
         val world = location.world ?: return false
