@@ -49,9 +49,9 @@ class SpreadSpawner(
     }
 
     suspend fun clearOldEntries(world: World) {
-        db.write {
-            dao.deleteSpawnsOlderThan(world, 1.hours)
-        }
+//        db.write {
+//            dao.deleteSpawnsOlderThan(world, 1.hours)
+//        }
     }
 
 
