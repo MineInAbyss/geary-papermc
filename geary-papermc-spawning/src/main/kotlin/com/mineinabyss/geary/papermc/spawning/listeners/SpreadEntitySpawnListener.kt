@@ -12,10 +12,6 @@ import org.bukkit.event.Listener
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.plugin.Plugin
 import kotlin.random.Random
-import org.bukkit.entity.Entity
-import kotlin.text.get
-import kotlin.text.set
-import kotlin.times
 
 // listen to chunk load event and spawn entity if its in the list of entities
 class ListSpawnListener(

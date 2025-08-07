@@ -42,7 +42,6 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
     val spreadConfig by config("spread_config", plugin.dataPath,
         SpreadSpawnSectionsConfig())
     var spawnTask: SpawnTask? = null
-    //var targetedSpawnTask: SpreadSpawnTask? = null
     var spawnEntriesByName: Map<String, SpawnEntry>? = null
     var spreadSpawnTask: SpreadSpawnTask? = null
     var database: Database? = null
@@ -67,13 +66,14 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
     }
 
     override fun enable() {
+        // -- Database logic --
         val db = plugin.sqliteDatabase(Path("spawns.db")) {
             val world = Bukkit.getWorlds().firstOrNull() ?: error("No worlds found, cannot initialize spawning database")
             SpawningSchema(listOf(world)).init()
         }
         database = db
 
-
+        // -- Regular spawning logic --
         val reader = SpawnEntryReader(
             gearyPaper.plugin, Yaml(
                 serializersModule = gearyPaper.worldManager.global.getAddon(SerializableComponents).serializers.module,
@@ -97,7 +97,15 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
                 LocationSpread(spawnPositionReader, triesForNearbyLoc = 10)
             ),
         )
-        val spreadSpawner = SpreadSpawner(db, Bukkit.getWorld("world")!!, spreadConfig)
+
+        // -- Spread Spawn logic --
+        val spreadSpawner = SpreadSpawner(
+            db = db,
+            world = Bukkit.getWorld("world")!!,
+            configs = spreadConfig,
+            task.mobSpawner
+        )
+
         listeners(
             GearySpawnTypeListener(),
             MythicSpawnTypeListener(),
@@ -106,13 +114,19 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
                 spreadSpawner, db, plugin
             )
         )
-        val spreadTask = SpreadSpawnTask(db, Bukkit.getWorlds().firstOrNull() ?: error("No worlds found, cannot initialize spread spawning"), spreadConfig)
+
+        val spreadTask = SpreadSpawnTask(
+            db = db,
+            world = Bukkit.getWorlds().firstOrNull() ?: error("No worlds found, cannot initialize spread spawning"),
+            configs = spreadConfig
+        )
+
+        // -- Tasks registration --
         spawnTask = task
         spreadSpawnTask = spreadTask
         spawnEntriesByName = spawns.mapValues { it.value.entry }
         task(task.job)
         task(spreadTask.job)
-//        task(targetedTask.job)
     }
 
     fun sendTpButton(player: Player, loc: Location) {

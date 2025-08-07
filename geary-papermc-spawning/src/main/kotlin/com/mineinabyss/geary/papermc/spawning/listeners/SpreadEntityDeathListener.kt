@@ -15,16 +15,15 @@ class SpreadEntityDeathListener(
     private val spawner: SpreadSpawner,
     val db: Database,
     val plugin: Plugin
-) :
-    Listener {
+) : Listener {
 
     @EventHandler
     fun onEntityDeath(event: EntityDeathEvent) {
         val entity = event.entity.toGearyOrNull() ?: return
         val spread = entity.get<SpreadSpawnLocation>() ?: return
         val id = spread.id
-
         val dao: SpawnLocationsDAO = spawner.dao
+
         plugin.launch {
             db.write {
                 dao.deleteSpawnLocation(spawner.world, id)

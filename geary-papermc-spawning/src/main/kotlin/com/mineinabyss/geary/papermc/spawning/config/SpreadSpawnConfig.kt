@@ -6,12 +6,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class SpreadSpawnConfig(
-    @YamlComment("Entity type, e.g. 'mm:prayingskeleton'")
-    val entityType: String,
+    @YamlComment("Entity entry, e.g. 'mm:prayingskeleton'")
+    val entry: SpawnEntry,
     @YamlComment("How far the entity should be from another entity of the same type")
     val spreadRadius: Int,
     val spawnCap: Int,
-    //val spawnTickDelay: Int, // can't really change that since its handled by the task
     @YamlComment("Lowest point of the section to spawn in")
     val sectionMinY: Int,
     @YamlComment("Highest point of the section to spawn in")
