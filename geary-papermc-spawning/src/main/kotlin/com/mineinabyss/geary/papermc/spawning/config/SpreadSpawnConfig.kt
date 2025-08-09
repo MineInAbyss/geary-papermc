@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 class SpreadSpawnConfig(
     @YamlComment("Entity entry, e.g. 'mm:prayingskeleton'")
-    val type: String,
+    val entry: SpawnEntry,
     @YamlComment("How far the entity should be from another entity of the same type")
     val spreadRadius: Int,
     val spawnCap: Int,
