@@ -23,7 +23,7 @@ class InChunkLocationChooser(
 
         val pos = chunk.launchWithTicket {
             repeat(config.spawnAttempts) {
-                val candidate = getValidBlockOrNull(chunkLoc, spawner, config)
+                val candidate = getValidBlockOrNull(chunk, config)
                 if (candidate != null)
                     return@launchWithTicket candidate
             }
@@ -32,15 +32,16 @@ class InChunkLocationChooser(
         return pos.await()
     }
 
-    private fun getValidBlockOrNull(loc: Location, spawner: SpreadSpawner, config: SpreadSpawnConfig): Location? {
-        val chunk = loc.chunk
+    private fun getValidBlockOrNull(chunk: Chunk, config: SpreadSpawnConfig): Location? {
         val spawnPositionReader = SpawnPositionReader()
         val testloc = getRandomChunkCoord(chunk, config)
         val type = spawnPositionReader.spawnPositionFor(testloc)
-        // this check could also check for the config
-        if (type != SpawnPosition.GROUND || !isOpenArea(testloc, config))
+        val entry: SpawnEntry = config.entry
+
+        if (type != entry.position || !mobSpawner.checkSpawnConditions(entry, testloc))
             return null
-        return Location(mainWorld, testloc.x, testloc.y, testloc.z)
+
+        return Location(chunk.world, testloc.x, testloc.y, testloc.z)
     }
 
     // chose a random spot within the chunk
@@ -50,30 +51,5 @@ class InChunkLocationChooser(
         val z = chunk.z * 16 + (0..15).random()
         val y = yRange.random()
         return Location(mainWorld, x.toDouble(), y.toDouble(), z.toDouble())
-    }
-
-    // check a 5x5 area above a block to check if it is an open area
-    private fun isOpenArea(location: Location, config: SpreadSpawnConfig): Boolean {
-        val world = location.world ?: return false
-        val chunk = location.chunk
-        val chunkMinX = chunk.x * 16
-        val chunkMinZ = chunk.z * 16
-        val blockX = location.blockX
-        val blockY = location.blockY
-        val blockZ = location.blockZ
-
-        for (x in -5..5) {
-            val checkX = (blockX + x).coerceIn(chunkMinX, chunkMinX + 15)
-            for (y in 0..3) {
-                val checkY = (blockY + y).coerceIn(config.sectionMinY, config.sectionMaxY)
-                for (z in -5..5) {
-                    val checkZ = (blockZ + z).coerceIn(chunkMinZ, chunkMinZ + 15)
-                    if (!world.getBlockAt(checkX, checkY, checkZ).isPassable) {
-                        return false
-                    }
-                }
-            }
-        }
-        return true
     }
 }
