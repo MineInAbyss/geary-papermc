@@ -20,7 +20,7 @@ import kotlin.time.Duration.Companion.hours
 class SpreadSpawner(
     val db: Database,
     private val world: World,
-    private val configs: SpreadSpawnSectionsConfig,
+    val configs: SpreadSpawnSectionsConfig,
     private val chunkChooser: SpreadChunkChooser,
     private val posChooser: InChunkLocationChooser,
     val dao: SpawnLocationsDAO
@@ -44,7 +44,7 @@ class SpreadSpawner(
 
             val chunkLoc = chooseChunkInRegion(cuboidRegion, config) ?: continue // No valid chunk found
             val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue // No valid position found in chunk
-            db.write { dao.insertSpawnLocation(spawnPos, StoredEntity(config.type)) }
+            db.write { dao.insertSpawnLocation(spawnPos, StoredEntity(config.entry.type.key)) }
         }
     }
 
