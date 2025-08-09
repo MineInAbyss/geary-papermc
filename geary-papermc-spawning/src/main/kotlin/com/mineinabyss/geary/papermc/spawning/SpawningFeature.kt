@@ -47,7 +47,6 @@ import org.bukkit.entity.Player
 
 class SpawningFeature(context: FeatureContext) : Feature(context) {
     val config by config("spawning", plugin.dataPath, SpawnConfig())
-
     var spawnTask: SpawnTask? = null
     var spawnEntriesByName: Map<String, SpawnEntry>? = null
     var spreadSpawnTask: SpreadSpawnTask? = null
