@@ -19,8 +19,8 @@ class InChunkLocationChooser(
 
     suspend fun chooseSpotInChunk(chunkLoc: Location, spawner: SpreadSpawner, config: SpreadSpawnConfig): Location? {
         val chunk = chunkLoc.chunk
-        if (chunkLoc.world == null || chunkLoc.world != mainWorld) return null
-
+        if (chunkLoc.world == null || chunkLoc.world != mainWorld)
+            return null
         val pos = chunk.launchWithTicket {
             repeat(config.spawnAttempts) {
                 val candidate = getValidBlockOrNull(chunk, config)
