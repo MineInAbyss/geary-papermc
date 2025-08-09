@@ -21,16 +21,18 @@ import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnSectionsConfig
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
 import com.mineinabyss.geary.papermc.spawning.database.schema.SpawningSchema
+import com.mineinabyss.geary.papermc.spawning.listeners.SpreadEntityDeathListener
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.mythic.MythicSpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
 import com.mineinabyss.geary.papermc.spawning.targeted.ListSpawnListener
-import com.mineinabyss.geary.papermc.spawning.listeners.SpreadEntityDeathListener
 import com.mineinabyss.geary.papermc.spawning.tasks.SpawnTask
 import com.mineinabyss.geary.papermc.spawning.tasks.SpreadSpawnTask
 import com.mineinabyss.geary.papermc.sqlite.sqliteDatabase
 import com.mineinabyss.geary.serialization.SerializableComponents
+import com.mineinabyss.idofront.config.ConfigFormats
+import com.mineinabyss.idofront.config.Format
 import com.mineinabyss.idofront.config.config
 import com.sk89q.worldguard.WorldGuard
 import kotlin.io.path.Path
@@ -45,8 +47,7 @@ import org.bukkit.entity.Player
 
 class SpawningFeature(context: FeatureContext) : Feature(context) {
     val config by config("spawning", plugin.dataPath, SpawnConfig())
-    val spreadConfig by config("spread_config", plugin.dataPath,
-        SpreadSpawnSectionsConfig())
+
     var spawnTask: SpawnTask? = null
     var spawnEntriesByName: Map<String, SpawnEntry>? = null
     var spreadSpawnTask: SpreadSpawnTask? = null
@@ -104,6 +105,20 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         )
 
         // -- Spread Spawn logic --
+        val spreadConfig by config(
+            "spread_config", plugin.dataPath,
+            SpreadSpawnSectionsConfig(),
+            formats = ConfigFormats(
+                listOf(
+                    Format(
+                        "yml", Yaml(
+                            serializersModule = gearyPaper.worldManager.global.getAddon(SerializableComponents).serializers.module,
+                            configuration = YamlConfiguration(strictMode = false)
+                        )
+                    )
+                )
+            )
+        )
         val mainWorld = getWorld(spreadConfig.WorldName) ?: error("World ${spreadConfig.WorldName} not found, cannot initialize spread spawning")
         val posChooser = InChunkLocationChooser(task.mobSpawner, mainWorld)
         val chunkChooser = SpreadChunkChooser(mainWorld)
