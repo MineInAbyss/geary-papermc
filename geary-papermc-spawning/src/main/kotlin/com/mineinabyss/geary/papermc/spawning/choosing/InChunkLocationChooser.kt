@@ -17,7 +17,7 @@ class InChunkLocationChooser(
     private val mainWorld: World,
 ) {
 
-    suspend fun chooseSpotInChunk(chunkLoc: Location, spawner: SpreadSpawner, config: SpreadSpawnConfig): Location? {
+    suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? {
         val chunk = chunkLoc.chunk
         if (chunkLoc.world == null || chunkLoc.world != mainWorld)
             return null

@@ -1,5 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.spread_spawn
 
+import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
+import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.choosing.InChunkLocationChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.SpreadChunkChooser
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
@@ -11,6 +13,7 @@ import com.sk89q.worldguard.WorldGuard
 import com.sk89q.worldguard.protection.managers.RegionManager
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion
 import com.sk89q.worldguard.protection.regions.RegionContainer
+import kotlinx.coroutines.withContext
 import me.dvyy.sqlite.Database
 import org.bukkit.Location
 import org.bukkit.World
@@ -44,6 +47,7 @@ class SpreadSpawner(
 
             val chunkLoc = chooseChunkInRegion(cuboidRegion, config) ?: continue // No valid chunk found
             val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue // No valid position found in chunk
+            println("spawning entity in $regionName at ${spawnPos.x.toInt()}, ${spawnPos.y.toInt()}, ${spawnPos.z.toInt()}")
             db.write { dao.insertSpawnLocation(spawnPos, StoredEntity(config.entry.type.key)) }
         }
     }
@@ -59,8 +63,8 @@ class SpreadSpawner(
         return chunkChooser.chooseChunkInBB(boundingBox, this, config)
     }
 
-    suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? {
-        return posChooser.chooseSpotInChunk(chunkLoc, this, config)
+    suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? = withContext(gearyPaper.plugin.minecraftDispatcher) {
+        posChooser.chooseSpotInChunk(chunkLoc, config)
     }
 
     private fun getBBFromRegion(region: ProtectedCuboidRegion): BoundingBox {

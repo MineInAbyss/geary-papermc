@@ -1,6 +1,5 @@
 package com.mineinabyss.geary.papermc.spawning.helpers
 
-import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.papermc.gearyPaper
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -20,17 +19,17 @@ inline fun <T> Chunk.withTicket(block: (Chunk) -> T): T = try {
  * Launches a coroutine on the main server thread, adding a plugin ticket to this chunk,
  * ensuring it doesn't unload until the coroutine completes or is cancelled.
  */
-inline fun <T> Chunk.launchWithTicket(crossinline block: suspend (Chunk) -> T): Deferred<T> {
+suspend inline fun <T> Chunk.launchWithTicket(crossinline block: suspend (Chunk) -> T): Deferred<T> {
     val deferred = CompletableDeferred<T>()
-    gearyPaper.plugin.launch {
-        try {
-            addPluginChunkTicket(gearyPaper.plugin)
-            deferred.complete(block(this@launchWithTicket))
-        } catch (e: Exception) {
-            deferred.completeExceptionally(e)
-        } finally {
-            removePluginChunkTicket(gearyPaper.plugin)
-        }
+//    gearyPaper.plugin.launch {
+    try {
+        addPluginChunkTicket(gearyPaper.plugin)
+        deferred.complete(block(this@launchWithTicket))
+    } catch (e: Exception) {
+        deferred.completeExceptionally(e)
+    } finally {
+        removePluginChunkTicket(gearyPaper.plugin)
     }
+//    }
     return deferred
 }

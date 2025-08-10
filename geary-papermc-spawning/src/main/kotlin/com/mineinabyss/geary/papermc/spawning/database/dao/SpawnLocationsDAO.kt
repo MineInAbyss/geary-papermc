@@ -45,6 +45,40 @@ class SpawnLocationsDAO {
         box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
     ).first { getInt(0) }
 
+    context(tx: Transaction)
+    fun areSpawnsNearby(location: Location, radius: Double): Boolean {
+        val (x, y, z) = location
+        return tx.select(
+            """
+            SELECT count(*) FROM ${rtree(location.world)}
+            WHERE minX > :x - :rad AND minY > :y - :rad AND minZ > :z - :rad
+            AND maxX < :x + :rad AND maxY < :y + :rad AND maxZ < :z + :rad
+            AND (minX - :x) * (minX - :x) +
+                (minY - :y) * (minY - :y) +
+                (minZ - :z) * (minZ - :z) <= :rad * :rad
+            LIMIT 1;
+            """.trimIndent(),
+            x, radius, y, z
+        ).first { getInt(0) } > 0
+    }
+
+    context(tx: Transaction)
+    fun getClosestSpawn(location: Location, maxDistance: Double): SpreadSpawnLocation? {
+        val (x, y, z) = location
+        return tx.select(
+            """
+            SELECT id, data, minX, minY, minZ FROM ${locationsView(location.world)}
+            WHERE minX > :x - :rad AND minY > :y - :rad AND minZ > :z - :rad
+            AND maxX < :x + :rad AND maxY < :y + :rad AND maxZ < :z + :rad
+            ORDER BY (minX - :x) * (minX - :x) + (minY - :y) * (minY - :y) + (minZ - :z) * (minZ - :z)
+            LIMIT 1;
+            """.trimIndent(),
+            x, maxDistance, y, z
+        ).firstOrNull {
+            SpreadSpawnLocation.fromStatement(this, location.world)
+        }
+    }
+
     /** Gets all stored spawn positions that land in this [chunk]. */
     context(tx: Transaction)
     fun getSpawnsInChunk(chunk: Chunk): List<SpreadSpawnLocation> = tx.select(
@@ -55,16 +89,6 @@ class SpawnLocationsDAO {
         """.trimIndent(),
         chunk.x shl 4, chunk.z shl 4
     ).map { SpreadSpawnLocation.fromStatement(this, chunk.world) }
-
-    /**
-     * Gets the stored spawn with [preferred]'s id if it is within [radius],
-     * OR the closest stored spawn [location] within [radius],
-     * OR null if none are nearby.
-     */
-    context(tx: Transaction)
-    fun getNearestLocationPreferringId(location: Location, radius: Double): SpreadSpawnLocation? {
-        TODO()
-    }
 
     context(tx: WriteTransaction)
     fun insertSpawnLocation(location: Location, store: StoredEntity) {
@@ -91,9 +115,6 @@ class SpawnLocationsDAO {
     context(tx: WriteTransaction)
     fun deleteSpawnsOlderThan(world: World, age: Duration) {
         val epochSeconds = (Clock.System.now() - age).epochSeconds
-//        java.lang.NoClassDefFoundError: kotlin/time/Clock$System
-//        at SpawnLocationsDAO.kt:93
-
         tx.exec("DELETE FROM ${dataTable(world)} WHERE data ->> 'createdTime' < :epochSeconds", epochSeconds)
     }
 
