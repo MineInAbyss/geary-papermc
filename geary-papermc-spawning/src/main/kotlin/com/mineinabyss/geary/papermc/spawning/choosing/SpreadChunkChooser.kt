@@ -9,7 +9,11 @@ import org.bukkit.World
 import org.bukkit.util.BoundingBox
 import kotlin.random.Random
 
-class SpreadChunkChooser(val mainWorld: World) {
+class SpreadChunkChooser(
+    private val mainWorld: World,
+    private val db: Database,
+    private val dao: SpawnLocationsDAO
+) {
     /**
      * Chose a random chunk inside a given bounding box, generally corresponding to a section.
      *
@@ -20,9 +24,7 @@ class SpreadChunkChooser(val mainWorld: World) {
      * @param config the SpreadSpawnConfig containing the algorithm parameters
      * @return a Location representing the chosen chunk, or null if no suitable chunk could be found
      */
-    suspend fun chooseChunkInBB(bb: BoundingBox, spawner: SpreadSpawner, config: SpreadSpawnConfig): Location? {
-        val db = spawner.db
-        val dao = spawner.dao
+    suspend fun chooseChunkInBB(bb: BoundingBox, config: SpreadSpawnConfig): Location? {
         val radius = config.spreadRadius
         val sectionX = bb.minX.toInt()..bb.maxX.toInt()
         val sectionZ = bb.minZ.toInt()..bb.maxZ.toInt()
@@ -67,9 +69,9 @@ class SpreadChunkChooser(val mainWorld: World) {
         )
     }
 
-    private suspend fun findNearestSq(x: Int, z: Int, database: Database, dao: SpawnLocationsDAO, world: World): Double {
-        return database.read {
-            val loc = Location(world, x.toDouble(), 0.0, z.toDouble())
+    private suspend fun findNearestSq(x: Int, z: Int): Double {
+        return db.read {
+            val loc = Location(mainWorld, x.toDouble(), 0.0, z.toDouble())
             dao.getClosestSpawn(loc, 1000.0)
                 ?.location?.distanceSquared(loc)
                 ?: Double.MAX_VALUE

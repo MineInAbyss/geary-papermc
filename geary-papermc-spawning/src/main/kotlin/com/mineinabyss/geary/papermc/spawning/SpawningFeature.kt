@@ -126,7 +126,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         )
         val mainWorld = getWorld(spreadConfig.WorldName) ?: error("World ${spreadConfig.WorldName} not found, cannot initialize spread spawning")
         val posChooser = InChunkLocationChooser(task.mobSpawner, mainWorld)
-        val chunkChooser = SpreadChunkChooser(mainWorld)
+        val chunkChooser = SpreadChunkChooser(mainWorld, db, SpawnLocationDAO())
 
         val spreadSpawner = SpreadSpawner(
             db = db,
