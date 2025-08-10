@@ -78,6 +78,11 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         }
         database = db
 
+        listeners(
+            GearySpawnTypeListener(),
+            MythicSpawnTypeListener(),
+        )
+
         // -- Regular spawning logic --
         val reader = SpawnEntryReader(
             gearyPaper.plugin, Yaml(
@@ -107,6 +112,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         val spreadConfig by config(
             "spread_config", plugin.dataPath,
             SpreadSpawnSectionsConfig(),
+            mergeUpdates = false,
             formats = ConfigFormats(
                 listOf(
                     Format(
@@ -132,8 +138,6 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         )
 
         listeners(
-            GearySpawnTypeListener(),
-            MythicSpawnTypeListener(),
             ListSpawnListener(spreadSpawner, db, plugin),
             SpreadEntityDeathListener(
                 spreadSpawner, db, plugin, mainWorld

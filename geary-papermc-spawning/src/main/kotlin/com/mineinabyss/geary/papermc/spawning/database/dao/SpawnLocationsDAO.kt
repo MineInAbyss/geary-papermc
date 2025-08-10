@@ -99,8 +99,6 @@ class SpawnLocationsDAO {
 
     context(tx: WriteTransaction)
     fun dropAll(world: World) {
-        tx.exec("DROP TABLE IF EXISTS ${dataTable(world)}")
-        tx.exec("DROP TABLE IF EXISTS ${rtree(world)}")
-        tx.exec("DROP VIEW IF EXISTS ${locationsView(world)}")
+        tx.exec("DELETE FROM ${dataTable(world)}")
     }
 }
