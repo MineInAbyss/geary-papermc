@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.spawning.spread_spawn
 
+import co.touchlab.kermit.Logger
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.choosing.InChunkLocationChooser
@@ -25,7 +26,8 @@ class SpreadSpawner(
     private val configs: SpreadSpawnSectionsConfig,
     private val chunkChooser: SpreadChunkChooser,
     private val posChooser: InChunkLocationChooser,
-    private val dao: SpawnLocationsDAO
+    private val dao: SpawnLocationsDAO,
+    private val logger: Logger,
 ) {
     suspend fun spawnSpreadEntities() {
         val container: RegionContainer = WorldGuard.getInstance().platform.regionContainer
@@ -35,18 +37,18 @@ class SpreadSpawner(
         for ((regionName, config) in configs.sectionsConfig) {
 
             val region = regions?.getRegion(regionName) ?: run {
-                println("Region $regionName not found in world ${world.name}")
+                logger.w { "Region $regionName not found in world ${world.name}" }
                 continue
             }
 
             val cuboidRegion: ProtectedCuboidRegion = region as? ProtectedCuboidRegion ?: run {
-                println("Region $regionName is not a cuboid region in world ${world.name}")
+                logger.w { "Region $regionName is not a cuboid region in world ${world.name}" }
                 continue
             }
 
             val chunkLoc = chooseChunkInRegion(cuboidRegion, config) ?: continue // No valid chunk found
             val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue // No valid position found in chunk
-            println("spawning entity in $regionName at ${spawnPos.x.toInt()}, ${spawnPos.y.toInt()}, ${spawnPos.z.toInt()}")
+            logger.d { "Spawning entity in $regionName at ${spawnPos.x.toInt()}, ${spawnPos.y.toInt()}, ${spawnPos.z.toInt()}" }
             db.write { dao.insertSpawnLocation(spawnPos, StoredEntity(config.entry.type.key)) }
         }
     }

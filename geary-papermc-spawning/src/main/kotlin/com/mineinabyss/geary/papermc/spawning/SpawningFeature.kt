@@ -53,13 +53,11 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
 
     init {
         pluginDeps("WorldGuard", "MythicMobs")
-        println("SpawningFeature initialized")
     }
 
     override fun canEnable() = gearyPaper.config.spawning
 
     override fun load() {
-        println("SpawningFeature load")
         runCatching {
             val registry = WorldGuard.getInstance().flagRegistry
             registry.register(SpawningWorldGuardFlags.OVERRIDE_LOWER_PRIORITY_SPAWNS)
@@ -134,7 +132,8 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
             configs = spreadConfig,
             chunkChooser = chunkChooser,
             posChooser = posChooser,
-            dao = dao
+            dao = dao,
+            logger = logger
         )
 
         listeners(
@@ -166,11 +165,9 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         player.sendMessage(message)
     }
 
-    fun dumpDB(loc: Location, player : Player?) {
-        val db = database ?: return println("no database to dump")
+    fun dumpDB(loc: Location, player : Player) {
+        val db = database ?: error("No database to dump")
         val dao = SpawnLocationsDAO()
-        if (player == null)
-            return println("no player to dump db to")
         plugin.launch {
             db.read {
                 val locations = dao.getSpawnsNear(loc, 10000.0)
@@ -191,6 +188,5 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
                 dao.dropAll(world)
             }
         }
-        println("Cleared spawn locations from the database.")
     }
 }

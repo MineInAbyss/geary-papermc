@@ -20,6 +20,7 @@ import com.mineinabyss.idofront.commands.brigadier.IdoCommand
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.items.editItemMeta
 import com.mineinabyss.idofront.messaging.info
+import com.mineinabyss.idofront.messaging.success
 import org.bukkit.Material
 import org.bukkit.block.ShulkerBox
 import org.bukkit.inventory.ItemStack
@@ -123,6 +124,7 @@ internal fun IdoCommand.debug() = "debug" {
     "clearDB" {
         playerExecutes {
             gearyPaper.features.getOrNull<SpawningFeature>()?.clearDB(player.world)
+            sender.success("Cleared spawn locations from the database.")
         }
     }
 }
