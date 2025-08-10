@@ -3,7 +3,6 @@ package com.mineinabyss.geary.papermc.spawning
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.github.shynixn.mccoroutine.bukkit.launch
-import com.mineinabyss.geary.actions.main
 import com.mineinabyss.geary.papermc.Feature
 import com.mineinabyss.geary.papermc.FeatureContext
 import com.mineinabyss.geary.papermc.gearyPaper
@@ -26,7 +25,7 @@ import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.mythic.MythicSpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
-import com.mineinabyss.geary.papermc.spawning.targeted.ListSpawnListener
+import com.mineinabyss.geary.papermc.spawning.listeners.ListSpawnListener
 import com.mineinabyss.geary.papermc.spawning.tasks.SpawnTask
 import com.mineinabyss.geary.papermc.spawning.tasks.SpreadSpawnTask
 import com.mineinabyss.geary.papermc.sqlite.sqliteDatabase
@@ -124,9 +123,10 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
                 )
             )
         )
-        val mainWorld = getWorld(spreadConfig.WorldName) ?: error("World ${spreadConfig.WorldName} not found, cannot initialize spread spawning")
+        val mainWorld = getWorld(spreadConfig.worldName) ?: error("World ${spreadConfig.worldName} not found, cannot initialize spread spawning")
         val posChooser = InChunkLocationChooser(task.mobSpawner, mainWorld)
-        val chunkChooser = SpreadChunkChooser(mainWorld, db, SpawnLocationDAO())
+        val dao = SpawnLocationsDAO()
+        val chunkChooser = SpreadChunkChooser(mainWorld, db, dao)
 
         val spreadSpawner = SpreadSpawner(
             db = db,
@@ -134,11 +134,11 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
             configs = spreadConfig,
             chunkChooser = chunkChooser,
             posChooser = posChooser,
-            dao = SpawnLocationsDAO()
+            dao = dao
         )
 
         listeners(
-            ListSpawnListener(spreadSpawner, db, plugin),
+            ListSpawnListener(spreadSpawner, db, dao ,plugin),
             SpreadEntityDeathListener(
                 spreadSpawner, db, plugin, mainWorld
             )
@@ -168,7 +168,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
 
     fun dumpDB(loc: Location, player : Player?) {
         val db = database ?: return println("no database to dump")
-        val dao = spreadSpawnTask?.spreadSpawner?.dao ?: return println("no spread spawner to dump db from")
+        val dao = SpawnLocationsDAO()
         if (player == null)
             return println("no player to dump db to")
         plugin.launch {
@@ -185,7 +185,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
     // the db is locked when we try to run this function.
     fun clearDB(world: World) {
         val db = database ?: return println("no database to clear")
-        val dao = spreadSpawnTask?.spreadSpawner?.dao ?: return println("no spread spawner to clear db from")
+        val dao = SpawnLocationsDAO()
         plugin.launch {
             db.write {
                 dao.dropAll(world)

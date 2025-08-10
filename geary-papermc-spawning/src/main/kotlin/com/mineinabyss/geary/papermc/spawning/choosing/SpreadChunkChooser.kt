@@ -50,7 +50,7 @@ class SpreadChunkChooser(
         // Choose first subsection with no nearby spawns
         var chosen: Pair<Int, Int>? = null
         for ((x, z) in sampledCandidates) {
-            if (findNearestSq(x, z, db, dao, mainWorld) >= scoreThreshold) {
+            if (findNearestSq(x, z) >= scoreThreshold) {
                 chosen = x to z
                 break
             }
@@ -69,13 +69,11 @@ class SpreadChunkChooser(
         )
     }
 
-    private suspend fun findNearestSq(x: Int, z: Int): Double {
-        return db.read {
-            val loc = Location(mainWorld, x.toDouble(), 0.0, z.toDouble())
-            dao.getClosestSpawn(loc, 1000.0)
-                ?.location?.distanceSquared(loc)
-                ?: Double.MAX_VALUE
-        }
+    private suspend fun findNearestSq(x: Int, z: Int): Double = db.read {
+        val loc = Location(mainWorld, x.toDouble(), 0.0, z.toDouble())
+        dao.getClosestSpawn(loc, 1000.0)
+            ?.location?.distanceSquared(loc)
+            ?: Double.MAX_VALUE
     }
 }
 

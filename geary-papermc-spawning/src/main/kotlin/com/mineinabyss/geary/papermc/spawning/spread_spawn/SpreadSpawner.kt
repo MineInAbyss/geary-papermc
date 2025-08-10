@@ -18,15 +18,14 @@ import me.dvyy.sqlite.Database
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
-import kotlin.time.Duration.Companion.hours
 
 class SpreadSpawner(
-    val db: Database,
+    private val db: Database,
     private val world: World,
-    val configs: SpreadSpawnSectionsConfig,
+    private val configs: SpreadSpawnSectionsConfig,
     private val chunkChooser: SpreadChunkChooser,
     private val posChooser: InChunkLocationChooser,
-    val dao: SpawnLocationsDAO
+    private val dao: SpawnLocationsDAO
 ) {
     suspend fun spawnSpreadEntities() {
         val container: RegionContainer = WorldGuard.getInstance().platform.regionContainer
@@ -52,6 +51,7 @@ class SpreadSpawner(
         }
     }
 
+    // TODO add back once we update to 1.21.8 (needs kotlin 2.2 time apis)
     suspend fun clearOldEntries(world: World) {
 //        db.write {
 //            dao.deleteSpawnsOlderThan(world, 1.hours)
@@ -60,7 +60,7 @@ class SpreadSpawner(
 
     suspend fun chooseChunkInRegion(worldGuardRegion: ProtectedCuboidRegion, config: SpreadSpawnConfig): Location? {
         val boundingBox = getBBFromRegion(worldGuardRegion)
-        return chunkChooser.chooseChunkInBB(boundingBox, this, config)
+        return chunkChooser.chooseChunkInBB(boundingBox, config)
     }
 
     suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? = withContext(gearyPaper.plugin.minecraftDispatcher) {

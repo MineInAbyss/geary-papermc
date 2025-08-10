@@ -22,7 +22,7 @@ class SpreadSpawnTask(world: World, configs: SpreadSpawnSectionsConfig, val spre
             }.onFailure {
                 gearyPaper.logger.e { it.stackTraceToString() }
             }
-            delay(configs.SpawnDelay.ticks)
+            delay(configs.spawnDelay.ticks)
         }
     }
 
