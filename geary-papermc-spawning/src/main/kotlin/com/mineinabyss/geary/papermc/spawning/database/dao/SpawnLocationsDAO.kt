@@ -46,7 +46,7 @@ class SpawnLocationsDAO {
     ).first { getInt(0) }
 
     context(tx: Transaction)
-    fun areSpawnsNearby(location: Location, radius: Double): Boolean {
+    fun countNearby(location: Location, radius: Double): Int {
         val (x, y, z) = location
         return tx.select(
             """
@@ -55,11 +55,10 @@ class SpawnLocationsDAO {
             AND maxX < :x + :rad AND maxY < :y + :rad AND maxZ < :z + :rad
             AND (minX - :x) * (minX - :x) +
                 (minY - :y) * (minY - :y) +
-                (minZ - :z) * (minZ - :z) <= :rad * :rad
-            LIMIT 1;
+                (minZ - :z) * (minZ - :z) <= :rad * :rad;
             """.trimIndent(),
             x, radius, y, z
-        ).first { getInt(0) } > 0
+        ).first { getInt(0) }
     }
 
     context(tx: Transaction)

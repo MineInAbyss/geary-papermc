@@ -78,23 +78,7 @@ class SpreadSpawner(
         return BoundingBox.of(minLoc, maxLoc)
     }
 
-    suspend fun getNBNear(location: Location, radius: Double): Int {
-        val radiusSq = radius * radius
-        val nearbySpawns = db.read {
-            dao.getSpawnsNear(location, radius)
-                .filter {
-                    val loc = it.location
-                    val dx = loc.x - location.x
-                    val dy = loc.y - location.y
-                    val dz = loc.z - location.z
-                    (dx * dx + dy * dy + dz * dz) <= radiusSq
-                }
-                .map {
-                    it.location.world = this@SpreadSpawner.world
-                    it.location.chunk
-                }
-                .toSet()
-        }
-        return nearbySpawns.size
+    suspend fun countNearby(location: Location, radius: Double): Int = db.read {
+        dao.countNearby(location, radius)
     }
 }

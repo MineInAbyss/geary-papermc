@@ -24,7 +24,7 @@ class GhostSeekAction(val radii: List<Double>) : Action {
             val pings = mutableListOf<Int>()
             for (i in radii.indices.reversed()) {
                 val radius = radii[i]
-                if (spawner.getNBNear(player.location, radius) > 0) {
+                if (spawner.countNearby(player.location, radius) > 0) {
                     pings.add(i)
                 }
             }
