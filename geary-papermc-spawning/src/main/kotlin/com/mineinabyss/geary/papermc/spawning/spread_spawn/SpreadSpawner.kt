@@ -35,7 +35,6 @@ class SpreadSpawner(
         val regions: RegionManager? = container.get(wgWorld)
 
         for ((regionName, config) in configs.sectionsConfig) {
-
             val region = regions?.getRegion(regionName) ?: run {
                 logger.w { "Region $regionName not found in world ${world.name}" }
                 continue
@@ -49,7 +48,11 @@ class SpreadSpawner(
             val chunkLoc = chooseChunkInRegion(cuboidRegion, config) ?: continue // No valid chunk found
             val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue // No valid position found in chunk
             logger.d { "Spawning entity in $regionName at ${spawnPos.x.toInt()}, ${spawnPos.y.toInt()}, ${spawnPos.z.toInt()}" }
-            db.write { dao.insertSpawnLocation(spawnPos, StoredEntity(config.entry.type.key)) }
+            val spread = db.write {
+                dao.insertSpawnLocation(spawnPos, StoredEntity(config.entry.type.key))
+            }
+            // Handle case where chunk is loaded by player immediately (without a reload)
+            spread.spawn()
         }
     }
 

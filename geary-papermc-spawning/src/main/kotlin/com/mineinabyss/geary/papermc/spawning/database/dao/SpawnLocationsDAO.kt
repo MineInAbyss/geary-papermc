@@ -91,7 +91,7 @@ class SpawnLocationsDAO {
     ).map { SpreadSpawnLocation.fromStatement(this, chunk.world) }
 
     context(tx: WriteTransaction)
-    fun insertSpawnLocation(location: Location, store: StoredEntity) {
+    fun insertSpawnLocation(location: Location, store: StoredEntity): SpreadSpawnLocation {
         val (x, y, z) = location
         tx.exec(
             """
@@ -100,9 +100,17 @@ class SpawnLocationsDAO {
             """.trimIndent(),
             x, y, z
         )
+        val id = tx.select("SELECT last_insert_rowid()").first { getInt(0) }
         tx.exec(
-            "INSERT INTO ${dataTable(location.world)}(id, data) VALUES (last_insert_rowid(), json(:data))",
+            "INSERT INTO ${dataTable(location.world)}(id, data) VALUES (:id, json(:data))",
+            id,
             json.encodeToString(store)
+        )
+
+        return SpreadSpawnLocation(
+            id = id,
+            stored = store,
+            location = location
         )
     }
 
