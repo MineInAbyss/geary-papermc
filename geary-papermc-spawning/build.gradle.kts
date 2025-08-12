@@ -6,7 +6,12 @@ plugins {
     alias(idofrontLibs.plugins.kotlinx.serialization)
 }
 
+repositories {
+    mavenLocal()
+}
+
 dependencies {
+    implementation(libs.sqlite.kt)
     // Plugins
     compileOnly(idofrontLibs.minecraft.plugin.mythic.dist)
     compileOnly(idofrontLibs.idofront.nms)
@@ -16,9 +21,11 @@ dependencies {
     compileOnly(idofrontLibs.kotlinx.serialization.json)
     compileOnly(idofrontLibs.kotlinx.serialization.kaml)
     compileOnly(idofrontLibs.minecraft.mccoroutine)
+    testImplementation(idofrontLibs.mockk)
 
     compileOnly(libs.geary.actions)
-    implementation(project(":geary-papermc-tracking"))
+    implementation(projects.gearyPapermcSqlite)
+    implementation(projects.gearyPapermcTracking)
     compileOnly(idofrontLibs.minecraft.plugin.worldguard) {
         exclude(group = "org.bukkit")
         exclude(group = "com.google.guava")

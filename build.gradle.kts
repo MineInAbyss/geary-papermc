@@ -1,7 +1,9 @@
 plugins {
     `java-library`
     alias(idofrontLibs.plugins.mia.publication)
-    alias(idofrontLibs.plugins.mia.kotlin.jvm)
+    //alias(idofrontLibs.plugins.mia.kotlin.jvm)
+    //TODO revert back to alias after merging idofront bump
+    kotlin("jvm") version "2.2.0"
     alias(idofrontLibs.plugins.mia.autoversion)
 }
 
@@ -43,8 +45,10 @@ allprojects {
                 freeCompilerArgs.addAll(
                     "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
                     "-opt-in=kotlin.ExperimentalUnsignedTypes",
-                    "-Xcontext-receivers",
-                    "-Xsuppress-warning=CONTEXT_RECEIVERS_DEPRECATED" // We're aware of this, will be switching to context parameters once they release
+                    "-Xcontext-parameters",
+                )
+                optIn.addAll(
+                    "kotlin.time.ExperimentalTime"
                 )
             }
         }

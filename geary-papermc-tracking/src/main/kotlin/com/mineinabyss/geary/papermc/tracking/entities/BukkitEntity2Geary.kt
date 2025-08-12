@@ -17,18 +17,18 @@ class BukkitEntity2Geary(
 ) {
     private val entityMap = Int2LongOpenHashMap().apply { defaultReturnValue(-1) }
 
-    context(Geary)
+    context(world: Geary)
     operator fun get(bukkitEntity: BukkitEntity): GearyEntity? = synchronized(entityMap) {
         val id = entityMap.get(bukkitEntity.entityId)
         if (id == -1L) return null
-        return id.toGeary()
+        return with(world) { id.toGeary() }
     }
 
-    context(Geary)
+    context(world: Geary)
     operator fun get(entityId: Int): GearyEntity? = synchronized(entityMap) {
         val id = entityMap.get(entityId)
         if (id == -1L) return null
-        return id.toGeary()
+        return with(world) { id.toGeary() }
     }
 
     operator fun set(bukkit: BukkitEntity, entity: GearyEntity) = synchronized(entityMap) {
@@ -41,20 +41,20 @@ class BukkitEntity2Geary(
         entityMap.remove(entityId)
     }
 
-    context(Geary)
+    context(world: Geary)
     fun getOrCreate(bukkit: BukkitEntity): GearyEntity = synchronized(entityMap) {
         return get(bukkit) ?: run {
             if (forceMainThread) AsyncCatcher.catchOp("Async geary entity creation for id ${bukkit.entityId}, type ${bukkit.type}")
             synchronized(entityMap) {
-                entity { set(bukkit) }.also { fireAddToWorldEvent(bukkit, it) }
+                world.entity { set(bukkit) }.also { fireAddToWorldEvent(bukkit, it) }
             }
         }
     }
 
-    context(Geary)
+    context(world: Geary)
     fun fireAddToWorldEvent(bukkit: BukkitEntity, entity: GearyEntity) = synchronized(entityMap) {
         entity.add<AddedToWorld>()
-        val entityBinds = getAddon(EntityTracking).entityTypeBinds[bukkit.type.key.toString()]
+        val entityBinds = world.getAddon(EntityTracking).entityTypeBinds[bukkit.type.key.toString()]
         entityBinds.forEach { bind ->
             entity.extend(bind)
         }

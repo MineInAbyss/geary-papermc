@@ -29,30 +29,30 @@ internal val Geary.serializers get() = getAddon(SerializableComponents).serializ
 internal val Geary.formats get() = getAddon(SerializableComponents).formats
 
 /** Returns whether this [PersistentDataContainer] has a component [T] encoded in it. */
-context(Geary)
+context(world: Geary)
 inline fun <reified T : GearyComponent> PersistentDataContainer.has(): Boolean {
-    return has(serializers.getNamespacedKeyFor<T>() ?: return false, BYTE_ARRAY)
+    return has(world.serializers.getNamespacedKeyFor<T>() ?: return false, BYTE_ARRAY)
 }
 
-context(Geary)
+context(world: Geary)
 inline fun <reified T : GearyComponent> PersistentDataContainer.remove() {
-    return remove(serializers.getNamespacedKeyFor<T>() ?: return)
+    return remove(world.serializers.getNamespacedKeyFor<T>() ?: return)
 }
 
 /**
  * Encodes a component into this [PersistentDataContainer], where the serializer and key can automatically be found via
  * [Formats].
  */
-context(Geary)
+context(world: Geary)
 fun <T : GearyComponent> PersistentDataContainer.encode(
     value: T,
-    serializer: SerializationStrategy<T> = ((serializers.getSerializerFor(value::class)
+    serializer: SerializationStrategy<T> = ((world.serializers.getSerializerFor(value::class)
         ?: error("Serializer not registered for ${value::class.simpleName}")) as SerializationStrategy<T>),
-    key: NamespacedKey = serializers.getSerialNameFor(value::class)?.toComponentKey()
+    key: NamespacedKey = world.serializers.getSerialNameFor(value::class)?.toComponentKey()
         ?: error("SerialName  not registered for ${value::class.simpleName}"),
 ) {
     hasComponentsEncoded = true
-    val encoded = formats.binaryFormat.encodeToByteArray(serializer, value)
+    val encoded = world.formats.binaryFormat.encodeToByteArray(serializer, value)
     this[key, BYTE_ARRAY] = encoded
 }
 
@@ -60,11 +60,11 @@ fun <T : GearyComponent> PersistentDataContainer.encode(
  * Decodes a component of type [T] from this [PersistentDataContainer], where serializer and key are automatically
  * found via [Formats].
  */
-context(Geary)
+context(world: Geary)
 inline fun <reified T : GearyComponent> PersistentDataContainerView.decode(): T? {
     return decode(
-        serializer = serializers.getSerializerFor(T::class) ?: return null,
-        key = serializers.getSerialNameFor(T::class)?.toComponentKey() ?: return null
+        serializer = world.serializers.getSerializerFor(T::class) ?: return null,
+        key = world.serializers.getSerialNameFor(T::class)?.toComponentKey() ?: return null
     )
 }
 
@@ -72,16 +72,16 @@ inline fun <reified T : GearyComponent> PersistentDataContainerView.decode(): T?
  * Decodes a component of type [T] from this [PersistentDataContainer] where the [serializer] may automatically be found
  * via [Formats] given a [key].
  */
-context(Geary)
+context(world: Geary)
 inline fun <reified T : GearyComponent> PersistentDataContainerView.decode(
     key: NamespacedKey,
     serializer: DeserializationStrategy<out T>? =
-        serializers.getSerializerForNamespaced(key, T::class),
+        world.serializers.getSerializerForNamespaced(key, T::class),
 ): T? {
 
     serializer ?: return null
     val encoded = get(key, BYTE_ARRAY) ?: return null
-    return runCatching { formats.binaryFormat.decodeFromByteArray(serializer, encoded) }
+    return runCatching { world.formats.binaryFormat.decodeFromByteArray(serializer, encoded) }
         .onFailure { it.printStackTrace() }
         .getOrNull()
 }
@@ -91,11 +91,11 @@ inline fun <reified T : GearyComponent> PersistentDataContainerView.decode(
  *
  * @see encode
  */
-context(Geary)
+context(world: Geary)
 fun PersistentDataContainer.encodeComponents(
     components: Collection<GearyComponent>,
     type: GearyEntityType,
-) {
+) = with(world) {
     hasComponentsEncoded = true
     //remove all keys present on the PDC so we only end up with the new list of components being encoded
     keys.filter { it.key.isComponentKey() && it != COMPONENTS_KEY }
@@ -113,7 +113,7 @@ fun PersistentDataContainer.encodeComponents(
  * Encodes a list of [PrefabKey]s under the key `geary:prefabs`. When decoding these will be stored in
  * [DecodedEntityData.type].
  */
-context(Geary)
+context(world: Geary)
 fun PersistentDataContainer.encodePrefabs(
     keys: Collection<PrefabKey>
 ) {
@@ -129,7 +129,7 @@ fun PersistentDataContainer.encodePrefabs(
 }
 
 /** Decodes [PrefabKey]s under the key `geary:prefabs`. */
-context(Geary)
+context(world: Geary)
 fun PersistentDataContainerView.decodePrefabs(): Set<PrefabKey> =
     decode(PREFABS_KEY, SetSerializer(PrefabKey.serializer()))
         ?.map { key ->
@@ -145,8 +145,8 @@ fun PersistentDataContainerView.decodePrefabs(): Set<PrefabKey> =
  *
  * @see decode
  */
-context(Geary)
-fun PersistentDataContainerView.decodeComponents(): DecodedEntityData =
+context(world: Geary)
+fun PersistentDataContainerView.decodeComponents(): DecodedEntityData = with(world) {
     DecodedEntityData(
         // only include keys that start with the component prefix and remove it to get the serial name
         persistingComponents = keys
@@ -157,6 +157,7 @@ fun PersistentDataContainerView.decodeComponents(): DecodedEntityData =
             relationOf<InstanceOf?>(entityOfOrNull(it) ?: return@mapNotNull null).id
         })
     )
+}
 
 /** Verifies a [PersistentDataContainer] has a tag identifying it as containing Geary components. */
 var PersistentDataContainer.hasComponentsEncoded: Boolean

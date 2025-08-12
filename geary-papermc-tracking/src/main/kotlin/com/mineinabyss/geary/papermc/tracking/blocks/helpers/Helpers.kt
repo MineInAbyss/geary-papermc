@@ -14,9 +14,9 @@ val Block.prefabKey get() = withGeary { gearyBlocks.block2Prefab[blockData] }
 
 fun Block.toGearyOrNull() = withGeary { entityOfOrNull(gearyBlocks.block2Prefab[blockData]) }
 
-context(Geary)
+context(world: Geary)
 val BlockData.prefabKey
-    get() = gearyBlocks.block2Prefab[this]
+    get() = world.gearyBlocks.block2Prefab[this]
 
-context(Geary)
-fun BlockData.toGearyOrNull() = entityOfOrNull(gearyBlocks.block2Prefab[this])
+context(world: Geary)
+fun BlockData.toGearyOrNull() = world.entityOfOrNull(world.gearyBlocks.block2Prefab[this])

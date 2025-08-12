@@ -1,4 +1,5 @@
 rootProject.name = "geary-papermc"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {
@@ -40,6 +41,7 @@ include(
     "geary-papermc-plugin",
     "geary-papermc-spawning",
     "geary-papermc-tracking",
+    "geary-papermc-sqlite",
     "geary-tests",
 //    "schema-generator"
 )

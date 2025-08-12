@@ -37,26 +37,26 @@ class LoginListener(
     }
 
     companion object {
-        context(Geary)
+        context(world: Geary)
         fun readItemInfo(item: NMSItemStack): ItemInfo {
             if (item.isEmpty) return ItemInfo.NothingEncoded
             val pdc = item.fastPDC ?: return ItemInfo.NothingEncoded
             return readItemInfo(pdc)
         }
 
-        context(Geary)
+        context(world: Geary)
         fun readItemInfo(item: ItemStack): ItemInfo {
             if (item.isEmpty) return ItemInfo.NothingEncoded
             val pdc = item.persistentDataContainer
             return readItemInfo(pdc)
         }
 
-        context(Geary)
+        context(world: Geary)
         fun readItemInfo(pdc: PersistentDataContainerView): ItemInfo {
             if (!pdc.hasComponentsEncoded) return ItemInfo.NothingEncoded
 
             val prefabKeys = pdc.decodePrefabs()
-            val prefabs = prefabKeys.map { entityOfOrNull(it) ?: return ItemInfo.ErrorDecoding }.toSet()
+            val prefabs = prefabKeys.map { world.entityOfOrNull(it) ?: return ItemInfo.ErrorDecoding }.toSet()
 
 
             val uuid = pdc.decode<UUID>()

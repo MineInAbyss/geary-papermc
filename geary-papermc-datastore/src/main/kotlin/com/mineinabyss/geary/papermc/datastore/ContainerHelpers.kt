@@ -27,14 +27,14 @@ fun GearyEntity.encodeComponentsTo(pdc: PersistentDataContainer) = with(world) {
     pdc.encodeComponents(persisting, type)
 }
 
-context(Geary)
+context(world: Geary)
 fun GearyEntity.encodeComponentsTo(holder: PersistentDataHolder) {
     val bukkitHolder = holder as? BukkitEntity
     world.logger.v { "Encoding components for bukkit entity $id (${bukkitHolder?.type} ${bukkitHolder?.uniqueId})" }
     encodeComponentsTo(holder.persistentDataContainer)
 }
 
-context(Geary)
+context(world: Geary)
 fun GearyEntity.encodeComponentsTo(item: ItemStack) {
     item.editPersistentDataContainer(::encodeComponentsTo)
 }
@@ -56,10 +56,10 @@ fun GearyEntity.loadComponentsFrom(decodedEntityData: DecodedEntityData) {
     }
 }
 
-context(Geary)
+context(world: Geary)
 fun PersistentDataHolder.decodeComponents(): DecodedEntityData =
     persistentDataContainer.decodeComponents()
 
-context(Geary)
+context(world: Geary)
 fun ItemStack.decodeComponents(): DecodedEntityData =
     persistentDataContainer.decodeComponents()
