@@ -35,5 +35,5 @@ fun <T> Database.blockingRead(block: Transaction.() -> T): T {
 fun Plugin.sqliteDatabase(path: Path, init: WriteTransaction.() -> Unit = {}): Database {
     val dbPath = (dataPath / path).absolutePathString()
     //TODO a thread pool for the whole plugin, not each db
-    return Database(dbPath, parentScope = this.scope, init = init)
+    return Database(dbPath, init = init)
 }
