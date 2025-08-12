@@ -2,12 +2,9 @@ plugins {
     id(idofrontLibs.plugins.mia.kotlin.jvm.get().pluginId)
     id(idofrontLibs.plugins.mia.papermc.get().pluginId)
     id(idofrontLibs.plugins.mia.nms.get().pluginId)
-    id(idofrontLibs.plugins.mia.publication.get().pluginId)
+    id(idofrontLibs.plugins.mia.testing.get().pluginId)
+    alias(idofrontLibs.plugins.mia.publication)
     alias(idofrontLibs.plugins.kotlinx.serialization)
-}
-
-repositories {
-    mavenLocal()
 }
 
 dependencies {
@@ -32,6 +29,7 @@ dependencies {
         exclude(group = "com.google.code.gson")
         exclude(group = "it.unimi.dsi")
     }
+    testImplementation(idofrontLibs.kotlinx.coroutines.test)
 //    compileOnly(idofrontLibs.kotlinx.dataframe)
 //    implementation(project(":geary-papermc-features"))
 }

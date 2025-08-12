@@ -1,8 +1,11 @@
 package com.mineinabyss.geary.papermc.spawning.config
 
 import com.charleskorn.kaml.YamlComment
+import com.mineinabyss.idofront.serialization.DurationSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
 
 @Serializable
 class SpreadSpawnConfig(
@@ -28,5 +31,7 @@ class SpreadSpawnConfig(
 data class SpreadSpawnSectionsConfig(
     val spawnDelay: Int = 40,
     val worldName: String = "world",
-    val sectionsConfig: Map<String, SpreadSpawnConfig> = emptyMap()
+    @Serializable(with = DurationSerializer::class)
+    val clearSpawnsOlderThan: Duration = 7.days,
+    val sectionsConfig: Map<String, SpreadSpawnConfig> = emptyMap(),
 )

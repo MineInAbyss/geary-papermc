@@ -19,6 +19,7 @@ import me.dvyy.sqlite.Database
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
+import kotlin.time.Duration
 
 class SpreadSpawner(
     private val db: Database,
@@ -56,11 +57,8 @@ class SpreadSpawner(
         }
     }
 
-    // TODO add back once we update to 1.21.8 (needs kotlin 2.2 time apis)
-    suspend fun clearOldEntries(world: World) {
-//        db.write {
-//            dao.deleteSpawnsOlderThan(world, 1.hours)
-//        }
+    suspend fun clearOldEntries(world: World, olderThan: Duration) = db.write {
+        dao.deleteSpawnsOlderThan(world, olderThan)
     }
 
     suspend fun chooseChunkInRegion(worldGuardRegion: ProtectedCuboidRegion, config: SpreadSpawnConfig): Location? {

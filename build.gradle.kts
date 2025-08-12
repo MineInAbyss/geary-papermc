@@ -1,9 +1,7 @@
 plugins {
     `java-library`
     alias(idofrontLibs.plugins.mia.publication)
-    //alias(idofrontLibs.plugins.mia.kotlin.jvm)
-    //TODO revert back to alias after merging idofront bump
-    kotlin("jvm") version "2.2.0"
+    alias(idofrontLibs.plugins.mia.kotlin.jvm)
     alias(idofrontLibs.plugins.mia.autoversion)
 }
 
