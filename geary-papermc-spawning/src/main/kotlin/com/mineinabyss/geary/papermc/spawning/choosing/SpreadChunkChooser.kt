@@ -2,7 +2,6 @@ package com.mineinabyss.geary.papermc.spawning.choosing
 
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
-import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
 import me.dvyy.sqlite.Database
 import org.bukkit.Location
 import org.bukkit.World
@@ -43,21 +42,12 @@ class SpreadChunkChooser(
         // generate candidates
         val xRange = (sectionX.first / splitSize)..(sectionX.last / splitSize)
         val zRange = (sectionZ.first / splitSize)..(sectionZ.last / splitSize)
-        val sampledCandidates = generateSequence { (xRange.random() * splitSize) to (zRange.random() * splitSize) }
+        val chosen = generateSequence { (xRange.random() * splitSize) to (zRange.random() * splitSize) }
             .take(sampleSize)
             .distinct()
-
-        // Choose first subsection with no nearby spawns
-        var chosen: Pair<Int, Int>? = null
-        for ((x, z) in sampledCandidates) {
-            if (findNearestSq(x, z) >= scoreThreshold) {
-                chosen = x to z
-                break
-            }
-        }
-
-        if (chosen == null)
-            return null
+            // Choose first subsection with no nearby spawns
+            .firstOrNull { (x, z) -> findNearestSq(x, z) >= scoreThreshold }
+            ?: return null
 
         val noisyX = (chosen.first + Random.nextInt(-noiseRange, noiseRange + 1)).coerceIn(sectionX)
         val noisyZ = (chosen.second + Random.nextInt(-noiseRange, noiseRange + 1)).coerceIn(sectionZ)

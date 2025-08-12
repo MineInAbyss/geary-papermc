@@ -1,13 +1,10 @@
 package com.mineinabyss.geary.papermc.spawning.choosing
 
-import com.mineinabyss.geary.actions.main
 import com.mineinabyss.geary.papermc.spawning.MobSpawner
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
-import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
 import com.mineinabyss.geary.papermc.spawning.helpers.launchWithTicket
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
-import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
 import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.World
@@ -19,7 +16,7 @@ class InChunkLocationChooser(
 
     suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? {
         val chunk = chunkLoc.chunk
-        if (chunkLoc.world == null || chunkLoc.world != mainWorld)
+        if (!chunkLoc.isWorldLoaded || !chunkLoc.isChunkLoaded || chunkLoc.world != mainWorld)
             return null
         val pos = chunk.launchWithTicket {
             repeat(config.spawnAttempts) {
