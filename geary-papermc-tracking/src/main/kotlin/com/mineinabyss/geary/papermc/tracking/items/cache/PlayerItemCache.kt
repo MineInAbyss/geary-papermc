@@ -13,9 +13,9 @@ import com.mineinabyss.geary.prefabs.PrefabKey
 import org.bukkit.inventory.ItemStack
 
 abstract class PlayerItemCache<T>(
-    world: Geary,
+    val holder: GearyEntity,
     val maxSize: Int = 64,
-) : Geary by world {
+) : Geary by holder.world {
     /** Entity associated with an inventory slot */
     private val entities = ULongArray(maxSize)
 
@@ -45,7 +45,6 @@ abstract class PlayerItemCache<T>(
     /** Updates cache to match passed [inventory] */
     fun updateToMatch(
         inventory: Array<T?>,
-        holder: GearyEntity? = null,
         ignoreCached: Boolean = false,
         heldSlot: Int = -1,
     ) {

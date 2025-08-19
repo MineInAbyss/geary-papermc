@@ -12,12 +12,11 @@ import org.bukkit.inventory.PlayerInventory
 
 class NMSInventoryCacheWrapper(
     override val cache: PlayerItemCache<NMSItemStack>,
-    val holder: GearyEntity,
 ) : InventoryCacheWrapper {
-    override fun updateToMatch(inventory: Inventory, ignoreCached: Boolean) = with(holder.world) {
+    override fun updateToMatch(inventory: Inventory, ignoreCached: Boolean) = with(cache.holder.world) {
         require(inventory is PlayerInventory) { "Inventory must be a player inventory" }
         require(cache is NMSItemCache) { "Cache must be an NMS cache" }
-        updateToMatch(cache, holder, inventory, ignoreCached)
+        updateToMatch(cache, inventory, ignoreCached)
     }
 
     override fun getOrUpdate(inventory: Inventory, slot: Int): GearyEntity? {
@@ -36,11 +35,10 @@ class NMSInventoryCacheWrapper(
     companion object {
         fun updateToMatch(
             cache: PlayerItemCache<NMSItemStack>,
-            holder: GearyEntity,
             inventory: PlayerInventory,
             ignoreCached: Boolean,
         ) {
-            cache.updateToMatch(toArray(inventory.toNMS()), holder, ignoreCached, inventory.heldItemSlot)
+            cache.updateToMatch(toArray(inventory.toNMS()), ignoreCached, inventory.heldItemSlot)
         }
 
         fun toArray(inventory: NMSPlayerInventory): Array<NMSItemStack?> {

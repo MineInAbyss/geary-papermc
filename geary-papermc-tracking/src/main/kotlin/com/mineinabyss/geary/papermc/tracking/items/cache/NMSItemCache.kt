@@ -1,7 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.items.cache
 
 import com.mineinabyss.geary.datatypes.GearyEntity
-import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.tracking.items.GearyItemProvider
 import com.mineinabyss.geary.papermc.tracking.items.systems.LoginListener
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
@@ -10,9 +9,9 @@ import com.mineinabyss.idofront.nms.nbt.fastPDC
 import org.bukkit.inventory.ItemStack
 
 class NMSItemCache(
-    world: Geary,
+    holder: GearyEntity,
     val itemProvider: GearyItemProvider,
-) : PlayerItemCache<NMSItemStack>(world, 64) {
+) : PlayerItemCache<NMSItemStack>(holder, 64) {
     override fun readItemInfo(item: NMSItemStack): ItemInfo {
         return LoginListener.readItemInfo(item)
     }

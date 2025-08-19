@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.items.systems
 
+import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.datastore.decode
 import com.mineinabyss.geary.papermc.datastore.decodePrefabs
@@ -22,12 +23,12 @@ import java.util.*
 
 class LoginListener(
     world: Geary,
-    val cacheImpl: () -> PlayerItemCache<*>,
+    val cacheImpl: (holder: GearyEntity) -> PlayerItemCache<*>,
 ) : Listener, Geary by world {
     @EventHandler
     fun PlayerJoinEvent.track() {
         val entity = player.toGeary()
-        entity.set<PlayerItemCache<*>>(cacheImpl())
+        entity.set<PlayerItemCache<*>>(cacheImpl(entity))
     }
 
     @EventHandler(priority = EventPriority.HIGH)
