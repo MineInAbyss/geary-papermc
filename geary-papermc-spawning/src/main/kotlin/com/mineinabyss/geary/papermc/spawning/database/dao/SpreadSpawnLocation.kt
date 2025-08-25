@@ -24,7 +24,7 @@ data class SpreadSpawnLocation(
      * Caller is responsible for ensuring the entity isn't spawned multiple times and removed as needed.
      */
     suspend fun spawn(): BukkitEntity? = withContext(gearyPaper.plugin.minecraftDispatcher) {
-        val loc = location.clone()
+        val loc = location.clone().add(0.5, 0.0, 0.5)
         loc.yaw = Random.nextFloat() * 360f
         val type = stored.asSpawnType() ?: return@withContext null
         val bukkitEntity = type.spawnAt(loc)
