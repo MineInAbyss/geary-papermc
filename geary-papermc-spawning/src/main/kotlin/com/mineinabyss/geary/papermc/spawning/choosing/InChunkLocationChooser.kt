@@ -38,7 +38,7 @@ class InChunkLocationChooser(
         if (type != entry.position || !mobSpawner.checkSpawnConditions(entry, testloc))
             return null
 
-        return Location(chunk.world, testloc.x, testloc.y, testloc.z)
+        return testloc
     }
 
     // chose a random spot within the chunk
