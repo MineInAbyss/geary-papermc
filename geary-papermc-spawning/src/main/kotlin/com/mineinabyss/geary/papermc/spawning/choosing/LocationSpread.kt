@@ -7,10 +7,7 @@ import org.bukkit.util.BoundingBox
 import kotlin.math.ceil
 import kotlin.math.floor
 
-class LocationSpread(
-    val spawnPositionReader: SpawnPositionReader,
-    val triesForNearbyLoc: Int,
-) {
+class LocationSpread(val triesForNearbyLoc: Int) {
     val random = java.util.Random()
 
     /**
@@ -62,7 +59,7 @@ class LocationSpread(
             val dz = random.nextGaussian(0.0, horizontalRange).toInt()
             val dy = verticalRange * random.nextDouble(0.0, 1.0).toInt()
             val offsetLoc = loc.clone().apply { add(dx.toDouble(), dy.toDouble(), dz.toDouble()) }
-            if (spawnPositionReader.spawnPositionFor(offsetLoc) == position) return offsetLoc
+            if (SpawnPositionReader.spawnPositionFor(offsetLoc) == position) return offsetLoc
         }
         return loc
     }
