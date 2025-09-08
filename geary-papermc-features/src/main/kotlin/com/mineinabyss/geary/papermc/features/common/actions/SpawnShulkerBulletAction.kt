@@ -42,10 +42,6 @@ class SpawnShulkerBulletAction(
             return
         val targetedEntity = getTarget(player, radius) ?: return
         repeat(amount) {
-//            val bullet = player.world.spawnEntity(
-//                player.eyeLocation.clone().add(player.eyeLocation.direction.clone().multiply(1)),
-//                EntityType.SHULKER_BULLET
-//            ) as ShulkerBullet
             val bullet = player.world.spawn(player.eyeLocation.clone().add(player.eyeLocation.direction.clone().multiply(1)), ShulkerBullet::class.java)
             bullet.target = targetedEntity
             val gearyEntity = bullet.toGearyOrNull() ?: return
