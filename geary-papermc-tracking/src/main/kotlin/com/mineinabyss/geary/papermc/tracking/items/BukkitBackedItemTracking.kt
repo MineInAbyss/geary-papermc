@@ -14,7 +14,7 @@ class BukkitBackedItemTracking(
     val world: Geary,
 ) : ItemTrackingModule {
     override val itemProvider = GearyItemProvider(world)
-    override val loginListener = LoginListener(world) { BukkitItemCache(world, world.getAddon(ItemTracking)) }
+    override val loginListener = LoginListener(world) { BukkitItemCache(it, world.getAddon(ItemTracking)) }
     override val prefabs = world.cache(::GearyItemPrefabQuery)
 
     override fun getCacheWrapper(entity: GearyEntity): InventoryCacheWrapper? {

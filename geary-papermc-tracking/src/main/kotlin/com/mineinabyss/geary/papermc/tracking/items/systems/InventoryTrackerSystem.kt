@@ -30,7 +30,6 @@ fun Geary.createInventoryTrackerSystem() = system(
     forEachMutating { entity, (player, itemCache) ->
         NMSInventoryCacheWrapper.updateToMatch(
             itemCache as PlayerItemCache<NMSItemStack>,
-            entity,
             player.inventory,
             ignoreCached = false
         )

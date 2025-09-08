@@ -6,7 +6,7 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.data.Waterlogged
 
-class SpawnPositionReader {
+object SpawnPositionReader {
     fun spawnPositionFor(location: Location): SpawnPosition {
         val type = location.block.type
         val state = location.block.blockData

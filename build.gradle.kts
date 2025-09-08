@@ -24,9 +24,7 @@ allprojects {
         google()
         maven("https://repo.mineinabyss.com/releases")
         maven("https://repo.mineinabyss.com/snapshots")
-        maven("https://maven.enginehub.org/repo/") //WorldGuard/Edit
-        maven("https://mvn.lumine.io/repository/maven-public/") // Mythic
-        maven("https://repo.nexomc.com/releases")
+        maven("https://repo.mineinabyss.com/mirror")
         mavenLocal()
     }
 

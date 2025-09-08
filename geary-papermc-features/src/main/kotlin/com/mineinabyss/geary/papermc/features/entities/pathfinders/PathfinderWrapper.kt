@@ -24,9 +24,9 @@ data class PathfinderWrapper(
     val constructor: Constructor<*> = Class.forName(PATHFINDER_PACKAGE + type)
         .constructors.filter {
             it.parameterCount == (parameters.size + 1) && NMSMob::class.java.isAssignableFrom(it.parameters.first().type)
-        }.single {
+        }.firstOrNull {
             it.parameters.drop(1).map { it.name }.containsAll(parameters.keys)
-        }
+        } ?: error("Could not find constructor for pathfinder $type, has the class name changed?")
 
     @Transient
     val serializers = constructor.parameters.drop(1).map { it.name to serializer(it.type) }

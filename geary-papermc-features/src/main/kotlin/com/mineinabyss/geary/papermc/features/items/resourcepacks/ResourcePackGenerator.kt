@@ -9,7 +9,6 @@ import com.mineinabyss.geary.systems.query.GearyQuery
 import com.mineinabyss.idofront.resourcepacks.ResourcePacks
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.key.Key
-import org.bukkit.inventory.ItemType
 import team.unnamed.creative.ResourcePack
 import team.unnamed.creative.item.Item
 import team.unnamed.creative.item.ItemModel
@@ -28,21 +27,24 @@ class ResourcePackGenerator(world: Geary) : Geary by world {
         val resourcePackFile = gearyPaper.plugin.dataFolder.resolve(gearyPaper.config.resourcePack.outputPath)
         resourcePackFile.deleteRecursively()
 
-        resourcePackQuery.forEach { (prefabKey, resourcePackContent, itemStack) ->
+        resourcePackQuery.forEach { (prefabKey, content, itemStack) ->
             // Generates any missing models for predicates if only textures are provided
-            generatePredicateModels(resourcePack, resourcePackContent, prefabKey)
+            generatePredicateModels(resourcePack, content, prefabKey)
 
-            if (resourcePackContent.model == null) resourcePack.model(
-                Model.model()
-                    .key(Key.key(prefabKey.namespace, prefabKey.key))
-                    .parent(resourcePackContent.parentModel.key())
-                    .textures(resourcePackContent.textures.modelTextures).build()
-            )
+            if (content.model == null || !content.textures.isEmpty) {
+                val modelKey = content.model ?: Key.key(prefabKey.full)
+                resourcePack.model(
+                    Model.model()
+                        .key(modelKey)
+                        .parent(content.parentModel.key())
+                        .textures(content.textures.modelTextures).build()
+                )
+            }
 
             val itemKey = itemStack?.getData(DataComponentTypes.ITEM_MODEL)
-                ?.takeUnless { itemStack.type.asItemType()?.getDefaultData(DataComponentTypes.ITEM_MODEL) == it }
-                ?: Key.key(prefabKey.full)
-            val item = Item.item(itemKey, ItemModel.reference(resourcePackContent.model ?: Key.key(prefabKey.namespace, prefabKey.key), resourcePackContent.tintSources))
+                ?.takeIf { itemStack.isDataOverridden(DataComponentTypes.ITEM_MODEL) }
+                ?: content.itemModel ?: Key.key(prefabKey.full)
+            val item = Item.item(itemKey, ItemModel.reference(content.model ?: Key.key(prefabKey.namespace, prefabKey.key), content.tintSources))
             if (resourcePack.item(itemKey) == null) resourcePack.item(item)
         }
 

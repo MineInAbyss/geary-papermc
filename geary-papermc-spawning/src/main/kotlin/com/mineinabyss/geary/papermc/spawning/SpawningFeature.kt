@@ -6,11 +6,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.papermc.Feature
 import com.mineinabyss.geary.papermc.FeatureContext
 import com.mineinabyss.geary.papermc.gearyPaper
-import com.mineinabyss.geary.papermc.spawning.choosing.InChunkLocationChooser
-import com.mineinabyss.geary.papermc.spawning.choosing.LocationSpread
-import com.mineinabyss.geary.papermc.spawning.choosing.SpawnChooser
-import com.mineinabyss.geary.papermc.spawning.choosing.SpawnLocationChooser
-import com.mineinabyss.geary.papermc.spawning.choosing.SpreadChunkChooser
+import com.mineinabyss.geary.papermc.spawning.choosing.*
 import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.SpawningWorldGuardFlags
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpawning
@@ -20,12 +16,11 @@ import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnSectionsConfig
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
 import com.mineinabyss.geary.papermc.spawning.database.schema.SpawningSchema
+import com.mineinabyss.geary.papermc.spawning.listeners.ListSpawnListener
 import com.mineinabyss.geary.papermc.spawning.listeners.SpreadEntityDeathListener
-import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.mythic.MythicSpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
-import com.mineinabyss.geary.papermc.spawning.listeners.ListSpawnListener
 import com.mineinabyss.geary.papermc.spawning.tasks.SpawnTask
 import com.mineinabyss.geary.papermc.spawning.tasks.SpreadSpawnTask
 import com.mineinabyss.geary.papermc.sqlite.sqliteDatabase
@@ -34,15 +29,14 @@ import com.mineinabyss.idofront.config.ConfigFormats
 import com.mineinabyss.idofront.config.Format
 import com.mineinabyss.idofront.config.config
 import com.sk89q.worldguard.WorldGuard
-import kotlin.io.path.Path
 import me.dvyy.sqlite.Database
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import org.bukkit.Bukkit
-import org.bukkit.Bukkit.getWorld
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Player
+import kotlin.io.path.Path
 
 class SpawningFeature(context: FeatureContext) : Feature(context) {
     val config by config("spawning", plugin.dataPath, SpawnConfig())
@@ -93,16 +87,11 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         val wg = WorldGuardSpawning(spawns.values.map { it.entry })
         val caps = MobCaps(config.playerCaps, config.defaultCap, config.range.playerCapRadius)
         val spawnChooser = SpawnChooser(wg, caps)
-        val spawnPositionReader = SpawnPositionReader()
         val task = SpawnTask(
             runTimes = config.runTimes,
             locationChooser = SpawnLocationChooser(config.range),
-            spawnPositionReader = spawnPositionReader,
             spawnAttempts = config.maxSpawnAttemptsPerPlayer,
-            mobSpawner = MobSpawner(
-                spawnChooser,
-                LocationSpread(spawnPositionReader, triesForNearbyLoc = 10)
-            ),
+            mobSpawner = MobSpawner(spawnChooser, LocationSpread(triesForNearbyLoc = 10)),
         )
 
         // -- Spread Spawn logic --
@@ -121,7 +110,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
                 )
             )
         )
-        val mainWorld = getWorld(spreadConfig.worldName) ?: error("World ${spreadConfig.worldName} not found, cannot initialize spread spawning")
+        val mainWorld = Bukkit.getWorld(spreadConfig.worldName) ?: error("World ${spreadConfig.worldName} not found, cannot initialize spread spawning")
         val posChooser = InChunkLocationChooser(task.mobSpawner, mainWorld)
         val dao = SpawnLocationsDAO()
         val chunkChooser = SpreadChunkChooser(mainWorld, db, dao)

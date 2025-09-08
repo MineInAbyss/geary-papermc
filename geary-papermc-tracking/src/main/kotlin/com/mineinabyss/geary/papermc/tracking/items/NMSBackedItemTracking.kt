@@ -15,13 +15,13 @@ class NMSBackedItemTracking(
     val world: Geary,
 ) : ItemTrackingModule, Geary by world {
     override val itemProvider = GearyItemProvider(world)
-    override val loginListener = LoginListener(world) { NMSItemCache(world, itemProvider) }
+    override val loginListener = LoginListener(world) { holder -> NMSItemCache(holder, itemProvider) }
     override val prefabs = cache(::GearyItemPrefabQuery)
 
     private val itemCacheComponent = componentId<PlayerItemCache<*>>()
 
     override fun getCacheWrapper(entity: GearyEntity): InventoryCacheWrapper? {
         val cache = entity.get(itemCacheComponent) as? PlayerItemCache<NMSItemStack> ?: return null
-        return NMSInventoryCacheWrapper(cache, entity)
+        return NMSInventoryCacheWrapper(cache)
     }
 }
