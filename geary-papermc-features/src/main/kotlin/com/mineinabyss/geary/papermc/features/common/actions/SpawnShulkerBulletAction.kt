@@ -6,9 +6,7 @@ import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.idofront.serialization.PotionEffectSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.bukkit.World
 import org.bukkit.entity.Entity
-import org.bukkit.entity.EntityType
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.entity.ShulkerBullet
@@ -59,10 +57,7 @@ class SpawnShulkerBulletAction(
 }
 
 fun alreadyExists(player: Player, radius: Double): Boolean {
-    val entities = player.world.getNearbyEntities(
-        player.location,
-        radius
-    ) { entity ->
+    val entities = player.world.getNearbyLivingEntities(player.location, radius) { entity ->
         entity is ShulkerBullet && entity.toGearyOrNull()?.get<ShulkerBulletData>()?.owner == player
     }
     return entities.isNotEmpty()
@@ -77,7 +72,7 @@ fun getTarget(player: Player, radius: Double): Entity? {
 
 fun getClosestEntity(player: Player, radius: Double): Entity? {
     val predicate = { entity: Entity -> entity != player }
-    val entities = player.world.getNearbyEntities(player.location, radius, predicate)
+    val entities = player.world.getNearbyLivingEntities(player.location, radius, predicate)
     return entities.minByOrNull { it.location.distance(player.location) }
 }
 
@@ -86,8 +81,8 @@ class ShulkerBulletHitListener : Listener {
     fun ProjectileHitEvent.onProjectileHit() {
         val data = (entity as? ShulkerBullet)?.toGearyOrNull()?.get<ShulkerBulletData>() ?: return
 
-        if (hitEntity !is LivingEntity) return
-        hitEntity.damage(data.damage) // could be customized
+        val hitEntity = hitEntity as? LivingEntity ?: return
+        hitEntity.damage(data.damage)
         hitEntity.removePotionEffect(PotionEffectType.LEVITATION)
         data.effects.forEach(hitEntity::addPotionEffect)
     }
