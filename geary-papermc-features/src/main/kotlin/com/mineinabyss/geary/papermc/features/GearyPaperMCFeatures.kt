@@ -27,6 +27,7 @@ val GearyPaperMCFeatures = createAddon("Geary Paper Features") {
             EntityDamageBridge(),
             EntityLoadUnloadBridge(),
             EntityShearedBridge(),
+            ShulkerBulletHitListener(),
         )
 
         gearyPaper.plugin.listeners(
