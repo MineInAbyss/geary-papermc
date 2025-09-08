@@ -29,7 +29,7 @@ class BoneMealRadiusAction(
         val excludedMaterials = excludedBlocks.mapNotNull(Material::matchMaterial)
         for (x in -radius..radius) for (y in -radius..radius) for (z in -radius..radius) {
             val block = world.getBlockAt(center.x + x, center.y + y, center.z + z)
-            if (allowedBlockTags.any { it.isTagged(block.type) } && block.type !in excludedMaterials) {
+            if (block.type !in excludedMaterials && allowedBlockTags.any { it.isTagged(block.type) }) {
                 block.applyBoneMeal(BlockFace.UP)
             }
         }
