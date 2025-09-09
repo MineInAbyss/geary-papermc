@@ -19,6 +19,7 @@ import me.dvyy.sqlite.Database
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
+import java.lang.Math.random
 import kotlin.time.Duration
 
 class SpreadSpawner(
@@ -49,8 +50,9 @@ class SpreadSpawner(
             val chunkLoc = chooseChunkInRegion(cuboidRegion, config) ?: continue // No valid chunk found
             val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue // No valid position found in chunk
             logger.d { "Spawning entity in $regionName at ${spawnPos.x.toInt()}, ${spawnPos.y.toInt()}, ${spawnPos.z.toInt()}" }
+            val spawnedEntity = StoredEntity(if (random() * 100 <= config.altSpawnChance) config.altSpawnEntry.type.key else config.entry.type.key)
             val spread = db.write {
-                dao.insertSpawnLocation(spawnPos, StoredEntity(config.entry.type.key))
+                dao.insertSpawnLocation(spawnPos, spawnedEntity)
             }
             // Handle case where chunk is loaded by player immediately (without a reload)
             spread.spawn()
