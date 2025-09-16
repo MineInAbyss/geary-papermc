@@ -25,7 +25,7 @@ class SpreadSpawnConfig(
     @YamlComment("How many times to try and spawn an entity in a chunk before giving up")
     val spawnAttempts: Int,
     val altSpawnChance: Double = 0.0,
-    val altSpawnEntry: SpawnEntry
+    val altSpawnEntry: SpawnEntry = entry,
 )
 
 @Serializable
