@@ -12,8 +12,8 @@ dependencies {
 }
 ```
 
-!!! note
-    Depend on `geary-papermc` to get all supported addons automatically, or `geary-papermc-core` for just the API.
+Depend on `geary-papermc` to get all supported addons automatically, or `geary-papermc-core` for just the API.
+{.info}
 
 
 ## Initialize your plugin

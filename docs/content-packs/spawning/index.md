@@ -2,8 +2,8 @@
 
 Spawns are defined under `plugins/Geary/spawns/<namespace>`. Each file can contain multiple spawns, and within one file, entries may `inherit` other entries.
 
-!!! tip
-    You can see a list of conditions for spawns at [Action system conditions](../../actions/conditions/index.md), any block condition will work here, as well as `mythicConditions` for conditions that aren't yet implemented by Geary.
+You can see a list of conditions for spawns at [Action system conditions](../../actions/conditions/index.md), any block condition will work here, as well as `mythicConditions` for conditions that aren't yet implemented by Geary.
+{.tip}
 
 A quick overview of most features by example:
 

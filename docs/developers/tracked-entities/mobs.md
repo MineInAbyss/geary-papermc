@@ -1,7 +1,7 @@
 # Mobs
 
-!!! note
-    To avoid confusion, Geary comes with a `BukkitEntity` typealias for Bukkit's `Entity` interface.
+To avoid confusion, Geary comes with a `BukkitEntity` typealias for Bukkit's `Entity` interface.
+{.tip}
 
 All bukkit entities get a geary entity created for them when spawned (and removed when despawned.)
 

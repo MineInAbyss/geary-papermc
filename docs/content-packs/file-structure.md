@@ -48,5 +48,5 @@ blocky:sound:
     breakSound: minecraft:block.amethyst_block.break
 ```
 
-- !!! tip
-    We provide a json schema [here](https://raw.githubusercontent.com/MineInAbyss/plugin-schemas/refs/heads/master/generated/geary.json) for automatic code completion, our `server-config` project shows how to set this up in IntelliJ as well as GitHub's web editor using the YAML plugin.
+We provide a json schema [here](https://raw.githubusercontent.com/MineInAbyss/plugin-schemas/refs/heads/master/generated/geary.json) for automatic code completion, our `server-config` project shows how to set this up in IntelliJ as well as GitHub's web editor using the YAML plugin.
+{.tip}
