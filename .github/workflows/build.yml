@@ -2,6 +2,8 @@ name: Build
 
 on:
   pull_request:
+    paths-ignore:
+      - docs
 
 concurrency:
   cancel-in-progress: true
