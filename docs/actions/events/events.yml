@@ -1,0 +1,20 @@
+- Name: onDamaged
+  Desc: Entity was damaged by another entity
+
+- Name: onDamageOther
+  Desc: Entity damaged another entity
+
+- Name: onSheared
+  Desc: Entity got sheared
+
+- Name: onSpawn
+  Desc: Entity spawned (for the first time)
+
+- Name: onDeath
+  Desc: Entity died
+
+- Name: onLoad
+  Desc: Entity was loaded (i.e. from spawn or chunk load)
+
+- Name: onUnload
+  Desc: Entity was unloaded from a chunk

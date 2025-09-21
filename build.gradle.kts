@@ -3,6 +3,7 @@ plugins {
     alias(idofrontLibs.plugins.mia.publication)
     alias(idofrontLibs.plugins.mia.kotlin.jvm)
     alias(idofrontLibs.plugins.mia.autoversion)
+    alias(idofrontLibs.plugins.mia.docs)
 }
 
 dependencies {
@@ -56,4 +57,8 @@ tasks {
     build {
         dependsOn(project(":geary-papermc-plugin").tasks.build)
     }
+}
+
+idofront {
+    docsVersion = "0.0.6"
 }

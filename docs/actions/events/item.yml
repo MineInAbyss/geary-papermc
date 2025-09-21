@@ -1,0 +1,26 @@
+- Name: itemInteract
+  Desc: Item interacts with something
+
+- Name: itemLeftClick
+  Desc: Item left clicked air or block
+
+- Name: itemLeftClickBlock
+  Desc: Item left clicked a block
+
+- Name: itemRightClick
+  Desc: Item right clicked air or block
+
+- Name: itemRightClickBlock
+  Desc: Item right clicked a block
+
+- Name: itemRightClickEntity
+  Desc: Item right clicked an entity
+
+- Name: itemConsumed
+  Desc: Item was consumed, ex. eaten or drunk
+
+- Name: itemBreak
+  Desc: Item broke from low durability
+
+- Name: itemDrop
+  Desc: Item was dropped by a player
