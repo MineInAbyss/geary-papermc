@@ -158,7 +158,7 @@ class SpawnLocationsDAO {
         )
         val id = tx.select("SELECT last_insert_rowid()").first { getInt(0) }
         tx.exec(
-            "INSERT INTO ${dataTable(location.world)}(id, data, type) VALUES (:id, json(:data), :type)",
+            "INSERT INTO ${dataTable(location.world)}(id, data) VALUES (:id, json(:data))",
             id,
             json.encodeToString(store),
         )
