@@ -42,7 +42,7 @@ object SpawnLocationTables {
             """
             CREATE TABLE IF NOT EXISTS $name (
                 id INTEGER PRIMARY KEY,
-                data TEXT NOT NULL,
+                data TEXT NOT NULL
             ) STRICT;
             """.trimIndent()
         ) {
