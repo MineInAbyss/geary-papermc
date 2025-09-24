@@ -62,6 +62,23 @@ class SpawnLocationsDAO {
     }
 
     context(tx: Transaction)
+    fun countNearbyOfType(location: Location, radius: Double, type: String): Int {
+        val (x, y, z) = location
+        return tx.select(
+            """
+            SELECT count(*) FROM ${rtree(location.world)}
+            WHERE minX > :x - :rad AND minY > :y - :rad AND minZ > :z - :rad
+            AND maxX < :x + :rad AND maxY < :y + :rad AND maxZ < :z + :rad
+            AND (minX - :x) * (minX - :x) +
+                (minY - :y) * (minY - :y) +
+                (minZ - :z) * (minZ - :z) <= :rad * :rad
+            AND type = :type;
+            """.trimIndent(),
+            x, radius, y, z, type
+        ).first { getInt(0) }
+    }
+
+    context(tx: Transaction)
     fun getClosestSpawn(location: Location, maxDistance: Double): SpreadSpawnLocation? {
         val (x, y, z) = location
         return tx.select(

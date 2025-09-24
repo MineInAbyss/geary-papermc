@@ -14,6 +14,7 @@ import org.bukkit.entity.Player
 @Serializable
 @SerialName("geary:ghost_seek")
 class GhostSeekAction(
+    val type: String = "praying_skeleton",
     val radii: Map<Double, Tasks>,
 ) : Action {
     @Transient
@@ -27,7 +28,7 @@ class GhostSeekAction(
         gearyPaper.plugin.launch {
             // Represents first radius which contains any skeletons within it
             val greatestRadius = sortedRadii.firstOrNull {
-                spawner.countNearby(player.location, it.key) > 0
+                spawner.countNearby(player.location, it.key, type) > 0
             } ?: return@launch
 
             // If we found an entry, execute its actions

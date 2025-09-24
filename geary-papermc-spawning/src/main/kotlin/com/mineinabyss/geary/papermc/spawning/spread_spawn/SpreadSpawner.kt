@@ -81,7 +81,7 @@ class SpreadSpawner(
         return BoundingBox.of(minLoc, maxLoc)
     }
 
-    suspend fun countNearby(location: Location, radius: Double): Int = db.read {
-        dao.countNearby(location, radius)
+    suspend fun countNearby(location: Location, radius: Double, type: String): Int = db.read {
+        dao.countNearbyOfType(location, radius, type)
     }
 }
