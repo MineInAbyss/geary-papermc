@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.features.common.event_bridge.items
 
+import com.mineinabyss.geary.papermc.features.common.event_bridge.entities.EventBridge
 import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.inventory.GearyPlayerInventory
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
@@ -22,63 +23,63 @@ import org.bukkit.event.player.PlayerToggleSneakEvent
 
 @Serializable
 @SerialName("geary:item_interact")
-class OnItemInteract
+class OnItemInteract : EventBridge
 
 @Serializable
 @SerialName("geary:item_left_click")
-class OnItemLeftClick
+class OnItemLeftClick : EventBridge
 
 @Serializable
 @SerialName("geary:equipment_left_click")
-class OnEquipmentLeftClick
+class OnEquipmentLeftClick : EventBridge
 
 @Serializable
 @SerialName("geary:item_left_click_sneak")
-class OnItemLeftClickSneak
+class OnItemLeftClickSneak : EventBridge
 
 @Serializable
 @SerialName("geary:equipment_left_click_sneak")
-class OnEquipmentLeftClickSneak
+class OnEquipmentLeftClickSneak : EventBridge
 
 @Serializable
 @SerialName("geary:item_left_click_block")
-class OnItemLeftClickBlock
+class OnItemLeftClickBlock : EventBridge
 
 @Serializable
 @SerialName("geary:item_right_click")
-class OnItemRightClick
+class OnItemRightClick : EventBridge
 
 @Serializable
 @SerialName("geary:equipment_right_click")
-class OnEquipmentRightClick
+class OnEquipmentRightClick : EventBridge
 
 @Serializable
 @SerialName("geary:item_right_click_sneak")
-class OnItemRightClickSneak
+class OnItemRightClickSneak : EventBridge
 
 @Serializable
 @SerialName("geary:equipment_right_click_sneak")
-class OnEquipmentRightClickSneak
+class OnEquipmentRightClickSneak : EventBridge
 
 @Serializable
 @SerialName("geary:item_right_click_block")
-class OnItemRightClickBlock
+class OnItemRightClickBlock : EventBridge
 
 @Serializable
 @SerialName("geary:item_right_click_entity")
-class OnItemRightClickEntity
+class OnItemRightClickEntity : EventBridge
 
 @Serializable
 @SerialName("geary:item_swap_in")
-class OnItemSwapIn
+class OnItemSwapIn : EventBridge
 
 @Serializable
 @SerialName("geary:item_swap_out")
-class OnItemSwapOut
+class OnItemSwapOut : EventBridge
 
 @Serializable
 @SerialName("geary:equipment_sneak")
-class OnEquipmentSneak
+class OnEquipmentSneak : EventBridge
 
 
 

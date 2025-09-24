@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.features.entities.bucketable
 
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
+import com.mineinabyss.idofront.serialization.MaterialByNameSerializer
 import com.mineinabyss.idofront.serialization.SerializableItemStack
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -13,7 +14,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent
 @Serializable
 @SerialName("geary:bucketable")
 class Bucketable(
-    val bucketLiquidRequired: Material = Material.WATER,
+    val bucketLiquidRequired: @Serializable(with = MaterialByNameSerializer::class) Material = Material.WATER,
     val bucketItem: SerializableItemStack
 )
 

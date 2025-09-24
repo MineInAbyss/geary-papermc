@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.features.common.event_bridge.items
 
 import com.mineinabyss.geary.helpers.addParent
+import com.mineinabyss.geary.papermc.features.common.event_bridge.entities.EventBridge
 import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
@@ -15,15 +16,15 @@ import org.bukkit.event.player.PlayerItemConsumeEvent
 
 @Serializable
 @SerialName("geary:item_consumed")
-sealed class OnItemConsume
+sealed class OnItemConsume : EventBridge
 
 @Serializable
 @SerialName("geary:item_break")
-sealed class OnItemBreak
+sealed class OnItemBreak : EventBridge
 
 @Serializable
 @SerialName("geary:item_drop")
-sealed class OnItemDrop
+sealed class OnItemDrop : EventBridge
 
 class ItemRemovedBridge : Listener {
     @EventHandler(ignoreCancelled = true)

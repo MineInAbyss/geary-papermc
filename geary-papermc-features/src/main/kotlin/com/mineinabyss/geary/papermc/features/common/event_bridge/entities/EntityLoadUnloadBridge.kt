@@ -12,15 +12,15 @@ import org.bukkit.event.entity.EntitySpawnEvent
 
 @Serializable
 @SerialName("geary:on_spawn")
-sealed class OnSpawn
+sealed class OnSpawn : EventBridge
 
 @Serializable
 @SerialName("geary:on_load")
-sealed class OnLoad
+sealed class OnLoad : EventBridge
 
 @Serializable
 @SerialName("geary:on_death")
-class OnDeath
+class OnDeath : EventBridge
 
 class EntityLoadUnloadBridge : Listener {
     @EventHandler(ignoreCancelled = true)

@@ -9,7 +9,7 @@ import org.bukkit.event.player.PlayerShearEntityEvent
 
 @Serializable
 @SerialName("geary:on_sheared")
-class OnSheared
+class OnSheared : EventBridge
 
 class EntityShearedBridge : Listener {
     @EventHandler(ignoreCancelled = true)

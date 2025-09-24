@@ -1,97 +1,146 @@
-import com.charleskorn.kaml.YamlComment
-import com.mineinabyss.geary.actions.actions.EnsureAction
-import com.mineinabyss.geary.papermc.GearyPaperConfig
-import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
-import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
-import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
-import com.mineinabyss.geary.papermc.spawning.spawn_types.SpawnType
-import io.github.smiley4.schemakenerator.core.CoreSteps.initial
-import io.github.smiley4.schemakenerator.core.data.AnnotationData
-import io.github.smiley4.schemakenerator.jsonschema.JsonSchemaAnnotationUtils.iterateProperties
-import io.github.smiley4.schemakenerator.jsonschema.JsonSchemaSteps
-import io.github.smiley4.schemakenerator.jsonschema.JsonSchemaSteps.compileReferencing
-import io.github.smiley4.schemakenerator.jsonschema.JsonSchemaSteps.generateJsonSchema
-import io.github.smiley4.schemakenerator.jsonschema.JsonSchemaSteps.merge
-import io.github.smiley4.schemakenerator.jsonschema.JsonSchemaSteps.withTitle
-import io.github.smiley4.schemakenerator.jsonschema.data.TitleType
-import io.github.smiley4.schemakenerator.jsonschema.jsonDsl.JsonObject
-import io.github.smiley4.schemakenerator.jsonschema.jsonDsl.JsonTextValue
-import io.github.smiley4.schemakenerator.serialization.SerializationSteps.analyzeTypeUsingKotlinxSerialization
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.Serializable
-import kotlin.io.path.*
-import kotlin.reflect.KType
-import kotlin.reflect.typeOf
+import com.mineinabyss.geary.actions.Action
+import com.mineinabyss.geary.actions.Condition
+import com.mineinabyss.geary.actions.event_binds.EntityObservers
+import com.mineinabyss.geary.actions.expressions.Expression.Serializer.ExpressionDescriptor
+import com.mineinabyss.geary.autoscan.autoscan
+import com.mineinabyss.geary.modules.ArchetypeEngineModule
+import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.geary
+import com.mineinabyss.geary.papermc.features.common.event_bridge.entities.EventBridge
+import com.mineinabyss.geary.prefabs.PrefabKey
+import com.mineinabyss.geary.serialization.serialization
+import com.mineinabyss.idofront.jsonschema.dsl.SchemaProperty
+import com.mineinabyss.idofront.jsonschema.dsl.SchemaType.*
+import com.mineinabyss.idofront.jsonschema.dsl.jsonSchema
+import com.mineinabyss.idofront.jsonschema.generator.kotlinx_serialization.KotlinxSerializationJsonSchemaGenerator
+import com.mineinabyss.idofront.serialization.BaseSerializableItemStack
+import kotlinx.serialization.PolymorphicSerializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.getPolymorphicDescriptors
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlin.io.path.Path
+import kotlin.io.path.writeText
+import kotlin.reflect.KClass
 
-@Serializable
-data class TestConfig(
-    @YamlComment("Default per player spawn cap limit when not explicitly set in playerCaps")
-    val first: String,
-)
-
-@OptIn(ExperimentalSerializationApi::class)
 fun main() {
-    generateSimpleConfigSchema(typeOf<GearyPaperConfig>(), "config")
-    generateSimpleConfigSchema(typeOf<SpawnConfig>(), "spawns")
-    generateSimpleConfigSchema(typeOf<EnsureAction>(), "spread_config")
-//    writeFile("config", config)
-//    writeFile("spawns", spawnsFile)
-}
-
-fun generateSimpleConfigSchema(type: KType, name: String) {
-    val outputDir = Path("build/schemas").createDirectories()
-
-    fun determineDescription(annotations: Collection<AnnotationData>): String? {
-        return annotations
-            .filter { it.name == YamlComment::class.qualifiedName }
-            .map { (it.values["lines"] as Array<String>).joinToString("") }
-            .firstOrNull()
+    val json = Json {
+        prettyPrint = true
+        prettyPrintIndent = "  "
     }
-    fun writeFile(name: String, text: String) {
-        (outputDir / "$name.json").also { if (it.notExists()) it.createFile() }.writeText(text)
-    }
-
-    return initial(type)
-        .analyzeTypeUsingKotlinxSerialization {
-//            redirect {
-//                from<SpawnEntry>()
-//                to<Map<String, String>>()
-//            }
-            redirect {
-                from<IntRange>()
-                to<Int>()
+    jsonSchema {
+        val generator = KotlinxSerializationJsonSchemaGenerator(
+            replaceDescriptors = {
+                when (it) {
+                    is ExpressionDescriptor -> it.innerDescriptor
+                    else -> it
+                }
             }
-//            redirect {
-//                from<SpawnType>()
-//                to<String>()
-//            }
-            redirect {
-                from<EnsureAction>()
-                to<String>()
+        )
+//        definition() {
+//            generator.applyClassDescriptor(DurationSerializer.descriptor)
+//        }
+//        com.mineinabyss.geary.actions.expressions.Expression.serializer(String.serializer()).descriptor
+        val desc = BaseSerializableItemStack.serializer().descriptor
+        definition("kotlinx.serialization.ContextualSerializer<BaseSerializableItemStack>", desc) {
+            anyOf(
+                { type = STRING },
+                { generator.applyClassDescriptor(desc) }
+            )
+        }
+
+
+//        var componentDescriptors: List<SerialDescriptor> = listOf()
+        var module = SerializersModule { }
+        geary(ArchetypeEngineModule()) {
+//        /var/home/offz/projects/geary-papermc/geary-papermc-features/src/com.mineinabyss.idofront.jsonschema.generator.kotlinx_serialization.main/kotlin/com/mineinabyss/geary/papermc/features/common/actions
+            autoscan(Geary::class.java.classLoader, "com.mineinabyss.geary.papermc", "com.mineinabyss.geary.actions") {
+                components()
+                subClassesOf<Action>()
+                subClassesOf<Condition>()
+                subClassesOf<EventBridge>()
+                println("Autoscan ran")
+            }
+            serialization {
+                module = SerializersModule { serializers.modules.forEach { include(it) } }
             }
         }
-        .generateJsonSchema {
-            this.optionals = JsonSchemaSteps.RequiredHandling.NON_REQUIRED
+
+        fun getPolymorphicDescriptors(kClass: KClass<*>): List<SerialDescriptor> {
+            return module
+                .getPolymorphicDescriptors(PolymorphicSerializer(kClass).descriptor)
+                .toList()
+                .filter { PrefabKey.ofOrNull(it.serialName) != null }
         }
-        .apply {
-            this.entries.forEach { schema ->
-                val json = schema.json
-                if (json is JsonObject && json.properties["description"] == null) {
-                    determineDescription(schema.typeData.annotations)?.also { description ->
-                        json.properties["description"] = JsonTextValue(description)
-                    }
-                    iterateProperties(schema, typeDataById) { property, data, type ->
-                        determineDescription(data.annotations + type.annotations)?.also { description ->
-                            property.properties["description"] = JsonTextValue(description)
-                        }
-                    }
+
+        val allDescriptors = getPolymorphicDescriptors(Any::class).toSet()
+        val actions = getPolymorphicDescriptors(Action::class).toSet() - getPolymorphicDescriptors(Condition::class).toSet()
+        val conditions = getPolymorphicDescriptors(Condition::class).toSet() - actions
+        val eventBridges = getPolymorphicDescriptors(EventBridge::class).toSet()
+        val componentDescriptors = allDescriptors - actions - conditions - eventBridges
+
+
+        val regex = "_([a-z])".toRegex()
+        fun String.toFormattedKey(): String {
+            val key = PrefabKey.of(this)
+            fun String.snakeCaseToCamelCase() = replace(regex) { it.groupValues[1].uppercase() }
+            val name = (if (key.namespace == "geary") key.key else key.toString()).snakeCaseToCamelCase()
+            return name
+        }
+
+        definition("geary:observe", EntityObservers.serializer().descriptor) {
+            type = OBJECT
+            additionalProperties {
+                ref = $$"#/$defs/geary:run"
+            }
+            propertyNames {
+                type = STRING
+                enum += eventBridges.map { it.serialName.toFormattedKey() }
+            }
+        }
+
+        definition("geary:run", null) {
+            type = ARRAY
+            items {
+                ref = $$"#/$defs/geary:action"
+            }
+        }
+
+        fun SchemaProperty.addPropertiesFromDescriptors(descriptors: Collection<SerialDescriptor>) {
+            descriptors.forEach {
+                val name = it.serialName.toFormattedKey()
+                property(name) {
+                    ref = $$"#/$defs/$${it.serialName}"
                 }
             }
         }
-        .withTitle(type = TitleType.SIMPLE)
-        .compileReferencing()
-        .merge()
-        .json
-        .prettyPrint()
-        .let { writeFile(name, it) }
+        definition("geary:ensure", null, override = true) {
+            addPropertiesFromDescriptors(conditions)
+        }
+        definition("geary:action", null, override = true) {
+            addPropertiesFromDescriptors(actions)
+        }
+
+        definition("kotlinx.serialization.ContextualSerializer<Any>", null) {
+            addPropertiesFromDescriptors(componentDescriptors)
+        }
+
+        definition("kotlinx.serialization.ContextualSerializer<ULong>", null) {
+            type = STRING
+            enum += allDescriptors.map { it.serialName.toFormattedKey() }
+        }
+
+        allDescriptors.forEach {
+            definition(it.serialName, it) {
+                generator.applyClassDescriptor(it)
+            }
+        }
+
+        rootProperty {
+            ref = $$"#/$defs/kotlinx.serialization.ContextualSerializer<Any>"
+        }
+
+    }.let {
+        Path("/var/home/offz/projects/geary-papermc/build/schemas/test.json").writeText(json.encodeToString(it))
+    }
 }

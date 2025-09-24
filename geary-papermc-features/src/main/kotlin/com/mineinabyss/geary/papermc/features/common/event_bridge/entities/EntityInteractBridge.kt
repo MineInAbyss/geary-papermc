@@ -12,15 +12,15 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent
 
 @Serializable
 @SerialName("geary:on_damaged")
-sealed class OnDamaged
+sealed class OnDamaged : EventBridge
 
 @Serializable
 @SerialName("geary:on_damage_other")
-sealed class OnDamageOther
+sealed class OnDamageOther : EventBridge
 
 @Serializable
 @SerialName("geary:on_interact")
-sealed class OnInteract
+sealed class OnInteract : EventBridge
 
 class EntityDamageBridge : Listener {
     @EventHandler(ignoreCancelled = true)
@@ -45,7 +45,7 @@ class EntityDamageBridge : Listener {
         gearyEntity?.emit<OnInteract>()
 
         //TODO update event system so we can run conditions on the player here, not just target
-        if(player.inventory.itemInMainHand.type == Material.SHEARS) {
+        if (player.inventory.itemInMainHand.type == Material.SHEARS) {
             gearyEntity?.emit<OnSheared>()
         }
     }

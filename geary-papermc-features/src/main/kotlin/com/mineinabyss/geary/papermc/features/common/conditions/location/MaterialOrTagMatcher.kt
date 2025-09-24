@@ -42,7 +42,7 @@ data class MaterialOrTagMatcher(
                 tags.mapNotNull { tag ->
                     Bukkit.getTag(
                         Tag.REGISTRY_BLOCKS,
-                        NamespacedKey.fromString(tag.removePrefix("#")) ?: return@mapNotNull null.also { Geary.w { "Invalid tag: $tag" }},
+                        NamespacedKey.fromString(tag.removePrefix("#")) ?: return@mapNotNull null.also { Geary.w { "Invalid tag: $tag" } },
                         Material::class.java
                     ) ?: null.also { Geary.w { "Unknown block tag: $tag" } }
                 }

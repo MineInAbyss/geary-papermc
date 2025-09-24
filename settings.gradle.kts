@@ -44,3 +44,5 @@ include(
     "geary-tests",
     "schema-generator"
 )
+
+includeBuild("../Idofront")
