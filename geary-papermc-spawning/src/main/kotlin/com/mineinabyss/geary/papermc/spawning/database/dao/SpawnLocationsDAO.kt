@@ -78,6 +78,23 @@ class SpawnLocationsDAO {
         }
     }
 
+    context(tx: Transaction)
+    fun getClosestSpawnOfType(location: Location, maxDistance: Double, type: String): SpreadSpawnLocation? {
+        val (x, y, z) = location
+        return tx.select(
+            """
+            SELECT id, data, type, minX, minY, minZ FROM ${locationsView(location.world)}
+            WHERE minX > :x - :rad AND minY > :y - :rad AND minZ > :z - :rad
+            AND maxX < :x + :rad AND maxY < :y + :rad AND maxZ < :z + :rad
+            AND type = :type
+            ORDER BY (minX - :x) * (minX - :x) + (minY - :y) * (minY - :y) + (minZ - :z) * (minZ - :z)
+            LIMIT 1;
+            """.trimIndent(),
+            x, maxDistance, y, z, type
+        ).firstOrNull {
+            SpreadSpawnLocation.fromStatement(this, location.world)
+        }
+    }
     /** Gets all stored spawn positions that land in this [chunk]. */
     context(tx: Transaction)
     fun getSpawnsInChunk(chunk: Chunk): List<SpreadSpawnLocation> = tx.select(
