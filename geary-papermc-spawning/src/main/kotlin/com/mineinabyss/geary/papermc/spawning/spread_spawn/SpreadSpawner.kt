@@ -5,6 +5,7 @@ import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.choosing.InChunkLocationChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.SpreadChunkChooser
+import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnSectionsConfig
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
@@ -25,37 +26,39 @@ import kotlin.time.Duration
 class SpreadSpawner(
     private val db: Database,
     private val world: World,
-    private val configs: SpreadSpawnSectionsConfig,
+    private val configs: SpreadEntityTypesConfig,
     private val chunkChooser: SpreadChunkChooser,
     private val posChooser: InChunkLocationChooser,
     private val dao: SpawnLocationsDAO,
     private val logger: Logger,
 ) {
     suspend fun spawnSpreadEntities() {
-        val container: RegionContainer = WorldGuard.getInstance().platform.regionContainer
-        val wgWorld: com.sk89q.worldedit.world.World = BukkitAdapter.adapt(world)
-        val regions: RegionManager? = container.get(wgWorld)
+        for ((type, spreadConfigs) in configs.types) {
+            val container: RegionContainer = WorldGuard.getInstance().platform.regionContainer
+            val wgWorld: com.sk89q.worldedit.world.World = BukkitAdapter.adapt(world)
+            val regions: RegionManager? = container.get(wgWorld)
 
-        for ((regionName, config) in configs.sectionsConfig) {
-            val region = regions?.getRegion(regionName) ?: run {
-                logger.w { "Region $regionName not found in world ${world.name}" }
-                continue
-            }
+            for ((regionName, config) in spreadConfigs.sectionsConfig) {
+                val region = regions?.getRegion(regionName) ?: run {
+                    logger.w { "Region $regionName not found in world ${world.name}" }
+                    continue
+                }
 
-            val cuboidRegion: ProtectedCuboidRegion = region as? ProtectedCuboidRegion ?: run {
-                logger.w { "Region $regionName is not a cuboid region in world ${world.name}" }
-                continue
-            }
+                val cuboidRegion: ProtectedCuboidRegion = region as? ProtectedCuboidRegion ?: run {
+                    logger.w { "Region $regionName is not a cuboid region in world ${world.name}" }
+                    continue
+                }
 
-            val chunkLoc = chooseChunkInRegion(cuboidRegion, config) ?: continue // No valid chunk found
-            val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue // No valid position found in chunk
-            logger.d { "Spawning entity in $regionName at ${spawnPos.x.toInt()}, ${spawnPos.y.toInt()}, ${spawnPos.z.toInt()}" }
-            val spawnedEntity = StoredEntity(if (random() * 100 <= config.altSpawnChance) config.altSpawnEntry.type.key else config.entry.type.key)
-            val spread = db.write {
-                dao.insertSpawnLocation(spawnPos, spawnedEntity)
+                val chunkLoc = chooseChunkInRegion(cuboidRegion, config) ?: continue // No valid chunk found
+                val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue // No valid position found in chunk
+                logger.d { "Spawning entity in $regionName at ${spawnPos.x.toInt()}, ${spawnPos.y.toInt()}, ${spawnPos.z.toInt()}" }
+                val spawnedEntity = StoredEntity(if (random() * 100 <= config.altSpawnChance) config.altSpawnEntry.type.key else config.entry.type.key)
+                val spread = db.write {
+                    dao.insertSpawnLocation(spawnPos, spawnedEntity)
+                }
+                // Handle case where chunk is loaded by player immediately (without a reload)
+                spread.spawn()
             }
-            // Handle case where chunk is loaded by player immediately (without a reload)
-            spread.spawn()
         }
     }
 

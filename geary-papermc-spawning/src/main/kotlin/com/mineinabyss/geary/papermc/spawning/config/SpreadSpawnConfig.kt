@@ -29,7 +29,6 @@ class SpreadSpawnConfig(
 )
 
 @Serializable
-@SerialName("geary:spread_spawn_sections")
 data class SpreadSpawnSectionsConfig(
     val enableAltSpawns: Boolean = false,
     val spawnDelay: Int = 40,
@@ -37,4 +36,11 @@ data class SpreadSpawnSectionsConfig(
     @Serializable(with = DurationSerializer::class)
     val clearSpawnsOlderThan: Duration = 7.days,
     val sectionsConfig: Map<String, SpreadSpawnConfig> = emptyMap(),
+)
+
+@Serializable
+@SerialName("geary:spread_entities_types")
+data class SpreadEntityTypesConfig(
+    val types: Map<String, SpreadSpawnSectionsConfig> = emptyMap(),
+    val worldName: String = "world",
 )
