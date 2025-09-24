@@ -49,7 +49,7 @@ class SpreadSpawner(
                     continue
                 }
 
-                val chunkLoc = chooseChunkInRegion(cuboidRegion, config) ?: continue // No valid chunk found
+                val chunkLoc = chooseChunkInRegion(cuboidRegion, config, type) ?: continue // No valid chunk found
                 val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue // No valid position found in chunk
                 logger.d { "Spawning entity in $regionName at ${spawnPos.x.toInt()}, ${spawnPos.y.toInt()}, ${spawnPos.z.toInt()}" }
                 val spawnedEntity = StoredEntity(if (random() * 100 <= config.altSpawnChance) config.altSpawnEntry.type.key else config.entry.type.key)
@@ -66,9 +66,9 @@ class SpreadSpawner(
         dao.deleteSpawnsOlderThan(world, olderThan)
     }
 
-    suspend fun chooseChunkInRegion(worldGuardRegion: ProtectedCuboidRegion, config: SpreadSpawnConfig): Location? {
+    suspend fun chooseChunkInRegion(worldGuardRegion: ProtectedCuboidRegion, config: SpreadSpawnConfig, type: String): Location? {
         val boundingBox = getBBFromRegion(worldGuardRegion)
-        return chunkChooser.chooseChunkInBB(boundingBox, config)
+        return chunkChooser.chooseChunkInBB(boundingBox, config, type)
     }
 
     suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? = withContext(gearyPaper.plugin.minecraftDispatcher) {

@@ -23,7 +23,7 @@ class SpreadChunkChooser(
      * @param config the SpreadSpawnConfig containing the algorithm parameters
      * @return a Location representing the chosen chunk, or null if no suitable chunk could be found
      */
-    suspend fun chooseChunkInBB(bb: BoundingBox, config: SpreadSpawnConfig): Location? {
+    suspend fun chooseChunkInBB(bb: BoundingBox, config: SpreadSpawnConfig, type: String): Location? {
         val radius = config.spreadRadius
         val sectionX = bb.minX.toInt()..bb.maxX.toInt()
         val sectionZ = bb.minZ.toInt()..bb.maxZ.toInt()
@@ -46,7 +46,7 @@ class SpreadChunkChooser(
             .take(sampleSize)
             .distinct()
             // Choose first subsection with no nearby spawns
-            .firstOrNull { (x, z) -> findNearestSq(x, z) >= scoreThreshold }
+            .firstOrNull { (x, z) -> findNearestSq(x, z, type) >= scoreThreshold }
             ?: return null
 
         val noisyX = (chosen.first + Random.nextInt(-noiseRange, noiseRange + 1)).coerceIn(sectionX)
@@ -59,9 +59,9 @@ class SpreadChunkChooser(
         )
     }
 
-    private suspend fun findNearestSq(x: Int, z: Int): Double = db.read {
+    private suspend fun findNearestSq(x: Int, z: Int, type: String): Double = db.read {
         val loc = Location(mainWorld, x.toDouble(), 0.0, z.toDouble())
-        dao.getClosestSpawn(loc, 1000.0)
+        dao.getClosestSpawnOfType(loc, 1000.0, type)
             ?.location?.distanceSquared(loc)
             ?: Double.MAX_VALUE
     }
