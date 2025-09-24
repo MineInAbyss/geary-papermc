@@ -17,7 +17,10 @@ import java.time.Instant
  */
 @Serializable
 data class StoredEntity(
+    // entity type (the one we are spawning)
     val type: String,
+    // the entity's category (what we are filtering for in the code)
+    val category: String = "none",
     val createdTime: Instant = Instant.now(),
 ) {
     fun asSpawnType(): SpawnType? = SpawnType.Companion.getType(type)

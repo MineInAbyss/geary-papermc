@@ -29,7 +29,7 @@ class SpreadChunkChooser(
         val sectionZ = bb.minZ.toInt()..bb.maxZ.toInt()
         val splitSize = config.splitSize
         val noiseRange = config.spawnNoise * 16
-        val sectionCount = db.read { dao.countSpawnsInBB(mainWorld, bb) }
+        val sectionCount = db.read { dao.countSpawnsInBBOfType(mainWorld, bb, type) }
         val scoreThreshold = radius * radius
         val sampleSize = (((sectionX.last - sectionX.first) / splitSize) * 0.1)
             .toInt()

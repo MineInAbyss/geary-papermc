@@ -43,14 +43,12 @@ object SpawnLocationTables {
             CREATE TABLE IF NOT EXISTS $name (
                 id INTEGER PRIMARY KEY,
                 data TEXT NOT NULL,
-                entity_type TEXT,
             ) STRICT;
             """.trimIndent()
         ) {
             context(tx: WriteTransaction)
             override fun create() {
                 super.create()
-                tx.exec("ALTER TABLE $name ADD COLUMN entity_type TEXT;")
                 // Index json data
                 tx.exec("CREATE INDEX IF NOT EXISTS ${name}_created_time ON $name (data ->> 'createdTime');")
 
