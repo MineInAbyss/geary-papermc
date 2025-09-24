@@ -46,6 +46,17 @@ class SpawnLocationsDAO {
     ).first { getInt(0) }
 
     context(tx: Transaction)
+    fun countSpawnsInBBOfType(world: World, box: BoundingBox, type: String): Int = tx.select(
+        """
+        SELECT count(*) FROM ${locationsView(world)}
+        WHERE minX >= :minX AND minY >= :minY AND minZ >= :minZ
+        AND maxX < :maxX AND maxY < :maxY AND maxZ < :maxZ
+        AND data ->> 'category' = :type
+        """.trimIndent(),
+        box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
+    ).first { getInt(0) }
+
+    context(tx: Transaction)
     fun countNearby(location: Location, radius: Double): Int {
         val (x, y, z) = location
         return tx.select(
@@ -66,13 +77,13 @@ class SpawnLocationsDAO {
         val (x, y, z) = location
         return tx.select(
             """
-            SELECT count(*) FROM ${rtree(location.world)}
+            SELECT count(*) FROM ${locationsView(location.world)}
             WHERE minX > :x - :rad AND minY > :y - :rad AND minZ > :z - :rad
             AND maxX < :x + :rad AND maxY < :y + :rad AND maxZ < :z + :rad
             AND (minX - :x) * (minX - :x) +
                 (minY - :y) * (minY - :y) +
                 (minZ - :z) * (minZ - :z) <= :rad * :rad
-            AND type = :type;
+            AND data ->> 'category' = :type;
             """.trimIndent(),
             x, radius, y, z, type
         ).first { getInt(0) }
@@ -100,10 +111,10 @@ class SpawnLocationsDAO {
         val (x, y, z) = location
         return tx.select(
             """
-            SELECT id, data, type, minX, minY, minZ FROM ${locationsView(location.world)}
+            SELECT id, data, minX, minY, minZ FROM ${locationsView(location.world)}
             WHERE minX > :x - :rad AND minY > :y - :rad AND minZ > :z - :rad
             AND maxX < :x + :rad AND maxY < :y + :rad AND maxZ < :z + :rad
-            AND type = :type
+            AND data ->> 'category' = :type
             ORDER BY (minX - :x) * (minX - :x) + (minY - :y) * (minY - :y) + (minZ - :z) * (minZ - :z)
             LIMIT 1;
             """.trimIndent(),
@@ -118,9 +129,21 @@ class SpawnLocationsDAO {
         """
         SELECT id, data, minX, minY, minZ FROM ${locationsView(chunk.world)}
         WHERE minX >= :x AND minZ >= :z
-        AND maxX < :x + 16 AND maxZ < :z + 16;
+        AND maxX < :x + 16 AND maxZ < :z + 16
+
         """.trimIndent(),
         chunk.x shl 4, chunk.z shl 4
+    ).map { SpreadSpawnLocation.fromStatement(this, chunk.world) }
+
+    context(tx: Transaction)
+    fun getSpawnsInChunkOfType(chunk: Chunk, type: String): List<SpreadSpawnLocation> = tx.select(
+        """
+        SELECT id, data, minX, minY, minZ FROM ${locationsView(chunk.world)}
+        WHERE minX >= :x AND minZ >= :z
+        AND maxX < :x + 16 AND maxZ < :z + 16
+        AND data ->> 'category' = :type
+        """.trimIndent(),
+        chunk.x shl 4, chunk.z shl 4, type
     ).map { SpreadSpawnLocation.fromStatement(this, chunk.world) }
 
     context(tx: WriteTransaction)
@@ -135,9 +158,9 @@ class SpawnLocationsDAO {
         )
         val id = tx.select("SELECT last_insert_rowid()").first { getInt(0) }
         tx.exec(
-            "INSERT INTO ${dataTable(location.world)}(id, data) VALUES (:id, json(:data))",
+            "INSERT INTO ${dataTable(location.world)}(id, data, type) VALUES (:id, json(:data), :type)",
             id,
-            json.encodeToString(store)
+            json.encodeToString(store),
         )
 
         return SpreadSpawnLocation(
