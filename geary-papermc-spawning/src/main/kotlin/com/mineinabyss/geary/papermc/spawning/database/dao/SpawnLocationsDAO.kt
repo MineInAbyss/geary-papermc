@@ -53,7 +53,7 @@ class SpawnLocationsDAO {
         AND maxX < :maxX AND maxY < :maxY AND maxZ < :maxZ
         AND data ->> 'category' = :type
         """.trimIndent(),
-        box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
+        box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, type,
     ).first { getInt(0) }
 
     context(tx: Transaction)

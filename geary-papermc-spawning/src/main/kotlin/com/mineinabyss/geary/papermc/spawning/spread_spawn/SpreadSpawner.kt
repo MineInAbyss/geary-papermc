@@ -53,6 +53,7 @@ class SpreadSpawner(
                 val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue // No valid position found in chunk
                 logger.d { "Spawning entity in $regionName at ${spawnPos.x.toInt()}, ${spawnPos.y.toInt()}, ${spawnPos.z.toInt()}" }
                 val spawnedEntity = StoredEntity(if (random() * 100 <= config.altSpawnChance) config.altSpawnEntry.type.key else config.entry.type.key, type)
+                logger.i { "${spawnedEntity.type == config.entry.type.key}" }
                 val spread = db.write {
                     dao.insertSpawnLocation(spawnPos, spawnedEntity)
                 }

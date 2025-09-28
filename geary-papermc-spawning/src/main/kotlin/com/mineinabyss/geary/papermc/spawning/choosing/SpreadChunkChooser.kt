@@ -48,7 +48,6 @@ class SpreadChunkChooser(
             // Choose first subsection with no nearby spawns
             .firstOrNull { (x, z) -> findNearestSq(x, z, type) >= scoreThreshold }
             ?: return null
-
         val noisyX = (chosen.first + Random.nextInt(-noiseRange, noiseRange + 1)).coerceIn(sectionX)
         val noisyZ = (chosen.second + Random.nextInt(-noiseRange, noiseRange + 1)).coerceIn(sectionZ)
         return Location(
@@ -61,9 +60,16 @@ class SpreadChunkChooser(
 
     private suspend fun findNearestSq(x: Int, z: Int, type: String): Double = db.read {
         val loc = Location(mainWorld, x.toDouble(), 0.0, z.toDouble())
-        dao.getClosestSpawnOfType(loc, 1000.0, type)
+        val distance = dao.getClosestSpawnOfType(loc, 1000.0, type)
             ?.location?.distanceSquared(loc)
             ?: Double.MAX_VALUE
+        if (distance > 150 * 150) {
+            println(" no entity in range for chunk $x, $z: $distance")
+        }
+        if (distance == Double.MAX_VALUE) {
+            println("startloc = $x, $z")
+        }
+        distance
     }
 }
 
