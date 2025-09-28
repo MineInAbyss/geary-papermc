@@ -15,8 +15,10 @@ class SpreadSpawnTask(world: World, configs: SpreadEntityTypesConfig, val spread
     val job = gearyPaper.plugin.launch(gearyPaper.plugin.asyncDispatcher) {
         while (true) {
             runCatching {
+                var task_nb = 0
                 spreadSpawner.clearOldEntries(world, configs.clearSpawnsOlderThan)
-                spreadSpawner.spawnSpreadEntities()
+                spreadSpawner.spawnSpreadEntities(task_nb)
+                task_nb++
             }.onFailure {
                 gearyPaper.logger.e { it.stackTraceToString() }
             }
