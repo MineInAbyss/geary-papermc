@@ -8,6 +8,8 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldguard.WorldGuard
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin
 import org.bukkit.Material
+import org.bukkit.Sound.ENTITY_GENERIC_SPLASH
+import org.bukkit.Sound.ITEM_BOTTLE_EMPTY
 import org.bukkit.block.data.Levelled
 import org.bukkit.entity.Player
 
@@ -44,5 +46,7 @@ class UseWaterBottleAction(
         if (targetedBlock.type == Material.DIRT) {
             targetedBlock.type = Material.MUD
         }
+        player.playSound(player, ITEM_BOTTLE_EMPTY, 0.5f, 0.5f)
+        player.playSound(player, ENTITY_GENERIC_SPLASH, 0.5f, 0.5f)
     }
 }
