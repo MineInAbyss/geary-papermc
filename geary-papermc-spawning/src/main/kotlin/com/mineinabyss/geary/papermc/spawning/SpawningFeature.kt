@@ -87,11 +87,12 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         val wg = WorldGuardSpawning(spawns.values.map { it.entry })
         val caps = MobCaps(config.playerCaps, config.defaultCap, config.range.playerCapRadius)
         val spawnChooser = SpawnChooser(wg, caps)
+        val mobSpawner = MobSpawner(spawnChooser, LocationSpread(triesForNearbyLoc = 10))
         val task = SpawnTask(
             runTimes = config.runTimes,
             locationChooser = SpawnLocationChooser(config.range),
             spawnAttempts = config.maxSpawnAttemptsPerPlayer,
-            mobSpawner = MobSpawner(spawnChooser, LocationSpread(triesForNearbyLoc = 10)),
+            mobSpawner = mobSpawner,
         )
 
         // -- Spread Spawn logic --
@@ -111,7 +112,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
             )
         )
         val mainWorld = Bukkit.getWorld(spreadConfig.worldName) ?: error("World ${spreadConfig.worldName} not found, cannot initialize spread spawning")
-        val posChooser = InChunkLocationChooser(task.mobSpawner, mainWorld)
+        val posChooser = InChunkLocationChooser(mobSpawner, mainWorld)
         val dao = SpawnLocationsDAO()
         val chunkChooser = SpreadChunkChooser(mainWorld, db, dao)
 

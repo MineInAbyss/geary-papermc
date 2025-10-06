@@ -12,9 +12,8 @@ class InChunkLocationChooser(
     private val mobSpawner: MobSpawner,
     private val mainWorld: World,
 ) {
-
     suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? {
-        if (!chunkLoc.isWorldLoaded || !chunkLoc.isChunkLoaded || chunkLoc.world != mainWorld) return null
+        if (!chunkLoc.isWorldLoaded || chunkLoc.world != mainWorld) return null
         val chunk = chunkLoc.chunk
 
         return chunk.launchWithTicket {

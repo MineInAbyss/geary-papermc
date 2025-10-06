@@ -29,7 +29,7 @@ class SpreadSpawnConfig(
 @Serializable
 @SerialName("geary:spread_spawn_sections")
 data class SpreadSpawnSectionsConfig(
-    val spawnDelay: Int = 40,
+    val spawnDelay: Long = 40,
     val worldName: String = "world",
     @Serializable(with = DurationSerializer::class)
     val clearSpawnsOlderThan: Duration = 7.days,

@@ -11,7 +11,7 @@ import kotlin.random.Random
 class SpreadChunkChooser(
     private val mainWorld: World,
     private val db: Database,
-    private val dao: SpawnLocationsDAO
+    private val dao: SpawnLocationsDAO,
 ) {
     /**
      * Chose a random chunk inside a given bounding box, generally corresponding to a section.
