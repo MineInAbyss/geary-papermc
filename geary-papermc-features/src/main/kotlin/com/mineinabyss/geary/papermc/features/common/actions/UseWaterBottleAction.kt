@@ -29,18 +29,14 @@ class UseWaterBottleAction(
         if (!authorized) return
         if (targetedBlock.type == Material.CAULDRON) {
             targetedBlock.type = Material.WATER_CAULDRON
-            val cauldronData = targetedBlock.blockData
-            if (cauldronData is Levelled) {
-                cauldronData.level = cauldronLevelIncrease
-                targetedBlock.blockData = cauldronData
-            }
+            val cauldronData = targetedBlock.blockData as Levelled
+            cauldronData.level = cauldronLevelIncrease
+            targetedBlock.blockData = cauldronData
         } else if (targetedBlock.type == Material.WATER_CAULDRON) {
-            val cauldronData = targetedBlock.blockData
-            if (cauldronData is Levelled) {
-                val newLevel = if (cauldronData.level + cauldronLevelIncrease > 3) 3 else cauldronData.level + cauldronLevelIncrease
-                cauldronData.level = newLevel
-                targetedBlock.blockData = cauldronData
-            }
+            val cauldronData = targetedBlock.blockData as Levelled
+            val newLevel = (cauldronData.level + cauldronLevelIncrease).coerceAtMost(3)
+            cauldronData.level = newLevel
+            targetedBlock.blockData = cauldronData
         }
 
         if (targetedBlock.type == Material.DIRT) {
