@@ -25,13 +25,13 @@ class UseWaterBottleAction(
         val query = container.createQuery()
         val location = BukkitAdapter.adapt(targetedBlock.location)
 
+        if (cauldronLevelIncrease > 3) return
         val authorized = query.testState(location, WorldGuardPlugin.inst().wrapPlayer(player), com.sk89q.worldguard.protection.flags.Flags.BUILD)
         if (!authorized) return
         if (targetedBlock.type == Material.CAULDRON) {
-            targetedBlock.type = Material.WATER_CAULDRON
-            val cauldronData = targetedBlock.blockData as Levelled
-            cauldronData.level = cauldronLevelIncrease
-            targetedBlock.blockData = cauldronData
+            targetedBlock.blockData = Material.WATER_CAULDRON.createBlockData {
+                (it as Levelled).level = cauldronLevelIncrease
+            }
         } else if (targetedBlock.type == Material.WATER_CAULDRON) {
             val cauldronData = targetedBlock.blockData as Levelled
             val newLevel = (cauldronData.level + cauldronLevelIncrease).coerceAtMost(3)
