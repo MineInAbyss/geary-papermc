@@ -16,6 +16,7 @@ dependencies {
     api(libs.geary.serialization)
     api(libs.geary.uuid)
     api(libs.geary.actions)
+
 }
 
 allprojects {
@@ -34,6 +35,7 @@ allprojects {
 
         dependencies {
             compileOnly(rootProject.idofrontLibs.bundles.idofront.core)
+            compileOnly(rootProject.idofrontLibs.minecraft.plugin.worldguard)
             testImplementation(rootProject.idofrontLibs.bundles.idofront.core)
         }
         kotlin {
