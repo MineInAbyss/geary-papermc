@@ -37,20 +37,14 @@ class SpreadSpawner(
     private val logger: Logger,
 ) {
     suspend fun spawnSpreadEntities(task_nb: Int = 0) {
-        val timings = mutableListOf<String>()
-        val now = System.currentTimeMillis()
-        logger.i { "Spawning spread entities at $now" }
 
-        val totalStart = System.currentTimeMillis()
         for ((type, spreadConfigs) in configs.types) {
-            val typeStart = System.currentTimeMillis()
 
             val container: RegionContainer = WorldGuard.getInstance().platform.regionContainer
             val wgWorld: com.sk89q.worldedit.world.World = BukkitAdapter.adapt(world)
             val regions: RegionManager? = container.get(wgWorld)
 
             for ((regionName, config) in spreadConfigs.sectionsConfig) {
-                val regionStart = System.currentTimeMillis()
 
                 val region = regions?.getRegion(regionName) ?: run {
                     logger.w { "Region $regionName not found in world ${world.name}" }
@@ -62,42 +56,25 @@ class SpreadSpawner(
                     continue
                 }
 
-                val chunkStart = System.currentTimeMillis()
                 val chunkLoc = chooseChunkInRegion(cuboidRegion, config, type) ?: continue
-                timings += "chooseChunkInRegion for $regionName took ${System.currentTimeMillis() - chunkStart}ms"
 
-                val spotStart = System.currentTimeMillis()
                 val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue
-                timings += "chooseSpotInChunk for $regionName took ${System.currentTimeMillis() - spotStart}ms"
 
-                val entityStart = System.currentTimeMillis()
                 val spawnedEntity = StoredEntity(
                     if (random() * 100 <= config.altSpawnChance) config.altSpawnEntry.type.key else config.entry.type.key,
                     type
                 )
-                timings += "Entity creation for $regionName took ${System.currentTimeMillis() - entityStart}ms"
-
-                val dbStart = System.currentTimeMillis()
+                if (spawnedEntity.type == config.altSpawnEntry.type.key) {
+                    logger.i { "spawn 2" }
+                }
                 val spread = db.write {
                     dao.insertSpawnLocation(spawnPos, spawnedEntity)
                 }
-                timings += "DB insert for $regionName took ${System.currentTimeMillis() - dbStart}ms"
 
-                val spawnStart = System.currentTimeMillis()
                 spread.spawn()
-                timings += "Entity spawn for $regionName took ${System.currentTimeMillis() - spawnStart}ms"
 
-                timings += "Region $regionName total took ${System.currentTimeMillis() - regionStart}ms"
             }
-            timings += "Type $type total took ${System.currentTimeMillis() - typeStart}ms"
         }
-        logger.i { "Finished spawning spread entities at ${System.currentTimeMillis()}" }
-        logger.i { "total duration = ${System.currentTimeMillis() - now}ms" }
-        logger.i { "task nb $task_nb" }
-        timings += "Total spawnSpreadEntities took ${System.currentTimeMillis() - totalStart}ms"
-
-// Print all timings at once
-        timings.forEach { logger.i { it } }
     }
 
 
