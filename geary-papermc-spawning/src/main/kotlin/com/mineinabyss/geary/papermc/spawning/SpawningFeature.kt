@@ -13,6 +13,7 @@ import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpaw
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
+import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnSectionsConfig
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
 import com.mineinabyss.geary.papermc.spawning.database.schema.SpawningSchema
@@ -98,7 +99,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         // -- Spread Spawn logic --
         val spreadConfig by config(
             "spread_config", plugin.dataPath,
-            SpreadSpawnSectionsConfig(),
+            SpreadEntityTypesConfig(),
             mergeUpdates = false,
             formats = ConfigFormats(
                 listOf(
