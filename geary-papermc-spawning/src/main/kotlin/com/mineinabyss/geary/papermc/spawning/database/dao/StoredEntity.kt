@@ -14,16 +14,18 @@ import java.time.Instant
 
 /**
  * Represents an entity stored in the spread spawn database.
+ *
+ * @property type Entity type (the one we are spawning).
+ * @property category The entity's category (what we are filtering for in the code).
+ * @property createdTime When the entity was created in the database.
  */
 @Serializable
 data class StoredEntity(
-    // entity type (the one we are spawning)
     val type: String,
-    // the entity's category (what we are filtering for in the code)
     val category: String = "none",
     val createdTime: Instant = Instant.now(),
 ) {
-    fun asSpawnType(): SpawnType? = SpawnType.Companion.getType(type)
+    fun asSpawnType(): SpawnType? = SpawnType.getType(type)
 }
 
 object InstantAsUnixEpochSerializer : KSerializer<Instant> {
