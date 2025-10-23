@@ -51,6 +51,7 @@ object SpawnLocationTables {
                 super.create()
                 // Index json data
                 tx.exec("CREATE INDEX IF NOT EXISTS ${name}_created_time ON $name (data ->> 'createdTime');")
+                tx.exec("CREATE INDEX IF NOT EXISTS ${name}_category ON $name (data ->> 'category');")
 
                 // Delete from rtree when removed from here
                 tx.exec(
