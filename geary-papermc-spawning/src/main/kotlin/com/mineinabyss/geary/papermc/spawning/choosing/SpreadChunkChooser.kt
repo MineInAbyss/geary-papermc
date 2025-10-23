@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.spawning.choosing
 
+import co.touchlab.kermit.Logger
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
 import me.dvyy.sqlite.Database
@@ -7,13 +8,9 @@ import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
 import kotlin.random.Random
-import kotlin.ranges.rangeTo
-import kotlin.text.compareTo
-import kotlin.text.toInt
-import kotlin.times
-import kotlin.unaryMinus
 
 class SpreadChunkChooser(
+    private val logger: Logger,
     private val mainWorld: World,
     private val db: Database,
     private val dao: SpawnLocationsDAO,
@@ -28,48 +25,48 @@ class SpreadChunkChooser(
      * @param config the SpreadSpawnConfig containing the algorithm parameters
      * @return a Location representing the chosen chunk, or null if no suitable chunk could be found
      */
-        suspend fun chooseChunkInBB(bb: BoundingBox, config: SpreadSpawnConfig, type: String): Location? {
-            val radius = config.spreadRadius
-            val sectionX = bb.minX.toInt()..bb.maxX.toInt()
-            val sectionZ = bb.minZ.toInt()..bb.maxZ.toInt()
-            val splitSize = config.splitSize
-            val noiseRange = config.spawnNoise * 16
+    suspend fun chooseChunkInBB(bb: BoundingBox, config: SpreadSpawnConfig, type: String): Location? {
+        val radius = config.spreadRadius
+        val sectionX = bb.minX.toInt()..bb.maxX.toInt()
+        val sectionZ = bb.minZ.toInt()..bb.maxZ.toInt()
+        val splitSize = config.splitSize
+        val noiseRange = config.spawnNoise * 16
 
-            val sectionCount = db.read { dao.countSpawnsInBBOfType(mainWorld, bb, type) }
+        val sectionCount = db.read { dao.countSpawnsInBBOfType(mainWorld, bb, type) }
 
-            val scoreThreshold = radius * radius
-            val sampleSize = (((sectionX.last - sectionX.first) / splitSize) * 0.1)
-                .toInt()
-                .coerceAtLeast(10)
+        val scoreThreshold = radius * radius
+        val sampleSize = (((sectionX.last - sectionX.first) / splitSize) * 0.1)
+            .toInt()
+            .coerceAtLeast(10)
 
-            if (sectionCount >= config.spawnCap) {
-                return null
-            }
-            val xRange = (sectionX.first / splitSize)..(sectionX.last / splitSize)
-            val zRange = (sectionZ.first / splitSize)..(sectionZ.last / splitSize)
-            val chosen = generateSequence { (xRange.random() * splitSize) to (zRange.random() * splitSize) }
-                .take(sampleSize)
-                .distinct()
-                .firstOrNull { (x, z) ->
-                    val dist = findNearestSq(x, z, type)
-                    dist >= scoreThreshold
-                }
-
-            if (chosen == null) {
-                return null
-            }
-            println("Checking at ${chosen.first}, ${chosen.second}")
-            val noisyX = (chosen.first + Random.nextInt(-noiseRange, noiseRange + 1)).coerceIn(sectionX)
-            val noisyZ = (chosen.second + Random.nextInt(-noiseRange, noiseRange + 1)).coerceIn(sectionZ)
-            return Location(mainWorld, noisyX.toDouble(), 0.0, noisyZ.toDouble())
+        if (sectionCount >= config.spawnCap) {
+            return null
         }
+        val xRange = (sectionX.first / splitSize)..(sectionX.last / splitSize)
+        val zRange = (sectionZ.first / splitSize)..(sectionZ.last / splitSize)
+        val chosen = generateSequence { (xRange.random() * splitSize) to (zRange.random() * splitSize) }
+            .take(sampleSize)
+            .distinct()
+            .firstOrNull { (x, z) ->
+                val dist = findNearestSq(x, z, type)
+                dist >= scoreThreshold
+            }
 
-        private suspend fun findNearestSq(x: Int, z: Int, type: String): Double = db.read {
-            val loc = Location(mainWorld, x.toDouble(), 0.0, z.toDouble())
-            dao.getClosestSpawnOfType(loc, 1000.0, type)
-                ?.location?.distanceSquared(loc)
-                ?: Double.MAX_VALUE
+        if (chosen == null) {
+            return null
         }
+        logger.v { "Checking at ${chosen.first}, ${chosen.second}" }
+        val noisyX = (chosen.first + Random.nextInt(-noiseRange, noiseRange + 1)).coerceIn(sectionX)
+        val noisyZ = (chosen.second + Random.nextInt(-noiseRange, noiseRange + 1)).coerceIn(sectionZ)
+        return Location(mainWorld, noisyX.toDouble(), 0.0, noisyZ.toDouble())
     }
+
+    private suspend fun findNearestSq(x: Int, z: Int, type: String): Double = db.read {
+        val loc = Location(mainWorld, x.toDouble(), 0.0, z.toDouble())
+        dao.getClosestSpawnOfType(loc, 1000.0, type)
+            ?.location?.distanceSquared(loc)
+            ?: Double.MAX_VALUE
+    }
+}
 
 

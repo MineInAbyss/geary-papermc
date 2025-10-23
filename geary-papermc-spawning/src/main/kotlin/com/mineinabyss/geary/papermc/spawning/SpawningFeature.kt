@@ -115,7 +115,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         val mainWorld = Bukkit.getWorld(spreadConfig.worldName) ?: error("World ${spreadConfig.worldName} not found, cannot initialize spread spawning")
         val posChooser = InChunkLocationChooser(mobSpawner, mainWorld)
         val dao = SpawnLocationsDAO()
-        val chunkChooser = SpreadChunkChooser(mainWorld, db, dao)
+        val chunkChooser = SpreadChunkChooser(logger, mainWorld, db, dao)
 
         val spreadSpawner = SpreadSpawner(
             db = db,
@@ -172,7 +172,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
 
     // the db is locked when we try to run this function.
     fun clearDB(world: World) {
-        val db = database ?: return println("no database to clear")
+        val db = database ?: return logger.w { "Could not clear spawn database, no database to clear" }
         val dao = SpawnLocationsDAO()
         plugin.launch {
             db.write {
