@@ -13,8 +13,10 @@ import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpaw
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
-import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnSectionsConfig
+import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
+import com.mineinabyss.geary.papermc.spawning.database.dao.SpreadSpawnLocation
+import com.mineinabyss.geary.papermc.spawning.database.dao.StoredEntity
 import com.mineinabyss.geary.papermc.spawning.database.schema.SpawningSchema
 import com.mineinabyss.geary.papermc.spawning.listeners.ListSpawnListener
 import com.mineinabyss.geary.papermc.spawning.listeners.SpreadEntityDeathListener
@@ -28,9 +30,10 @@ import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.idofront.config.ConfigFormats
 import com.mineinabyss.idofront.config.Format
 import com.mineinabyss.idofront.config.config
+import com.mineinabyss.idofront.textcomponents.miniMsg
 import com.sk89q.worldguard.WorldGuard
+import kotlinx.serialization.json.Json
 import me.dvyy.sqlite.Database
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -87,17 +90,18 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         val wg = WorldGuardSpawning(spawns.values.map { it.entry })
         val caps = MobCaps(config.playerCaps, config.defaultCap, config.range.playerCapRadius)
         val spawnChooser = SpawnChooser(wg, caps)
+        val mobSpawner = MobSpawner(spawnChooser, LocationSpread(triesForNearbyLoc = 10))
         val task = SpawnTask(
             runTimes = config.runTimes,
             locationChooser = SpawnLocationChooser(config.range),
             spawnAttempts = config.maxSpawnAttemptsPerPlayer,
-            mobSpawner = MobSpawner(spawnChooser, LocationSpread(triesForNearbyLoc = 10)),
+            mobSpawner = mobSpawner,
         )
 
         // -- Spread Spawn logic --
         val spreadConfig by config(
             "spread_config", plugin.dataPath,
-            SpreadSpawnSectionsConfig(),
+            SpreadEntityTypesConfig(),
             mergeUpdates = false,
             formats = ConfigFormats(
                 listOf(
@@ -111,9 +115,9 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
             )
         )
         val mainWorld = Bukkit.getWorld(spreadConfig.worldName) ?: error("World ${spreadConfig.worldName} not found, cannot initialize spread spawning")
-        val posChooser = InChunkLocationChooser(task.mobSpawner, mainWorld)
+        val posChooser = InChunkLocationChooser(mobSpawner, mainWorld)
         val dao = SpawnLocationsDAO()
-        val chunkChooser = SpreadChunkChooser(mainWorld, db, dao)
+        val chunkChooser = SpreadChunkChooser(logger, mainWorld, db, dao)
 
         val spreadSpawner = SpreadSpawner(
             db = db,
@@ -126,7 +130,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         )
 
         listeners(
-            ListSpawnListener(spreadSpawner, db, dao ,plugin),
+            ListSpawnListener(spreadSpawner, db, dao, plugin),
             SpreadEntityDeathListener(
                 spreadSpawner, db, plugin, mainWorld
             )
@@ -146,15 +150,29 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         task(spreadTask.job)
     }
 
-    fun sendTpButton(player: Player, loc: Location) {
+    private val prettyPrintJson = Json {
+        prettyPrint = true
+        ignoreUnknownKeys = true
+    }
+
+    fun sendTpButton(player: Player, spawnLocation: SpreadSpawnLocation) {
+        val loc = spawnLocation.location
         val command = "/tp ${loc.x} ${loc.y} ${loc.z}"
         val distance = if (loc.world != null) loc.distance(player.location).toInt() else -1
-        val message = Component.text("TP to (${loc.x}, ${loc.y}, ${loc.z}) ($distance blocks away)")
+
+        val message = " • ${spawnLocation.stored.type} <gray>(${distance}m away)".miniMsg()
+            .hoverEvent(
+                """
+                |id: <gray>${spawnLocation.id}</gray>
+                |location: <gray>[${loc.x.toInt()}, ${loc.y.toInt()}, ${loc.z.toInt()}]</gray>
+                |stored: <gray>${prettyPrintJson.encodeToString(spawnLocation.stored)}</gray>
+            """.trimMargin().miniMsg()
+            )
             .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, command))
         player.sendMessage(message)
     }
 
-    fun dumpDB(loc: Location, player : Player) {
+    fun dumpDB(loc: Location, player: Player) {
         val db = database ?: error("No database to dump")
         val dao = SpawnLocationsDAO()
         plugin.launch {
@@ -162,7 +180,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
                 val locations = dao.getSpawnsNear(loc, 10000.0)
                 player.sendMessage("Total spawn locations: ${locations.size}")
                 locations.forEach { location ->
-                    sendTpButton(player, location.location)
+                    sendTpButton(player, location)
                 }
             }
         }
@@ -170,7 +188,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
 
     // the db is locked when we try to run this function.
     fun clearDB(world: World) {
-        val db = database ?: return println("no database to clear")
+        val db = database ?: return logger.w { "Could not clear spawn database, no database to clear" }
         val dao = SpawnLocationsDAO()
         plugin.launch {
             db.write {

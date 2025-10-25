@@ -15,4 +15,5 @@ dependencies {
     // MineInAbyss platform
     compileOnly(idofrontLibs.kotlinx.serialization.json)
     compileOnly(idofrontLibs.kotlinx.serialization.kaml)
+    compileOnly(idofrontLibs.minecraft.mccoroutine)
 }

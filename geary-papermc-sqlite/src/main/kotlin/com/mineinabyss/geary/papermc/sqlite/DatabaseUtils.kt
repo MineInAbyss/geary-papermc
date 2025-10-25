@@ -25,7 +25,7 @@ fun <T> Database.blockingRead(block: Transaction.() -> T): T {
     }
 
     val conn = getOrCreateReadConnectionForCurrentThread()
-    return Transaction(conn).block()
+    return Transaction(conn, defaultIdentity ?: error("Default identity must be provided")).block()
 }
 
 /**

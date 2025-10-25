@@ -24,14 +24,23 @@ class SpreadSpawnConfig(
     val splitSize: Int,
     @YamlComment("How many times to try and spawn an entity in a chunk before giving up")
     val spawnAttempts: Int,
+    val altSpawnChance: Double = 0.0,
+    val altSpawnEntry: SpawnEntry = entry,
 )
 
 @Serializable
-@SerialName("geary:spread_spawn_sections")
 data class SpreadSpawnSectionsConfig(
-    val spawnDelay: Int = 40,
+    val enableAltSpawns: Boolean = false,
+    val worldName: String = "world",
+    val sectionsConfig: Map<String, SpreadSpawnConfig> = emptyMap(),
+)
+
+@Serializable
+@SerialName("geary:spread_entities_types")
+data class SpreadEntityTypesConfig(
+    val types: Map<String, SpreadSpawnSectionsConfig> = emptyMap(),
+    val spawnDelay: Long = 40,
     val worldName: String = "world",
     @Serializable(with = DurationSerializer::class)
     val clearSpawnsOlderThan: Duration = 7.days,
-    val sectionsConfig: Map<String, SpreadSpawnConfig> = emptyMap(),
 )

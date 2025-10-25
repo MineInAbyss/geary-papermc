@@ -5,8 +5,8 @@ import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.choosing.InChunkLocationChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.SpreadChunkChooser
+import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
-import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnSectionsConfig
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
 import com.mineinabyss.geary.papermc.spawning.database.dao.StoredEntity
 import com.sk89q.worldedit.bukkit.BukkitAdapter
@@ -19,51 +19,66 @@ import me.dvyy.sqlite.Database
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
+import java.lang.Math.random
 import kotlin.time.Duration
 
 class SpreadSpawner(
     private val db: Database,
     private val world: World,
-    private val configs: SpreadSpawnSectionsConfig,
+    private val configs: SpreadEntityTypesConfig,
     private val chunkChooser: SpreadChunkChooser,
     private val posChooser: InChunkLocationChooser,
     private val dao: SpawnLocationsDAO,
     private val logger: Logger,
 ) {
     suspend fun spawnSpreadEntities() {
-        val container: RegionContainer = WorldGuard.getInstance().platform.regionContainer
-        val wgWorld: com.sk89q.worldedit.world.World = BukkitAdapter.adapt(world)
-        val regions: RegionManager? = container.get(wgWorld)
+        for ((type, spreadConfigs) in configs.types) {
 
-        for ((regionName, config) in configs.sectionsConfig) {
-            val region = regions?.getRegion(regionName) ?: run {
-                logger.w { "Region $regionName not found in world ${world.name}" }
-                continue
-            }
+            val container: RegionContainer = WorldGuard.getInstance().platform.regionContainer
+            val wgWorld: com.sk89q.worldedit.world.World = BukkitAdapter.adapt(world)
+            val regions: RegionManager? = container.get(wgWorld)
 
-            val cuboidRegion: ProtectedCuboidRegion = region as? ProtectedCuboidRegion ?: run {
-                logger.w { "Region $regionName is not a cuboid region in world ${world.name}" }
-                continue
-            }
+            for ((regionName, config) in spreadConfigs.sectionsConfig) {
 
-            val chunkLoc = chooseChunkInRegion(cuboidRegion, config) ?: continue // No valid chunk found
-            val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue // No valid position found in chunk
-            logger.d { "Spawning entity in $regionName at ${spawnPos.x.toInt()}, ${spawnPos.y.toInt()}, ${spawnPos.z.toInt()}" }
-            val spread = db.write {
-                dao.insertSpawnLocation(spawnPos, StoredEntity(config.entry.type.key))
+                val region = regions?.getRegion(regionName) ?: run {
+                    logger.w { "Region $regionName not found in world ${world.name}" }
+                    continue
+                }
+
+                val cuboidRegion: ProtectedCuboidRegion = region as? ProtectedCuboidRegion ?: run {
+                    logger.w { "Region $regionName is not a cuboid region in world ${world.name}" }
+                    continue
+                }
+
+                val chunkLoc = chooseChunkInRegion(cuboidRegion, config, type) ?: continue
+
+                val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue
+
+                val spawnedEntity = StoredEntity(
+                    type = if (random() * 100 <= config.altSpawnChance) config.altSpawnEntry.type.key else config.entry.type.key,
+                    category = type
+                )
+                if (spawnedEntity.type == config.altSpawnEntry.type.key) {
+                    logger.v { "Spawn alt entity ${spawnedEntity.type}" }
+                }
+                val spread = db.write {
+                    dao.insertSpawnLocation(spawnPos, spawnedEntity)
+                }
+
+                spread.spawn()
+
             }
-            // Handle case where chunk is loaded by player immediately (without a reload)
-            spread.spawn()
         }
     }
+
 
     suspend fun clearOldEntries(world: World, olderThan: Duration) = db.write {
         dao.deleteSpawnsOlderThan(world, olderThan)
     }
 
-    suspend fun chooseChunkInRegion(worldGuardRegion: ProtectedCuboidRegion, config: SpreadSpawnConfig): Location? {
+    suspend fun chooseChunkInRegion(worldGuardRegion: ProtectedCuboidRegion, config: SpreadSpawnConfig, type: String): Location? {
         val boundingBox = getBBFromRegion(worldGuardRegion)
-        return chunkChooser.chooseChunkInBB(boundingBox, config)
+        return chunkChooser.chooseChunkInBB(boundingBox, config, type)
     }
 
     suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? = withContext(gearyPaper.plugin.minecraftDispatcher) {
@@ -76,7 +91,7 @@ class SpreadSpawner(
         return BoundingBox.of(minLoc, maxLoc)
     }
 
-    suspend fun countNearby(location: Location, radius: Double): Int = db.read {
-        dao.countNearby(location, radius)
+    suspend fun countNearby(location: Location, radius: Double, type: String): Int = db.read {
+        dao.countNearbyOfType(location, radius, type)
     }
 }
