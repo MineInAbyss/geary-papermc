@@ -48,10 +48,15 @@ class SpawnLocationsDAO {
     context(tx: Transaction)
     fun countSpawnsInBBOfType(world: World, box: BoundingBox, type: String): Int = tx.select(
         """
-        SELECT count(*) FROM ${locationsView(world)}
-        WHERE minX >= :minX AND minY >= :minY AND minZ >= :minZ
-        AND maxX < :maxX AND maxY < :maxY AND maxZ < :maxZ
-        AND data ->> 'category' = :type
+        WITH rtree AS (
+            SELECT id
+            FROM ${rtree(world)}
+            WHERE minX >= :minX AND minY >= :minY AND minZ >= :minZ AND maxX < :maxX AND maxY < :maxY AND maxZ < :maxZ
+        )
+        SELECT count(*)
+        FROM ${dataTable(world)} as data
+            JOIN rtree ON data.id = rtree.id
+        WHERE data ->> 'category' = :type
         """.trimIndent(),
         box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, type,
     ).first { getInt(0) }
@@ -77,13 +82,19 @@ class SpawnLocationsDAO {
         val (x, y, z) = location
         return tx.select(
             """
-            SELECT count(*) FROM ${locationsView(location.world)}
-            WHERE minX > :x - :rad AND minY > :y - :rad AND minZ > :z - :rad
-            AND maxX < :x + :rad AND maxY < :y + :rad AND maxZ < :z + :rad
-            AND (minX - :x) * (minX - :x) +
-                (minY - :y) * (minY - :y) +
-                (minZ - :z) * (minZ - :z) <= :rad * :rad
-            AND data ->> 'category' = :type;
+            WITH rtree AS (
+                SELECT id
+                FROM ${rtree(location.world)}
+                WHERE minX > :x - :rad AND minY > :y - :rad AND minZ > :z - :rad
+                AND maxX < :x + :rad AND maxY < :y + :rad AND maxZ < :z + :rad
+                AND (minX - :x) * (minX - :x) +
+                    (minY - :y) * (minY - :y) +
+                    (minZ - :z) * (minZ - :z) <= :rad * :rad
+            )
+            SELECT count(*)
+            FROM ${dataTable(location.world)} as data
+                JOIN rtree ON data.id = rtree.id
+            WHERE data ->> 'category' = :type
             """.trimIndent(),
             x, radius, y, z, type
         ).first { getInt(0) }
@@ -111,11 +122,15 @@ class SpawnLocationsDAO {
         val (x, y, z) = location
         return tx.select(
             """
-            SELECT id, data, minX, minY, minZ FROM ${locationsView(location.world)}
-            WHERE minX > :x - :rad AND minY > :y - :rad AND minZ > :z - :rad
-            AND maxX < :x + :rad AND maxY < :y + :rad AND maxZ < :z + :rad
-            AND data ->> 'category' = :type
-            ORDER BY (minX - :x) * (minX - :x) + (minY - :y) * (minY - :y) + (minZ - :z) * (minZ - :z)
+            WITH rtree AS (
+                SELECT id, minX, minY, minZ FROM ${rtree(location.world)}
+                WHERE minX > :x - :rad AND minY > :y - :rad AND minZ > :z - :rad
+                AND maxX < :x + :rad AND maxY < :y + :rad AND maxZ < :z + :rad
+                ORDER BY (minX - :x) * (minX - :x) + (minY - :y) * (minY - :y) + (minZ - :z) * (minZ - :z)
+            )
+            SELECT data.id, data.data, rtree.minX, rtree.minY, rtree.minZ FROM ${dataTable(location.world)} as data
+                JOIN rtree ON data.id = rtree.id
+            WHERE data ->> 'category' = :type
             LIMIT 1;
             """.trimIndent(),
             x, maxDistance, y, z, type
@@ -123,6 +138,7 @@ class SpawnLocationsDAO {
             SpreadSpawnLocation.fromStatement(this, location.world)
         }
     }
+
     /** Gets all stored spawn positions that land in this [chunk]. */
     context(tx: Transaction)
     fun getSpawnsInChunk(chunk: Chunk): List<SpreadSpawnLocation> = tx.select(
@@ -138,10 +154,15 @@ class SpawnLocationsDAO {
     context(tx: Transaction)
     fun getSpawnsInChunkOfType(chunk: Chunk, type: String): List<SpreadSpawnLocation> = tx.select(
         """
-        SELECT id, data, minX, minY, minZ FROM ${locationsView(chunk.world)}
-        WHERE minX >= :x AND minZ >= :z
-        AND maxX < :x + 16 AND maxZ < :z + 16
-        AND data ->> 'category' = :type
+        WITH rtree AS (
+            SELECT id, minX, minY, minZ
+            FROM ${rtree(chunk.world)}
+            WHERE minX >= :x AND minZ >= :z
+            AND maxX < :x + 16 AND maxZ < :z + 16
+        )
+        SELECT data.id, data.data, rtree.minX, rtree.minY, rtree.minZ FROM ${dataTable(chunk.world)} as data
+            JOIN rtree ON data.id = rtree.id
+        WHERE data ->> 'category' = :type
         """.trimIndent(),
         chunk.x shl 4, chunk.z shl 4, type
     ).map { SpreadSpawnLocation.fromStatement(this, chunk.world) }
