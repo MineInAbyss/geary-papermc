@@ -24,7 +24,8 @@ class UseWaterBottleAction(
         val container = WorldGuard.getInstance().platform.regionContainer
         val query = container.createQuery()
         val location = BukkitAdapter.adapt(targetedBlock.location)
-
+        val success = false
+        
         if (cauldronLevelIncrease > 3) return
         val authorized = query.testState(location, WorldGuardPlugin.inst().wrapPlayer(player), com.sk89q.worldguard.protection.flags.Flags.BUILD)
         if (!authorized) return
@@ -32,6 +33,7 @@ class UseWaterBottleAction(
             targetedBlock.blockData = Material.WATER_CAULDRON.createBlockData {
                 (it as Levelled).level = cauldronLevelIncrease
             }
+            success = true
         } else if (targetedBlock.type == Material.WATER_CAULDRON) {
             val cauldronData = targetedBlock.blockData as Levelled
             val newLevel = (cauldronData.level + cauldronLevelIncrease).coerceAtMost(3)
@@ -41,8 +43,11 @@ class UseWaterBottleAction(
 
         if (targetedBlock.type == Material.DIRT) {
             targetedBlock.type = Material.MUD
+            success = true
         }
-        player.playSound(player, ITEM_BOTTLE_EMPTY, 0.5f, 0.5f)
-        player.playSound(player, ENTITY_GENERIC_SPLASH, 0.5f, 0.5f)
+        if (success) {
+            player.playSound(player, ITEM_BOTTLE_EMPTY, 0.5f, 0.5f)
+            player.playSound(player, ENTITY_GENERIC_SPLASH, 0.5f, 0.5f)
+        }
     }
 }
