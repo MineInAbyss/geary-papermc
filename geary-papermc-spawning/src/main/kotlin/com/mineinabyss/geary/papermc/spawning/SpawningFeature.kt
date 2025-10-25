@@ -16,6 +16,7 @@ import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
 import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpreadSpawnLocation
+import com.mineinabyss.geary.papermc.spawning.database.dao.StoredEntity
 import com.mineinabyss.geary.papermc.spawning.database.schema.SpawningSchema
 import com.mineinabyss.geary.papermc.spawning.listeners.ListSpawnListener
 import com.mineinabyss.geary.papermc.spawning.listeners.SpreadEntityDeathListener
@@ -29,9 +30,10 @@ import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.idofront.config.ConfigFormats
 import com.mineinabyss.idofront.config.Format
 import com.mineinabyss.idofront.config.config
+import com.mineinabyss.idofront.textcomponents.miniMsg
 import com.sk89q.worldguard.WorldGuard
+import kotlinx.serialization.json.Json
 import me.dvyy.sqlite.Database
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -148,11 +150,24 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         task(spreadTask.job)
     }
 
+    private val prettyPrintJson = Json {
+        prettyPrint = true
+        ignoreUnknownKeys = true
+    }
+
     fun sendTpButton(player: Player, spawnLocation: SpreadSpawnLocation) {
         val loc = spawnLocation.location
         val command = "/tp ${loc.x} ${loc.y} ${loc.z}"
         val distance = if (loc.world != null) loc.distance(player.location).toInt() else -1
-        val message = Component.text("TP to ${spawnLocation.stored.type} [${loc.x}, ${loc.y}, ${loc.z}] ($distance blocks away)")
+
+        val message = " • ${spawnLocation.stored.type} <gray>(${distance}m away)".miniMsg()
+            .hoverEvent(
+                """
+                |id: <gray>${spawnLocation.id}</gray>
+                |location: <gray>[${loc.x.toInt()}, ${loc.y.toInt()}, ${loc.z.toInt()}]</gray>
+                |stored: <gray>${prettyPrintJson.encodeToString(spawnLocation.stored)}</gray>
+            """.trimMargin().miniMsg()
+            )
             .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, command))
         player.sendMessage(message)
     }
