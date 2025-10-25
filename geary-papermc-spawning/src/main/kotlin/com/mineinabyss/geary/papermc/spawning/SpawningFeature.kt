@@ -14,8 +14,8 @@ import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
 import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
-import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnSectionsConfig
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
+import com.mineinabyss.geary.papermc.spawning.database.dao.SpreadSpawnLocation
 import com.mineinabyss.geary.papermc.spawning.database.schema.SpawningSchema
 import com.mineinabyss.geary.papermc.spawning.listeners.ListSpawnListener
 import com.mineinabyss.geary.papermc.spawning.listeners.SpreadEntityDeathListener
@@ -128,7 +128,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         )
 
         listeners(
-            ListSpawnListener(spreadSpawner, db, dao ,plugin),
+            ListSpawnListener(spreadSpawner, db, dao, plugin),
             SpreadEntityDeathListener(
                 spreadSpawner, db, plugin, mainWorld
             )
@@ -148,15 +148,16 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         task(spreadTask.job)
     }
 
-    fun sendTpButton(player: Player, loc: Location) {
+    fun sendTpButton(player: Player, spawnLocation: SpreadSpawnLocation) {
+        val loc = spawnLocation.location
         val command = "/tp ${loc.x} ${loc.y} ${loc.z}"
         val distance = if (loc.world != null) loc.distance(player.location).toInt() else -1
-        val message = Component.text("TP to (${loc.x}, ${loc.y}, ${loc.z}) ($distance blocks away)")
+        val message = Component.text("TP to ${spawnLocation.stored.type} [${loc.x}, ${loc.y}, ${loc.z}] ($distance blocks away)")
             .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, command))
         player.sendMessage(message)
     }
 
-    fun dumpDB(loc: Location, player : Player) {
+    fun dumpDB(loc: Location, player: Player) {
         val db = database ?: error("No database to dump")
         val dao = SpawnLocationsDAO()
         plugin.launch {
@@ -164,7 +165,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
                 val locations = dao.getSpawnsNear(loc, 10000.0)
                 player.sendMessage("Total spawn locations: ${locations.size}")
                 locations.forEach { location ->
-                    sendTpButton(player, location.location)
+                    sendTpButton(player, location)
                 }
             }
         }

@@ -7,7 +7,6 @@ import com.mineinabyss.geary.papermc.spawning.choosing.InChunkLocationChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.SpreadChunkChooser
 import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
-import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnSectionsConfig
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
 import com.mineinabyss.geary.papermc.spawning.database.dao.StoredEntity
 import com.sk89q.worldedit.bukkit.BukkitAdapter
@@ -21,11 +20,7 @@ import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
 import java.lang.Math.random
-import kotlin.collections.get
-import kotlin.text.compareTo
-import kotlin.text.toInt
 import kotlin.time.Duration
-import kotlin.times
 
 class SpreadSpawner(
     private val db: Database,
@@ -36,8 +31,7 @@ class SpreadSpawner(
     private val dao: SpawnLocationsDAO,
     private val logger: Logger,
 ) {
-    suspend fun spawnSpreadEntities(task_nb: Int = 0) {
-
+    suspend fun spawnSpreadEntities() {
         for ((type, spreadConfigs) in configs.types) {
 
             val container: RegionContainer = WorldGuard.getInstance().platform.regionContainer
@@ -61,11 +55,11 @@ class SpreadSpawner(
                 val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue
 
                 val spawnedEntity = StoredEntity(
-                    if (random() * 100 <= config.altSpawnChance) config.altSpawnEntry.type.key else config.entry.type.key,
-                    type
+                    type = if (random() * 100 <= config.altSpawnChance) config.altSpawnEntry.type.key else config.entry.type.key,
+                    category = type
                 )
                 if (spawnedEntity.type == config.altSpawnEntry.type.key) {
-                    logger.i { "spawn 2" }
+                    logger.v { "Spawn alt entity ${spawnedEntity.type}" }
                 }
                 val spread = db.write {
                     dao.insertSpawnLocation(spawnPos, spawnedEntity)
