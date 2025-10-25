@@ -24,7 +24,7 @@ class UseWaterBottleAction(
         val container = WorldGuard.getInstance().platform.regionContainer
         val query = container.createQuery()
         val location = BukkitAdapter.adapt(targetedBlock.location)
-        val success = false
+        var success = false
         
         if (cauldronLevelIncrease > 3) return
         val authorized = query.testState(location, WorldGuardPlugin.inst().wrapPlayer(player), com.sk89q.worldguard.protection.flags.Flags.BUILD)
