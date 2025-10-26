@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.choosing
 
 import co.touchlab.kermit.Logger
+import com.google.common.cache.CacheBuilder
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
 import me.dvyy.sqlite.Database
@@ -8,6 +9,8 @@ import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.toJavaDuration
 
 class SpreadChunkChooser(
     private val logger: Logger,
@@ -15,6 +18,12 @@ class SpreadChunkChooser(
     private val db: Database,
     private val dao: SpawnLocationsDAO,
 ) {
+    // Cache to prevent re-checking full sections as frequently. Unit is placed to mark a section as full.
+    // Keys are bounding box to type pairs. An entry being present means this section and type were recently full.
+    private val fullSectionCache = CacheBuilder.newBuilder()
+        .expireAfterWrite(10.seconds.toJavaDuration())
+        .build<Pair<BoundingBox, String>, Unit>()
+
     /**
      * Chose a random chunk inside a given bounding box, generally corresponding to a section.
      *
@@ -32,16 +41,20 @@ class SpreadChunkChooser(
         val splitSize = config.splitSize
         val noiseRange = config.spawnNoise * 16
 
+        // Get count in section, checking cache first to see if the section was recently filled.
+        // If so, wait a little before re-executing DB call
+        if (fullSectionCache.getIfPresent(bb to type) != null) return null
         val sectionCount = db.read { dao.countSpawnsInBBOfType(mainWorld, bb, type) }
+        if (sectionCount >= config.spawnCap) {
+            fullSectionCache.put(bb to type, Unit)
+            return null
+        }
 
         val scoreThreshold = radius * radius
         val sampleSize = (((sectionX.last - sectionX.first) / splitSize) * 0.1)
             .toInt()
             .coerceAtLeast(10)
 
-        if (sectionCount >= config.spawnCap) {
-            return null
-        }
         val xRange = (sectionX.first / splitSize)..(sectionX.last / splitSize)
         val zRange = (sectionZ.first / splitSize)..(sectionZ.last / splitSize)
         val chosen = generateSequence { (xRange.random() * splitSize) to (zRange.random() * splitSize) }
