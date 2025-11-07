@@ -5,6 +5,7 @@ import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import kotlinx.coroutines.withContext
+import me.dvyy.sqlite.Database
 import me.dvyy.sqlite.statement.NamedColumnSqliteStatement
 import org.bukkit.Location
 import org.bukkit.World
@@ -23,7 +24,14 @@ data class SpreadSpawnLocation(
      *
      * Caller is responsible for ensuring the entity isn't spawned multiple times and removed as needed.
      */
-    suspend fun spawn(): BukkitEntity? = withContext(gearyPaper.plugin.minecraftDispatcher) {
+    suspend fun spawn(db: Database): BukkitEntity? = withContext(gearyPaper.plugin.minecraftDispatcher) {
+        val supportBlock = location.subtract(0.0, 1.0, 0.0).block
+        if (!supportBlock.type.isSolid){
+            val dao = SpawnLocationsDAO()
+            db.write {
+                dao.deleteSpawnLocation(location.world!!, id)
+            }
+        }
         val loc = location.toCenterLocation().subtract(0.0, 0.5, 0.0).setRotation(Random.nextFloat() * 360, location.pitch)
         val bukkitEntity = stored.asSpawnType()?.spawnAt(loc) ?: return@withContext null
         bukkitEntity.toGearyOrNull()?.set<SpreadSpawnLocation>(this@SpreadSpawnLocation)

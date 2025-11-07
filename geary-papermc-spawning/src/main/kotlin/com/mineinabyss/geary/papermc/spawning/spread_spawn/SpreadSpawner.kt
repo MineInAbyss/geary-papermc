@@ -65,7 +65,7 @@ class SpreadSpawner(
                     dao.insertSpawnLocation(spawnPos, spawnedEntity)
                 }
 
-                spread.spawn()
+                spread.spawn(db)
 
             }
         }
