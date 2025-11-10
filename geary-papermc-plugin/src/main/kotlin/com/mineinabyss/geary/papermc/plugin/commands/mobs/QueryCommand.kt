@@ -12,7 +12,7 @@ import com.mineinabyss.geary.prefabs.entityOfOrNull
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.IdoCommand
 import com.mineinabyss.idofront.commands.brigadier.context.IdoPlayerCommandContext
-import com.mineinabyss.idofront.commands.brigadier.playerExecutes
+import com.mineinabyss.idofront.commands.brigadier.suggests
 import com.mineinabyss.idofront.messaging.info
 import com.mineinabyss.idofront.messaging.success
 import org.bukkit.entity.Entity
@@ -38,11 +38,11 @@ internal fun IdoCommand.mobsQuery() {
 
     ("remove" / "info") {
         val isInfo = name == "info"
-        requiresPermission("geary.mobs.$name")
+        permission = "geary.mobs.$name"
 
-        playerExecutes(
-            Args.word().suggests { suggest(querySuggestions(suggestions.remaining)) },
-            Args.integer(min = 0)
+        executes.asPlayer().args(
+            "query" to Args.word().suggests { suggest(querySuggestions(suggestions.remaining)) },
+            "radius" to Args.integer(min = 0)
         ) { query, radius -> removeOrInfo(query, radius, isInfo) }
     }
 }

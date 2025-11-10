@@ -25,6 +25,7 @@ dependencies {
 
     // MineInAbyss platform
     compileOnly(idofrontLibs.kotlin.stdlib)
+    compileOnly(idofrontLibs.idofront.services)
     compileOnly(idofrontLibs.kotlinx.serialization.json)
     compileOnly(idofrontLibs.kotlinx.serialization.kaml)
     compileOnly(idofrontLibs.kotlinx.coroutines)

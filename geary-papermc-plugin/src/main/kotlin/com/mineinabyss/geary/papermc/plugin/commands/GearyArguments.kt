@@ -11,6 +11,7 @@ import com.mineinabyss.geary.prefabs.entityOfOrNull
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.ArgsMinecraft
 import com.mineinabyss.idofront.commands.brigadier.IdoCommand
+import com.mineinabyss.idofront.commands.brigadier.suggests
 
 class GearyArguments(
     val context: IdoCommand,

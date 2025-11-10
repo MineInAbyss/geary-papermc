@@ -12,15 +12,15 @@ import com.mineinabyss.geary.serialization.serializers.PolymorphicListAsMapSeria
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.IdoCommand
 import com.mineinabyss.idofront.commands.brigadier.context.IdoPlayerCommandContext
-import com.mineinabyss.idofront.commands.brigadier.playerExecutes
+import com.mineinabyss.idofront.commands.brigadier.suggests
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.success
 
 object TestCommands {
     fun IdoCommand.test() = "test" {
-        requiresPermission("geary.admin.test")
+        permission = "geary.admin.test"
         "execute" {
-            playerExecutes(Args.greedyString().named("Action or condition Yaml")) { yaml ->
+            executes.asPlayer().args("Action or condition Yaml" to Args.greedyString()) { yaml ->
                 executeYaml(yaml)
             }
         }
@@ -30,9 +30,8 @@ object TestCommands {
 
             val spawnArg = Args.string()
                 .suggests { suggestFiltering(getSpawns()?.map { it.key } ?: listOf()) }
-                .named("Spawn name")
 
-            playerExecutes(spawnArg) { spawnName ->
+            executes.asPlayer().args("Spawn name" to spawnArg) { spawnName ->
                 val spawn = getSpawns()?.get(spawnName) ?: fail("Could not find spawn named $spawnName")
                 val spawner = spawningFeature().spawnTask?.mobSpawner ?: fail("Mob spawn task not enabled")
                 runCatching { spawner.checkSpawnConditions(spawn, player.location) }
@@ -57,7 +56,7 @@ object TestCommands {
                 is Condition -> {
                     with(comp) {
                         runCatching { ActionGroupContext(player.toGeary()).execute() }
-                            .onSuccess { if(it) return sender.success("Condition $className passed") else sender.error("Condition $className failed without extra info") }
+                            .onSuccess { if (it) return sender.success("Condition $className passed") else sender.error("Condition $className failed without extra info") }
                             .onFailure { sender.error("Condition $className failed:\n${it.message}") }
                     }
                 }

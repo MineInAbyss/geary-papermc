@@ -13,7 +13,7 @@ import com.mineinabyss.geary.prefabs.Prefabs
 import com.mineinabyss.geary.prefabs.helpers.inheritPrefabsIfNeeded
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.IdoCommand
-import com.mineinabyss.idofront.commands.brigadier.executes
+import com.mineinabyss.idofront.commands.brigadier.suggests
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.success
 import com.mineinabyss.idofront.messaging.warn
@@ -24,9 +24,9 @@ import kotlin.io.path.Path
 import kotlin.io.path.nameWithoutExtension
 
 internal fun IdoCommand.prefabs() = "prefab" {
-    requiresPermission("geary.admin.prefab")
+    permission = "geary.admin.prefab"
     "count" {
-        executes(GearyArgs.prefab()) { prefab ->
+        executes.args("prefab" to GearyArgs.prefab()) { prefab ->
             val geary = gearyPaper.worldManager.global
             with(geary) {
                 val count = geary.queryManager.getEntitiesMatching(family {
@@ -38,7 +38,7 @@ internal fun IdoCommand.prefabs() = "prefab" {
         }
     }
     "reload" {
-        executes(GearyArgs.prefab()) { prefab ->
+        executes.args("prefab" to GearyArgs.prefab()) { prefab ->
             with(gearyPaper.worldManager.global) {
                 runCatching { getAddon(Prefabs).loader.reload(prefab) }
                     .onSuccess { sender.success("Reread prefab $prefab") }
@@ -64,9 +64,9 @@ internal fun IdoCommand.prefabs() = "prefab" {
         }
     }
     "load" {
-        executes(
-            GearyArgs.namespace(),
-            Args.word().suggests {
+        executes.args(
+            "namespace" to GearyArgs.namespace(),
+            "path" to Args.word().suggests {
                 //TODO get previous argument in suggestion
                 val namespace = input.split(" ").dropLast(1).lastOrNull() ?: return@suggests
 //                plugin.dataFolder.resolve("prefabs").resolve(namespace).walk()

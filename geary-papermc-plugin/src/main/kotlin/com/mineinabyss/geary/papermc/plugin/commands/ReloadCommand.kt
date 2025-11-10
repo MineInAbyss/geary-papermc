@@ -10,7 +10,7 @@ import com.mineinabyss.idofront.commands.brigadier.IdoCommand
 
 
 internal fun IdoCommand.reload(plugin: GearyPluginImpl) = "reload" {
-    requiresPermission("geary.admin.reload")
+    permission = "geary.admin.reload"
     executes {
         gearyPaper.configHolder.reload()
         with(gearyPaper.worldManager.global) {

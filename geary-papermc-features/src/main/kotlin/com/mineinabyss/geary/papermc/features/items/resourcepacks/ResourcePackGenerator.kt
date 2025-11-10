@@ -31,7 +31,8 @@ class ResourcePackGenerator(world: Geary) : Geary by world {
             // Generates any missing models for predicates if only textures are provided
             generatePredicateModels(resourcePack, content, prefabKey)
 
-            if (content.model == null || !content.textures.isEmpty) {
+            //FIXME add back
+            if (content.model == null /*|| !content.textures.isEmpty*/) {
                 val modelKey = content.model ?: Key.key(prefabKey.full)
                 resourcePack.model(
                     Model.model()

@@ -28,7 +28,7 @@ import org.bukkit.inventory.meta.BlockStateMeta
 import kotlin.io.path.div
 
 internal fun IdoCommand.debug() = "debug" {
-    requiresPermission("geary.admin.debug")
+    permission = "geary.admin.debug"
     "generateschema" {
         executes {
             GearySchema(
@@ -37,11 +37,11 @@ internal fun IdoCommand.debug() = "debug" {
         }
     }
     "inventory" {
-        playerExecutes {
+        executes.asPlayer {
             repeat(64) {
                 val entities = player.toGeary()
                     .get<PlayerItemCache<*>>()
-                    ?.getEntities() ?: return@playerExecutes
+                    ?.getEntities() ?: return@asPlayer
 
                 player.info(
                     entities
@@ -52,7 +52,7 @@ internal fun IdoCommand.debug() = "debug" {
         }
     }
     "resourcepack_items" {
-        playerExecutes {
+        executes.asPlayer {
             val world = player.world.toGeary()
             val gearyItems = world.getAddon(ItemTracking)
             val items = gearyItems.prefabs.mapNotNull {
@@ -101,14 +101,14 @@ internal fun IdoCommand.debug() = "debug" {
     }
     "async" {
         "read" {
-            playerExecutes {
+            executes.asPlayer {
                 gearyPaper.plugin.launch(gearyPaper.plugin.asyncDispatcher) {
                     player.toGeary().get<PlayerItemCache<*>>()
                 }
             }
         }
         "write" {
-            playerExecutes {
+            executes.asPlayer {
 
                 gearyPaper.plugin.launch(gearyPaper.plugin.asyncDispatcher) {
                     player.toGeary().set(DebugComponent())
@@ -117,12 +117,12 @@ internal fun IdoCommand.debug() = "debug" {
         }
     }
     "getNearbyDBEntries" {
-        playerExecutes {
+        executes.asPlayer {
             gearyPaper.features.getOrNull<SpawningFeature>()?.dumpDB(player.location, player)
         }
     }
     "clearDB" {
-        playerExecutes {
+        executes.asPlayer {
             gearyPaper.features.getOrNull<SpawningFeature>()?.clearDB(player.world)
             sender.success("Cleared spawn locations from the database.")
         }

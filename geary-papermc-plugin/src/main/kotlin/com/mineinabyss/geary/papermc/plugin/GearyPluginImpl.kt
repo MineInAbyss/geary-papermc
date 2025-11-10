@@ -27,7 +27,6 @@ import com.mineinabyss.geary.serialization.dsl.withCommonComponentNames
 import com.mineinabyss.geary.serialization.formats.YamlFormat
 import com.mineinabyss.geary.serialization.helpers.withSerialName
 import com.mineinabyss.geary.serialization.serialization
-import com.mineinabyss.geary.prefabs.DeferredLoadException
 import com.mineinabyss.geary.uuid.SynchronizedUUID2GearyMap
 import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.config.config
@@ -35,11 +34,11 @@ import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.messaging.injectLogger
 import com.mineinabyss.idofront.messaging.observeLogger
+import com.mineinabyss.idofront.plugin.Services
 import com.mineinabyss.idofront.plugin.listeners
 import com.mineinabyss.idofront.serialization.LocationSerializer
-import com.mineinabyss.idofront.serialization.SerializablePrefabItemService
+import com.mineinabyss.idofront.services.SerializableItemStackService
 import org.bukkit.Location
-import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
@@ -116,17 +115,10 @@ class GearyPluginImpl : GearyPlugin() {
             install("PaperMC init") {
                 components {
                     getAddonOrNull(ItemTracking)?.let { addon ->
-                        DI.add<SerializablePrefabItemService>(object : SerializablePrefabItemService {
-                            override fun encodeFromPrefab(item: ItemStack, prefabName: String): ItemStack {
-                                val result = addon.createItem(PrefabKey.of(prefabName), item)
-                                if (result == null) {
-                                    throw DeferredLoadException() // Dependent prefab is not registered yet; deferring load of this prefab
-                                }
-                                else {
-                                    return result
-                                }
-                            }
-                        })
+                        Services.get<SerializableItemStackService>().registerProvider("") { item, prefabName ->
+                            val result = addon.createItem(PrefabKey.of(prefabName), item)
+                            result != null
+                        }
                     }
                 }
 
