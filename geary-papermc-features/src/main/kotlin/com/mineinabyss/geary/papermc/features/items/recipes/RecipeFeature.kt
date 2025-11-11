@@ -1,63 +1,33 @@
 package com.mineinabyss.geary.papermc.features.items.recipes
 
-import com.mineinabyss.geary.papermc.Feature
-import com.mineinabyss.geary.papermc.FeatureContext
-import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.PrefabKey
-import com.mineinabyss.geary.prefabs.Prefabs
 import com.mineinabyss.geary.systems.query.query
+import com.mineinabyss.idofront.features.feature
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.serialization.recipes.options.ingredientOptionsListener
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
+import org.bukkit.plugin.Plugin
+import org.koin.core.module.dsl.scopedOf
+import org.koin.core.module.dsl.singleOf
 
-class RecipeFeature(val context: FeatureContext) : Feature(context) {
-    val world get() = gearyPaper.worldManager.global
-    private val recipes by lazy { with(world) { cache(query<SetRecipes, PrefabKey>()) } }
-    private val potionMixes by lazy { with(world) { cache(query<SetPotionMixes, PrefabKey>()) } }
-    private val gearyItems by lazy { with(world) { getAddon(ItemTracking) } }
-    override val logger: ComponentLogger get() = context.logger
+class RecipeContext(
+    val world: Geary,
+    val logger: ComponentLogger,
+    val plugin: Plugin,
+) {
+    internal val recipesQuery by lazy { with(world) { cache(query<SetRecipes, PrefabKey>()) } }
+    internal val potionMixes by lazy { with(world) { cache(query<SetPotionMixes, PrefabKey>()) } }
+    internal val gearyItems by lazy { with(world) { getAddon(ItemTracking) } }
 
-    override fun enable() {
-        if (!context.isFirstEnable) {
-            (recipes.entities().toSet() + potionMixes.entities().toSet()).forEach {
-                world.getAddon(Prefabs).loader.reload(it)
-            }
-        }
-
-        val autoDiscoveredRecipes = registerRecipes()
-        registerPotionMixes()
-
-        listeners(
-            RecipeDiscoveryListener(autoDiscoveredRecipes),
-            RecipeCraftingListener(),
-        )
-//        val recipeReader = MultiEntryYamlReader(
-//            SetRecipes.serializer(), Yaml(
-//                serializersModule = serializableComponents.serializers.module,
-//                configuration = YamlConfiguration(
-//                    strictMode = false
-//                )
-//            )
-//        )
-//        val recipes = recipeReader.decodeRecursive((plugin.dataPath / "recipes").createParentDirectories())
-    }
-
-    override fun disable() {
-        recipes.forEach { (recipes, prefabKey) ->
-            recipes.recipes.forEachIndexed { i, recipe ->
-                val key = NamespacedKey(prefabKey.namespace, "${prefabKey.key}$i")
-                Bukkit.removeRecipe(key)
-            }
-        }
-    }
+    val recipes = registerRecipes()
 
     private fun registerRecipes(): Set<NamespacedKey> {
         val discoveredRecipes = mutableSetOf<NamespacedKey>()
-
-        recipes.forEach { (recipes, prefabKey) ->
+        recipesQuery.forEach { (recipes, prefabKey) ->
             val result: ItemStack? = runCatching {
                 recipes.result?.toItemStackOrNull() ?: gearyItems.createItem(prefabKey)
             }.getOrNull()
@@ -99,15 +69,53 @@ class RecipeFeature(val context: FeatureContext) : Feature(context) {
     /**
      * This is implemented separate from idofront recipes since they are handled differently by Minecraft.
      */
-    private fun registerPotionMixes() = potionMixes.forEach { (potionMixes, prefabKey) ->
+    internal fun registerPotionMixes() = potionMixes.forEach { (potionMixes, prefabKey) ->
         val result = potionMixes.result?.toItemStackOrNull() ?: gearyItems.createItem(prefabKey)
 
         if (result != null) {
             potionMixes.potionmixes.forEachIndexed { i, potionmix ->
                 val key = NamespacedKey(prefabKey.namespace, "${prefabKey.key}$i")
-                gearyPaper.plugin.server.potionBrewer.removePotionMix(key)
-                gearyPaper.plugin.server.potionBrewer.addPotionMix(potionmix.toPotionMix(key, result))
+                plugin.server.potionBrewer.removePotionMix(key)
+                plugin.server.potionBrewer.addPotionMix(potionmix.toPotionMix(key, result))
             }
-        } else gearyPaper.logger.w { "PotionMix $prefabKey is missing result item" }
+        } else logger.w { "PotionMix $prefabKey is missing result item" }
+    }
+}
+
+val RecipeFeature = feature("recipes") {
+    globalModule {
+        singleOf(::RecipeContext)
+    }
+
+    scopedModule {
+        scopedOf(::RecipeDiscoveryListener)
+        scopedOf(::RecipeCraftingListener)
+    }
+
+    onLoad {
+        val context = get<RecipeContext>()
+//        if (!context.isFirstEnable) {
+//        (context.recipesQuery.entities().toSet() + context.potionMixes.entities().toSet()).forEach {
+//            get<Geary>().getAddon(Prefabs).loader.reload(it)
+//        }
+//        }
+    }
+
+    onEnable {
+        get<RecipeContext>().registerPotionMixes()
+
+        listeners(
+            get<RecipeDiscoveryListener>(),
+            get<RecipeCraftingListener>(),
+        )
+    }
+
+    onDisable {
+//        get<RecipeContext>().recipes.forEach { (recipes, prefabKey) ->
+//            recipes.recipes.forEachIndexed { i, recipe ->
+//                val key = NamespacedKey(prefabKey.namespace, "${prefabKey.key}$i")
+//                Bukkit.removeRecipe(key)
+//            }
+//        }
     }
 }

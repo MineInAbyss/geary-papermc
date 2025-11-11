@@ -3,7 +3,7 @@ package com.mineinabyss.geary.papermc
 import ca.spottedleaf.moonrise.common.util.TickThread
 import com.mineinabyss.geary.helpers.async.AsyncCatcher
 
-class PaperAsyncCatcher: AsyncCatcher {
+class PaperAsyncCatcher : AsyncCatcher {
     override fun isAsync(): Boolean {
         return !TickThread.isTickThread()
     }

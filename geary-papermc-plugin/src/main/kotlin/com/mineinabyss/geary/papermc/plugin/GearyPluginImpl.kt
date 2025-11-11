@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.plugin
 
 import com.mineinabyss.geary.actions.GearyActions
 import com.mineinabyss.geary.autoscan.autoscan
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.modules.UninitializedGearyModule
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.*
@@ -9,10 +10,9 @@ import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
 import com.mineinabyss.geary.papermc.features.GearyPaperMCFeatures
 import com.mineinabyss.geary.papermc.features.entities.EntityFeatures
-import com.mineinabyss.geary.papermc.features.items.ItemFeatures
+import com.mineinabyss.geary.papermc.features.items.ItemsFeature
 import com.mineinabyss.geary.papermc.features.items.recipes.RecipeFeature
 import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsFeature
-import com.mineinabyss.geary.papermc.plugin.commands.registerGearyCommands
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.spawning.statistics.EntityStatistics
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
@@ -31,8 +31,10 @@ import com.mineinabyss.geary.uuid.SynchronizedUUID2GearyMap
 import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.config.config
 import com.mineinabyss.idofront.di.DI
+import com.mineinabyss.idofront.features.featureManager
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.messaging.injectLogger
+import com.mineinabyss.idofront.messaging.injectedLogger
 import com.mineinabyss.idofront.messaging.observeLogger
 import com.mineinabyss.idofront.plugin.Services
 import com.mineinabyss.idofront.plugin.listeners
@@ -47,15 +49,6 @@ import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 
 class GearyPluginImpl : GearyPlugin() {
-    val features = Features(
-        this,
-        ::SpawningFeature,
-        ::RecipeFeature,
-        ::EntityFeatures,
-        ::ItemFeatures,
-        ::MythicMobsFeature,
-    )
-
     override fun onLoad() {
         // Register DI
         val configModule = object : GearyPaperModule {
@@ -66,7 +59,24 @@ class GearyPluginImpl : GearyPlugin() {
             )
             override val config: GearyPaperConfig by configHolder
             override val logger by plugin.observeLogger()
-            override val features get() = this@GearyPluginImpl.features
+            override val features = featureManager {
+                globalModule {
+                    single<ComponentLogger> { this@GearyPluginImpl.injectedLogger() }
+                    single<Geary> { worldManager.global }
+                    factory<GearyPaperConfig> { config }
+                }
+
+                withMainCommand("geary")
+                withReloadSubcommand(permission = "geary.admin.reload")
+
+                install(
+                    SpawningFeature,
+                    RecipeFeature,
+                    EntityFeatures,
+                    ItemsFeature,
+                    MythicMobsFeature,
+                )
+            }
             override val gearyModule: UninitializedGearyModule = geary(PaperEngineModule(config))
             override val worldManager = WorldManager()
         }
@@ -143,15 +153,14 @@ class GearyPluginImpl : GearyPlugin() {
                 }
             }
         }
-        features.loadAll()
-
-        registerGearyCommands()
     }
 
     override fun onEnable() {
         //TODO api for registering geary per world once we have per world ticking
         gearyPaper.worldManager.setGlobalEngine(gearyPaper.gearyModule.start())
-        features.enableAll()
+        gearyPaper.features.load()
+//        registerGearyCommands()
+        gearyPaper.features.enable()
 
         val stats = EntityStatistics()
         listeners(stats)
@@ -159,7 +168,7 @@ class GearyPluginImpl : GearyPlugin() {
     }
 
     override fun onDisable() {
-        features.disableAll()
+        gearyPaper.features.disable()
         server.worlds.forEach { world ->
             with(world.toGeary()) {
                 world.entities.forEach entities@{ entity ->

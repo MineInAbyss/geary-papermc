@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.choosing.mobcaps
 
 import com.mineinabyss.geary.papermc.spawning.components.SpawnCategory
+import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.spawn_types.GearyReadSpawnCategoryEvent
 import com.mineinabyss.idofront.events.call
@@ -11,10 +12,12 @@ import org.bukkit.util.BoundingBox
 import java.util.function.Predicate
 
 class MobCaps(
-    val caps: Map<SpawnCategory, Int>,
-    val defaultCapLimit: Int,
-    val searchRadius: Int,
+    config: SpawnConfig,
 ) {
+    private val caps: Map<SpawnCategory, Int> = config.playerCaps
+    private val defaultCapLimit: Int = config.defaultCap
+    private val searchRadius: Int = config.range.playerCapRadius
+
     companion object {
         private val IGNORED_ENTITY_TYPES = ObjectOpenHashSet.of<EntityType>(
             EntityType.ITEM, EntityType.ITEM_FRAME, EntityType.GLOW_ITEM_FRAME, EntityType.ACACIA_BOAT, EntityType.BIRCH_BOAT,

@@ -1,6 +1,5 @@
 package com.mineinabyss.geary.papermc.events
 
-import com.mineinabyss.geary.addons.dsl.createAddon
 import com.mineinabyss.geary.modules.GearySetup
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
@@ -21,5 +20,4 @@ data class GearyWorldLoadEvent(
     }
 
     override fun getHandlers() = HANDLER_LIST
-
 }

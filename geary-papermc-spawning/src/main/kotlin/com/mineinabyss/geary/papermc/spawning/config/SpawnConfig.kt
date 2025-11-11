@@ -26,6 +26,7 @@ data class SpawnConfig(
     val runTimes: Map<SpawnPosition, @Serializable(with = DurationSerializer::class) Duration> = mapOf(),
     @YamlComment("How many times to try and find a valid spawn position around a player before giving up.")
     val maxSpawnAttemptsPerPlayer: Int = 10,
+    val taskDelay: Long = 1,
 ) {
     @Serializable
     data class Range(

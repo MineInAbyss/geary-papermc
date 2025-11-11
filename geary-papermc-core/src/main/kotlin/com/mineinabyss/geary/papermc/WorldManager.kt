@@ -1,7 +1,6 @@
 package com.mineinabyss.geary.papermc
 
 import com.mineinabyss.geary.modules.Geary
-import com.mineinabyss.idofront.typealiases.BukkitEntity
 import org.bukkit.World
 
 // TODO per world engine support in the future

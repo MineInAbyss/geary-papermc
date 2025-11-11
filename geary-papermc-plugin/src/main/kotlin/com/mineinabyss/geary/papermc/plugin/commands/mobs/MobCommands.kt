@@ -1,6 +1,6 @@
 package com.mineinabyss.geary.papermc.plugin.commands.mobs
 
-import com.mineinabyss.geary.papermc.plugin.commands.GearyArgs
+import com.mineinabyss.geary.papermc.tracking.GearyArgs
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.spawnFromPrefab
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.idofront.commands.brigadier.Args

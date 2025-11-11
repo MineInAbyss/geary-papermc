@@ -4,7 +4,7 @@ import ca.spottedleaf.moonrise.common.util.TickThread
 import com.mineinabyss.geary.helpers.async.AsyncCatcher
 import net.minecraft.server.MinecraftServer
 
-class PaperWarningAsyncCatcher: AsyncCatcher {
+class PaperWarningAsyncCatcher : AsyncCatcher {
     override fun isAsync(): Boolean {
         return !TickThread.isTickThread()
     }

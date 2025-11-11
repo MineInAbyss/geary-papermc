@@ -9,8 +9,9 @@ import kotlin.math.abs
 import kotlin.random.Random
 
 class SpawnLocationChooser(
-    val config: SpawnConfig.Range,
+    config: SpawnConfig,
 ) {
+    val config = config.range
     fun chooseSpawnLocationNear(onlinePlayers: List<Player>, location: Location): Location? {
         val horizontalRange = config.minDistance..config.maxDistance
         val verticalRange = config.minDistance..config.maxVerticalDistance

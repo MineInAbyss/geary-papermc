@@ -1,32 +1,29 @@
 package com.mineinabyss.geary.papermc.spawning.tasks
 
-import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.launchTickRepeating
 import com.mineinabyss.geary.papermc.spawning.MobSpawner
 import com.mineinabyss.geary.papermc.spawning.choosing.SpawnLocationChooser
+import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import com.mineinabyss.idofront.time.inWholeTicks
 import com.mineinabyss.idofront.time.ticks
-import kotlinx.coroutines.delay
 import org.bukkit.Bukkit
 import org.bukkit.GameMode.SPECTATOR
 import kotlin.time.Duration
 
 class SpawnTask(
-    val runTimes: Map<SpawnPosition, Duration>,
-    val locationChooser: SpawnLocationChooser,
-    val spawnAttempts: Int,
-    val mobSpawner: MobSpawner,
+    config: SpawnConfig,
+    private val locationChooser: SpawnLocationChooser,
+    private val mobSpawner: MobSpawner,
 ) {
-    val job = gearyPaper.plugin.launch {
-        while (true) {
-            runCatching {
-                run()
-            }.onFailure {
-                gearyPaper.logger.d { it.stackTraceToString() }
-            }
-            delay(1.ticks)
+    private val runTimes: Map<SpawnPosition, Duration> = config.runTimes
+    private val spawnAttempts: Int = config.maxSpawnAttemptsPerPlayer
+
+    val job = gearyPaper.plugin.launchTickRepeating(config.taskDelay) {
+        runCatching { run() }.onFailure {
+            gearyPaper.logger.d { it.stackTraceToString() }
         }
     }
 
@@ -50,6 +47,4 @@ class SpawnTask(
             }
         }
     }
-
-    fun cancel() = job.cancel()
 }

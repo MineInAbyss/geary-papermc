@@ -2,21 +2,16 @@ package com.mineinabyss.geary.papermc.spawning
 
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
-import com.github.shynixn.mccoroutine.bukkit.launch
-import com.mineinabyss.geary.papermc.Feature
-import com.mineinabyss.geary.papermc.FeatureContext
+import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.choosing.*
 import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.SpawningWorldGuardFlags
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpawning
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
-import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
 import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
 import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
-import com.mineinabyss.geary.papermc.spawning.database.dao.SpreadSpawnLocation
-import com.mineinabyss.geary.papermc.spawning.database.dao.StoredEntity
 import com.mineinabyss.geary.papermc.spawning.database.schema.SpawningSchema
 import com.mineinabyss.geary.papermc.spawning.listeners.ListSpawnListener
 import com.mineinabyss.geary.papermc.spawning.listeners.SpreadEntityDeathListener
@@ -27,172 +22,154 @@ import com.mineinabyss.geary.papermc.spawning.tasks.SpawnTask
 import com.mineinabyss.geary.papermc.spawning.tasks.SpreadSpawnTask
 import com.mineinabyss.geary.papermc.sqlite.sqliteDatabase
 import com.mineinabyss.geary.serialization.SerializableComponents
+import com.mineinabyss.idofront.commands.brigadier.Args
+import com.mineinabyss.idofront.commands.brigadier.suggests
 import com.mineinabyss.idofront.config.ConfigFormats
 import com.mineinabyss.idofront.config.Format
 import com.mineinabyss.idofront.config.config
-import com.mineinabyss.idofront.textcomponents.miniMsg
+import com.mineinabyss.idofront.features.feature
+import com.mineinabyss.idofront.messaging.ComponentLogger
+import com.mineinabyss.idofront.messaging.error
+import com.mineinabyss.idofront.messaging.success
 import com.sk89q.worldguard.WorldGuard
 import kotlinx.serialization.json.Json
-import me.dvyy.sqlite.Database
-import net.kyori.adventure.text.event.ClickEvent
 import org.bukkit.Bukkit
-import org.bukkit.Location
 import org.bukkit.World
-import org.bukkit.entity.Player
+import org.koin.core.module.dsl.scopedOf
 import kotlin.io.path.Path
 
-class SpawningFeature(context: FeatureContext) : Feature(context) {
-    val config by config("spawning", plugin.dataPath, SpawnConfig())
-    var spawnTask: SpawnTask? = null
-    var spawnEntriesByName: Map<String, SpawnEntry>? = null
-    var spreadSpawnTask: SpreadSpawnTask? = null
-    var database: Database? = null
-
-    init {
-        pluginDeps("WorldGuard", "MythicMobs")
+val SpawningFeature = feature("spawning") {
+    dependsOn {
+        plugins("WorldGuard", "MythicMobs")
+        condition { get<GearyPaperConfig>().spawning }
     }
 
-    override fun canEnable() = gearyPaper.config.spawning
-
-    override fun load() {
-        runCatching {
-            val registry = WorldGuard.getInstance().flagRegistry
-            registry.register(SpawningWorldGuardFlags.OVERRIDE_LOWER_PRIORITY_SPAWNS)
-        }.onFailure {
-            logger.w { "Failed to register WorldGuard flags for Geary spawning" }
-            it.printStackTrace()
+    scopedModule {
+        scoped { config("spawning", plugin.dataPath, SpawnConfig()).getOrLoad() }
+        scoped {
+            config(
+                "spread_config", plugin.dataPath,
+                SpreadEntityTypesConfig(),
+                mergeUpdates = false,
+                formats = ConfigFormats(
+                    listOf(
+                        Format(
+                            "yml", Yaml(
+                                serializersModule = gearyPaper.worldManager.global.getAddon(SerializableComponents).serializers.module,
+                                configuration = YamlConfiguration(strictMode = false)
+                            )
+                        )
+                    )
+                )
+            ).getOrLoad()
         }
-    }
-
-    override fun enable() {
-        // -- Database logic --
-        val db = plugin.sqliteDatabase(Path("spawns.db")) {
-            val world = Bukkit.getWorlds().firstOrNull() ?: error("No worlds found, cannot initialize spawning database")
-            SpawningSchema(listOf(world)).init()
+        scoped {
+            // -- Database logic --
+            val db = plugin.sqliteDatabase(Path("spawns.db")) {
+                val world = Bukkit.getWorlds().firstOrNull() ?: error("No worlds found, cannot initialize spawning database")
+                SpawningSchema(listOf(world)).init()
+            }
         }
-        database = db
 
-        listeners(
-            GearySpawnTypeListener(),
-            MythicSpawnTypeListener(),
-        )
-
-        // -- Regular spawning logic --
-        val reader = SpawnEntryReader(
-            gearyPaper.plugin, Yaml(
+        scoped<Json> {
+            Json {
+                prettyPrint = true
+                ignoreUnknownKeys = true
+            }
+        }
+        scoped<Yaml> {
+            Yaml(
                 serializersModule = gearyPaper.worldManager.global.getAddon(SerializableComponents).serializers.module,
                 configuration = YamlConfiguration(
                     strictMode = false
                 )
             )
-        )
-        val spawns = reader.readSpawnEntries()
-        val wg = WorldGuardSpawning(spawns.values.map { it.entry })
-        val caps = MobCaps(config.playerCaps, config.defaultCap, config.range.playerCapRadius)
-        val spawnChooser = SpawnChooser(wg, caps)
-        val mobSpawner = MobSpawner(spawnChooser, LocationSpread(triesForNearbyLoc = 10))
-        val task = SpawnTask(
-            runTimes = config.runTimes,
-            locationChooser = SpawnLocationChooser(config.range),
-            spawnAttempts = config.maxSpawnAttemptsPerPlayer,
-            mobSpawner = mobSpawner,
-        )
+        }
+        scoped<World> {
+            Bukkit.getWorld(get<SpreadEntityTypesConfig>().worldName) ?: error("Spawn config main world not found!")
+        }
+
+
+        // -- Regular spawning logic --
+        scopedOf(::SpawnEntryReader)
+        scopedOf(::SpawnEntryReader)
+        scopedOf(::WorldGuardSpawning)
+        scopedOf(::MobCaps)
+        scopedOf(::SpawnChooser)
+        scoped { LocationSpread(triesForNearbyLoc = 10) }
+        scopedOf(::MobSpawner)
+        scopedOf(::SpawnLocationChooser)
+        scopedOf(::SpawnTask)
 
         // -- Spread Spawn logic --
-        val spreadConfig by config(
-            "spread_config", plugin.dataPath,
-            SpreadEntityTypesConfig(),
-            mergeUpdates = false,
-            formats = ConfigFormats(
-                listOf(
-                    Format(
-                        "yml", Yaml(
-                            serializersModule = gearyPaper.worldManager.global.getAddon(SerializableComponents).serializers.module,
-                            configuration = YamlConfiguration(strictMode = false)
-                        )
-                    )
-                )
-            )
-        )
-        val mainWorld = Bukkit.getWorld(spreadConfig.worldName) ?: error("World ${spreadConfig.worldName} not found, cannot initialize spread spawning")
-        val posChooser = InChunkLocationChooser(mobSpawner, mainWorld)
-        val dao = SpawnLocationsDAO()
-        val chunkChooser = SpreadChunkChooser(logger, mainWorld, db, dao)
+        scopedOf(::SpawningContext)
+        scopedOf(::InChunkLocationChooser)
+        scopedOf(::SpawnLocationsDAO)
+        scopedOf(::SpreadChunkChooser)
+        scopedOf(::SpreadSpawner)
 
-        val spreadSpawner = SpreadSpawner(
-            db = db,
-            world = Bukkit.getWorld("world")!!,
-            configs = spreadConfig,
-            chunkChooser = chunkChooser,
-            posChooser = posChooser,
-            dao = dao,
-            logger = logger
-        )
+        scopedOf(::SpawnTask)
+        scopedOf(::SpreadSpawnTask)
 
-        listeners(
-            ListSpawnListener(spreadSpawner, db, dao, plugin),
-            SpreadEntityDeathListener(
-                spreadSpawner, db, plugin, mainWorld
-            )
-        )
-
-        val spreadTask = SpreadSpawnTask(
-            world = Bukkit.getWorlds().firstOrNull() ?: error("No worlds found, cannot initialize spread spawning"),
-            configs = spreadConfig,
-            spreadSpawner = spreadSpawner
-        )
-
-        // -- Tasks registration --
-        spawnTask = task
-        spreadSpawnTask = spreadTask
-        spawnEntriesByName = spawns.mapValues { it.value.entry }
-        task(task.job)
-        task(spreadTask.job)
+        // -- Listeners --
+        scopedOf(::GearySpawnTypeListener)
+        scopedOf(::MythicSpawnTypeListener)
+        scopedOf(::ListSpawnListener)
+        scopedOf(::SpreadEntityDeathListener)
+        scopedOf(::ListSpawnListener)
+        scopedOf(::SpreadEntityDeathListener)
     }
 
-    private val prettyPrintJson = Json {
-        prettyPrint = true
-        ignoreUnknownKeys = true
-    }
 
-    fun sendTpButton(player: Player, spawnLocation: SpreadSpawnLocation) {
-        val loc = spawnLocation.location
-        val command = "/tp ${loc.x} ${loc.y} ${loc.z}"
-        val distance = if (loc.world != null) loc.distance(player.location).toInt() else -1
-
-        val message = " • ${spawnLocation.stored.type} <gray>(${distance}m away)".miniMsg()
-            .hoverEvent(
-                """
-                |id: <gray>${spawnLocation.id}</gray>
-                |location: <gray>[${loc.x.toInt()}, ${loc.y.toInt()}, ${loc.z.toInt()}]</gray>
-                |stored: <gray>${prettyPrintJson.encodeToString(spawnLocation.stored)}</gray>
-            """.trimMargin().miniMsg()
-            )
-            .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, command))
-        player.sendMessage(message)
-    }
-
-    fun dumpDB(loc: Location, player: Player) {
-        val db = database ?: error("No database to dump")
-        val dao = SpawnLocationsDAO()
-        plugin.launch {
-            db.read {
-                val locations = dao.getSpawnsNear(loc, 10000.0)
-                player.sendMessage("Total spawn locations: ${locations.size}")
-                locations.forEach { location ->
-                    sendTpButton(player, location)
-                }
-            }
+    onLoad {
+        runCatching {
+            val registry = WorldGuard.getInstance().flagRegistry
+            registry.register(SpawningWorldGuardFlags.OVERRIDE_LOWER_PRIORITY_SPAWNS)
+        }.onFailure {
+            get<ComponentLogger>().w { "Failed to register WorldGuard flags for Geary spawning" }
+            it.printStackTrace()
         }
     }
 
-    // the db is locked when we try to run this function.
-    fun clearDB(world: World) {
-        val db = database ?: return logger.w { "Could not clear spawn database, no database to clear" }
-        val dao = SpawnLocationsDAO()
-        plugin.launch {
-            db.write {
-                dao.dropAll(world)
+    onEnable {
+        listeners(
+            get<GearySpawnTypeListener>(),
+            get<MythicSpawnTypeListener>(),
+            get<ListSpawnListener>(),
+            get<SpreadEntityDeathListener>(),
+        )
+
+        // -- Tasks registration --
+        task(get<SpawnTask>().job)
+        task(get<SpreadSpawnTask>().job)
+    }
+
+    mainCommand {
+        "spawns" {
+            "getNearbyDBEntries" {
+                executes.asPlayer {
+                    get<SpawningContext>().dumpDB(player.location, player)
+                }
+            }
+            "clearDB" {
+                executes.asPlayer {
+                    get<SpawningContext>().clearDB(player.world)
+                    sender.success("Cleared spawn locations from the database.")
+                }
+            }
+
+            "test" {
+                executes.asPlayer().args(
+                    "Spawn name" to Args.string().suggests { suggestFiltering(get<SpawningContext>().spawnEntriesByName.map { it.key }) }
+                ) { spawnName ->
+                    val mobSpawner = get<MobSpawner>()
+                    val spawn = get<SpawningContext>().spawnEntriesByName.get(spawnName) ?: fail("Could not find spawn named $spawnName")
+                    runCatching { mobSpawner.checkSpawnConditions(spawn, player.location) }
+                        .onSuccess {
+                            if (it) sender.success("Conditions for $spawnName passed") else sender.error("Conditions for $spawnName failed")
+                        }
+                        .onFailure { sender.error("Conditions for $spawnName failed:\n${it.message}") }
+                }
             }
         }
     }

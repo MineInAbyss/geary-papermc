@@ -6,7 +6,11 @@ import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
 import org.bukkit.World
 
-class SpreadSpawnTask(world: World, configs: SpreadEntityTypesConfig, val spreadSpawner: SpreadSpawner) {
+class SpreadSpawnTask(
+    world: World,
+    configs: SpreadEntityTypesConfig,
+    private val spreadSpawner: SpreadSpawner,
+) {
     val job = gearyPaper.plugin.launchTickRepeating(configs.spawnDelay) {
         runCatching {
             spreadSpawner.clearOldEntries(world, configs.clearSpawnsOlderThan)
@@ -14,9 +18,5 @@ class SpreadSpawnTask(world: World, configs: SpreadEntityTypesConfig, val spread
         }.onFailure {
             gearyPaper.logger.e { it.stackTraceToString() }
         }
-    }
-
-    fun cancel() {
-        job.cancel()
     }
 }

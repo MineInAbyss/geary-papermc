@@ -25,6 +25,7 @@ class MultiEntryYamlReader<T>(
 
     @OptIn(ExperimentalPathApi::class)
     fun decodeRecursive(rootDir: Path): Map<String, EntryWithNode<T>> {
+        TODO("Move into idofront")
         val nodes = mutableMapOf<String, EntryWithNode<T>>()
         val entries = mutableListOf<T>()
         rootDir.walk()
@@ -81,7 +82,7 @@ class MultiEntryYamlReader<T>(
                     original.entries.entries.associate { it.key.content to (it.key to it.value) }.toMutableMap()
                 override.entries.forEach { (key, node) ->
 //                    if (key.content in mapEntries) {
-                        mapEntries[key.content] = key to mergeYamlNodes(mapEntries[key.content]?.second, node)
+                    mapEntries[key.content] = key to mergeYamlNodes(mapEntries[key.content]?.second, node)
 //                    } else mapEntries[key.content] = key to node
                 }
                 YamlMap(
@@ -100,7 +101,8 @@ class MultiEntryYamlReader<T>(
                 }.toSet()
 
                 if (inheritKey != null)
-                    YamlList(original.items
+                    YamlList(
+                        original.items
                         .filter { (it as? YamlMap)?.entries?.any { it.key.content in removeTags } != true }
                         .plus(override.items.filter {
                             (it as? YamlScalar)?.content?.contains(specialMergeTags) != true

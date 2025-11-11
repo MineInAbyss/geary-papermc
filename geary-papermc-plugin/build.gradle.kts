@@ -14,6 +14,7 @@ configurations {
         exclude(group = "org.jetbrains.kotlinx")
         exclude(group = "org.snakeyaml")
         exclude(group = "it.unimi.dsi")
+        exclude(group = "io.insert-koin")
     }
 }
 

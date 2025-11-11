@@ -4,7 +4,6 @@ import ca.spottedleaf.moonrise.common.util.TickThread
 import co.touchlab.kermit.Severity
 import com.charleskorn.kaml.YamlComment
 import com.mineinabyss.geary.modules.Geary
-import com.mineinabyss.geary.modules.geary
 import kotlinx.serialization.Serializable
 import org.bukkit.entity.EntityType
 import org.spigotmc.AsyncCatcher
@@ -39,7 +38,7 @@ class Catching(
 //    val asyncRecordsAccess: CatchType = CatchType.IGNORE,
 //    val asyncArchetypeProviderAccess: CatchType = CatchType.IGNORE,
 ) {
-    companion object{
+    companion object {
         fun asyncCheck(type: CatchType, message: String) {
             when (type) {
                 CatchType.ERROR -> AsyncCatcher.catchOp(message)
@@ -47,6 +46,7 @@ class Catching(
                     Geary.w(message)
                     IllegalStateException("(Ignoring) $message").printStackTrace()
                 }
+
                 CatchType.IGNORE -> Unit
             }
         }
@@ -58,7 +58,6 @@ enum class CatchType {
 }
 
 
-
 enum class MobTypeConversion {
     MIGRATE, REMOVE, IGNORE
 }
@@ -68,7 +67,7 @@ data class ItemTrackingConfig(
     val enabled: Boolean = true,
     @YamlComment("If an item has no prefabs encoded, try to find its prefab by matching custom model data.")
     val migrateByCustomModelData: Boolean = false,
-    val autoDiscoverVanillaRecipes: Boolean = false
+    val autoDiscoverVanillaRecipes: Boolean = false,
 )
 
 @Serializable
@@ -83,5 +82,5 @@ data class ResourcePack(
     @YamlComment("The path to generate the pack to from `plugins/Geary`", "Adding .zip to path will export as a zip instead of directory")
     val outputPath: String = "resourcepack.zip",
     @YamlComment("Points to a resourcepack in zip or directory format to merge into Geary's pack")
-    val includedPackPath: String = ""
+    val includedPackPath: String = "",
 )

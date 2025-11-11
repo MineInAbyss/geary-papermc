@@ -24,7 +24,7 @@ private fun GearyPlugin.paperModule() = module {
     }
 }
 
-private fun chooseCatcher(catchType: CatchType) = when(catchType) {
+private fun chooseCatcher(catchType: CatchType) = when (catchType) {
     CatchType.IGNORE -> IgnoringAsyncCatcher()
     CatchType.WARN -> PaperWarningAsyncCatcher()
     CatchType.ERROR -> PaperAsyncCatcher()

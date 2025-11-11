@@ -6,6 +6,7 @@ import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.Tasks
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -21,8 +22,7 @@ class GhostSeekAction(
     private val sortedRadii = radii.entries.sortedBy { it.key }
 
     override fun ActionGroupContext.execute() {
-        val feature = gearyPaper.features.getOrNull<SpawningFeature>() ?: return
-        val spawner = feature.spreadSpawnTask?.spreadSpawner ?: return
+        val spawner = gearyPaper.features.get<SpreadSpawner>(SpawningFeature) ?: return
         val player = entity?.get<Player>() ?: return
 
         gearyPaper.plugin.launch {

@@ -4,6 +4,7 @@ import com.mineinabyss.geary.modules.GearySetup
 import com.mineinabyss.geary.modules.UninitializedGearyModule
 import com.mineinabyss.idofront.config.IdofrontConfig
 import com.mineinabyss.idofront.di.DI
+import com.mineinabyss.idofront.features.FeatureManager
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -14,7 +15,7 @@ interface GearyPaperModule {
     val configHolder: IdofrontConfig<GearyPaperConfig>
     val config: GearyPaperConfig
     val logger: ComponentLogger
-    val features: Features
+    val features: FeatureManager
     val gearyModule: UninitializedGearyModule
     val worldManager: WorldManager
 }

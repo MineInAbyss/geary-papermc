@@ -8,7 +8,6 @@ import com.mineinabyss.geary.modules.get
 import com.mineinabyss.geary.papermc.features.items.resourcepacks.ResourcePackContent
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.plugin.schema_generator.GearySchema
-import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.spawning.statistics.EntityStatistics
 import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
@@ -20,7 +19,6 @@ import com.mineinabyss.idofront.commands.brigadier.IdoCommand
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.items.editItemMeta
 import com.mineinabyss.idofront.messaging.info
-import com.mineinabyss.idofront.messaging.success
 import org.bukkit.Material
 import org.bukkit.block.ShulkerBox
 import org.bukkit.inventory.ItemStack
@@ -114,17 +112,6 @@ internal fun IdoCommand.debug() = "debug" {
                     player.toGeary().set(DebugComponent())
                 }
             }
-        }
-    }
-    "getNearbyDBEntries" {
-        executes.asPlayer {
-            gearyPaper.features.getOrNull<SpawningFeature>()?.dumpDB(player.location, player)
-        }
-    }
-    "clearDB" {
-        executes.asPlayer {
-            gearyPaper.features.getOrNull<SpawningFeature>()?.clearDB(player.world)
-            sender.success("Cleared spawn locations from the database.")
         }
     }
 }
