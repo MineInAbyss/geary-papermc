@@ -13,7 +13,7 @@ import org.koin.core.module.dsl.scopedOf
 
 val MythicMobsFeature = feature("mythicMobs") {
     dependsOn {
-        condition { get<GearyPaperConfig>().trackEntities }
+        condition { get<GearyPaperConfig>().minecraftFeatures }
         plugins("MythicMobs")
     }
 

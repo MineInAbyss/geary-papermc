@@ -10,12 +10,11 @@ import org.spigotmc.AsyncCatcher
 
 @Serializable
 class GearyPaperConfig(
-    @YamlComment("Convert bukkit entities to and from geary, for instance to store and persist components on a player.")
-    val trackEntities: Boolean = true,
+    val entities: EntityTrackingConfig = EntityTrackingConfig(),
     val items: ItemTrackingConfig = ItemTrackingConfig(),
     @YamlComment("Convert blocks to and from geary.")
     val trackBlocks: Boolean = true,
-    @YamlComment("Whether to enable Minecraft-specific features for Geary like event bridging.")
+    @YamlComment("Whether to enable Minecraft-specific features for Geary like event bridging. Requires item and entity tracking to be enabled.")
     val minecraftFeatures: Boolean = true,
     @YamlComment("Whether to enable Geary actions (ex. used for item configs.)")
     val actions: Boolean = true,
@@ -75,6 +74,14 @@ data class ItemTrackingConfig(
     @YamlComment("If an item has no prefabs encoded, try to find its prefab by matching custom model data.")
     val migrateByCustomModelData: Boolean = false,
     val autoDiscoverVanillaRecipes: Boolean = false,
+)
+
+@Serializable
+data class EntityTrackingConfig(
+    @YamlComment("Whether players should be tracked as entities in Geary")
+    val trackPlayers: Boolean = true,
+    @YamlComment("Whether all other Minecraft entities should be tracked as entities in Geary")
+    val trackOtherEntities: Boolean = true,
 )
 
 @Serializable

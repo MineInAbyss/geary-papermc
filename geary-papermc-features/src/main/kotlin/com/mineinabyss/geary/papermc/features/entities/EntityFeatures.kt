@@ -11,7 +11,7 @@ import com.mineinabyss.idofront.features.feature
 
 val EntityFeatures = feature("entities") {
     dependsOn {
-        condition { get<GearyPaperConfig>().trackEntities }
+        condition { get<GearyPaperConfig>().minecraftFeatures }
     }
 
     install(

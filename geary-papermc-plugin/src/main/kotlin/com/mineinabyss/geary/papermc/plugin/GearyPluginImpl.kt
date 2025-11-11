@@ -87,7 +87,7 @@ class GearyPluginImpl : GearyPlugin() {
             // Install default addons
             install(UUIDTracking.withConfig { SynchronizedUUID2GearyMap() })
 
-            if (configModule.config.trackEntities) install(EntityTracking)
+            install(EntityTracking)
             if (configModule.config.items.enabled) install(ItemTracking)
             if (configModule.config.trackBlocks) install(BlockTracking)
 

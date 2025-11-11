@@ -12,8 +12,6 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.world.EntitiesUnloadEvent
 
 class EntityWorldEventTracker(
@@ -23,9 +21,8 @@ class EntityWorldEventTracker(
     /** Add entities to ECS when they are added to Bukkit for any reason (Uses PaperMC event) */
     @EventHandler(priority = EventPriority.LOWEST)
     fun EntityAddToWorldEvent.onBukkitEntityAdd() {
-        // Only remove player from ECS on disconnect, not death
-        if (entity is Player) logger.v { "PlayerJoinEvent: Track ${entity.name}" }
-        else logger.v { "EntityAddToWorldEvent: Tracking bukkit entity ${entity.toGearyOrNull()?.id} (${entity.type} ${entity.uniqueId})" }
+        if (entity is Player) return // Separate listener for players
+        logger.v { "EntityAddToWorldEvent: Tracking bukkit entity ${entity.toGearyOrNull()?.id} (${entity.type} ${entity.uniqueId})" }
         gearyMobs.bukkit2Geary.getOrCreate(entity)
     }
 
@@ -48,19 +45,12 @@ class EntityWorldEventTracker(
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun EntitiesUnloadEvent.onEntitiesUnload() {
-        if (entities.size != 0)
-            logger.v { "EntitiesUnloadEvent: Saving ${entities.size} entities in chunk..." }
+        if (entities.isEmpty()) return
+        logger.v { "EntitiesUnloadEvent: Saving ${entities.size} entities in chunk..." }
+
         entities.forEach {
             val gearyEntity = it.toGearyOrNull() ?: return@forEach
             gearyEntity.encodeComponentsTo(it)
         }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    fun PlayerQuitEvent.onPlayerLogout() {
-        logger.v { "PlayerQuitEvent: Untracking ${player.name}" }
-        val gearyEntity = player.toGearyOrNull() ?: return
-        gearyEntity.encodeComponentsTo(player)
-        gearyEntity.removeEntity()
     }
 }

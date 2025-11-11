@@ -13,15 +13,11 @@ import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.onPluginEnable
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTrackingModule.Builder
 import com.mineinabyss.geary.papermc.tracking.entities.components.BindToEntityType
-import com.mineinabyss.geary.papermc.tracking.entities.components.markBindEntityTypeAsCustomMob
-import com.mineinabyss.geary.papermc.tracking.entities.components.markSetEntityTypeAsCustomMob
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.entities.systems.EntityWorldEventTracker
-import com.mineinabyss.geary.papermc.tracking.entities.systems.attemptspawn.createAttemptSpawnListener
+import com.mineinabyss.geary.papermc.tracking.entities.systems.GearyPlayerTracker
 import com.mineinabyss.geary.papermc.tracking.entities.systems.createBukkitEntityRemoveListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.createBukkitEntitySetListener
-import com.mineinabyss.geary.papermc.tracking.entities.systems.removevanillamobs.RemoveVanillaMobsListener
-import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.ConvertEntityTypesListener
 import com.mineinabyss.geary.systems.query.ShorthandQuery1
 import com.mineinabyss.geary.systems.query.query
 import com.mineinabyss.idofront.plugin.listeners
@@ -57,16 +53,14 @@ val EntityTracking: Addon<Builder, EntityTrackingModule> = createAddon<Builder, 
     val module = configuration.build(geary)
 
     onPluginEnable {
+        val config = gearyPaper.config.entities
+
+        // Track BukkitEntity component set/remove to internal hashmap
         createBukkitEntityRemoveListener()
         createBukkitEntitySetListener()
-        createAttemptSpawnListener()
-        markSetEntityTypeAsCustomMob()
-        markBindEntityTypeAsCustomMob()
-        plugin.listeners(
-            EntityWorldEventTracker(this, module),
-            ConvertEntityTypesListener(this),
-            RemoveVanillaMobsListener(this),
-        )
+
+        if (config.trackOtherEntities) plugin.listeners(EntityWorldEventTracker(this, module))
+        if (config.trackPlayers) plugin.listeners(GearyPlayerTracker(this, module))
     }
 
     module
