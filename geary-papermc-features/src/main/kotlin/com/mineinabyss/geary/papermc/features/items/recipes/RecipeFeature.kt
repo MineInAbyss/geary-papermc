@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.features.items.recipes
 
 import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.systems.query.query
@@ -13,6 +14,47 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 import org.koin.core.module.dsl.scopedOf
 import org.koin.core.module.dsl.singleOf
+
+val RecipeFeature = feature("recipes") {
+    dependsOn {
+        condition { get<GearyPaperConfig>().recipes }
+    }
+
+    globalModule {
+        singleOf(::RecipeContext)
+    }
+
+    scopedModule {
+        scopedOf(::RecipeDiscoveryListener)
+        scopedOf(::RecipeCraftingListener)
+    }
+
+    onLoad {
+//        if (!context.isFirstEnable) {
+//        (context.recipesQuery.entities().toSet() + context.potionMixes.entities().toSet()).forEach {
+//            get<Geary>().getAddon(Prefabs).loader.reload(it)
+//        }
+//        }
+    }
+
+    onEnable {
+        get<RecipeContext>().registerPotionMixes()
+
+        listeners(
+            get<RecipeDiscoveryListener>(),
+            get<RecipeCraftingListener>(),
+        )
+    }
+
+    onDisable {
+//        get<RecipeContext>().recipes.forEach { (recipes, prefabKey) ->
+//            recipes.recipes.forEachIndexed { i, recipe ->
+//                val key = NamespacedKey(prefabKey.namespace, "${prefabKey.key}$i")
+//                Bukkit.removeRecipe(key)
+//            }
+//        }
+    }
+}
 
 class RecipeContext(
     val world: Geary,
@@ -79,43 +121,5 @@ class RecipeContext(
                 plugin.server.potionBrewer.addPotionMix(potionmix.toPotionMix(key, result))
             }
         } else logger.w { "PotionMix $prefabKey is missing result item" }
-    }
-}
-
-val RecipeFeature = feature("recipes") {
-    globalModule {
-        singleOf(::RecipeContext)
-    }
-
-    scopedModule {
-        scopedOf(::RecipeDiscoveryListener)
-        scopedOf(::RecipeCraftingListener)
-    }
-
-    onLoad {
-        val context = get<RecipeContext>()
-//        if (!context.isFirstEnable) {
-//        (context.recipesQuery.entities().toSet() + context.potionMixes.entities().toSet()).forEach {
-//            get<Geary>().getAddon(Prefabs).loader.reload(it)
-//        }
-//        }
-    }
-
-    onEnable {
-        get<RecipeContext>().registerPotionMixes()
-
-        listeners(
-            get<RecipeDiscoveryListener>(),
-            get<RecipeCraftingListener>(),
-        )
-    }
-
-    onDisable {
-//        get<RecipeContext>().recipes.forEach { (recipes, prefabKey) ->
-//            recipes.recipes.forEachIndexed { i, recipe ->
-//                val key = NamespacedKey(prefabKey.namespace, "${prefabKey.key}$i")
-//                Bukkit.removeRecipe(key)
-//            }
-//        }
     }
 }

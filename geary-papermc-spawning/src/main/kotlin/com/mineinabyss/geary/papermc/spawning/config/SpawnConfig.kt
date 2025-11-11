@@ -6,9 +6,6 @@ import com.mineinabyss.idofront.serialization.DurationSerializer
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration
 
-/**
- * This is a javadoc comment
- */
 @Serializable
 data class SpawnConfig(
     @YamlComment("Default per player spawn cap limit when not explicitly set in playerCaps")

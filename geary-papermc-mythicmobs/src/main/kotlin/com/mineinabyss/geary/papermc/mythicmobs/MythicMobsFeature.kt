@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.mythicmobs
 
+import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.configure
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.mythicmobs.actions.runMMSkillAction
@@ -12,6 +13,7 @@ import org.koin.core.module.dsl.scopedOf
 
 val MythicMobsFeature = feature("mythicMobs") {
     dependsOn {
+        condition { get<GearyPaperConfig>().trackEntities }
         plugins("MythicMobs")
     }
 

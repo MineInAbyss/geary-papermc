@@ -110,17 +110,19 @@ class GearyPluginImpl : GearyPlugin() {
 
             // Load prefabs in Geary/prefabs folder, each subfolder is considered its own namespace
             install(Prefabs)
-            dataPath.resolve("prefabs").createDirectories().listDirectoryEntries().filter(Path::isDirectory)
-                .forEach { folder ->
-                    namespace(folder.name) {
-                        prefabs {
-                            fromDirectory(folder)
+
+            if (configModule.config.prefabLoading)
+                dataPath.resolve("prefabs").createDirectories().listDirectoryEntries().filter(Path::isDirectory)
+                    .forEach { folder ->
+                        namespace(folder.name) {
+                            prefabs {
+                                fromDirectory(folder)
+                            }
                         }
                     }
-                }
 
-            install(GearyActions)
-            install(GearyPaperMCFeatures)
+            if (configModule.config.actions) install(GearyActions)
+            if (configModule.config.minecraftFeatures) install(GearyPaperMCFeatures)
 
             install("PaperMC init") {
                 components {
