@@ -42,7 +42,7 @@ class ListSpawnListener(
             if (alreadyExists) {
                 continue
             }
-            spread.spawn()
+            spread.spawn(db)
         }
     }
 }
