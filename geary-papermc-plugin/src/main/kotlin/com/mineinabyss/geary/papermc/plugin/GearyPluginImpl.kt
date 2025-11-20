@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.plugin
 
+import co.touchlab.kermit.Logger
 import com.mineinabyss.geary.actions.GearyActions
 import com.mineinabyss.geary.autoscan.autoscan
 import com.mineinabyss.geary.modules.Geary
@@ -12,9 +13,11 @@ import com.mineinabyss.geary.papermc.features.GearyPaperMCFeatures
 import com.mineinabyss.geary.papermc.features.entities.EntityFeatures
 import com.mineinabyss.geary.papermc.features.items.ItemsFeature
 import com.mineinabyss.geary.papermc.features.items.recipes.RecipeFeature
+import com.mineinabyss.geary.papermc.features.prefabs.PrefabsFeature
 import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsFeature
+import com.mineinabyss.geary.papermc.plugin.commands.DebugFeature
+import com.mineinabyss.geary.papermc.plugin.commands.TestingFeature
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
-import com.mineinabyss.geary.papermc.spawning.statistics.EntityStatistics
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
@@ -33,54 +36,61 @@ import com.mineinabyss.idofront.config.config
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.features.featureManager
 import com.mineinabyss.idofront.messaging.ComponentLogger
-import com.mineinabyss.idofront.messaging.injectLogger
-import com.mineinabyss.idofront.messaging.injectedLogger
-import com.mineinabyss.idofront.messaging.observeLogger
 import com.mineinabyss.idofront.plugin.Services
-import com.mineinabyss.idofront.plugin.listeners
 import com.mineinabyss.idofront.serialization.LocationSerializer
 import com.mineinabyss.idofront.services.SerializableItemStackService
+import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
+import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.binds
 import java.nio.file.Path
-import kotlin.io.path.createDirectories
-import kotlin.io.path.isDirectory
-import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.name
+import kotlin.io.path.*
 
 class GearyPluginImpl : GearyPlugin() {
+    val features = featureManager {
+        globalModule {
+            single<Plugin> { this@GearyPluginImpl }
+            single<GearyPaperConfig> {
+                config<GearyPaperConfig> { default = GearyPaperConfig() }.single(dataPath / "config.yml").read()
+            }
+            single { ComponentLogger.forPlugin(get(), minSeverity = get<GearyPaperConfig>().logLevel) } binds arrayOf(ComponentLogger::class, Logger::class)
+            single<UninitializedGearyModule> { geary(PaperEngineModule(get())) }
+            singleOf(::WorldManager)
+
+            //TODO remove once we run a separate instance per world
+            single<Geary> { get<WorldManager>().global }
+        }
+
+        withMainCommand("geary")
+        withReloadSubcommand(permission = "geary.admin.reload")
+
+        install(
+            PrefabsFeature,
+            EntityFeatures,
+            ItemsFeature,
+            RecipeFeature,
+            SpawningFeature,
+            MythicMobsFeature,
+            DebugFeature,
+            TestingFeature,
+        )
+    }
+
     override fun onLoad() {
         // Register DI
         val configModule = object : GearyPaperModule {
-            override val plugin: JavaPlugin = this@GearyPluginImpl
-            override val configHolder = config(
-                "config", plugin.dataPath, GearyPaperConfig(),
-                onLoad = { plugin.injectLogger(ComponentLogger.forPlugin(plugin, minSeverity = it.logLevel)) }
-            )
-            override val config: GearyPaperConfig by configHolder
-            override val logger by plugin.observeLogger()
-            override val features = featureManager {
-                globalModule {
-                    single<ComponentLogger> { this@GearyPluginImpl.injectedLogger() }
-                    single<Geary> { worldManager.global }
-                    factory<GearyPaperConfig> { config }
-                }
+            private val koin = this@GearyPluginImpl.features.koin
 
-                withMainCommand("geary")
-                withReloadSubcommand(permission = "geary.admin.reload")
-
-                install(
-                    SpawningFeature,
-                    RecipeFeature,
-                    EntityFeatures,
-                    ItemsFeature,
-                    MythicMobsFeature,
-                )
-            }
-            override val gearyModule: UninitializedGearyModule = geary(PaperEngineModule(config))
-            override val worldManager = WorldManager()
+            override val plugin = koin.get<Plugin>() as JavaPlugin
+            override val config: GearyPaperConfig = koin.get()
+            override val logger: ComponentLogger = koin.get()
+            override val features = this@GearyPluginImpl.features
+            override val gearyModule: UninitializedGearyModule = features.koin.get()
+            override val worldManager: WorldManager = features.koin.get()
         }
-
+        //TODO deprecate in favor of koin
         DI.add<GearyPaperModule>(configModule)
 
         gearyPaper.configure {
@@ -159,14 +169,13 @@ class GearyPluginImpl : GearyPlugin() {
 
     override fun onEnable() {
         //TODO api for registering geary per world once we have per world ticking
-        gearyPaper.worldManager.setGlobalEngine(gearyPaper.gearyModule.start())
+        val engine = gearyPaper.gearyModule.start()
+        gearyPaper.worldManager.setGlobalEngine(engine)
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, {
+            engine.tick()
+        }, 0, 1)
         gearyPaper.features.load()
-//        registerGearyCommands()
         gearyPaper.features.enable()
-
-        val stats = EntityStatistics()
-        listeners(stats)
-        DI.add(stats)
     }
 
     override fun onDisable() {

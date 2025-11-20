@@ -1,4 +1,4 @@
-package com.mineinabyss.geary.papermc.plugin.commands.mobs
+package com.mineinabyss.geary.papermc.features.entities.commands
 
 import com.mineinabyss.geary.papermc.tracking.GearyArgs
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.spawnFromPrefab

@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.spawning
 
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.choosing.*
@@ -24,15 +25,13 @@ import com.mineinabyss.geary.papermc.sqlite.sqliteDatabase
 import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.suggests
-import com.mineinabyss.idofront.config.ConfigFormats
-import com.mineinabyss.idofront.config.Format
-import com.mineinabyss.idofront.config.config
 import com.mineinabyss.idofront.features.feature
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.success
 import com.sk89q.worldguard.WorldGuard
 import kotlinx.serialization.json.Json
+import me.dvyy.sqlite.Database
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.koin.core.module.dsl.scopedOf
@@ -45,27 +44,14 @@ val SpawningFeature = feature("spawning") {
     }
 
     scopedModule {
-        scoped { config("spawning", plugin.dataPath, SpawnConfig()).getOrLoad() }
-        scoped {
-            config(
-                "spread_config", plugin.dataPath,
-                SpreadEntityTypesConfig(),
-                mergeUpdates = false,
-                formats = ConfigFormats(
-                    listOf(
-                        Format(
-                            "yml", Yaml(
-                                serializersModule = gearyPaper.worldManager.global.getAddon(SerializableComponents).serializers.module,
-                                configuration = YamlConfiguration(strictMode = false)
-                            )
-                        )
-                    )
-                )
-            ).getOrLoad()
+        scopedConfig<SpawnConfig>("spawning.yml") { default = SpawnConfig() }
+        scopedConfig<SpreadEntityTypesConfig>("spread_config.yml") {
+            withSerializersModule(get<Geary>().getAddon(SerializableComponents).serializers.module)
+            default = SpreadEntityTypesConfig()
         }
-        scoped {
+        scoped<Database> {
             // -- Database logic --
-            val db = plugin.sqliteDatabase(Path("spawns.db")) {
+            plugin.sqliteDatabase(Path("spawns.db")) {
                 val world = Bukkit.getWorlds().firstOrNull() ?: error("No worlds found, cannot initialize spawning database")
                 SpawningSchema(listOf(world)).init()
             }

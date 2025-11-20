@@ -1,4 +1,4 @@
-package com.mineinabyss.geary.papermc.plugin.commands.mobs
+package com.mineinabyss.geary.papermc.features.entities.commands
 
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.toGeary

@@ -22,9 +22,9 @@ paperweight.reobfArtifactConfiguration.set(ReobfArtifactConfiguration.MOJANG_PRO
 
 dependencies {
     implementation(project(":"))
-    implementation(libs.kts.to.typescript)
 
     // MineInAbyss platform
+    compileOnly(idofrontLibs.koin.core)
     compileOnly(idofrontLibs.kotlin.stdlib)
     compileOnly(idofrontLibs.idofront.services)
     compileOnly(idofrontLibs.kotlinx.serialization.json)
