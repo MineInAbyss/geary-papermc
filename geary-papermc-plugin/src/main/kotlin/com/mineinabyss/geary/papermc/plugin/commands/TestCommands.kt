@@ -21,7 +21,7 @@ val TestingFeature = feature("testing") {
             fun IdoPlayerCommandContext.executeYaml(yaml: String) {
                 val decoded = runCatching {
                     gearyPaper.worldManager.global.getAddon(SerializableComponents)
-                        .formats["yml"]
+                        .formats.getFormat("yml")
                         ?.decodeFromString(PolymorphicListAsMapSerializer.ofComponents(), yaml)
                         ?: fail("Could not decode yaml")
                 }.getOrElse { fail("Could not decode yaml:\n${it.message}") }

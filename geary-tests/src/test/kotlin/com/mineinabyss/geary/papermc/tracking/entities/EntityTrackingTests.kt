@@ -3,7 +3,6 @@ package com.mineinabyss.geary.papermc.tracking.entities
 import com.mineinabyss.geary.modules.TestEngineModule
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.helpers.MockedServerTest
-import com.mineinabyss.geary.papermc.helpers.TestEntityTracking
 import com.mineinabyss.geary.papermc.helpers.withTestSerializers
 import com.mineinabyss.geary.serialization.serialization
 import com.mineinabyss.geary.uuid.UUIDTracking
@@ -13,7 +12,8 @@ class EntityTrackingTests : MockedServerTest() {
         serialization {
             withTestSerializers()
         }
-        install(TestEntityTracking)
+        TODO()
+//        install(TestEntityTracking)
         install(UUIDTracking)
     }
 

@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking
 
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.getAddon
 import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.getKeys

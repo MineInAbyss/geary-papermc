@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.mythicmobs.items
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.features.items.food.ReplaceBurnedDrop
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.getAddon
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.entityOfOrNull

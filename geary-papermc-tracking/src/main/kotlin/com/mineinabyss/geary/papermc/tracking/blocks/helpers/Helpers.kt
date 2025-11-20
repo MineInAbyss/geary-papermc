@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.blocks.helpers
 
 import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.papermc.getAddon
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
 import com.mineinabyss.geary.papermc.withGeary
 import com.mineinabyss.geary.prefabs.entityOfOrNull

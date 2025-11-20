@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.features.entities
 
 import com.mineinabyss.geary.papermc.GearyPaperConfig
+import com.mineinabyss.geary.papermc.configureGeary
 import com.mineinabyss.geary.papermc.features.common.actions.ShulkerBulletHitListener
 import com.mineinabyss.geary.papermc.features.common.cooldowns.clearOldCooldownsSystem
 import com.mineinabyss.geary.papermc.features.common.cooldowns.cooldownDisplaySystem
@@ -9,7 +10,6 @@ import com.mineinabyss.geary.papermc.features.common.event_bridge.entities.Entit
 import com.mineinabyss.geary.papermc.features.common.event_bridge.entities.EntityShearedBridge
 import com.mineinabyss.geary.papermc.features.common.event_bridge.items.ItemInteractBridge
 import com.mineinabyss.geary.papermc.features.common.event_bridge.items.ItemRemovedBridge
-import com.mineinabyss.geary.papermc.features.configureGeary
 import com.mineinabyss.geary.papermc.features.entities.bucketable.BucketableListener
 import com.mineinabyss.geary.papermc.features.entities.commands.mobs
 import com.mineinabyss.geary.papermc.features.entities.displayname.ShowDisplayNameOnKillerListener
@@ -34,9 +34,9 @@ val MinecraftFeatures = feature("minecraft-features") {
         PreventEventsFeature,
     )
 
-    onEnable {
-        configureGeary {
-            autoClose(
+    configureGeary {
+        onEnable {
+            addCloseables(
                 cooldownDisplaySystem(),
                 clearOldCooldownsSystem(),
                 addPathfindersSystem(),
@@ -45,25 +45,18 @@ val MinecraftFeatures = feature("minecraft-features") {
                 markBindEntityTypeAsCustomMob(),
             )
         }
+    }
 
+    onEnable {
         listeners(
             ConvertEntityTypesListener(),
             RemoveVanillaMobsListener(),
-        )
-
-        listeners(
             EntityDamageBridge(),
             EntityLoadUnloadBridge(),
             EntityShearedBridge(),
             ShulkerBulletHitListener(),
-        )
-
-        listeners(
             ItemInteractBridge(),
             ItemRemovedBridge(),
-        )
-
-        listeners(
             BucketableListener(),
             ShowDisplayNameOnKillerListener(),
             TamingListener(),

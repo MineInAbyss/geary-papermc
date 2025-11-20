@@ -4,13 +4,13 @@ import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
+import com.mineinabyss.geary.papermc.getAddon
 import com.mineinabyss.geary.papermc.tracking.entities.components.AddedToWorld
 import com.mineinabyss.geary.papermc.tracking.entities.events.GearyEntityAddToWorldEvent
 import com.mineinabyss.geary.papermc.tracking.entities.events.GearyEntityRemoveFromWorldEvent
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap
 import org.spigotmc.AsyncCatcher
-import kotlin.collections.set
 
 class BukkitEntity2Geary(
     val forceMainThread: Boolean = true

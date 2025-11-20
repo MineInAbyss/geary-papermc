@@ -1,9 +1,9 @@
 package com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype
 
 import com.mineinabyss.geary.datatypes.GearyEntity
-import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.getAddon
 import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.spawnFromPrefab

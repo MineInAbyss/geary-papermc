@@ -4,6 +4,7 @@ import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.helpers.contains
 import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.papermc.getAddon
 import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.components.ShowInMobQueries
 import com.mineinabyss.geary.papermc.tracking.entities.components.SpawnableByGeary

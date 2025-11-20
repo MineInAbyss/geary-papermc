@@ -1,9 +1,9 @@
 package com.mineinabyss.geary.papermc.helpers
 
-import com.mineinabyss.geary.serialization.SerializableComponentsBuilder
+import com.mineinabyss.geary.serialization.SerializableComponentsModule
 
-fun SerializableComponentsBuilder.withTestSerializers() {
-    components {
-        component(SomeData.serializer())
-    }
+fun SerializableComponentsModule.withTestSerializers() {
+    registerComponentSerializers(
+        SomeData.serializer()
+    )
 }

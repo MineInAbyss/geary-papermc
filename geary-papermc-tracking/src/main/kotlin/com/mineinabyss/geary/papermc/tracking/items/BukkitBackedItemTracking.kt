@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.tracking.items
 
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.papermc.getAddon
 import com.mineinabyss.geary.papermc.tracking.items.cache.BukkitItemCache
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.helpers.GearyItemPrefabQuery

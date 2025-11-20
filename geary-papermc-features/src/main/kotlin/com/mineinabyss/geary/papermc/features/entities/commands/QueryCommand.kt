@@ -21,7 +21,7 @@ internal fun IdoCommand.mobsQuery() {
     val mobs: List<String> by lazy {
         buildList {
             addAll(listOf("custom"))
-            addAll(gearyPaper.worldManager.global.getAddon(EntityTracking).query.prefabs.getKeyStrings())
+            addAll(gearyPaper.features.get(EntityTracking).query.prefabs.getKeyStrings())
         }
     }
 
@@ -55,7 +55,6 @@ private fun IdoPlayerCommandContext.removeOrInfo(query: String, radius: Int, isI
     val types = query.split("+")
 
     for (world in worlds) with(world.toGeary()) {
-        val gearyMobs = getAddon(EntityTracking)
         for (entity in world.entities) {
             val geary = entity.toGearyOrNull() ?: continue
             // Only select entities that are instanced from a gearyMobs registered prefab

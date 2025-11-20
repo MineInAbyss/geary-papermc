@@ -17,7 +17,7 @@ import kotlinx.serialization.Serializable
 class NearbyCondition(
     val amount: Int,
     val types: Expression<List<String>> = Expression.Variable("spawnTypes"),
-    val radius: Double = gearyPaper.features.get<SpawnConfig>(SpawningFeature)?.range?.defaultNearbyRange ?: 128.0,
+    val radius: Double = gearyPaper.features.getScoped<SpawnConfig>(SpawningFeature)?.range?.defaultNearbyRange ?: 128.0,
 ) : Condition {
     override fun ActionGroupContext.execute(): Boolean {
         val types = eval(types)

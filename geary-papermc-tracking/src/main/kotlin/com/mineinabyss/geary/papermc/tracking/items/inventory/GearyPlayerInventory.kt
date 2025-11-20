@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.tracking.items.inventory
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.papermc.CatchType
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.getAddon
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache

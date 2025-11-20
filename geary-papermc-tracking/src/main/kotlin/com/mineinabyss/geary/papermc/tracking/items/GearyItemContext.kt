@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.tracking.items
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.papermc.getAddon
 import org.bukkit.inventory.ItemStack
 import java.io.Closeable
 

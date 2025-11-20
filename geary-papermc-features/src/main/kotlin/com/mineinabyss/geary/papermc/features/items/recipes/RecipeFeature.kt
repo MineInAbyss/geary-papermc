@@ -11,7 +11,7 @@ val RecipeFeature = feature("recipes") {
     }
 
     globalModule {
-        singleOf(::RecipeContext)
+        singleOf(::RecipeManager)
     }
 
     scopedModule {
@@ -20,7 +20,10 @@ val RecipeFeature = feature("recipes") {
     }
 
     onEnable {
-        get<RecipeContext>().registerPotionMixes()
+        val context = get<RecipeManager>()
+        autoClose(context)
+        context.registerRecipes()
+        context.registerPotionMixes()
 
         listeners(
             get<RecipeDiscoveryListener>(),

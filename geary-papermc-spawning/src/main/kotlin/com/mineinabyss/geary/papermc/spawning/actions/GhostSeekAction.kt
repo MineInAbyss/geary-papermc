@@ -22,7 +22,7 @@ class GhostSeekAction(
     private val sortedRadii = radii.entries.sortedBy { it.key }
 
     override fun ActionGroupContext.execute() {
-        val spawner = gearyPaper.features.get<SpreadSpawner>(SpawningFeature) ?: return
+        val spawner = gearyPaper.features.getScoped<SpreadSpawner>(SpawningFeature) ?: return
         val player = entity?.get<Player>() ?: return
 
         gearyPaper.plugin.launch {

@@ -1,8 +1,7 @@
 package com.mineinabyss.geary.papermc.mythicmobs
 
 import com.mineinabyss.geary.papermc.GearyPaperConfig
-import com.mineinabyss.geary.papermc.configure
-import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.configureGeary
 import com.mineinabyss.geary.papermc.mythicmobs.actions.runMMSkillAction
 import com.mineinabyss.geary.papermc.mythicmobs.items.MythicMobDropListener
 import com.mineinabyss.geary.papermc.mythicmobs.skills.MythicPrefabsListeners
@@ -22,11 +21,13 @@ val MythicMobsFeature = feature("mythicMobs") {
         scopedOf(::MythicPrefabsListeners)
     }
 
-    onLoad {
-        gearyPaper.configure {
-            geary.runMMSkillAction()
-            geary.mythicMobSpawner()
-            geary.markMMAsCustomMob()
+    configureGeary {
+        onEnable {
+            addCloseables(
+                runMMSkillAction(),
+                mythicMobSpawner(),
+                markMMAsCustomMob(),
+            )
         }
     }
 

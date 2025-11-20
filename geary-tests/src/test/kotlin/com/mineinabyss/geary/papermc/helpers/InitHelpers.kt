@@ -2,8 +2,6 @@ package com.mineinabyss.geary.papermc.helpers
 
 import com.mineinabyss.geary.modules.GearySetup
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
-import com.mineinabyss.geary.papermc.tracking.items.BukkitBackedItemTracking
-import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.Prefabs
 import com.mineinabyss.geary.serialization.serialization
 
@@ -16,7 +14,8 @@ fun GearySetup.withMockTracking(
         withUUIDSerializer()
         withTestSerializers()
     }
-    if (entities) install(TestEntityTracking)
-    if (items) install(ItemTracking.withConfig { BukkitBackedItemTracking(geary) })
+    TODO()
+//    if (entities) install(TestEntityTracking)
+//    if (items) install(ItemTracking.withConfig { BukkitBackedItemTracking(geary) })
     install(Prefabs)
 }

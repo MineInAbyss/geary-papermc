@@ -46,7 +46,7 @@ val SpawningFeature = feature("spawning") {
     scopedModule {
         scopedConfig<SpawnConfig>("spawning.yml") { default = SpawnConfig() }
         scopedConfig<SpreadEntityTypesConfig>("spread_config.yml") {
-            withSerializersModule(get<Geary>().getAddon(SerializableComponents).serializers.module)
+            withSerializersModule(get<Geary>().getAddon(SerializableComponents).formats.module)
             default = SpreadEntityTypesConfig()
         }
         scoped<Database> {
@@ -65,7 +65,7 @@ val SpawningFeature = feature("spawning") {
         }
         scoped<Yaml> {
             Yaml(
-                serializersModule = gearyPaper.worldManager.global.getAddon(SerializableComponents).serializers.module,
+                serializersModule = gearyPaper.worldManager.global.getAddon(SerializableComponents).formats.module,
                 configuration = YamlConfiguration(
                     strictMode = false
                 )

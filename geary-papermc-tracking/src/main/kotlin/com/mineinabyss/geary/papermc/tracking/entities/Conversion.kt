@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.tracking.entities
 
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.papermc.getAddon
 import com.mineinabyss.geary.papermc.withGeary
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import org.bukkit.entity.Entity

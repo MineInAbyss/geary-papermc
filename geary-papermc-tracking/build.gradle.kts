@@ -8,6 +8,7 @@ plugins {
 
 dependencies {
     compileOnly(idofrontLibs.idofront.nms)
+    compileOnly(idofrontLibs.idofront.services)
     compileOnly(idofrontLibs.minecraft.mccoroutine)
     implementation(libs.geary.uuid)
     api(project(":geary-papermc-datastore"))
