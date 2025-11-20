@@ -1,13 +1,12 @@
 package com.mineinabyss.geary.papermc.tracking.entities.systems.removevanillamobs
 
-import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.events.GearyEntityAddToWorldEvent
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.UpdateMob
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
-class RemoveVanillaMobsListener(world: Geary) : Listener, Geary by world {
+class RemoveVanillaMobsListener() : Listener {
     @EventHandler
     fun GearyEntityAddToWorldEvent.onAddVanillaMob() {
         val removeTypes = gearyPaper.config.removeVanillaMobTypes

@@ -7,7 +7,7 @@ import org.koin.core.module.dsl.singleOf
 
 val RecipeFeature = feature("recipes") {
     dependsOn {
-        condition { get<GearyPaperConfig>().recipes }
+        condition { get<GearyPaperConfig>().loading.recipes }
     }
 
     globalModule {

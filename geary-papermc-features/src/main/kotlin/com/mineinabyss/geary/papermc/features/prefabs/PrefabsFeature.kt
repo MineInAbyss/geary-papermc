@@ -28,7 +28,7 @@ import kotlin.io.path.nameWithoutExtension
 //TODO move geary.configure definition into here as well
 val PrefabsFeature = feature("prefabs") {
     dependsOn {
-        condition { get<GearyPaperConfig>().prefabLoading }
+        condition { get<GearyPaperConfig>().loading.prefabs }
     }
 
     mainCommand {

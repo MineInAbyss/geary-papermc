@@ -1,4 +1,4 @@
-package com.mineinabyss.geary.papermc.features.items.resourcepacks
+package com.mineinabyss.geary.papermc.features.resourcepacks
 
 import com.mineinabyss.idofront.serialization.*
 import kotlinx.serialization.EncodeDefault

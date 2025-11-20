@@ -6,7 +6,7 @@ import com.mineinabyss.geary.engine.archetypes.ArchetypeQueryManager
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.modules.get
-import com.mineinabyss.geary.papermc.features.items.resourcepacks.ResourcePackContent
+import com.mineinabyss.geary.papermc.features.resourcepacks.ResourcePackContent
 import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking

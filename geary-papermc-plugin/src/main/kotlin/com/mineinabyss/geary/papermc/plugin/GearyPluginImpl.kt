@@ -9,11 +9,11 @@ import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.*
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
-import com.mineinabyss.geary.papermc.features.GearyPaperMCFeatures
-import com.mineinabyss.geary.papermc.features.entities.EntityFeatures
+import com.mineinabyss.geary.papermc.features.entities.MinecraftFeatures
 import com.mineinabyss.geary.papermc.features.items.ItemsFeature
 import com.mineinabyss.geary.papermc.features.items.recipes.RecipeFeature
 import com.mineinabyss.geary.papermc.features.prefabs.PrefabsFeature
+import com.mineinabyss.geary.papermc.features.resourcepacks.ResourcepackGeneratorFeature
 import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsFeature
 import com.mineinabyss.geary.papermc.plugin.commands.DebugFeature
 import com.mineinabyss.geary.papermc.plugin.commands.TestingFeature
@@ -68,7 +68,8 @@ class GearyPluginImpl : GearyPlugin() {
 
         install(
             PrefabsFeature,
-            EntityFeatures,
+            MinecraftFeatures,
+            ResourcepackGeneratorFeature,
             ItemsFeature,
             RecipeFeature,
             SpawningFeature,
@@ -121,7 +122,7 @@ class GearyPluginImpl : GearyPlugin() {
             // Load prefabs in Geary/prefabs folder, each subfolder is considered its own namespace
             install(Prefabs)
 
-            if (configModule.config.prefabLoading)
+            if (configModule.config.loading.prefabs)
                 dataPath.resolve("prefabs").createDirectories().listDirectoryEntries().filter(Path::isDirectory)
                     .forEach { folder ->
                         namespace(folder.name) {
@@ -132,7 +133,6 @@ class GearyPluginImpl : GearyPlugin() {
                     }
 
             if (configModule.config.actions) install(GearyActions)
-            if (configModule.config.minecraftFeatures) install(GearyPaperMCFeatures)
 
             install("PaperMC init") {
                 components {

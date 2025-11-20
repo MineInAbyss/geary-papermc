@@ -1,7 +1,7 @@
-package com.mineinabyss.geary.papermc.features.items.resourcepacks
+package com.mineinabyss.geary.papermc.features.resourcepacks
 
 import com.mineinabyss.geary.modules.Geary
-import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
@@ -9,6 +9,7 @@ import com.mineinabyss.geary.systems.query.GearyQuery
 import com.mineinabyss.idofront.resourcepacks.ResourcePacks
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.key.Key
+import org.bukkit.plugin.Plugin
 import team.unnamed.creative.ResourcePack
 import team.unnamed.creative.item.Item
 import team.unnamed.creative.item.ItemModel
@@ -16,15 +17,18 @@ import team.unnamed.creative.model.Model
 import team.unnamed.creative.model.ModelTexture
 import team.unnamed.creative.model.ModelTextures
 
-class ResourcePackGenerator(world: Geary) : Geary by world {
-    private val resourcePackQuery = cache(::ResourcePackQuery)
-    private val includedPackPath = gearyPaper.config.resourcePack.includedPackPath.takeUnless(String::isEmpty)
-        ?.let { gearyPaper.plugin.dataFolder.resolve(it) }
+class ResourcePackGenerator(
+    private val geary: Geary,
+    private val plugin: Plugin,
+    private val config: GearyPaperConfig,
+) : AutoCloseable {
+    private val resourcePackQuery = geary.cache(::ResourcePackQuery)
+    private val includedPackPath = config.resourcePack.includedPackPath.takeUnless(String::isEmpty)
+        ?.let { plugin.dataFolder.resolve(it) }
     private val resourcePack = includedPackPath?.let(ResourcePacks::readToResourcePack) ?: ResourcePack.resourcePack()
 
     fun generateResourcePack() {
-        if (!gearyPaper.config.resourcePack.generate) return
-        val resourcePackFile = gearyPaper.plugin.dataFolder.resolve(gearyPaper.config.resourcePack.outputPath)
+        val resourcePackFile = plugin.dataFolder.resolve(config.resourcePack.outputPath)
         resourcePackFile.deleteRecursively()
 
         resourcePackQuery.forEach { (prefabKey, content, itemStack) ->
@@ -78,6 +82,10 @@ class ResourcePackGenerator(world: Geary) : Geary by world {
         predicates.pullingTextures.onEachIndexed { i, (key, _) -> predicateModel(key, "_pulling_$i") }
         predicates.timeTextures.onEachIndexed { i, (key, _) -> predicateModel(key, "_time_$i") }
 
+    }
+
+    override fun close() {
+        resourcePackQuery.close()
     }
 
     companion object {

@@ -12,16 +12,13 @@ import org.spigotmc.AsyncCatcher
 class GearyPaperConfig(
     val entities: EntityTrackingConfig = EntityTrackingConfig(),
     val items: ItemTrackingConfig = ItemTrackingConfig(),
+    val loading: Loading = Loading(),
     @YamlComment("Convert blocks to and from geary.")
     val trackBlocks: Boolean = true,
     @YamlComment("Whether to enable Minecraft-specific features for Geary like event bridging. Requires item and entity tracking to be enabled.")
     val minecraftFeatures: Boolean = true,
     @YamlComment("Whether to enable Geary actions (ex. used for item configs.)")
     val actions: Boolean = true,
-    @YamlComment("Whether to register recipes defined in Geary prefabs")
-    val recipes: Boolean = true,
-    @YamlComment("Whether to load prefab files located in the Geary plugin folder.")
-    val prefabLoading: Boolean = true,
     val catch: Catching = Catching(),
     val mobTypeConversion: MobTypeConversion = MobTypeConversion.IGNORE,
     @YamlComment("List of mob types to remove if they are not entities with Geary prefabs (i.e. vanilla entities)")
@@ -30,7 +27,15 @@ class GearyPaperConfig(
     val resourcePack: ResourcePack = ResourcePack(),
     @YamlComment("Whether to enable Geary's spawning system")
     val spawning: Boolean = true,
-)
+) {
+    @Serializable
+    data class Loading(
+        @YamlComment("Whether to load prefab files located in the Geary plugin folder.")
+        val prefabs: Boolean = true,
+        @YamlComment("Whether to register recipes defined in Geary prefabs")
+        val recipes: Boolean = true,
+    )
+}
 
 @Serializable
 class Catching(
