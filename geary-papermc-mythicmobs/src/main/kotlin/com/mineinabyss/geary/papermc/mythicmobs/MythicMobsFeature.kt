@@ -23,11 +23,9 @@ val MythicMobsFeature = feature("mythicMobs") {
 
     configureGeary {
         onEnable {
-            addCloseables(
-                runMMSkillAction(),
-                mythicMobSpawner(),
-                markMMAsCustomMob(),
-            )
+            runMMSkillAction()
+            mythicMobSpawner()
+            markMMAsCustomMob()
         }
     }
 

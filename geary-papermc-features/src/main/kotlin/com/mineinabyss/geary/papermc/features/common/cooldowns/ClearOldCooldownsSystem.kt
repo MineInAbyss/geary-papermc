@@ -1,14 +1,14 @@
 package com.mineinabyss.geary.papermc.features.common.cooldowns
 
 import com.mineinabyss.geary.helpers.fastForEach
-import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.serialization.setPersisting
 import com.mineinabyss.geary.systems.query.query
 
 /**
  * Clear cooldowns that have expired from [Cooldowns] component.
  */
-fun Geary.clearOldCooldownsSystem() = system(query<Cooldowns>())
+fun WorldScoped.clearOldCooldownsSystem() = system(query<Cooldowns>())
     .every(CooldownDisplayProps.CLEAR_OLD_COOLDOWNS_INTERVAL)
     .execOnAll {
         mapNotNullWithEntity { (cooldowns) ->

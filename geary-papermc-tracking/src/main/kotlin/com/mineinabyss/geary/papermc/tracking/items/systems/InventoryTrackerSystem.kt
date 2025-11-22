@@ -3,7 +3,7 @@
 package com.mineinabyss.geary.papermc.tracking.items.systems
 
 import com.mineinabyss.geary.annotations.optin.UnsafeAccessors
-import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.inventory.NMSInventoryCacheWrapper
 import com.mineinabyss.geary.systems.query.query
@@ -23,7 +23,7 @@ import org.bukkit.entity.Player
  * - If an item isn't in our cache, we check the mismatches or deserialize it into the cache.
  * - All valid items get re-serialized TODO in the future there should be some form of dirty tag so we aren't unnecessarily serializing things
  */
-fun Geary.createInventoryTrackerSystem() = system(
+fun WorldScoped.createInventoryTrackerSystem() = system(
     query<Player, PlayerItemCache<*>>()
 ).every(1.ticks).execOnAll {
     @OptIn(UnsafeAccessors::class)

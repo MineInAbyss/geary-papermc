@@ -15,7 +15,7 @@ val ResourcepackGeneratorFeature = feature("resourcepack") {
 
     onEnable {
         val generator = get<ResourcePackGenerator>()
-        autoClose(generator)
+        addCloseables(generator)
         get<ResourcePackGenerator>().generateResourcePack()
     }
 }

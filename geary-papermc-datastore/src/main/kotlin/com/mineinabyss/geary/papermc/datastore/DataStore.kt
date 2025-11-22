@@ -46,7 +46,7 @@ inline fun <reified T : GearyComponent> PersistentDataContainer.remove() {
 context(world: Geary)
 fun <T : GearyComponent> PersistentDataContainer.encode(
     value: T,
-    serializer: SerializationStrategy<T> = ((world.serializers.getSerializerFor(value::class)
+    serializer: SerializationStrategy<T> = ((world.formats.getSerializerFor(value::class)
         ?: error("Serializer not registered for ${value::class.simpleName}")) as SerializationStrategy<T>),
     key: NamespacedKey = world.serializers.getSerialNameFor(value::class)?.toComponentKey()
         ?: error("SerialName  not registered for ${value::class.simpleName}"),
@@ -63,7 +63,7 @@ fun <T : GearyComponent> PersistentDataContainer.encode(
 context(world: Geary)
 inline fun <reified T : GearyComponent> PersistentDataContainerView.decode(): T? {
     return decode(
-        serializer = world.serializers.getSerializerFor(T::class) ?: return null,
+        serializer = world.formats.getSerializerFor(T::class) ?: return null,
         key = world.serializers.getSerialNameFor(T::class)?.toComponentKey() ?: return null
     )
 }
@@ -76,7 +76,7 @@ context(world: Geary)
 inline fun <reified T : GearyComponent> PersistentDataContainerView.decode(
     key: NamespacedKey,
     serializer: DeserializationStrategy<out T>? =
-        world.serializers.getSerializerForNamespaced(key, T::class),
+        world.formats.getSerializerForNamespaced(key, T::class),
 ): T? {
 
     serializer ?: return null

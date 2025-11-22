@@ -5,6 +5,8 @@ import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.helpers.parent
 import com.mineinabyss.geary.modules.findEntities
 import com.mineinabyss.geary.papermc.GearyPaperConfig
+import com.mineinabyss.geary.papermc.WorldManager
+import com.mineinabyss.geary.papermc.configureGeary
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.GearyArgs
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.UpdateMob
@@ -12,6 +14,8 @@ import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.PrefabLoader.PrefabLoadResult
 import com.mineinabyss.geary.prefabs.Prefabs
+import com.mineinabyss.geary.prefabs.PrefabsModule
+import com.mineinabyss.geary.prefabs.PrefabsModuleExtensions.fromDirectory
 import com.mineinabyss.geary.prefabs.helpers.inheritPrefabsIfNeeded
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.suggests
@@ -22,13 +26,38 @@ import com.mineinabyss.idofront.messaging.warn
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import kotlin.io.path.Path
-import kotlin.io.path.nameWithoutExtension
+import org.bukkit.plugin.Plugin
+import java.nio.file.Path
+import kotlin.io.path.*
 
 //TODO move geary.configure definition into here as well
-val PrefabsFeature = feature("prefabs") {
+val PrefabsFeature = feature("prefab-files") {
     dependsOn {
         condition { get<GearyPaperConfig>().loading.prefabs }
+    }
+
+    configureGeary {
+        dependsOn(Prefabs)
+
+        onEnable {
+            val config = get<GearyPaperConfig>()
+            val prefabs = get<PrefabsModule>()
+            val plugin = get<Plugin>()
+
+            // Load prefabs in Geary/prefabs folder, each subfolder is considered its own namespace
+            if (config.loading.prefabs) plugin
+                .dataPath
+                .resolve("prefabs")
+                .createDirectories()
+                .listDirectoryEntries()
+                .filter(Path::isDirectory)
+                .forEach { folder ->
+                    prefabs.fromDirectory(folder.name, folder)
+                }
+
+            // Force item refresh if any players are online
+            plugin.server.onlinePlayers.forEach { it.inventory.toGeary()?.forceRefresh(ignoreCached = true) }
+        }
     }
 
     mainCommand {
@@ -36,7 +65,7 @@ val PrefabsFeature = feature("prefabs") {
             permission = "geary.admin.prefab"
             "count" {
                 executes.args("prefab" to GearyArgs.prefab()) { prefab ->
-                    val geary = gearyPaper.worldManager.global
+                    val geary = get<WorldManager>().global
                     with(geary) {
                         val count = geary.queryManager.getEntitiesMatching(family {
                             hasRelation<InstanceOf?>(prefab)
@@ -90,9 +119,9 @@ val PrefabsFeature = feature("prefabs") {
 //                    .toList()
                     }
                 ) { namespace, path ->
-                    val prefabs = gearyPaper.worldManager.global.getAddon(Prefabs)
+                    val prefabs = get<WorldManager>().global.getAddon(Prefabs)
                     // Ensure not already registered
-                    if (prefabs.manager[PrefabKey.of(namespace, Path(path).nameWithoutExtension)] != null) {
+                    if (prefabs[PrefabKey.of(namespace, Path(path).nameWithoutExtension)] != null) {
                         fail("Prefab $namespace:$path already exists")
                     }
 

@@ -4,6 +4,6 @@ import com.mineinabyss.geary.serialization.SerializableComponentsModule
 
 fun SerializableComponentsModule.withTestSerializers() {
     registerComponentSerializers(
-        SomeData.serializer()
+        SomeData::class to SomeData.serializer()
     )
 }

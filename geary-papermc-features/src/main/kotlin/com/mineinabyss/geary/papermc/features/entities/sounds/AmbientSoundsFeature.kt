@@ -6,10 +6,8 @@ import com.mineinabyss.idofront.features.feature
 val AmbientSoundsFeature = feature("ambient-sounds") {
     configureGeary {
         onEnable {
-            addCloseables(
-                playAmbientSounds(),
-                silenceVanillaSounds()
-            )
+            playAmbientSounds()
+            silenceVanillaSounds()
         }
     }
 

@@ -17,7 +17,7 @@ import com.mineinabyss.idofront.commands.brigadier.suggests
 object GearyArgs {
     fun prefabKey() = ArgsMinecraft.namespacedKey().suggests {
         with(location.world.toGeary()) {
-            suggest(getAddon(Prefabs).manager.keys.filter {
+            suggest(getAddon(Prefabs).prefabs.keys.filter {
                 val arg = argument.lowercase()
                 it.key.startsWith(arg) || it.full.startsWith(arg)
             }.map { it.toString() })

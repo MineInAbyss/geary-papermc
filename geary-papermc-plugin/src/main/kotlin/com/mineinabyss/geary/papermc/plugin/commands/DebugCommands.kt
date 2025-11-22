@@ -5,7 +5,6 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.engine.archetypes.ArchetypeQueryManager
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.Geary
-import com.mineinabyss.geary.modules.get
 import com.mineinabyss.geary.papermc.features.resourcepacks.ResourcePackContent
 import com.mineinabyss.geary.papermc.getAddon
 import com.mineinabyss.geary.papermc.toGeary
@@ -21,6 +20,7 @@ import org.bukkit.block.ShulkerBox
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.BlockStateMeta
 import org.bukkit.plugin.Plugin
+import org.koin.core.component.get
 
 val DebugFeature = feature("debug") {
     mainCommand {

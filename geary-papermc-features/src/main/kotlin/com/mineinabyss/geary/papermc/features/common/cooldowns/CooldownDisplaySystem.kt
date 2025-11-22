@@ -1,6 +1,6 @@
 package com.mineinabyss.geary.papermc.features.common.cooldowns
 
-import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.papermc.features.common.cooldowns.CooldownDisplayProps.INTERVAL
 import com.mineinabyss.geary.papermc.features.common.cooldowns.CooldownDisplayProps.displayChar
 import com.mineinabyss.geary.papermc.features.common.cooldowns.CooldownDisplayProps.displayLength
@@ -14,7 +14,7 @@ import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
-fun Geary.cooldownDisplaySystem() = system(query<Player, Cooldowns>())
+fun WorldScoped.cooldownDisplaySystem() = system(query<Player, Cooldowns>())
     .every(INTERVAL)
     .exec { (player, cooldowns) ->
         if (!cooldowns.hasDisplayableCooldowns) return@exec

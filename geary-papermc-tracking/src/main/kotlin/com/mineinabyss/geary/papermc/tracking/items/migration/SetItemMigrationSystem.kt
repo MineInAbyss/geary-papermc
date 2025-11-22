@@ -1,6 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.items.migration
 
-import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.modules.observe
 import com.mineinabyss.geary.observers.events.OnSet
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
@@ -11,7 +11,7 @@ import org.bukkit.inventory.ItemStack
 
 private val plainTextSerializer by lazy { PlainTextComponentSerializer.plainText() }
 
-fun Geary.createItemMigrationListener() = observe<OnSet>()
+fun WorldScoped.createItemMigrationListener() = observe<OnSet>()
     .involving(query<SetItem, ItemStack>())
     .exec { (setItem, item) ->
         setItem.item.toItemStack(applyTo = item)

@@ -4,6 +4,7 @@ import com.mineinabyss.geary.components.relations.InstanceOf
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.component
 import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.serialization.components.Persists
 import com.mineinabyss.geary.serialization.getAllPersisting
 import com.mineinabyss.geary.serialization.setAllPersisting
@@ -27,7 +28,7 @@ fun GearyEntity.encodeComponentsTo(pdc: PersistentDataContainer) = with(world) {
     pdc.encodeComponents(persisting, type)
 }
 
-context(world: Geary)
+context(world: WorldScoped)
 fun GearyEntity.encodeComponentsTo(holder: PersistentDataHolder) {
     val bukkitHolder = holder as? BukkitEntity
     world.logger.v { "Encoding components for bukkit entity $id (${bukkitHolder?.type} ${bukkitHolder?.uniqueId})" }

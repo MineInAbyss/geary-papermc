@@ -39,13 +39,8 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
-import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.binds
-import java.nio.file.Path
-import kotlin.io.path.createDirectories
 import kotlin.io.path.div
-import kotlin.io.path.isDirectory
-import kotlin.io.path.listDirectoryEntries
 
 class GearyPluginImpl : GearyPlugin() {
     val features = featureManager {
@@ -55,11 +50,9 @@ class GearyPluginImpl : GearyPlugin() {
                 config<GearyPaperConfig> { default = GearyPaperConfig() }.single(dataPath / "config.yml").read()
             }
             single { ComponentLogger.forPlugin(get(), minSeverity = get<GearyPaperConfig>().logLevel) } binds arrayOf(ComponentLogger::class, Logger::class)
-            single<Geary> { geary(PaperEngineModule(get())) }
-            singleOf(::WorldManager)
-
-            //TODO remove once we run a separate instance per world
-            single<Geary> { get<WorldManager>().global }
+            single<Geary> { geary(PaperEngineModule(get()), koin = getKoin()) }
+            //TODO api for registering geary per world once we have per world ticking
+            single<WorldManager> { WorldManager().apply { setGlobalEngine(get()) } }
         }
 
         withMainCommand("geary")
@@ -115,18 +108,7 @@ class GearyPluginImpl : GearyPlugin() {
                 components()
             }
 
-            // Load prefabs in Geary/prefabs folder, each subfolder is considered its own namespace
-            val prefabs = install(Prefabs)
-
-            if (configModule.config.loading.prefabs) dataPath
-                .resolve("prefabs")
-                .createDirectories()
-                .listDirectoryEntries()
-                .filter(Path::isDirectory)
-                .forEach { folder ->
-                    TODO()
-//                        prefabs.loader.load(folder)
-                }
+            install(Prefabs)
 
             if (configModule.config.actions) install(GearyActions)
 
@@ -134,16 +116,13 @@ class GearyPluginImpl : GearyPlugin() {
     }
 
     override fun onEnable() {
-        //TODO api for registering geary per world once we have per world ticking
         val engine = features.koin.get<Geary>()
 
         // Run init steps registered by other plugins in onLoad. In the future this would be done per-world
-        val setup = GearySetup(engine.application)
+        val setup = GearySetup(engine.getKoin())
         gearyPaper.worldManager.initSteps.forEach { it(setup) }
-        gearyPaper.worldManager.setGlobalEngine(engine)
         features.load()
         features.enable()
-        TODO()
 //        gearyPaper.logger.s(
 //            """Loaded prefabs
 //                            | mobs: ${getAddonOrNull(EntityTracking)?.query?.prefabs?.count() ?: "disabled"}

@@ -1,6 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.entities.systems.attemptspawn
 
-import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.modules.observeWithData
 import com.mineinabyss.geary.papermc.tracking.entities.components.AttemptSpawn
 import com.mineinabyss.geary.papermc.tracking.entities.components.SetEntityType
@@ -12,7 +12,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.world.entity.EntitySpawnReason
 import org.bukkit.event.entity.CreatureSpawnEvent
 
-fun Geary.createAttemptSpawnListener() = observeWithData<AttemptSpawn>()
+fun WorldScoped.createAttemptSpawnListener() = observeWithData<AttemptSpawn>()
     .exec(query<SetEntityType> { not { has<BukkitEntity>() } }) { (mobType) ->
         val loc = event.location
         mobType.entityTypeFromRegistry.spawn(

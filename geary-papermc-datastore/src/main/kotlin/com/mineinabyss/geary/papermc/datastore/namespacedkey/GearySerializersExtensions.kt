@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.datastore.namespacedkey
 
 import com.mineinabyss.geary.datatypes.GearyComponent
 import com.mineinabyss.geary.serialization.ComponentSerializers
+import com.mineinabyss.geary.serialization.SerializationFormats
 import kotlinx.serialization.DeserializationStrategy
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataContainer
@@ -12,8 +13,8 @@ inline fun <reified T : GearyComponent> ComponentSerializers.getNamespacedKeyFor
     getSerialNameFor(T::class)?.toComponentKey()
 
 /** Gets the serializer for a [NamespacedKey][key] registered for polymorphic serialization under [baseClass]. */
-fun <T : GearyComponent> ComponentSerializers.getSerializerForNamespaced(
+fun <T : GearyComponent> SerializationFormats.getSerializerForNamespaced(
     key: NamespacedKey,
-    baseClass: KClass<in T> = GearyComponent::class
+    baseClass: KClass<in T> = GearyComponent::class,
 ): DeserializationStrategy<out T>? =
     getSerializerFor(key.toSerialName(), baseClass)

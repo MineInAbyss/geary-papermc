@@ -65,7 +65,7 @@ object MythicEmbeddedGearyEntity {
             set(prefabKey)
         }
         mob.config.set(LOADED_ENTITY_KEY, prefabKey.toString())
-        prefabs.manager.registerPrefab(prefabKey, prefabEntity)
+        prefabs.create(prefabKey to prefabEntity)
         prefabEntity
     }
 }

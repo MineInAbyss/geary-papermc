@@ -36,14 +36,12 @@ val MinecraftFeatures = feature("minecraft-features") {
 
     configureGeary {
         onEnable {
-            addCloseables(
-                cooldownDisplaySystem(),
-                clearOldCooldownsSystem(),
-                addPathfindersSystem(),
-                createAttemptSpawnListener(),
-                markSetEntityTypeAsCustomMob(),
-                markBindEntityTypeAsCustomMob(),
-            )
+            cooldownDisplaySystem()
+            clearOldCooldownsSystem()
+            addPathfindersSystem()
+            createAttemptSpawnListener()
+            markSetEntityTypeAsCustomMob()
+            markBindEntityTypeAsCustomMob()
         }
     }
 

@@ -89,19 +89,17 @@ class ResourcePackGenerator(
         resourcePackQuery.close()
     }
 
-    companion object {
-        class ResourcePackQuery(world: Geary) : GearyQuery(world) {
-            private val prefabKey by get<PrefabKey>()
-            private val resourcePackContent by get<ResourcePackContent>()
-            //private val itemstack by get<SerializableItemStack>().orNull()
+    class ResourcePackQuery(world: Geary) : GearyQuery(world) {
+        private val prefabKey by get<PrefabKey>()
+        private val resourcePackContent by get<ResourcePackContent>()
+        //private val itemstack by get<SerializableItemStack>().orNull()
 
-            override fun ensure() = this {
-                has<Prefab>()
-            }
-
-            operator fun component1() = prefabKey
-            operator fun component2() = resourcePackContent
-            operator fun component3() = world.getAddon(ItemTracking).itemProvider.serializePrefabToItemStack(prefabKey)
+        override fun ensure() = this {
+            has<Prefab>()
         }
+
+        operator fun component1() = prefabKey
+        operator fun component2() = resourcePackContent
+        operator fun component3() = world.getAddon(ItemTracking).itemProvider.serializePrefabToItemStack(prefabKey)
     }
 }

@@ -1,6 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.blocks.systems
 
-import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.modules.observe
 import com.mineinabyss.geary.observers.events.OnSet
 import com.mineinabyss.geary.papermc.tracking.blocks.Block2Prefab
@@ -8,7 +8,7 @@ import com.mineinabyss.geary.papermc.tracking.blocks.components.SetBlock
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.systems.query.query
 
-fun Geary.createTrackOnSetBlockComponentListener(blocks: Block2Prefab) = observe<OnSet>()
+fun WorldScoped.createTrackOnSetBlockComponentListener(blocks: Block2Prefab) = observe<OnSet>()
     .involving(query<SetBlock, PrefabKey>())
     .exec { (block, prefab) ->
         val blockData = blocks

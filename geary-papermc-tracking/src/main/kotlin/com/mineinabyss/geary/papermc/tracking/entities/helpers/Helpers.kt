@@ -19,8 +19,8 @@ inline fun <T> Location.withGeary(run: Geary.() -> T) = with(world.toGeary()) { 
 
 fun Location.spawnFromPrefab(prefab: PrefabKey, initEntityPreEvent: GearyEntity.() -> Unit = {}): Result<BukkitEntity> =
     withGeary {
-        val entity =
-            getAddon(Prefabs).manager[prefab] ?: return Result.failure(IllegalArgumentException("No prefab found"))
+        val entity = getAddon(Prefabs)[prefab]
+            ?: return Result.failure(IllegalArgumentException("No prefab found"))
         return spawnFromPrefab(entity, initEntityPreEvent = initEntityPreEvent)
     }
 

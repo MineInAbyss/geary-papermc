@@ -1,6 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.entities.components
 
-import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.modules.observe
 import com.mineinabyss.geary.observers.events.OnSet
 import com.mineinabyss.geary.systems.query.query
@@ -19,13 +19,13 @@ value class SetEntityType(val key: String) {
             .orElseGet { error("An entity type with key $key was not found.") }
 }
 
-fun Geary.markSetEntityTypeAsCustomMob() = observe<OnSet>()
+fun WorldScoped.markSetEntityTypeAsCustomMob() = observe<OnSet>()
     .involving(query<SetEntityType>())
     .exec {
         entity.add<ShowInMobQueries>()
         entity.add<SpawnableByGeary>()
     }
 
-fun Geary.markBindEntityTypeAsCustomMob() = observe<OnSet>()
+fun WorldScoped.markBindEntityTypeAsCustomMob() = observe<OnSet>()
     .involving(query<BindToEntityType>())
     .exec { entity.add<ShowInMobQueries>() }
