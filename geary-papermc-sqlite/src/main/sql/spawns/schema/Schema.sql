@@ -7,13 +7,21 @@ CREATE VIRTUAL TABLE spawn_rtree USING rtree_i32
     maxY,
     minZ,
     maxZ,
+    minCategory,
+    maxCategory
 );
 --
 CREATE TABLE IF NOT EXISTS spawn_data
 (
     id       INTEGER PRIMARY KEY,
-    data TEXT NOT NULL
+    data BLOB NOT NULL
 ) STRICT;
+--
+CREATE TABLE spawn_categories
+(
+    id   INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL
+);
 --
 CREATE TRIGGER IF NOT EXISTS spawn_data_on_delete
     AFTER DELETE
@@ -35,6 +43,8 @@ SELECT rtree.id  AS id,
        minZ,
        maxX,
        maxY,
-       maxZ
+       maxZ,
+       minCategory,
+       maxCategory
 FROM spawn_rtree rtree
          INNER JOIN spawn_data data ON rtree.id = data.id;

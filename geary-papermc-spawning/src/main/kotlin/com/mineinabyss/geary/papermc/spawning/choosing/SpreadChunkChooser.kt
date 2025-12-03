@@ -42,7 +42,7 @@ class SpreadChunkChooser(
         // Get count in section, checking cache first to see if the section was recently filled.
         // If so, wait a little before re-executing DB call
         if (fullSectionCache.getIfPresent(bb to type) != null) return null
-        val sectionCount = spawnLocs.countSpawnsInBB(mainWorld, bb, type)
+        val sectionCount = spawnLocs.countSpawnsInBB(mainWorld, bb, listOf(type))
         if (sectionCount >= config.spawnCap) {
             fullSectionCache.put(bb to type, Unit)
             return null

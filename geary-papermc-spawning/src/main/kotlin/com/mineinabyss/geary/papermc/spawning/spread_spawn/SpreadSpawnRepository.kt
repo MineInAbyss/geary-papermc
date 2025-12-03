@@ -4,6 +4,8 @@ import com.mineinabyss.geary.papermc.data.SpawnQueries
 import com.mineinabyss.idofront.destructure.component1
 import com.mineinabyss.idofront.destructure.component2
 import com.mineinabyss.idofront.destructure.component3
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import me.dvyy.sqlite.Database
 import org.bukkit.Chunk
@@ -33,31 +35,35 @@ class SpreadSpawnRepository(
     suspend fun countSpawnsInBB(
         world: World,
         box: BoundingBox,
-        type: String? = null,
+        categories: List<String>? = null,
     ): Int = db.read {
-        when (type) {
+        when (categories) {
             null -> spawns.countSpawnsInBB(minX = box.minX, minY = box.minY, minZ = box.minZ, maxX = box.maxX, maxY = box.maxY, maxZ = box.maxZ)
-            else -> spawns.countSpawnsInBBOfType(minX = box.minX, minY = box.minY, minZ = box.minZ, maxX = box.maxX, maxY = box.maxY, maxZ = box.maxZ, type = type)
+            else -> spawns.countSpawnsInBBOfType(minX = box.minX, minY = box.minY, minZ = box.minZ, maxX = box.maxX, maxY = box.maxY, maxZ = box.maxZ, categories = json(categories))
         }.first { getInt(it.count) }
     }
 
-    suspend fun countNearby(location: Location, radius: Double, type: String? = null): Int = db.read {
+    suspend fun countNearby(
+        location: Location, radius: Double,
+        categories: List<String>? = null,
+    ): Int = db.read {
         val (x, y, z) = location
-        when (type) {
+        when (categories) {
             null -> spawns.countNearby(x = x, y = y, z = z, rad = radius)
-            else -> spawns.countNearbyOfType(x = x, y = y, z = z, rad = radius, type = type)
+            else -> spawns.countNearbyOfType(x = x, y = y, z = z, rad = radius, categories = json(categories))
         }.first { getInt(it.count) }
     }
+
 
     suspend fun getClosestSpawn(
         location: Location,
         maxDistance: Double,
-        type: String? = null,
+        categories: List<String>? = null,
     ): SpreadSpawnLocation? = db.read {
         val (x, y, z) = location
-        when (type) {
+        when (categories) {
             null -> spawns.getClosestSpawn(x = x, y = y, z = z, rad = maxDistance)
-            else -> spawns.getClosestSpawnOfType(x = x, y = y, z = z, rad = maxDistance, type = type)
+            else -> spawns.getClosestSpawnOfType(x = x, y = y, z = z, rad = maxDistance, categories = json(categories))
         }.firstOrNull { SpreadSpawnLocation.fromStatement(this, location.world) }
     }
 
@@ -71,11 +77,11 @@ class SpreadSpawnRepository(
     /** Gets all stored spawn positions that land in this [chunk]. */
     suspend fun getSpawnsInChunk(
         chunk: Chunk,
-        type: String? = null,
+        categories: List<String>? = null,
     ): List<SpreadSpawnLocation> = db.read {
-        when (type) {
+        when (categories) {
             null -> spawns.getSpawnsInChunk(chunk.x shl 4, chunk.z shl 4)
-            else -> spawns.getSpawnsInChunkOfType(chunk.x shl 4, chunk.z shl 4, type)
+            else -> spawns.getSpawnsInChunkOfType(chunk.x shl 4, chunk.z shl 4, categories = json(categories))
         }.map { SpreadSpawnLocation.fromStatement(this, chunk.world) }
     }
 
@@ -91,6 +97,7 @@ class SpreadSpawnRepository(
     suspend fun insertSpawnLocation(location: Location, store: StoredEntity): SpreadSpawnLocation = db.write {
         val (x, y, z) = location
         val id = spawns.insertRtree(x = x, y = y, z = z)
+        spawns.createCategoriesIfMissing(json(listOf(store.category)))
         spawns.insertData(id = id, data = json.encodeToString(store))
 
         SpreadSpawnLocation(
@@ -101,4 +108,6 @@ class SpreadSpawnRepository(
     }
 
     suspend fun dropAll(world: World) = db.write { spawns.dropAll() }
+
+    private fun json(filter: List<String>) = json.encodeToString(ListSerializer(String.serializer()), filter)
 }

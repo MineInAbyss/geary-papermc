@@ -11,7 +11,7 @@ ORDER BY abs(minX - :x) + abs(minY - :y) + abs(minZ - :z);
 
 -- countSpawnsInBB
 SELECT count(*) AS count
-FROM spawn_view
+FROM spawn_rtree
 WHERE minX >= :minX
   AND minY >= :minY
   AND minZ >= :minZ
@@ -20,18 +20,15 @@ WHERE minX >= :minX
   AND maxZ < :maxZ;
 
 -- countSpawnsInBBOfType
-WITH rtree AS ( SELECT id
-                FROM spawn_rtree
-                WHERE minX >= :minX
-                  AND minY >= :minY
-                  AND minZ >= :minZ
-                  AND maxX < :maxX
-                  AND maxY < :maxY
-                  AND maxZ < :maxZ )
 SELECT count(*) AS count
-FROM spawn_data AS data
-         JOIN rtree ON data.id = rtree.id
-WHERE data ->> 'category' = :type;
+FROM spawn_rtree
+WHERE minX >= :minX
+  AND minY >= :minY
+  AND minZ >= :minZ
+  AND maxX < :maxX
+  AND maxY < :maxY
+  AND maxZ < :maxZ
+  AND minCategory IN ( SELECT id FROM spawn_categories WHERE name IN ( SELECT value FROM json_each(:categories) ) );
 
 -- countNearby
 SELECT count(*) AS count
@@ -45,19 +42,16 @@ WHERE minX > :x - :rad
   AND (minX - :x) * (minX - :x) + (minY - :y) * (minY - :y) + (minZ - :z) * (minZ - :z) <= :rad * :rad;
 
 -- countNearbyOfType
-WITH rtree AS ( SELECT id
-                FROM spawn_rtree
-                WHERE minX > :x - :rad
-                  AND minY > :y - :rad
-                  AND minZ > :z - :rad
-                  AND maxX < :x + :rad
-                  AND maxY < :y + :rad
-                  AND maxZ < :z + :rad
-                  AND (minX - :x) * (minX - :x) + (minY - :y) * (minY - :y) + (minZ - :z) * (minZ - :z) <= :rad * :rad )
 SELECT count(*) AS count
-FROM spawn_data AS data
-         JOIN rtree ON data.id = rtree.id
-WHERE data ->> 'category' = :type;
+FROM spawn_rtree
+WHERE minX > :x - :rad
+  AND minY > :y - :rad
+  AND minZ > :z - :rad
+  AND maxX < :x + :rad
+  AND maxY < :y + :rad
+  AND maxZ < :z + :rad
+  AND (minX - :x) * (minX - :x) + (minY - :y) * (minY - :y) + (minZ - :z) * (minZ - :z) <= :rad * :rad
+  AND minCategory IN ( SELECT id FROM spawn_categories WHERE name IN ( SELECT value FROM json_each(:categories) ) );
 
 -- getClosestSpawn
 SELECT id, data, minX, minY, minZ
@@ -72,19 +66,16 @@ ORDER BY (minX - :x) * (minX - :x) + (minY - :y) * (minY - :y) + (minZ - :z) * (
 LIMIT 1;
 
 -- getClosestSpawnOfType
-WITH rtree AS ( SELECT id, minX, minY, minZ
-                FROM spawn_rtree
-                WHERE minX > :x - :rad
-                  AND minY > :y - :rad
-                  AND minZ > :z - :rad
-                  AND maxX < :x + :rad
-                  AND maxY < :y + :rad
-                  AND maxZ < :z + :rad
-                ORDER BY (minX - :x) * (minX - :x) + (minY - :y) * (minY - :y) + (minZ - :z) * (minZ - :z) )
-SELECT data.id, data.data, rtree.minX, rtree.minY, rtree.minZ
-FROM spawn_data AS data
-         JOIN rtree ON data.id = rtree.id
-WHERE data ->> 'category' = :type
+SELECT id, data, minX, minY, minZ
+FROM spawn_view
+WHERE minX > :x - :rad
+  AND minY > :y - :rad
+  AND minZ > :z - :rad
+  AND maxX < :x + :rad
+  AND maxY < :y + :rad
+  AND maxZ < :z + :rad
+  AND minCategory IN ( SELECT id FROM spawn_categories WHERE name IN ( SELECT value FROM json_each(:categories) ) )
+ORDER BY (minX - :x) * (minX - :x) + (minY - :y) * (minY - :y) + (minZ - :z) * (minZ - :z)
 LIMIT 1;
 
 -- getSpawnsInBB
@@ -106,13 +97,18 @@ WHERE minX >= :x
   AND maxZ < :z + 16;
 
 -- getSpawnsInChunkOfType
-WITH rtree AS ( SELECT id, minX, minY, minZ
-                FROM spawn_rtree
-                WHERE minX >= :x AND minZ >= :z AND maxX < :x + 16 AND maxZ < :z + 16 )
-SELECT data.id, data.data, rtree.minX, rtree.minY, rtree.minZ
-FROM spawn_data AS data
-         JOIN rtree ON data.id = rtree.id
-WHERE data ->> 'category' = :type;
+SELECT id, data, minX, minY, minZ
+FROM spawn_view
+WHERE minX >= :x
+  AND minZ >= :z
+  AND maxX < :x + 16
+  AND maxZ < :z + 16
+  AND minCategory IN ( SELECT id FROM spawn_categories WHERE name IN ( SELECT value FROM json_each(:categories) ) )
+
+-- createCategoriesIfMissing
+INSERT OR IGNORE INTO spawn_categories(name)
+SELECT value
+FROM json_each(:categories);
 
 -- insertData
 INSERT INTO spawn_data(id, data)
