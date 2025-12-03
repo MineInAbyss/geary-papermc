@@ -1,4 +1,4 @@
-package com.mineinabyss.geary.papermc.spawning.database.dao
+package com.mineinabyss.geary.papermc.spawning.spread_spawn
 
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.mineinabyss.geary.papermc.gearyPaper
@@ -14,7 +14,7 @@ import kotlin.random.Random
  * Represents a specific entity stored at a location in the spread spawns database.
  */
 data class SpreadSpawnLocation(
-    val id: Int,
+    val id: Long,
     val stored: StoredEntity,
     val location: Location,
 ) {
@@ -33,7 +33,7 @@ data class SpreadSpawnLocation(
     companion object {
         fun fromStatement(cursor: NamedColumnSqliteStatement, world: World) = with(cursor) {
             SpreadSpawnLocation(
-                getInt("id"),
+                getLong("id"),
                 json.decodeFromString<StoredEntity>(getText("data")),
                 Location(world, getDouble("minX"), getDouble("minY"), getDouble("minZ"))
             )

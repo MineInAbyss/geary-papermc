@@ -5,8 +5,8 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.papermc.GearyPlugin
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
-import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
-import com.mineinabyss.geary.papermc.spawning.database.dao.SpreadSpawnLocation
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawnLocation
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawnRepository
 import com.mineinabyss.geary.papermc.spawning.tasks.SpreadSpawnTask
 import com.mineinabyss.idofront.textcomponents.miniMsg
 import kotlinx.serialization.json.Json
@@ -20,10 +20,10 @@ class SpawningContext(
     val reader: SpawnEntryReader,
     val spreadSpawnTask: SpreadSpawnTask,
     val database: Database,
+    val spawnsLocs: SpreadSpawnRepository,
     val plugin: GearyPlugin,
     val prettyPrintJson: Json,
     val logger: Logger,
-    val dao: SpawnLocationsDAO,
 ) {
     val spawns = reader.readSpawnEntries()
     val spawnEntriesByName: Map<String, SpawnEntry> = spawns.mapValues { it.value.entry }
@@ -46,15 +46,11 @@ class SpawningContext(
     }
 
     fun dumpDB(loc: Location, player: Player) {
-        val db = database ?: error("No database to dump")
-        val dao = SpawnLocationsDAO()
         plugin.launch {
-            db.read {
-                val locations = dao.getSpawnsNear(loc, 10000.0)
-                player.sendMessage("Total spawn locations: ${locations.size}")
-                locations.forEach { location ->
-                    sendTpButton(player, location)
-                }
+            val locations = spawnsLocs.getSpawnsNear(loc, 10000.0)
+            player.sendMessage("Total spawn locations: ${locations.size}")
+            locations.forEach { location ->
+                sendTpButton(player, location)
             }
         }
     }
@@ -62,9 +58,7 @@ class SpawningContext(
     // the db is locked when we try to run this function.
     fun clearDB(world: World) {
         plugin.launch {
-            database.write {
-                dao.dropAll(world)
-            }
+            spawnsLocs.dropAll(world)
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.mineinabyss.geary.papermc.sqlite
 
-import com.github.shynixn.mccoroutine.bukkit.scope
 import me.dvyy.sqlite.Database
 import me.dvyy.sqlite.Transaction
 import me.dvyy.sqlite.WriteTransaction

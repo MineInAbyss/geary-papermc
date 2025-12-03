@@ -2,8 +2,10 @@ package com.mineinabyss.geary.papermc.spawning
 
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
+import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.GearyPaperConfig
+import com.mineinabyss.geary.papermc.data.SpawnsDatabase
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.choosing.*
 import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
@@ -12,12 +14,11 @@ import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpaw
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
 import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
-import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
-import com.mineinabyss.geary.papermc.spawning.database.schema.SpawningSchema
 import com.mineinabyss.geary.papermc.spawning.listeners.ListSpawnListener
 import com.mineinabyss.geary.papermc.spawning.listeners.SpreadEntityDeathListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.mythic.MythicSpawnTypeListener
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawnRepository
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
 import com.mineinabyss.geary.papermc.spawning.tasks.SpawnTask
 import com.mineinabyss.geary.papermc.spawning.tasks.SpreadSpawnTask
@@ -49,11 +50,10 @@ val SpawningFeature = feature("spawning") {
             withSerializersModule(get<Geary>().getAddon(SerializableComponents).formats.module)
             default = SpreadEntityTypesConfig()
         }
+        scopedOf(::SpawnsDatabase)
         scoped<Database> {
-            // -- Database logic --
             plugin.sqliteDatabase(Path("spawns.db")) {
-                val world = Bukkit.getWorlds().firstOrNull() ?: error("No worlds found, cannot initialize spawning database")
-                SpawningSchema(listOf(world)).init()
+                get<SpawnsDatabase>().create()
             }
         }
 
@@ -90,7 +90,6 @@ val SpawningFeature = feature("spawning") {
         // -- Spread Spawn logic --
         scopedOf(::SpawningContext)
         scopedOf(::InChunkLocationChooser)
-        scopedOf(::SpawnLocationsDAO)
         scopedOf(::SpreadChunkChooser)
         scopedOf(::SpreadSpawner)
 
@@ -139,7 +138,7 @@ val SpawningFeature = feature("spawning") {
             }
             "clearDB" {
                 executes.asPlayer {
-                    get<SpawningContext>().clearDB(player.world)
+                    plugin.launch { get<SpreadSpawnRepository>().dropAll(player.world) }
                     sender.success("Cleared spawn locations from the database.")
                 }
             }

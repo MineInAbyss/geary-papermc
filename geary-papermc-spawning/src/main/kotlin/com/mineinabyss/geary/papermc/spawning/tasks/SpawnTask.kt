@@ -1,29 +1,32 @@
 package com.mineinabyss.geary.papermc.spawning.tasks
 
-import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.launchTickRepeating
 import com.mineinabyss.geary.papermc.spawning.MobSpawner
 import com.mineinabyss.geary.papermc.spawning.choosing.SpawnLocationChooser
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
+import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.time.inWholeTicks
 import com.mineinabyss.idofront.time.ticks
 import org.bukkit.Bukkit
 import org.bukkit.GameMode.SPECTATOR
+import org.bukkit.plugin.Plugin
 import kotlin.time.Duration
 
 class SpawnTask(
     config: SpawnConfig,
+    plugin: Plugin,
+    logger: ComponentLogger,
     private val locationChooser: SpawnLocationChooser,
     private val mobSpawner: MobSpawner,
 ) {
     private val runTimes: Map<SpawnPosition, Duration> = config.runTimes
     private val spawnAttempts: Int = config.maxSpawnAttemptsPerPlayer
 
-    val job = gearyPaper.plugin.launchTickRepeating(config.taskDelay) {
+    val job = plugin.launchTickRepeating(config.taskDelay) {
         runCatching { run() }.onFailure {
-            gearyPaper.logger.d { it.stackTraceToString() }
+            logger.d { it.stackTraceToString() }
         }
     }
 

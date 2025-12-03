@@ -7,8 +7,10 @@ pluginManagement {
         maven("https://repo.mineinabyss.com/releases")
         maven("https://repo.mineinabyss.com/snapshots")
         maven("https://repo.papermc.io/repository/maven-public/")
+        google()
         mavenLocal()
     }
+    includeBuild("../sqlite-kt")
 }
 
 dependencyResolutionManagement {
@@ -47,3 +49,4 @@ include(
 
 includeBuild("../Idofront")
 includeBuild("../geary")
+includeBuild("../sqlite-kt")

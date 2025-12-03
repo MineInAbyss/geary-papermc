@@ -3,8 +3,7 @@ package com.mineinabyss.geary.papermc.spawning.choosing
 import co.touchlab.kermit.Logger
 import com.google.common.cache.CacheBuilder
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
-import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
-import me.dvyy.sqlite.Database
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawnRepository
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
@@ -15,8 +14,7 @@ import kotlin.time.toJavaDuration
 class SpreadChunkChooser(
     private val logger: Logger,
     private val mainWorld: World,
-    private val db: Database,
-    private val dao: SpawnLocationsDAO,
+    private val spawnLocs: SpreadSpawnRepository,
 ) {
     // Cache to prevent re-checking full sections as frequently. Unit is placed to mark a section as full.
     // Keys are bounding box to type pairs. An entry being present means this section and type were recently full.
@@ -44,7 +42,7 @@ class SpreadChunkChooser(
         // Get count in section, checking cache first to see if the section was recently filled.
         // If so, wait a little before re-executing DB call
         if (fullSectionCache.getIfPresent(bb to type) != null) return null
-        val sectionCount = db.read { dao.countSpawnsInBBOfType(mainWorld, bb, type) }
+        val sectionCount = spawnLocs.countSpawnsInBB(mainWorld, bb, type)
         if (sectionCount >= config.spawnCap) {
             fullSectionCache.put(bb to type, Unit)
             return null
@@ -74,12 +72,12 @@ class SpreadChunkChooser(
         return Location(mainWorld, noisyX.toDouble(), 0.0, noisyZ.toDouble())
     }
 
-    private suspend fun findNearestSq(x: Int, z: Int, type: String): Double = db.read {
+    private suspend fun findNearestSq(x: Int, z: Int, type: String): Double = TODO() /*db.read {
         val loc = Location(mainWorld, x.toDouble(), 0.0, z.toDouble())
         dao.getClosestSpawnOfType(loc, 1000.0, type)
             ?.location?.distanceSquared(loc)
             ?: Double.MAX_VALUE
-    }
+    }*/
 }
 
 

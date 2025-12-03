@@ -1,22 +1,27 @@
 package com.mineinabyss.geary.papermc.spawning.tasks
 
-import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.launchTickRepeating
 import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawnRepository
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
+import com.mineinabyss.idofront.messaging.ComponentLogger
 import org.bukkit.World
+import org.bukkit.plugin.Plugin
 
 class SpreadSpawnTask(
     world: World,
     configs: SpreadEntityTypesConfig,
-    private val spreadSpawner: SpreadSpawner,
+    plugin: Plugin,
+    logger: ComponentLogger,
+    spreadSpawner: SpreadSpawner,
+    spreadSpawns: SpreadSpawnRepository,
 ) {
-    val job = gearyPaper.plugin.launchTickRepeating(configs.spawnDelay) {
+    val job = plugin.launchTickRepeating(configs.spawnDelay) {
         runCatching {
-            spreadSpawner.clearOldEntries(world, configs.clearSpawnsOlderThan)
+            spreadSpawns.deleteSpawnsOlderThan(world, configs.clearSpawnsOlderThan)
             spreadSpawner.spawnSpreadEntities()
         }.onFailure {
-            gearyPaper.logger.e { it.stackTraceToString() }
+            logger.e { it.stackTraceToString() }
         }
     }
 }

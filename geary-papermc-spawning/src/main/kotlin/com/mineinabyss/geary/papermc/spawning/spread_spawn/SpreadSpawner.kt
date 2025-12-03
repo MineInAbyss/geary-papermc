@@ -7,28 +7,23 @@ import com.mineinabyss.geary.papermc.spawning.choosing.InChunkLocationChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.SpreadChunkChooser
 import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
-import com.mineinabyss.geary.papermc.spawning.database.dao.SpawnLocationsDAO
-import com.mineinabyss.geary.papermc.spawning.database.dao.StoredEntity
 import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldguard.WorldGuard
 import com.sk89q.worldguard.protection.managers.RegionManager
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion
 import com.sk89q.worldguard.protection.regions.RegionContainer
 import kotlinx.coroutines.withContext
-import me.dvyy.sqlite.Database
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
 import java.lang.Math.random
-import kotlin.time.Duration
 
 class SpreadSpawner(
-    private val db: Database,
+    private val spawns: SpreadSpawnRepository,
     private val world: World,
     private val configs: SpreadEntityTypesConfig,
     private val chunkChooser: SpreadChunkChooser,
     private val posChooser: InChunkLocationChooser,
-    private val dao: SpawnLocationsDAO,
     private val logger: Logger,
 ) {
     suspend fun spawnSpreadEntities() {
@@ -61,27 +56,19 @@ class SpreadSpawner(
                 if (spawnedEntity.type == config.altSpawnEntry.type.key) {
                     logger.v { "Spawn alt entity ${spawnedEntity.type}" }
                 }
-                val spread = db.write {
-                    dao.insertSpawnLocation(spawnPos, spawnedEntity)
-                }
-
+                val spread = spawns.insertSpawnLocation(spawnPos, spawnedEntity)
                 spread.spawn()
 
             }
         }
     }
 
-
-    suspend fun clearOldEntries(world: World, olderThan: Duration) = db.write {
-        dao.deleteSpawnsOlderThan(world, olderThan)
-    }
-
-    suspend fun chooseChunkInRegion(worldGuardRegion: ProtectedCuboidRegion, config: SpreadSpawnConfig, type: String): Location? {
+    private suspend fun chooseChunkInRegion(worldGuardRegion: ProtectedCuboidRegion, config: SpreadSpawnConfig, type: String): Location? {
         val boundingBox = getBBFromRegion(worldGuardRegion)
         return chunkChooser.chooseChunkInBB(boundingBox, config, type)
     }
 
-    suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? = withContext(gearyPaper.plugin.minecraftDispatcher) {
+    private suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? = withContext(gearyPaper.plugin.minecraftDispatcher) {
         posChooser.chooseSpotInChunk(chunkLoc, config)
     }
 
@@ -89,9 +76,5 @@ class SpreadSpawner(
         val minLoc = BukkitAdapter.adapt(world, region.minimumPoint)
         val maxLoc = BukkitAdapter.adapt(world, region.maximumPoint)
         return BoundingBox.of(minLoc, maxLoc)
-    }
-
-    suspend fun countNearby(location: Location, radius: Double, type: String): Int = db.read {
-        dao.countNearbyOfType(location, radius, type)
     }
 }
