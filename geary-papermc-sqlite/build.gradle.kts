@@ -2,7 +2,7 @@ plugins {
     id(idofrontLibs.plugins.mia.kotlin.jvm.get().pluginId)
     id(idofrontLibs.plugins.mia.papermc.get().pluginId)
     alias(idofrontLibs.plugins.kotlinx.serialization)
-    id("com.mineinabyss.sqlitekt.codegen")
+    id("me.dvyy.sqlite.codegen")
 }
 
 dependencies {
@@ -13,7 +13,7 @@ dependencies {
 }
 
 
-sqliteCodegen {
+sqliteKt {
     register("spawns") {
         packageName = "com.mineinabyss.geary.papermc.data"
     }

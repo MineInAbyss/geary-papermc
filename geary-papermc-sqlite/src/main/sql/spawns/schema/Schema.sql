@@ -10,19 +10,19 @@ CREATE VIRTUAL TABLE spawn_rtree USING rtree_i32
     minCategory,
     maxCategory
 );
---
+
 CREATE TABLE IF NOT EXISTS spawn_data
 (
-    id       INTEGER PRIMARY KEY,
+    id   INTEGER PRIMARY KEY,
     data BLOB NOT NULL
 ) STRICT;
---
+
 CREATE TABLE spawn_categories
 (
     id   INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL
 );
---
+
 CREATE TRIGGER IF NOT EXISTS spawn_data_on_delete
     AFTER DELETE
     ON spawn_data
@@ -30,11 +30,9 @@ CREATE TRIGGER IF NOT EXISTS spawn_data_on_delete
 BEGIN
     DELETE FROM spawn_rtree WHERE id = OLD.id;
 END;
---
 CREATE INDEX IF NOT EXISTS spawn_data_created_time ON spawn_data (data ->> 'createdTime');
---
 CREATE INDEX IF NOT EXISTS spawn_data_category ON spawn_data (data ->> 'category');
---
+
 CREATE VIEW IF NOT EXISTS spawn_view AS
 SELECT rtree.id  AS id,
        data.data AS data,

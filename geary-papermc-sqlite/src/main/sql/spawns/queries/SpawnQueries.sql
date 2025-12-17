@@ -103,7 +103,7 @@ WHERE minX >= :x
   AND minZ >= :z
   AND maxX < :x + 16
   AND maxZ < :z + 16
-  AND minCategory IN ( SELECT id FROM spawn_categories WHERE name IN ( SELECT value FROM json_each(:categories) ) )
+  AND minCategory IN ( SELECT id FROM spawn_categories WHERE name IN ( SELECT value FROM json_each(:categories) ) );
 
 -- createCategoriesIfMissing
 INSERT OR IGNORE INTO spawn_categories(name)
