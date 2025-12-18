@@ -5,7 +5,7 @@ import com.charleskorn.kaml.YamlConfiguration
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.GearyPaperConfig
-import com.mineinabyss.geary.papermc.data.SpawnsDatabase
+import com.mineinabyss.geary.papermc.data.SpawnsQueries
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.choosing.*
 import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
@@ -50,10 +50,10 @@ val SpawningFeature = feature("spawning") {
             withSerializersModule(get<Geary>().getAddon(SerializableComponents).formats.module)
             default = SpreadEntityTypesConfig()
         }
-        scopedOf(::SpawnsDatabase)
+        scopedOf(::SpawnsQueries)
         scoped<Database> {
             plugin.sqliteDatabase(Path("spawns.db")) {
-                get<SpawnsDatabase>().create()
+                get<SpawnsQueries>().create()
             }
         }
 

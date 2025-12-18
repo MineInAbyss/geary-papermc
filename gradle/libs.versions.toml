@@ -9,4 +9,5 @@ geary-prefabs = { module = "com.mineinabyss:geary-prefabs", version.ref = "geary
 geary-serialization = { module = "com.mineinabyss:geary-serialization", version.ref = "geary" }
 geary-uuid = { module = "com.mineinabyss:geary-uuid", version.ref = "geary" }
 geary-test = { module = "com.mineinabyss:geary-test", version.ref = "geary" }
+bytebuddy = "net.bytebuddy:byte-buddy:1.18.2"
 sqlite-kt = "me.dvyy:sqlite-kt:0.0.3-alpha.1"

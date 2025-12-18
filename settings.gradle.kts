@@ -25,6 +25,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("idofrontLibs") {
             from("com.mineinabyss:catalog:$idofrontVersion")
+            version("mockbukkit", "4.93.0")
         }
     }
 }

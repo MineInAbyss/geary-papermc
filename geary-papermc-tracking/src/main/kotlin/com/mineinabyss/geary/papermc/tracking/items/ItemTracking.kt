@@ -23,6 +23,7 @@ val ItemTracking = feature<ItemTrackingModule>("item-tracking") {
     }
 
     scopedModule {
+        scopedOf(::GearyItemProvider)
         scopedOf(::NMSBackedItemTracking) bind ItemTrackingModule::class
     }
 

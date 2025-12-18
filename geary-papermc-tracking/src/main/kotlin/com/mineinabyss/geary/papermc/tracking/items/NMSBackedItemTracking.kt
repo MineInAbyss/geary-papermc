@@ -13,8 +13,8 @@ import com.mineinabyss.idofront.nms.aliases.NMSItemStack
 
 class NMSBackedItemTracking(
     override val world: Geary,
+    override val itemProvider: GearyItemProvider,
 ) : ItemTrackingModule, WorldScoped by world.newScope() {
-    override val itemProvider = GearyItemProvider(world)
     override val prefabs = cache(::GearyItemPrefabQuery)
 
     private val itemCacheComponent = componentId<PlayerItemCache<*>>()

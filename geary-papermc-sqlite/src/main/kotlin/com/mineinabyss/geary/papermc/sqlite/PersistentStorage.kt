@@ -7,7 +7,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import me.dvyy.sqlite.Transaction
 import me.dvyy.sqlite.WriteTransaction
-import me.dvyy.sqlite.tables.Table
 import org.bukkit.entity.Player
 
 /**
@@ -22,14 +21,14 @@ private object PersistentStorage {
     fun tableNameFor(serialDescriptor: SerialDescriptor) =
         "\"component_${serialDescriptor.serialName}\""
 
-    fun tableFor(serializer: KSerializer<*>) = Table(
+    fun tableFor(serializer: KSerializer<*>): String = TODO() /*Table(
         """
         CREATE TABLE IF NOT EXISTS ${tableNameFor(serializer.descriptor)} (
             uuid BLOB NOT NULL PRIMARY KEY,
             data TEXT NOT NULL
         ) STRICT;
         """.trimIndent()
-    )
+    )*/
 }
 
 context(tx: Transaction)

@@ -12,9 +12,8 @@ import org.bukkit.inventory.ItemStack
 
 class BukkitBackedItemTracking(
     val world: Geary,
+    override val itemProvider: GearyItemProvider,
 ) : ItemTrackingModule {
-    override val itemProvider = GearyItemProvider(world)
-
     override val prefabs = world.cache(::GearyItemPrefabQuery)
 
     override fun createCache(holder: GearyEntity): PlayerItemCache<*> = BukkitItemCache(holder, world.getAddon(ItemTracking))

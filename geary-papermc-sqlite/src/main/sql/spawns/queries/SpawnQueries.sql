@@ -117,7 +117,8 @@ VALUES (:id, json(:data));
 
 -- insertRtree
 INSERT INTO spawn_rtree(minX, maxX, minY, maxY, minZ, maxZ)
-VALUES (:x, :x, :y, :y, :z, :z);
+VALUES (:x, :x, :y, :y, :z, :z)
+RETURNING id;
 
 -- deleteSpawnsOlderThan
 DELETE
