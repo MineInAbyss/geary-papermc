@@ -35,7 +35,11 @@ allprojects {
 
         dependencies {
             compileOnly(rootProject.idofrontLibs.bundles.idofront.core)
-            compileOnly(rootProject.idofrontLibs.minecraft.plugin.worldguard)
+            compileOnly(rootProject.idofrontLibs.minecraft.plugin.worldguard) {
+                exclude("com.google.guava")
+                exclude("com.google.code.gson")
+                exclude("it.unimi.dsi")
+            }
             testImplementation(rootProject.idofrontLibs.bundles.idofront.core)
         }
         kotlin {
