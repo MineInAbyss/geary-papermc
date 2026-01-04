@@ -159,7 +159,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
 
     fun sendTpButton(player: Player, spawnLocation: SpreadSpawnLocation) {
         val loc = spawnLocation.location
-        val command = "/tp ${loc.x} ${loc.y} ${loc.z}"
+        val command = ClickEvent.Payload.string("/tp ${loc.x} ${loc.y} ${loc.z}")
         val distance = if (loc.world != null) loc.distance(player.location).toInt() else -1
 
         val message = " • ${spawnLocation.stored.type} <gray>(${distance}m away)".miniMsg()
