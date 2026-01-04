@@ -30,6 +30,7 @@ import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.idofront.config.ConfigFormats
 import com.mineinabyss.idofront.config.Format
 import com.mineinabyss.idofront.config.config
+import com.mineinabyss.idofront.plugin.Plugins
 import com.mineinabyss.idofront.textcomponents.miniMsg
 import com.sk89q.worldguard.WorldGuard
 import kotlinx.serialization.json.Json
@@ -55,6 +56,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
     override fun canEnable() = gearyPaper.config.spawning
 
     override fun load() {
+        if (!Plugins.isEnabled("WorldGuard")) return logger.w { "Could not find WorldGuard... Skipping registering WorldGuard Flags" }
         runCatching {
             val registry = WorldGuard.getInstance().flagRegistry
             registry.register(SpawningWorldGuardFlags.OVERRIDE_LOWER_PRIORITY_SPAWNS)
