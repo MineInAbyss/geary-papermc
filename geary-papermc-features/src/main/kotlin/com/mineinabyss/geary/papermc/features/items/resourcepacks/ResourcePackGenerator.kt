@@ -9,9 +9,13 @@ import com.mineinabyss.geary.systems.query.GearyQuery
 import com.mineinabyss.idofront.resourcepacks.ResourcePacks
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.key.Key
+import net.kyori.adventure.text.Component
 import team.unnamed.creative.ResourcePack
 import team.unnamed.creative.item.Item
 import team.unnamed.creative.item.ItemModel
+import team.unnamed.creative.metadata.pack.FormatVersion
+import team.unnamed.creative.metadata.pack.PackFormat
+import team.unnamed.creative.metadata.pack.PackMeta
 import team.unnamed.creative.model.Model
 import team.unnamed.creative.model.ModelTexture
 import team.unnamed.creative.model.ModelTextures
@@ -46,6 +50,11 @@ class ResourcePackGenerator(world: Geary) : Geary by world {
                 ?: content.itemModel ?: Key.key(prefabKey.full)
             val item = Item.item(itemKey, ItemModel.reference(content.model ?: Key.key(prefabKey.namespace, prefabKey.key), content.tintSources))
             if (resourcePack.item(itemKey) == null) resourcePack.item(item)
+        }
+
+        if (resourcePack.packMeta() == null) {
+            val format = PackFormat.format(FormatVersion.of(75), FormatVersion.of(75), FormatVersion.of(99))
+            resourcePack.packMeta(PackMeta.of(format, Component.text("Geary ResourcePack")))
         }
 
         ResourcePacks.writeToFile(resourcePackFile, resourcePack)
