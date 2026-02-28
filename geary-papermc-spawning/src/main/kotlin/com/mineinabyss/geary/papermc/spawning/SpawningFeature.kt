@@ -94,6 +94,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         val spawnChooser = SpawnChooser(wg, caps)
         val mobSpawner = MobSpawner(spawnChooser, LocationSpread(triesForNearbyLoc = 10))
         val task = SpawnTask(
+            spawnDelay = config.spawnDelay,
             runTimes = config.runTimes,
             locationChooser = SpawnLocationChooser(config.range),
             spawnAttempts = config.maxSpawnAttemptsPerPlayer,

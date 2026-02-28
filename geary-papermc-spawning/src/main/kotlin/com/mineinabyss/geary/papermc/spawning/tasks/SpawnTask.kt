@@ -14,6 +14,7 @@ import org.bukkit.GameMode.SPECTATOR
 import kotlin.time.Duration
 
 class SpawnTask(
+    val spawnDelay: Duration,
     val runTimes: Map<SpawnPosition, Duration>,
     val locationChooser: SpawnLocationChooser,
     val spawnAttempts: Int,
@@ -26,15 +27,15 @@ class SpawnTask(
             }.onFailure {
                 gearyPaper.logger.d { it.stackTraceToString() }
             }
-            delay(1.ticks)
+            delay(spawnDelay)
         }
     }
 
     fun run() {
         val currTick = Bukkit.getCurrentTick()
-        val allowedSpawnPositions: List<SpawnPosition> = SpawnPosition.entries
+        val allowedSpawnPositions = SpawnPosition.entries
             .filter { currTick % runTimes.getOrDefault(it, 1.ticks).inWholeTicks == 0L }
-            .takeUnless { it.isEmpty() } ?: return
+            .ifEmpty { return }
         val onlinePlayers = Bukkit.getOnlinePlayers().filter { !it.isDead && it.gameMode != SPECTATOR }
 
         onlinePlayers.forEach { player ->
@@ -43,8 +44,8 @@ class SpawnTask(
                 if (attemptedPositions.isEmpty()) return@forEach
                 val spawnLoc = locationChooser.chooseSpawnLocationNear(onlinePlayers, player.location) ?: return@repeat
                 val type = SpawnPositionReader.spawnPositionFor(spawnLoc)
-                if (type in allowedSpawnPositions) {
-                    attemptedPositions.remove(type)
+
+                if (attemptedPositions.remove(type)) {
                     mobSpawner.attemptSpawnAt(spawnLoc, type)
                 }
             }

@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.spawning.config
 import com.charleskorn.kaml.YamlComment
 import com.mineinabyss.geary.papermc.spawning.components.SpawnCategory
 import com.mineinabyss.idofront.serialization.DurationSerializer
+import com.mineinabyss.idofront.time.ticks
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration
 
@@ -22,6 +23,8 @@ data class SpawnConfig(
     ),
     @YamlComment("Options about the spawn range of mobs around each player")
     val range: Range = Range(),
+    @YamlComment("The delay between each spawning-task run")
+    val spawnDelay: @Serializable(DurationSerializer::class) Duration = 1.ticks,
     @YamlComment("How often should each spawn category, attempt spawns. The higher a value, the more time between spawn attempts.")
     val runTimes: Map<SpawnPosition, @Serializable(with = DurationSerializer::class) Duration> = mapOf(),
     @YamlComment("How many times to try and find a valid spawn position around a player before giving up.")

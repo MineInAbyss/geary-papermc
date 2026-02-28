@@ -38,11 +38,11 @@ class SpawnLocationChooser(
         val highestY = newLoc.world.getHighestBlockAt(newLoc).y.toDouble() + 1
         if (abs(highestY - newLoc.y) <= range) return newLoc.apply { y = highestY }
         if (!newLoc.block.isPassable) return newLoc
-        (newLoc.y.toInt() downTo newLoc.y.toInt() - range)
-            .forEach {
-                newLoc.y = it.toDouble()
-                if (!newLoc.block.isPassable) return newLoc.up(1)
-            }
+
+        (newLoc.y.toInt() downTo newLoc.y.toInt() - range).forEach {
+            newLoc.y = it.toDouble()
+            if (!newLoc.block.isPassable) return newLoc.up(1)
+        }
         return location
     }
 
