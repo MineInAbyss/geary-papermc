@@ -1,7 +1,6 @@
 package com.mineinabyss.geary.papermc.spawning.choosing
 
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
-import com.mineinabyss.idofront.location.up
 import com.mineinabyss.idofront.util.randomOrMin
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -11,10 +10,10 @@ import kotlin.random.Random
 class SpawnLocationChooser(
     val config: SpawnConfig.Range,
 ) {
+    private val minSquared = config.minDistance * config.minDistance
+    private val horizontalRange = config.minDistance..config.maxDistance
+    private val verticalRange = config.minDistance..config.maxVerticalDistance
     fun chooseSpawnLocationNear(onlinePlayers: List<Player>, location: Location): Location? {
-        val horizontalRange = config.minDistance..config.maxDistance
-        val verticalRange = config.minDistance..config.maxVerticalDistance
-
         // Pick near current player
         val spawnLocation = location.clone().add(
             randomSign() * horizontalRange.randomOrMin().toDouble(),
@@ -22,28 +21,24 @@ class SpawnLocationChooser(
             randomSign() * horizontalRange.randomOrMin().toDouble(),
         )
 
-        if (Random.nextDouble() < 0.2) {
-            spawnLocation.y = tryGetHighestBlockWithinYRange(spawnLocation, config.maxVerticalDistance).y
-        }
+        if (Random.nextDouble() < 0.2) highestBlockWithinYRange(spawnLocation, config.maxVerticalDistance)
 
         // Ensure not near ANY player
-        if (onlinePlayers.any { it.location.distanceSquared(spawnLocation) < config.minDistance * config.minDistance })
+        if (onlinePlayers.any { it.location.distanceSquared(spawnLocation) < minSquared })
             return null
 
         return spawnLocation
     }
 
-    fun tryGetHighestBlockWithinYRange(location: Location, range: Int): Location {
-        val newLoc = location.clone()
-        val highestY = newLoc.world.getHighestBlockAt(newLoc).y.toDouble() + 1
-        if (abs(highestY - newLoc.y) <= range) return newLoc.apply { y = highestY }
-        if (!newLoc.block.isPassable) return newLoc
-
-        (newLoc.y.toInt() downTo newLoc.y.toInt() - range).forEach {
-            newLoc.y = it.toDouble()
-            if (!newLoc.block.isPassable) return newLoc.up(1)
+    fun highestBlockWithinYRange(location: Location, range: Int) {
+        val highestY = location.world.getHighestBlockYAt(location) + 1.0
+        when {
+            abs(highestY - location.y) <= range -> location.y = highestY
+            location.block.isPassable -> (location.y.toInt() downTo location.y.toInt() - range).forEach {
+                location.y = it.toDouble()
+                if (!location.block.isPassable) location.y += 1
+            }
         }
-        return location
     }
 
     private fun randomSign() = if (Random.nextBoolean()) 1 else -1
