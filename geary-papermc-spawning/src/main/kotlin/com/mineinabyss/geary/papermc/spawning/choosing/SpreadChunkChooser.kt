@@ -52,22 +52,16 @@ class SpreadChunkChooser(
 
         val scoreThreshold = radius * radius
         val sampleSize = (((sectionX.last - sectionX.first) / splitSize) * 0.1)
-            .toInt()
-            .coerceAtLeast(10)
+            .toInt().coerceAtLeast(10)
 
         val xRange = (sectionX.first / splitSize)..(sectionX.last / splitSize)
         val zRange = (sectionZ.first / splitSize)..(sectionZ.last / splitSize)
         val chosen = generateSequence { (xRange.random() * splitSize) to (zRange.random() * splitSize) }
-            .take(sampleSize)
-            .distinct()
-            .firstOrNull { (x, z) ->
+            .take(sampleSize).distinct().firstOrNull { (x, z) ->
                 val dist = findNearestSq(x, z, type)
                 dist >= scoreThreshold
-            }
+            } ?: return null
 
-        if (chosen == null) {
-            return null
-        }
         logger.v { "Checking at ${chosen.first}, ${chosen.second}" }
         val noisyX = (chosen.first + Random.nextInt(-noiseRange, noiseRange + 1)).coerceIn(sectionX)
         val noisyZ = (chosen.second + Random.nextInt(-noiseRange, noiseRange + 1)).coerceIn(sectionZ)

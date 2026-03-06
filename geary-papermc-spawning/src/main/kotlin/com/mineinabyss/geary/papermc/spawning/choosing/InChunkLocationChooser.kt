@@ -38,9 +38,9 @@ class InChunkLocationChooser(
 
     // chose a random spot within the chunk
     private fun getRandomChunkCoord(chunk: Chunk, config: SpreadSpawnConfig): Location {
-        val x = chunk.x * 16 + (0..15).random()
-        val z = chunk.z * 16 + (0..15).random()
-        val y = (config.sectionMinY.. config.sectionMaxY).random()
-        return Location(mainWorld, x.toDouble(), y.toDouble(), z.toDouble())
+        val x = chunk.x * 16 + (0..15).random().toDouble()
+        val z = chunk.z * 16 + (0..15).random().toDouble()
+        val y = (config.sectionMinY.. config.sectionMaxY).random().toDouble()
+        return Location(mainWorld, x, y, z)
     }
 }
