@@ -6,6 +6,7 @@ pluginManagement {
         gradlePluginPortal()
         maven("https://repo.mineinabyss.com/releases")
         maven("https://repo.mineinabyss.com/snapshots")
+        maven("https://repo.nexomc.com/releases")
         maven("https://repo.papermc.io/repository/maven-public/")
         mavenLocal()
     }
@@ -30,11 +31,12 @@ dependencyResolutionManagement {
 
 val includeGeary: String? by settings
 
-if(includeGeary.toBoolean()) includeBuild("../geary")
+if (includeGeary.toBoolean()) includeBuild("../geary")
 
 include(
     "geary-papermc-features",
     "geary-papermc-mythicmobs",
+    "geary-papermc-nexo",
     "geary-papermc-core",
     "geary-papermc-datastore",
     "geary-papermc-plugin",

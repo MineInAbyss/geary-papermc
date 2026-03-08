@@ -12,6 +12,7 @@ import com.mineinabyss.geary.papermc.features.entities.EntityFeatures
 import com.mineinabyss.geary.papermc.features.items.ItemFeatures
 import com.mineinabyss.geary.papermc.features.items.recipes.RecipeFeature
 import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsFeature
+import com.mineinabyss.geary.papermc.nexo.NexoFeature
 import com.mineinabyss.geary.papermc.plugin.commands.registerGearyCommands
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.spawning.statistics.EntityStatistics
@@ -55,6 +56,7 @@ class GearyPluginImpl : GearyPlugin() {
         ::EntityFeatures,
         ::ItemFeatures,
         ::MythicMobsFeature,
+        ::NexoFeature
     )
 
     override fun onLoad() {
