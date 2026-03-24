@@ -12,6 +12,7 @@ eclipse
 *.ipr
 *.iws
 
+
 logs
 /truckconfig.json
 .kotlin
