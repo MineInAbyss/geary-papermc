@@ -13,7 +13,7 @@ object SpawnPositionReader {
         return when {
             type == Material.WATER || state is Waterlogged && state.isWaterlogged -> SpawnPosition.WATER
             type == Material.LAVA -> SpawnPosition.LAVA
-            location.clone().down(1).block.isSolid && location.block.isPassable && !location.block.isLiquid -> SpawnPosition.GROUND
+            location.clone().down(1).block. let { it.isSolid || it.type == Material.SNOW } && location.block.isPassable && !location.block.isLiquid -> SpawnPosition.GROUND
             location.block.isEmpty -> SpawnPosition.AIR
             else -> SpawnPosition.IN_BLOCK
         }
