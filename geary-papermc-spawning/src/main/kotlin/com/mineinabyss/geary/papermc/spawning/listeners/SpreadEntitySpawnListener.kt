@@ -8,6 +8,7 @@ import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import me.dvyy.sqlite.Database
 import org.bukkit.Chunk
 import org.bukkit.Location
+import org.bukkit.World
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.world.ChunkLoadEvent
@@ -19,11 +20,13 @@ class ListSpawnListener(
     private val spawner: SpreadSpawner,
     private val db: Database,
     private val dao: SpawnLocationsDAO,
-    private val plugin: Plugin
+    private val plugin: Plugin,
+    private val mainWorld: World,
 ) : Listener {
 
     @EventHandler
     fun ChunkLoadEvent.onChunkLoad() {
+        if (chunk.world != mainWorld) return
         plugin.launch {
             triggerSpawn(chunk)
         }

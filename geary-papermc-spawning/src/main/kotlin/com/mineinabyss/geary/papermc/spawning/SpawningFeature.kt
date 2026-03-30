@@ -67,10 +67,27 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
     }
 
     override fun enable() {
+        // -- Spread Spawn logic --
+        val spreadConfig by config(
+            "spread_config", plugin.dataPath,
+            SpreadEntityTypesConfig(),
+            mergeUpdates = false,
+            formats = ConfigFormats(
+                listOf(
+                    Format(
+                        "yml", Yaml(
+                            serializersModule = gearyPaper.worldManager.global.getAddon(SerializableComponents).serializers.module,
+                            configuration = YamlConfiguration(strictMode = false)
+                        )
+                    )
+                )
+            )
+        )
+        val mainWorld = Bukkit.getWorld(spreadConfig.worldName) ?: error("World ${spreadConfig.worldName} not found, cannot initialize spread spawning")
+
         // -- Database logic --
         val db = plugin.sqliteDatabase(Path("spawns.db")) {
-            val world = Bukkit.getWorlds().firstOrNull() ?: error("No worlds found, cannot initialize spawning database")
-            SpawningSchema(listOf(world)).init()
+            SpawningSchema(listOf(mainWorld)).init()
         }
         database = db
 
@@ -100,24 +117,6 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
             spawnAttempts = config.maxSpawnAttemptsPerPlayer,
             mobSpawner = mobSpawner,
         )
-
-        // -- Spread Spawn logic --
-        val spreadConfig by config(
-            "spread_config", plugin.dataPath,
-            SpreadEntityTypesConfig(),
-            mergeUpdates = false,
-            formats = ConfigFormats(
-                listOf(
-                    Format(
-                        "yml", Yaml(
-                            serializersModule = gearyPaper.worldManager.global.getAddon(SerializableComponents).serializers.module,
-                            configuration = YamlConfiguration(strictMode = false)
-                        )
-                    )
-                )
-            )
-        )
-        val mainWorld = Bukkit.getWorld(spreadConfig.worldName) ?: error("World ${spreadConfig.worldName} not found, cannot initialize spread spawning")
         val posChooser = InChunkLocationChooser(mobSpawner, mainWorld)
         val dao = SpawnLocationsDAO()
         val chunkChooser = SpreadChunkChooser(logger, mainWorld, db, dao)
@@ -133,7 +132,7 @@ class SpawningFeature(context: FeatureContext) : Feature(context) {
         )
 
         listeners(
-            ListSpawnListener(spreadSpawner, db, dao, plugin),
+            ListSpawnListener(spreadSpawner, db, dao, plugin, mainWorld),
             SpreadEntityDeathListener(
                 spreadSpawner, db, plugin, mainWorld
             )
