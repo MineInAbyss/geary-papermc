@@ -2,7 +2,6 @@ package com.mineinabyss.geary.papermc.tracking.items.systems
 
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.modules.Geary
-import com.mineinabyss.geary.papermc.datastore.decode
 import com.mineinabyss.geary.papermc.datastore.decodePrefabs
 import com.mineinabyss.geary.papermc.datastore.hasComponentsEncoded
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
@@ -19,7 +18,6 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
-import java.util.*
 
 class LoginListener(
     world: Geary,
@@ -55,13 +53,9 @@ class LoginListener(
         context(world: Geary)
         fun readItemInfo(pdc: PersistentDataContainerView): ItemInfo {
             if (!pdc.hasComponentsEncoded) return ItemInfo.NothingEncoded
-
             val prefabKeys = pdc.decodePrefabs()
             val prefabs = prefabKeys.map { world.entityOfOrNull(it) ?: return ItemInfo.ErrorDecoding }.toSet()
-
-
-            val uuid = pdc.decode<UUID>()
-            return ItemInfo.EntityEncoded(uuid)
+            return ItemInfo.EntityEncoded
         }
     }
 }

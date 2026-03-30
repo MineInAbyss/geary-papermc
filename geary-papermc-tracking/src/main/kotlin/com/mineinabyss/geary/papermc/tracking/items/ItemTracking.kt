@@ -11,25 +11,28 @@ import com.mineinabyss.geary.papermc.tracking.items.systems.createInventoryTrack
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.systems.query.query
 import com.mineinabyss.idofront.features.feature
+import com.mineinabyss.idofront.features.get
 import com.mineinabyss.idofront.plugin.Services
 import com.mineinabyss.idofront.services.SerializableItemStackService
 import org.bukkit.entity.Player
-import org.koin.core.module.dsl.scopedOf
-import org.koin.dsl.bind
+import org.kodein.di.bindSingletonOf
+import org.kodein.di.delegate
+import org.kodein.di.instance
 
 val ItemTracking = feature<ItemTrackingModule>("item-tracking") {
     dependsOn {
         condition("Item tracking must be enabled in config") { get<GearyPaperConfig>().items.enabled }
     }
 
-    scopedModule {
-        scopedOf(::GearyItemProvider)
-        scopedOf(::NMSBackedItemTracking) bind ItemTrackingModule::class
+    dependencies {
+        bindSingletonOf(::GearyItemProvider)
+        bindSingletonOf(::NMSBackedItemTracking)
+        delegate<ItemTrackingModule>().to<NMSBackedItemTracking>()
     }
 
-    configureGeary {
+    configureGeary { di ->
+        val itemTracking = di.instance<ItemTrackingModule>()
         onEnable {
-            val itemTracking = get<ItemTrackingModule>()
             createItemMigrationListener()
             createInventoryTrackerSystem()
 

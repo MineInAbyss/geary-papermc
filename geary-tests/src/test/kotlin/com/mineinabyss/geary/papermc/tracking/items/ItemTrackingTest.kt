@@ -4,6 +4,7 @@ import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.GearySetup
 import com.mineinabyss.geary.papermc.datastore.decode
 import com.mineinabyss.geary.papermc.datastore.decodePrefabs
+import com.mineinabyss.geary.papermc.datastore.encode
 import com.mineinabyss.geary.papermc.getAddon
 import com.mineinabyss.geary.papermc.helpers.*
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
@@ -120,5 +121,41 @@ class ItemTrackingTest : MockedServerTest() {
         itemInMainHand.shouldNotBeNull()
         getEquipmentSlot.shouldNotBeNull()
         itemInMainHand.shouldBe(getEquipmentSlot)
+    }
+
+    @Test
+    fun `should track items with persisting components manually encoded to PDC without a prefab`() {
+        // arrange
+        val player = createTestPlayer()
+        val item = ItemStack.of(Material.STONE).apply {
+            editPersistentDataContainer {
+                it.encode(SomeData("test"))
+            }
+        }
+        val gearyInv = player.inventory.toGeary().shouldNotBeNull()
+
+        // act
+        player.inventory.setItem(10, item)
+        val tracked = gearyInv.get(10)
+
+        // assert
+        tracked.shouldNotBeNull()
+        tracked.get<SomeData>().shouldBe(SomeData("test"))
+    }
+
+
+    @Test
+    fun `should allow getting geary entities from items without component data for the current tick`() {
+        // arrange
+        val player = createTestPlayer()
+        val item = ItemStack.of(Material.STONE)
+        val gearyInv = player.inventory.toGeary().shouldNotBeNull()
+
+        // act
+        player.inventory.setItem(10, item)
+        val tracked = gearyInv.get(10)
+
+        // assert
+        tracked.shouldNotBeNull()
     }
 }

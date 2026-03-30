@@ -23,6 +23,8 @@ import com.mineinabyss.geary.papermc.tracking.entities.systems.attemptspawn.crea
 import com.mineinabyss.geary.papermc.tracking.entities.systems.removevanillamobs.RemoveVanillaMobsListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.ConvertEntityTypesListener
 import com.mineinabyss.idofront.features.feature
+import com.mineinabyss.idofront.features.get
+import com.mineinabyss.idofront.features.listeners
 
 val MinecraftFeatures = feature("minecraft-features") {
     dependsOn {

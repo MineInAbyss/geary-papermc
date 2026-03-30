@@ -7,13 +7,16 @@ import com.mineinabyss.geary.papermc.tracking.items.BukkitBackedItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.ItemTrackingModule
 import com.mineinabyss.idofront.features.Feature
-import org.koin.core.module.dsl.scopedOf
-import org.koin.dsl.bind
+import com.mineinabyss.idofront.features.get
+import org.kodein.di.bindSingleton
+import org.kodein.di.bindSingletonOf
+import org.kodein.di.delegate
 
 val TestEntityTracking: Feature<EntityTrackingModule> = EntityTracking.overrideScope {
-    scoped { BukkitEntity2Geary(forceMainThread = false, get(), get()) }
+    bindSingleton { BukkitEntity2Geary(forceMainThread = false, get(), get()) }
 }
 
 val TestItemTracking = ItemTracking.overrideScope {
-    scopedOf(::BukkitBackedItemTracking) bind ItemTrackingModule::class
+    bindSingletonOf(::BukkitBackedItemTracking)
+    delegate<ItemTrackingModule>().to<BukkitBackedItemTracking>()
 }

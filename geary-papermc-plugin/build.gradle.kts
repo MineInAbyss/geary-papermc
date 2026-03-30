@@ -25,6 +25,7 @@ dependencies {
 
     // MineInAbyss platform
     compileOnly(idofrontLibs.koin.core)
+//    compileOnly(idofrontLibs.kodein)
     compileOnly(idofrontLibs.kotlin.stdlib)
     compileOnly(idofrontLibs.idofront.services)
     compileOnly(idofrontLibs.kotlinx.serialization.json)

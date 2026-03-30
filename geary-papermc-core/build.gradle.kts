@@ -13,6 +13,7 @@ dependencies {
     compileOnly(libs.geary.actions)
 
     // MineInAbyss platform
+    compileOnly(idofrontLibs.koin.core)
     compileOnly(idofrontLibs.kotlinx.serialization.json)
     compileOnly(idofrontLibs.kotlinx.serialization.kaml)
     compileOnly(idofrontLibs.minecraft.mccoroutine)

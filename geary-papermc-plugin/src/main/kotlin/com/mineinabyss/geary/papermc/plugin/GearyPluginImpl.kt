@@ -4,7 +4,6 @@ import co.touchlab.kermit.Logger
 import com.mineinabyss.geary.actions.GearyActions
 import com.mineinabyss.geary.autoscan.AutoScanAddon
 import com.mineinabyss.geary.modules.Geary
-import com.mineinabyss.geary.modules.GearySetup
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.*
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
@@ -31,36 +30,34 @@ import com.mineinabyss.geary.uuid.SynchronizedUUID2GearyMap
 import com.mineinabyss.geary.uuid.UUID2GearyMap
 import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.config.config
-import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.features.FeatureManager
-import com.mineinabyss.idofront.features.singleFeatureManager
+import com.mineinabyss.idofront.features.MainCommand
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.serialization.LocationSerializer
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
-import org.koin.dsl.binds
-import org.koin.dsl.koinApplication
-import org.koin.dsl.module
+import org.kodein.di.*
 import kotlin.io.path.div
 
 class GearyPluginImpl : GearyPlugin() {
-    val application = koinApplication {
-        modules(module {
-            single<Plugin> { this@GearyPluginImpl }
-            single<GearyPaperConfig> {
-                config<GearyPaperConfig> { default = GearyPaperConfig() }.single(dataPath / "config.yml").read()
-            }
-            single { ComponentLogger.forPlugin(get(), minSeverity = get<GearyPaperConfig>().logLevel) } binds arrayOf(ComponentLogger::class, Logger::class)
-            single<Geary> { geary(PaperEngineModule(get()), koin = getKoin()) }
-            //TODO api for registering geary per world once we have per world ticking
-            single<WorldManager> { WorldManager().apply { setGlobalEngine(get()) } }
-            singleFeatureManager {
-                withMainCommand("geary")
-                withReloadSubcommand(permission = "geary.admin.reload")
-
-                install(
+    val application = DI {
+        bindSingleton<Plugin> { this@GearyPluginImpl }
+        bindSingleton<GearyPaperConfig> {
+            config<GearyPaperConfig> { default = GearyPaperConfig() }.single(dataPath / "config.yml").read()
+        }
+        bindSingleton<ComponentLogger> { ComponentLogger.forPlugin(instance(), minSeverity = instance<GearyPaperConfig>().logLevel) }
+        delegate<Logger>().to<ComponentLogger>()
+        bindSingleton<Geary> { geary(PaperEngineModule(instance())) }
+        //TODO api for registering geary per world once we have per world ticking
+        bindSingleton<WorldManager> { WorldManager().apply { setGlobalEngine(instance()) } }
+        bindSingleton {
+            MainCommand(names = listOf("geary"), description = null, reloadCommandName = "reload", reloadCommandPermission = "geary.admin.reload")
+        }
+        bindSingleton {
+            FeatureManager(di).apply {
+                loadAll(
                     EntityTracking,
                     ItemTracking,
                     BlockTracking,
@@ -75,25 +72,25 @@ class GearyPluginImpl : GearyPlugin() {
                     TestingFeature,
                 )
             }
-        })
+        }
     }
 
-    val features by application.koin.inject<FeatureManager>()
-    val engine by application.koin.inject<Geary>()
+    val features by application.instance<FeatureManager>()
+    val engine by application.instance<Geary>()
 
     override fun onLoad() {
         // Register DI
         val configModule = object : GearyPaperModule {
-            private val koin = this@GearyPluginImpl.application.koin
+            private val app = this@GearyPluginImpl.application.direct
 
-            override val plugin = koin.get<Plugin>() as JavaPlugin
-            override val config: GearyPaperConfig = koin.get()
-            override val logger: ComponentLogger = koin.get()
-            override val features: FeatureManager = koin.get()
-            override val worldManager: WorldManager = koin.get()
+            override val plugin = app.instance<Plugin>() as JavaPlugin
+            override val config: GearyPaperConfig = app.instance()
+            override val logger: ComponentLogger = app.instance()
+            override val features: FeatureManager = app.instance()
+            override val worldManager: WorldManager = app.instance()
         }
         //TODO deprecate in favor of koin
-        DI.add<GearyPaperModule>(configModule)
+        com.mineinabyss.idofront.di.DI.add<GearyPaperModule>(configModule)
 
         gearyPaper.configure {
             // Install default addons
@@ -124,10 +121,10 @@ class GearyPluginImpl : GearyPlugin() {
 
     override fun onEnable() {
         // Run init steps registered by other plugins in onLoad. In the future this would be done per-world
-        val setup = GearySetup(application.koin)
-        gearyPaper.worldManager.initSteps.forEach { it(setup) }
-        features.load()
-        features.enable()
+        gearyPaper.worldManager.global.configure {
+            gearyPaper.worldManager.initSteps.forEach { it() }
+        }
+        features.enableAll()
 //        gearyPaper.logger.s(
 //            """Loaded prefabs
 //                            | mobs: ${getAddonOrNull(EntityTracking)?.query?.prefabs?.count() ?: "disabled"}
@@ -145,7 +142,7 @@ class GearyPluginImpl : GearyPlugin() {
     }
 
     override fun onDisable() {
-        features.disable()
+        features.disableAll()
         server.worlds.forEach { world ->
             with(world.toGeary()) {
                 world.entities.forEach entities@{ entity ->

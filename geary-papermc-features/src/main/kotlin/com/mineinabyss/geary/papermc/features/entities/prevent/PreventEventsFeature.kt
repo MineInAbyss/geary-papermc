@@ -5,6 +5,7 @@ import com.mineinabyss.geary.papermc.features.entities.prevent.interaction.Preve
 import com.mineinabyss.geary.papermc.features.entities.prevent.regen.PreventRegenerationListener
 import com.mineinabyss.geary.papermc.features.entities.prevent.riding.PreventRidingListener
 import com.mineinabyss.idofront.features.feature
+import com.mineinabyss.idofront.features.listeners
 
 val PreventEventsFeature = feature("prevent-events") {
     onEnable {

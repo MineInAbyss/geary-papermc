@@ -1,16 +1,18 @@
 package com.mineinabyss.geary.papermc.features.resourcepacks
 
 import com.mineinabyss.geary.papermc.GearyPaperConfig
+import com.mineinabyss.idofront.features.addCloseables
 import com.mineinabyss.idofront.features.feature
-import org.koin.core.module.dsl.scopedOf
+import com.mineinabyss.idofront.features.get
+import org.kodein.di.bindSingletonOf
 
 val ResourcepackGeneratorFeature = feature("resourcepack") {
     dependsOn {
         condition { get<GearyPaperConfig>().resourcePack.generate }
     }
 
-    scopedModule {
-        scopedOf(::ResourcePackGenerator)
+    dependencies {
+        bindSingletonOf(::ResourcePackGenerator)
     }
 
     onEnable {

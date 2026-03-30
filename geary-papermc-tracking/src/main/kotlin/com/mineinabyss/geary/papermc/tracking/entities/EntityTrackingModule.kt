@@ -16,9 +16,13 @@ import com.mineinabyss.geary.papermc.tracking.entities.systems.GearyPlayerTracke
 import com.mineinabyss.geary.papermc.tracking.entities.systems.createBukkitEntityRemoveListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.createBukkitEntitySetListener
 import com.mineinabyss.geary.systems.query.query
+import com.mineinabyss.idofront.features.addCloseables
 import com.mineinabyss.idofront.features.feature
+import com.mineinabyss.idofront.features.get
+import com.mineinabyss.idofront.features.listeners
 import com.mineinabyss.idofront.typealiases.BukkitEntity
-import org.koin.core.module.dsl.scopedOf
+import org.kodein.di.bindSingleton
+import org.kodein.di.bindSingletonOf
 
 class EntityTrackingQueries(world: Geary) : WorldScoped by world.newScope() {
     val entityTypeBinds = cacheGroupedBy(query<BindToEntityType>()) { (type) ->
@@ -35,11 +39,11 @@ data class EntityTrackingModule(
 )
 
 val EntityTracking = feature<EntityTrackingModule>("entity-tracking") {
-    scopedModule {
-        scopedOf(::GearyMobPrefabQuery)
-        scopedOf(::EntityTrackingQueries)
-        scoped { BukkitEntity2Geary(get<GearyPaperConfig>().catch.asyncEntityConversion == CatchType.ERROR, get(), get()) }
-        scoped<EntityTrackingModule> {
+    dependencies {
+        bindSingletonOf(::GearyMobPrefabQuery)
+        bindSingletonOf(::EntityTrackingQueries)
+        bindSingleton { BukkitEntity2Geary(get<GearyPaperConfig>().catch.asyncEntityConversion == CatchType.ERROR, get(), get()) }
+        bindSingleton<EntityTrackingModule> {
             val geary = get<Geary>()
             EntityTrackingModule(
                 bukkitEntityComponent = geary.componentId<BukkitEntity>(),
@@ -48,10 +52,16 @@ val EntityTracking = feature<EntityTrackingModule>("entity-tracking") {
                 queries = get(),
             )
         }
-        scopedOf(::EntityWorldEventTracker)
-        scopedOf(::GearyPlayerTracker)
+        bindSingletonOf(::EntityWorldEventTracker)
+        bindSingletonOf(::GearyPlayerTracker)
     }
 
+    onEnable {
+        addCloseables(
+            get<EntityTrackingQueries>(),
+            get<BukkitEntity2Geary>()
+        )
+    }
     configureGeary {
         onEnable {
             createBukkitEntityRemoveListener()
@@ -62,12 +72,6 @@ val EntityTracking = feature<EntityTrackingModule>("entity-tracking") {
 //                    get<BukkitEntity2Geary>().getOrCreate(entity)
 //                }
 //            }
-
-
-            addCloseables(
-                get<EntityTrackingQueries>(),
-                get<BukkitEntity2Geary>()
-            )
         }
     }
 

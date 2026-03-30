@@ -13,7 +13,6 @@ import com.mineinabyss.geary.test.GearyTest
 import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.features.FeatureManager
 import com.mineinabyss.idofront.features.FeatureManagerBuilder
-import com.mineinabyss.idofront.features.singleFeatureManager
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.plugin.Services
 import com.mineinabyss.idofront.services.ItemProvider
@@ -36,7 +35,7 @@ import org.mockbukkit.mockbukkit.inventory.ItemStackMock
 
 abstract class MockedServerTest : GearyTest() {
     init {
-        ByteBuddyAgent.install();
+        ByteBuddyAgent.install()
         ByteBuddy().redefine(ItemStackMock::class.java)
             .method(ElementMatchers.named("editPersistentDataContainer"))
             .intercept(MethodDelegation.to(ItemStackMockInterceptor::class.java))
@@ -71,11 +70,11 @@ abstract class MockedServerTest : GearyTest() {
                     }
                 }
                 includes(module)
-                with(plugin) {
-                    singleFeatureManager {
-                        setupFeatureManager()
-                    }
-                }
+//                with(plugin) {
+//                    singleFeatureManager {
+//                        setupFeatureManager()
+//                    }
+//                }
             })
         }
 
@@ -104,8 +103,7 @@ abstract class MockedServerTest : GearyTest() {
         }
         registerItemService()
         DI.add<GearyPaperModule>(configModule)
-        world.getKoin().get<FeatureManager>().load()
-        world.getKoin().get<FeatureManager>().enable()
+        world.getKoin().get<FeatureManager>().enableAll()
     }
 
     open fun GearySetup.setupGeary() {}

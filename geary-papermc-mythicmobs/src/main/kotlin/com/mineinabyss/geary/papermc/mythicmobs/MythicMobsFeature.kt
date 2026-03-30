@@ -8,7 +8,9 @@ import com.mineinabyss.geary.papermc.mythicmobs.skills.MythicPrefabsListeners
 import com.mineinabyss.geary.papermc.mythicmobs.spawning.markMMAsCustomMob
 import com.mineinabyss.geary.papermc.mythicmobs.spawning.mythicMobSpawner
 import com.mineinabyss.idofront.features.feature
-import org.koin.core.module.dsl.scopedOf
+import com.mineinabyss.idofront.features.get
+import com.mineinabyss.idofront.features.listeners
+import org.kodein.di.bindSingletonOf
 
 val MythicMobsFeature = feature("mythicMobs") {
     dependsOn {
@@ -16,9 +18,9 @@ val MythicMobsFeature = feature("mythicMobs") {
         plugins("MythicMobs")
     }
 
-    scopedModule {
-        scopedOf(::MythicMobDropListener)
-        scopedOf(::MythicPrefabsListeners)
+    dependencies {
+        bindSingletonOf(::MythicMobDropListener)
+        bindSingletonOf(::MythicPrefabsListeners)
     }
 
     configureGeary {

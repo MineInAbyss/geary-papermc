@@ -13,6 +13,7 @@ import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.prefabs.entityOfOrNull
 import com.mineinabyss.idofront.features.feature
+import com.mineinabyss.idofront.features.get
 import com.mineinabyss.idofront.items.editItemMeta
 import com.mineinabyss.idofront.messaging.info
 import org.bukkit.Material

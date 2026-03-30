@@ -9,7 +9,9 @@ import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.systems.query.CachedQuery
 import com.mineinabyss.idofront.features.feature
 import org.bukkit.block.data.BlockData
-import org.koin.core.module.dsl.scopedOf
+import org.kodein.di.bindSingleton
+import org.kodein.di.bindSingletonOf
+import org.kodein.di.instance
 
 data class BlockTrackingModule(
     val block2Prefab: Block2Prefab,
@@ -20,18 +22,19 @@ data class BlockTrackingModule(
 
 val BlockTracking = feature<BlockTrackingModule>("blocks") {
     dependsOn {
-        condition("Block tracking disabled in config") { get<GearyPaperConfig>().trackBlocks }
+        condition("Block tracking disabled in config") { instance<GearyPaperConfig>().trackBlocks }
     }
 
-    scopedModule {
-        scopedOf(::Block2Prefab)
-        scoped {
+    dependencies {
+        bindSingletonOf(::Block2Prefab)
+        bindSingleton {
             BlockTrackingModule(
-                block2Prefab = get(),
-                get<Geary>().cache(::GearyBlockPrefabQuery)
+                block2Prefab = instance(),
+                instance<Geary>().cache(::GearyBlockPrefabQuery)
             )
         }
     }
+
     configureGeary {
         onEnable {
             addCloseables(

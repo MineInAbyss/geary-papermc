@@ -26,7 +26,7 @@ import com.mineinabyss.geary.papermc.sqlite.sqliteDatabase
 import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.suggests
-import com.mineinabyss.idofront.features.feature
+import com.mineinabyss.idofront.features.*
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.success
@@ -35,7 +35,9 @@ import kotlinx.serialization.json.Json
 import me.dvyy.sqlite.Database
 import org.bukkit.Bukkit
 import org.bukkit.World
-import org.koin.core.module.dsl.scopedOf
+import org.bukkit.plugin.Plugin
+import org.kodein.di.bindSingleton
+import org.kodein.di.bindSingletonOf
 import kotlin.io.path.Path
 
 val SpawningFeature = feature("spawning") {
@@ -44,26 +46,26 @@ val SpawningFeature = feature("spawning") {
         condition { get<GearyPaperConfig>().spawning }
     }
 
-    scopedModule {
-        scopedConfig<SpawnConfig>("spawning.yml") { default = SpawnConfig() }
-        scopedConfig<SpreadEntityTypesConfig>("spread_config.yml") {
+    dependencies {
+        bindConfig<SpawnConfig>("spawning.yml") { default = SpawnConfig() }
+        bindConfig<SpreadEntityTypesConfig>("spread_config.yml") {
             withSerializersModule(get<Geary>().getAddon(SerializableComponents).formats.module)
             default = SpreadEntityTypesConfig()
         }
-        scopedOf(::SpawnsQueries)
-        scoped<Database> {
+        bindSingletonOf(::SpawnsQueries)
+        bindSingleton<Database> {
             plugin.sqliteDatabase(Path("spawns.db")) {
                 get<SpawnsQueries>().create()
             }
         }
 
-        scoped<Json> {
+        bindSingleton<Json> {
             Json {
                 prettyPrint = true
                 ignoreUnknownKeys = true
             }
         }
-        scoped<Yaml> {
+        bindSingleton<Yaml> {
             Yaml(
                 serializersModule = gearyPaper.worldManager.global.getAddon(SerializableComponents).formats.module,
                 configuration = YamlConfiguration(
@@ -71,38 +73,38 @@ val SpawningFeature = feature("spawning") {
                 )
             )
         }
-        scoped<World> {
+        bindSingleton<World> {
             Bukkit.getWorld(get<SpreadEntityTypesConfig>().worldName) ?: error("Spawn config main world not found!")
         }
 
 
         // -- Regular spawning logic --
-        scopedOf(::SpawnEntryReader)
-        scopedOf(::SpawnEntryReader)
-        scopedOf(::WorldGuardSpawning)
-        scopedOf(::MobCaps)
-        scopedOf(::SpawnChooser)
-        scoped { LocationSpread(triesForNearbyLoc = 10) }
-        scopedOf(::MobSpawner)
-        scopedOf(::SpawnLocationChooser)
-        scopedOf(::SpawnTask)
+        bindSingletonOf(::SpawnEntryReader)
+        bindSingletonOf(::SpawnEntryReader)
+        bindSingletonOf(::WorldGuardSpawning)
+        bindSingletonOf(::MobCaps)
+        bindSingletonOf(::SpawnChooser)
+        bindSingleton { LocationSpread(triesForNearbyLoc = 10) }
+        bindSingletonOf(::MobSpawner)
+        bindSingletonOf(::SpawnLocationChooser)
+        bindSingletonOf(::SpawnTask)
 
         // -- Spread Spawn logic --
-        scopedOf(::SpawningContext)
-        scopedOf(::InChunkLocationChooser)
-        scopedOf(::SpreadChunkChooser)
-        scopedOf(::SpreadSpawner)
+        bindSingletonOf(::SpawningContext)
+        bindSingletonOf(::InChunkLocationChooser)
+        bindSingletonOf(::SpreadChunkChooser)
+        bindSingletonOf(::SpreadSpawner)
 
-        scopedOf(::SpawnTask)
-        scopedOf(::SpreadSpawnTask)
+        bindSingletonOf(::SpawnTask)
+        bindSingletonOf(::SpreadSpawnTask)
 
         // -- Listeners --
-        scopedOf(::GearySpawnTypeListener)
-        scopedOf(::MythicSpawnTypeListener)
-        scopedOf(::ListSpawnListener)
-        scopedOf(::SpreadEntityDeathListener)
-        scopedOf(::ListSpawnListener)
-        scopedOf(::SpreadEntityDeathListener)
+        bindSingletonOf(::GearySpawnTypeListener)
+        bindSingletonOf(::MythicSpawnTypeListener)
+        bindSingletonOf(::ListSpawnListener)
+        bindSingletonOf(::SpreadEntityDeathListener)
+        bindSingletonOf(::ListSpawnListener)
+        bindSingletonOf(::SpreadEntityDeathListener)
     }
 
 
@@ -138,7 +140,7 @@ val SpawningFeature = feature("spawning") {
             }
             "clearDB" {
                 executes.asPlayer {
-                    plugin.launch { get<SpreadSpawnRepository>().dropAll(player.world) }
+                    get<Plugin>().launch { get<SpreadSpawnRepository>().dropAll(player.world) }
                     sender.success("Cleared spawn locations from the database.")
                 }
             }

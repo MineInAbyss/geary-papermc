@@ -12,6 +12,8 @@ import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.default
 import com.mineinabyss.idofront.features.feature
+import com.mineinabyss.idofront.features.get
+import com.mineinabyss.idofront.features.listeners
 
 val ItemsFeature = feature("items") {
     dependsOn {
