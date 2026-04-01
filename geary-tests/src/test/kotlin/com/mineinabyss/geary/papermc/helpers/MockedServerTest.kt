@@ -1,7 +1,8 @@
 package com.mineinabyss.geary.papermc.helpers
 
-import co.touchlab.kermit.Logger
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent
+import com.mineinabyss.features.FeatureManager
+import com.mineinabyss.features.get
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.modules.GearySetup
 import com.mineinabyss.geary.modules.TestEngineModule
@@ -11,8 +12,6 @@ import com.mineinabyss.geary.papermc.GearyPaperModule
 import com.mineinabyss.geary.papermc.WorldManager
 import com.mineinabyss.geary.test.GearyTest
 import com.mineinabyss.idofront.di.DI
-import com.mineinabyss.idofront.features.FeatureManager
-import com.mineinabyss.idofront.features.FeatureManagerBuilder
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.plugin.Services
 import com.mineinabyss.idofront.services.ItemProvider
@@ -27,8 +26,8 @@ import org.bukkit.entity.Pig
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
 import org.junit.jupiter.api.AfterAll
-import org.koin.dsl.binds
-import org.koin.dsl.module
+import org.kodein.di.bindSingleton
+import org.kodein.di.instance
 import org.mockbukkit.mockbukkit.MockBukkit
 import org.mockbukkit.mockbukkit.ServerMock
 import org.mockbukkit.mockbukkit.inventory.ItemStackMock
@@ -59,23 +58,29 @@ abstract class MockedServerTest : GearyTest() {
     }
 
     val TestMinecraftModule
-        get() = TestEngineModule.run {
-            copy(module = module {
-                single<Plugin> { plugin }
-                single<GearyPaperConfig> { GearyPaperConfig() }
-                single { ComponentLogger.fallback() } binds arrayOf(ComponentLogger::class, Logger::class)
-                single<WorldManager> {
-                    WorldManager().apply {
-                        setGlobalEngine(get())
-                    }
+        get() = TestEngineModule.withOverrides {
+            bindSingleton<Plugin> { plugin }
+            bindSingleton<GearyPaperConfig> { GearyPaperConfig() }
+            bindSingleton { ComponentLogger.fallback() }
+            bindSingleton<WorldManager> {
+                WorldManager().apply {
+                    setGlobalEngine(get())
                 }
-                includes(module)
+            }
+//                includes(module)
+//            bindSingleton<FeatureManager>() {
+//                FeatureManager(org.kodein.di.DI {
+//                    bindSingleton<Geary> { get<Geary>() }
+//                }).apply { setupFeatureManager() }
+//            }
+            onReady {
+                instance<FeatureManager>().setupFeatureManager()
+            }
 //                with(plugin) {
 //                    singleFeatureManager {
 //                        setupFeatureManager()
 //                    }
 //                }
-            })
         }
 
 
@@ -93,22 +98,20 @@ abstract class MockedServerTest : GearyTest() {
 
     init {
         val configModule = object : GearyPaperModule {
-            private val koin = world.getKoin()
-
-            override val plugin = koin.get<Plugin>() as JavaPlugin
-            override val config: GearyPaperConfig = koin.get()
-            override val logger: ComponentLogger = koin.get()
-            override val features: FeatureManager = koin.get()
-            override val worldManager: WorldManager = koin.get<WorldManager>()
+            override val plugin = world.instance<Plugin>() as JavaPlugin
+            override val config: GearyPaperConfig = world.instance()
+            override val logger: ComponentLogger = world.instance()
+            override val features: FeatureManager = world.instance()
+            override val worldManager: WorldManager = world.instance()
         }
         registerItemService()
         DI.add<GearyPaperModule>(configModule)
-        world.getKoin().get<FeatureManager>().enableAll()
+        world.instance<FeatureManager>().enableAll()
     }
 
     open fun GearySetup.setupGeary() {}
 
-    open fun FeatureManagerBuilder.setupFeatureManager() {}
+    open fun FeatureManager.setupFeatureManager() {}
 
 
     private fun registerItemService() {

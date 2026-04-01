@@ -1,11 +1,11 @@
 package com.mineinabyss.geary.papermc.tracking.items
 
+import com.mineinabyss.features.FeatureManager
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.GearySetup
 import com.mineinabyss.geary.papermc.datastore.decode
 import com.mineinabyss.geary.papermc.datastore.decodePrefabs
 import com.mineinabyss.geary.papermc.datastore.encode
-import com.mineinabyss.geary.papermc.getAddon
 import com.mineinabyss.geary.papermc.helpers.*
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
@@ -15,7 +15,6 @@ import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.Prefabs
 import com.mineinabyss.geary.serialization.serialization
 import com.mineinabyss.geary.serialization.setPersisting
-import com.mineinabyss.idofront.features.FeatureManagerBuilder
 import com.mineinabyss.idofront.serialization.SerializableItemStack
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
@@ -36,9 +35,9 @@ class ItemTrackingTest : MockedServerTest() {
         install(Prefabs)
     }
 
-    override fun FeatureManagerBuilder.setupFeatureManager() {
-        install(TestItemTracking)
-        install(TestEntityTracking)
+    override fun FeatureManager.setupFeatureManager() {
+        load(TestItemTracking)
+        load(TestEntityTracking)
     }
 
     val prefabKey = PrefabKey.of("test:prefab")

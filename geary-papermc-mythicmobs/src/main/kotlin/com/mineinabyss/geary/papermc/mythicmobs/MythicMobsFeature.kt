@@ -1,14 +1,14 @@
 package com.mineinabyss.geary.papermc.mythicmobs
 
+import com.mineinabyss.features.feature
+import com.mineinabyss.features.get
+import com.mineinabyss.geary.addons.world
 import com.mineinabyss.geary.papermc.GearyPaperConfig
-import com.mineinabyss.geary.papermc.configureGeary
 import com.mineinabyss.geary.papermc.mythicmobs.actions.runMMSkillAction
 import com.mineinabyss.geary.papermc.mythicmobs.items.MythicMobDropListener
 import com.mineinabyss.geary.papermc.mythicmobs.skills.MythicPrefabsListeners
 import com.mineinabyss.geary.papermc.mythicmobs.spawning.markMMAsCustomMob
 import com.mineinabyss.geary.papermc.mythicmobs.spawning.mythicMobSpawner
-import com.mineinabyss.idofront.features.feature
-import com.mineinabyss.idofront.features.get
 import com.mineinabyss.idofront.features.listeners
 import org.kodein.di.bindSingletonOf
 
@@ -23,15 +23,12 @@ val MythicMobsFeature = feature("mythicMobs") {
         bindSingletonOf(::MythicPrefabsListeners)
     }
 
-    configureGeary {
-        onEnable {
+    onEnable {
+        world {
             runMMSkillAction()
             mythicMobSpawner()
             markMMAsCustomMob()
         }
-    }
-
-    onEnable {
         listeners(
             get<MythicMobDropListener>(),
             get<MythicPrefabsListeners>(),

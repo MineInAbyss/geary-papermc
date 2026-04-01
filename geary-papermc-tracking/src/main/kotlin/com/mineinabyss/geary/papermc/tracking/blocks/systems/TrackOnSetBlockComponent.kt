@@ -7,8 +7,11 @@ import com.mineinabyss.geary.papermc.tracking.blocks.Block2Prefab
 import com.mineinabyss.geary.papermc.tracking.blocks.components.SetBlock
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.systems.query.query
+import org.kodein.di.instance
 
-fun WorldScoped.createTrackOnSetBlockComponentListener(blocks: Block2Prefab) = observe<OnSet>()
+fun WorldScoped.createTrackOnSetBlockComponentListener(
+    blocks: Block2Prefab = instance(),
+) = observe<OnSet>()
     .involving(query<SetBlock, PrefabKey>())
     .exec { (block, prefab) ->
         val blockData = blocks

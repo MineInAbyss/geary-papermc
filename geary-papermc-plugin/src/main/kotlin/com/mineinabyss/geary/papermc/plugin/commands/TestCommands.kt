@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.plugin.commands
 
+import com.mineinabyss.features.feature
 import com.mineinabyss.geary.actions.Action
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.Condition
@@ -10,7 +11,7 @@ import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.geary.serialization.serializers.PolymorphicListAsMapSerializer
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.context.IdoPlayerCommandContext
-import com.mineinabyss.idofront.features.feature
+import com.mineinabyss.idofront.features.mainCommand
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.success
 

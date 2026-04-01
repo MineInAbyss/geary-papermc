@@ -1,17 +1,16 @@
 package com.mineinabyss.geary.papermc.tracking.items
 
+import com.mineinabyss.features.feature
+import com.mineinabyss.geary.addons.world
 import com.mineinabyss.geary.modules.observe
 import com.mineinabyss.geary.observers.events.OnRemove
 import com.mineinabyss.geary.observers.events.OnSet
 import com.mineinabyss.geary.papermc.GearyPaperConfig
-import com.mineinabyss.geary.papermc.configureGeary
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.migration.createItemMigrationListener
 import com.mineinabyss.geary.papermc.tracking.items.systems.createInventoryTrackerSystem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.systems.query.query
-import com.mineinabyss.idofront.features.feature
-import com.mineinabyss.idofront.features.get
 import com.mineinabyss.idofront.plugin.Services
 import com.mineinabyss.idofront.services.SerializableItemStackService
 import org.bukkit.entity.Player
@@ -21,7 +20,7 @@ import org.kodein.di.instance
 
 val ItemTracking = feature<ItemTrackingModule>("item-tracking") {
     dependsOn {
-        condition("Item tracking must be enabled in config") { get<GearyPaperConfig>().items.enabled }
+        condition("Item tracking must be enabled in config") { instance<GearyPaperConfig>().items.enabled }
     }
 
     dependencies {
@@ -30,9 +29,9 @@ val ItemTracking = feature<ItemTrackingModule>("item-tracking") {
         delegate<ItemTrackingModule>().to<NMSBackedItemTracking>()
     }
 
-    configureGeary { di ->
-        val itemTracking = di.instance<ItemTrackingModule>()
-        onEnable {
+    onEnable {
+        val itemTracking = instance<ItemTrackingModule>()
+        world {
             createItemMigrationListener()
             createInventoryTrackerSystem()
 
@@ -44,12 +43,8 @@ val ItemTracking = feature<ItemTrackingModule>("item-tracking") {
                 cache.clear()
             }
         }
-    }
-
-    onEnable {
-        val module = get<ItemTrackingModule>()
         Services.get<SerializableItemStackService>().registerProvider("") { item, prefabName ->
-            val result = module.createItem(PrefabKey.of(prefabName), item)
+            val result = itemTracking.createItem(PrefabKey.of(prefabName), item)
             result != null
         }
     }

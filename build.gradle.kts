@@ -36,6 +36,7 @@ allprojects {
         dependencies {
             compileOnly(rootProject.idofrontLibs.bundles.idofront.core)
             compileOnly(rootProject.idofrontLibs.minecraft.plugin.worldguard)
+            compileOnly(rootProject.idofrontLibs.idofront.features)
             testImplementation(rootProject.idofrontLibs.bundles.idofront.core)
         }
         kotlin {

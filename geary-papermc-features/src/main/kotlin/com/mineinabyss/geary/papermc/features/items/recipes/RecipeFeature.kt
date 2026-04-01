@@ -1,17 +1,17 @@
 package com.mineinabyss.geary.papermc.features.items.recipes
 
+import com.mineinabyss.features.addCloseables
+import com.mineinabyss.features.feature
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
-import com.mineinabyss.idofront.features.addCloseables
-import com.mineinabyss.idofront.features.feature
-import com.mineinabyss.idofront.features.get
 import com.mineinabyss.idofront.features.listeners
 import org.kodein.di.bindSingletonOf
+import org.kodein.di.instance
 
 val RecipeFeature = feature("recipes") {
     dependsOn {
         features(ItemTracking)
-        condition { get<GearyPaperConfig>().loading.recipes }
+        condition { instance<GearyPaperConfig>().loading.recipes }
     }
 
     dependencies {
@@ -21,14 +21,14 @@ val RecipeFeature = feature("recipes") {
     }
 
     onEnable {
-        val context = get<RecipeManager>()
+        val context = instance<RecipeManager>()
         addCloseables(context)
         context.registerRecipes()
         context.registerPotionMixes()
 
         listeners(
-            get<RecipeDiscoveryListener>(),
-            get<RecipeCraftingListener>(),
+            instance<RecipeDiscoveryListener>(),
+            instance<RecipeCraftingListener>(),
         )
     }
 }

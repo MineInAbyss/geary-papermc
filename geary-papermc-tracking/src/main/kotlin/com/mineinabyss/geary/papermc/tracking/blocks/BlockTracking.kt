@@ -1,13 +1,13 @@
 package com.mineinabyss.geary.papermc.tracking.blocks
 
+import com.mineinabyss.features.feature
+import com.mineinabyss.geary.addons.world
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.GearyPaperConfig
-import com.mineinabyss.geary.papermc.configureGeary
 import com.mineinabyss.geary.papermc.tracking.blocks.helpers.GearyBlockPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.blocks.systems.createTrackOnSetBlockComponentListener
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.systems.query.CachedQuery
-import com.mineinabyss.idofront.features.feature
 import org.bukkit.block.data.BlockData
 import org.kodein.di.bindSingleton
 import org.kodein.di.bindSingletonOf
@@ -35,11 +35,9 @@ val BlockTracking = feature<BlockTrackingModule>("blocks") {
         }
     }
 
-    configureGeary {
-        onEnable {
-            addCloseables(
-                createTrackOnSetBlockComponentListener(get<Block2Prefab>())
-            )
+    onEnable {
+        world {
+            createTrackOnSetBlockComponentListener()
         }
     }
 }

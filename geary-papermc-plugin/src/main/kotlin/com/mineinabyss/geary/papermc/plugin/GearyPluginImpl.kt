@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.plugin
 
 import co.touchlab.kermit.Logger
+import com.mineinabyss.features.FeatureManager
 import com.mineinabyss.geary.actions.GearyActions
 import com.mineinabyss.geary.autoscan.AutoScanAddon
 import com.mineinabyss.geary.modules.Geary
@@ -30,7 +31,6 @@ import com.mineinabyss.geary.uuid.SynchronizedUUID2GearyMap
 import com.mineinabyss.geary.uuid.UUID2GearyMap
 import com.mineinabyss.geary.uuid.UUIDTracking
 import com.mineinabyss.idofront.config.config
-import com.mineinabyss.idofront.features.FeatureManager
 import com.mineinabyss.idofront.features.MainCommand
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.serialization.LocationSerializer
@@ -95,7 +95,7 @@ class GearyPluginImpl : GearyPlugin() {
         gearyPaper.configure {
             // Install default addons
             install(UUIDTracking.overrideScope {
-                scoped<UUID2GearyMap> { SynchronizedUUID2GearyMap() }
+                bindSingleton<UUID2GearyMap> { SynchronizedUUID2GearyMap() }
             })
 
 

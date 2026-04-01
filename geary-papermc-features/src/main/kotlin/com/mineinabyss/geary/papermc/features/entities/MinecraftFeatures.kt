@@ -1,7 +1,8 @@
 package com.mineinabyss.geary.papermc.features.entities
 
+import com.mineinabyss.features.feature
+import com.mineinabyss.geary.addons.world
 import com.mineinabyss.geary.papermc.GearyPaperConfig
-import com.mineinabyss.geary.papermc.configureGeary
 import com.mineinabyss.geary.papermc.features.common.actions.ShulkerBulletHitListener
 import com.mineinabyss.geary.papermc.features.common.cooldowns.clearOldCooldownsSystem
 import com.mineinabyss.geary.papermc.features.common.cooldowns.cooldownDisplaySystem
@@ -22,13 +23,13 @@ import com.mineinabyss.geary.papermc.tracking.entities.components.markSetEntityT
 import com.mineinabyss.geary.papermc.tracking.entities.systems.attemptspawn.createAttemptSpawnListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.removevanillamobs.RemoveVanillaMobsListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.ConvertEntityTypesListener
-import com.mineinabyss.idofront.features.feature
-import com.mineinabyss.idofront.features.get
 import com.mineinabyss.idofront.features.listeners
+import com.mineinabyss.idofront.features.mainCommand
+import org.kodein.di.instance
 
 val MinecraftFeatures = feature("minecraft-features") {
     dependsOn {
-        condition { get<GearyPaperConfig>().minecraftFeatures }
+        condition { instance<GearyPaperConfig>().minecraftFeatures }
     }
 
     install(
@@ -36,8 +37,8 @@ val MinecraftFeatures = feature("minecraft-features") {
         PreventEventsFeature,
     )
 
-    configureGeary {
-        onEnable {
+    onEnable {
+        world {
             cooldownDisplaySystem()
             clearOldCooldownsSystem()
             addPathfindersSystem()
@@ -45,9 +46,7 @@ val MinecraftFeatures = feature("minecraft-features") {
             markSetEntityTypeAsCustomMob()
             markBindEntityTypeAsCustomMob()
         }
-    }
 
-    onEnable {
         listeners(
             ConvertEntityTypesListener(),
             RemoveVanillaMobsListener(),

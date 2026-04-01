@@ -1,23 +1,23 @@
 package com.mineinabyss.geary.papermc.features.items
 
+import com.mineinabyss.features.feature
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.features.items.food.ReplaceBurnedDropListener
 import com.mineinabyss.geary.papermc.features.items.holdsentity.SpawnHeldPrefabListener
 import com.mineinabyss.geary.papermc.features.items.nointeraction.DisableItemInteractionsListener
-import com.mineinabyss.geary.papermc.getAddon
 import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.geary
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.default
-import com.mineinabyss.idofront.features.feature
-import com.mineinabyss.idofront.features.get
 import com.mineinabyss.idofront.features.listeners
+import com.mineinabyss.idofront.features.mainCommand
+import org.kodein.di.instance
 
 val ItemsFeature = feature("items") {
     dependsOn {
-        condition { get<GearyPaperConfig>().items.enabled }
+        condition { instance<GearyPaperConfig>().items.enabled }
     }
 
     onEnable {

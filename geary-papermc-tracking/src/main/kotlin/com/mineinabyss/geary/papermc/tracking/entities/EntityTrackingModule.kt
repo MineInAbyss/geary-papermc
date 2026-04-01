@@ -1,5 +1,9 @@
 package com.mineinabyss.geary.papermc.tracking.entities
 
+import com.mineinabyss.features.addCloseables
+import com.mineinabyss.features.feature
+import com.mineinabyss.features.get
+import com.mineinabyss.geary.addons.world
 import com.mineinabyss.geary.components.relations.NoInherit
 import com.mineinabyss.geary.datatypes.ComponentId
 import com.mineinabyss.geary.helpers.componentId
@@ -8,7 +12,6 @@ import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.observers.queries.cacheGroupedBy
 import com.mineinabyss.geary.papermc.CatchType
 import com.mineinabyss.geary.papermc.GearyPaperConfig
-import com.mineinabyss.geary.papermc.configureGeary
 import com.mineinabyss.geary.papermc.tracking.entities.components.BindToEntityType
 import com.mineinabyss.geary.papermc.tracking.entities.helpers.GearyMobPrefabQuery
 import com.mineinabyss.geary.papermc.tracking.entities.systems.EntityWorldEventTracker
@@ -16,9 +19,6 @@ import com.mineinabyss.geary.papermc.tracking.entities.systems.GearyPlayerTracke
 import com.mineinabyss.geary.papermc.tracking.entities.systems.createBukkitEntityRemoveListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.createBukkitEntitySetListener
 import com.mineinabyss.geary.systems.query.query
-import com.mineinabyss.idofront.features.addCloseables
-import com.mineinabyss.idofront.features.feature
-import com.mineinabyss.idofront.features.get
 import com.mineinabyss.idofront.features.listeners
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import org.kodein.di.bindSingleton
@@ -57,27 +57,22 @@ val EntityTracking = feature<EntityTrackingModule>("entity-tracking") {
     }
 
     onEnable {
+        val config = get<GearyPaperConfig>().entities
+        if (config.trackOtherEntities) listeners(get<EntityWorldEventTracker>())
+        if (config.trackPlayers) listeners(get<GearyPlayerTracker>())
         addCloseables(
             get<EntityTrackingQueries>(),
             get<BukkitEntity2Geary>()
         )
-    }
-    configureGeary {
-        onEnable {
+
+        world {
             createBukkitEntityRemoveListener()
             createBukkitEntitySetListener()
-
 //            Bukkit.getServer().worlds.forEach { world ->
 //                world.entities.forEach entities@{ entity ->
 //                    get<BukkitEntity2Geary>().getOrCreate(entity)
 //                }
 //            }
         }
-    }
-
-    onEnable {
-        val config = get<GearyPaperConfig>().entities
-        if (config.trackOtherEntities) listeners(get<EntityWorldEventTracker>())
-        if (config.trackPlayers) listeners(get<GearyPlayerTracker>())
     }
 }

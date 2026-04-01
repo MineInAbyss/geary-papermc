@@ -2,7 +2,6 @@ package com.mineinabyss.geary.papermc.features.resourcepacks
 
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.GearyPaperConfig
-import com.mineinabyss.geary.papermc.getAddon
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab

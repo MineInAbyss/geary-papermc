@@ -1,6 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.entities.systems
 
-import com.mineinabyss.geary.addons.dsl.AddonScope
+import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.modules.observe
 import com.mineinabyss.geary.observers.Observer
 import com.mineinabyss.geary.observers.events.OnSet
@@ -9,10 +9,11 @@ import com.mineinabyss.geary.papermc.datastore.loadComponentsFrom
 import com.mineinabyss.geary.papermc.tracking.entities.BukkitEntity2Geary
 import com.mineinabyss.geary.systems.query.query
 import com.mineinabyss.idofront.typealiases.BukkitEntity
+import org.kodein.di.instance
 
-fun AddonScope.createBukkitEntitySetListener(): Observer {
-    val bukkit2Geary = get<BukkitEntity2Geary>()
-
+fun WorldScoped.createBukkitEntitySetListener(
+    bukkit2Geary: BukkitEntity2Geary = instance(),
+): Observer {
     return observe<OnSet>()
         .involving(query<BukkitEntity>())
         .exec { (bukkit) ->

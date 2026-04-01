@@ -3,6 +3,8 @@ package com.mineinabyss.geary.papermc.spawning
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.github.shynixn.mccoroutine.bukkit.launch
+import com.mineinabyss.features.feature
+import com.mineinabyss.features.get
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.data.SpawnsQueries
@@ -43,7 +45,7 @@ import kotlin.io.path.Path
 val SpawningFeature = feature("spawning") {
     dependsOn {
         plugins("WorldGuard", "MythicMobs")
-        condition { get<GearyPaperConfig>().spawning }
+        condition("Spawning must be enabled in config") { get<GearyPaperConfig>().spawning }
     }
 
     dependencies {
@@ -129,6 +131,7 @@ val SpawningFeature = feature("spawning") {
         // -- Tasks registration --
         task(get<SpawnTask>().job)
         task(get<SpreadSpawnTask>().job)
+
     }
 
     mainCommand {

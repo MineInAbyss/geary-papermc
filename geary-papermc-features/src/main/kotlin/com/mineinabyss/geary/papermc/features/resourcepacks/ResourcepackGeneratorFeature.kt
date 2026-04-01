@@ -1,9 +1,9 @@
 package com.mineinabyss.geary.papermc.features.resourcepacks
 
+import com.mineinabyss.features.addCloseables
+import com.mineinabyss.features.feature
+import com.mineinabyss.features.get
 import com.mineinabyss.geary.papermc.GearyPaperConfig
-import com.mineinabyss.idofront.features.addCloseables
-import com.mineinabyss.idofront.features.feature
-import com.mineinabyss.idofront.features.get
 import org.kodein.di.bindSingletonOf
 
 val ResourcepackGeneratorFeature = feature("resourcepack") {
@@ -18,6 +18,6 @@ val ResourcepackGeneratorFeature = feature("resourcepack") {
     onEnable {
         val generator = get<ResourcePackGenerator>()
         addCloseables(generator)
-        get<ResourcePackGenerator>().generateResourcePack()
+        generator.generateResourcePack()
     }
 }

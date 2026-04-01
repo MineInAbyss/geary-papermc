@@ -2,18 +2,18 @@ package com.mineinabyss.geary.papermc.plugin.commands
 
 import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.launch
+import com.mineinabyss.features.feature
 import com.mineinabyss.geary.engine.archetypes.ArchetypeQueryManager
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.features.resourcepacks.ResourcePackContent
-import com.mineinabyss.geary.papermc.getAddon
 import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.prefabs.entityOfOrNull
-import com.mineinabyss.idofront.features.feature
 import com.mineinabyss.idofront.features.get
+import com.mineinabyss.idofront.features.mainCommand
 import com.mineinabyss.idofront.items.editItemMeta
 import com.mineinabyss.idofront.messaging.info
 import org.bukkit.Material
@@ -21,7 +21,6 @@ import org.bukkit.block.ShulkerBox
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.BlockStateMeta
 import org.bukkit.plugin.Plugin
-import org.koin.core.component.get
 
 val DebugFeature = feature("debug") {
     mainCommand {
@@ -69,7 +68,7 @@ val DebugFeature = feature("debug") {
 
                     sender.info(
                         """
-                        |Archetype count: ${world.get<ArchetypeQueryManager>().archetypeCount}
+                        |Archetype count: ${get<ArchetypeQueryManager>().archetypeCount}
                         |Next entity ID: ${tempEntity.id}
                         |""".trimMargin()
                     )

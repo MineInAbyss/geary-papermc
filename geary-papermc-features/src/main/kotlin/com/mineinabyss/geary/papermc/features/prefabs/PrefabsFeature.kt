@@ -1,12 +1,14 @@
 package com.mineinabyss.geary.papermc.features.prefabs
 
+import com.mineinabyss.features.feature
+import com.mineinabyss.features.get
+import com.mineinabyss.geary.addons.world
 import com.mineinabyss.geary.components.relations.InstanceOf
 import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.helpers.parent
 import com.mineinabyss.geary.modules.findEntities
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.WorldManager
-import com.mineinabyss.geary.papermc.configureGeary
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.GearyArgs
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.UpdateMob
@@ -19,8 +21,8 @@ import com.mineinabyss.geary.prefabs.PrefabsModuleExtensions.fromDirectory
 import com.mineinabyss.geary.prefabs.helpers.inheritPrefabsIfNeeded
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.suggests
-import com.mineinabyss.idofront.features.feature
 import com.mineinabyss.idofront.features.get
+import com.mineinabyss.idofront.features.mainCommand
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.success
 import com.mineinabyss.idofront.messaging.warn
@@ -35,12 +37,12 @@ import kotlin.io.path.*
 val PrefabsFeature = feature("prefab-files") {
     dependsOn {
         condition { get<GearyPaperConfig>().loading.prefabs }
+        features(Prefabs)
     }
 
-    configureGeary {
-        dependsOn(Prefabs)
+    onEnable {
+        world {
 
-        onEnable {
             val config = get<GearyPaperConfig>()
             val prefabs = get<PrefabsModule>()
             val plugin = get<Plugin>()

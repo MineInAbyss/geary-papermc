@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.entities
 
+import com.mineinabyss.features.FeatureManager
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.modules.GearySetup
 import com.mineinabyss.geary.papermc.datastore.decode
@@ -10,7 +11,6 @@ import com.mineinabyss.geary.papermc.helpers.withTestSerializers
 import com.mineinabyss.geary.serialization.serialization
 import com.mineinabyss.geary.serialization.setPersisting
 import com.mineinabyss.geary.uuid.UUIDTracking
-import com.mineinabyss.idofront.features.FeatureManagerBuilder
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -28,10 +28,10 @@ class EntityTrackingTests : MockedServerTest() {
             withTestSerializers()
         }
         install(UUIDTracking)
+        install(TestEntityTracking)
     }
 
-    override fun FeatureManagerBuilder.setupFeatureManager() {
-        install(TestEntityTracking)
+    override fun FeatureManager.setupFeatureManager() {
     }
 
     @Test
