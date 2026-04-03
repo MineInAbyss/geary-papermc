@@ -27,7 +27,9 @@ class SpawnLocationChooser(
         }
 
         // Ensure not near ANY player
-        if (onlinePlayers.any { it.location.distanceSquared(spawnLocation) < config.minDistance * config.minDistance })
+        if (onlinePlayers.any {
+                it.location.world == spawnLocation.world && it.location.distanceSquared(spawnLocation) < config.minDistance * config.minDistance
+            })
             return null
 
         return spawnLocation
