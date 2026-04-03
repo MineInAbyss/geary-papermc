@@ -15,6 +15,8 @@ configurations {
         exclude(group = "org.snakeyaml")
         exclude(group = "it.unimi.dsi")
         exclude(group = "io.insert-koin")
+        exclude(group = "com.mineinabyss.features")
+        exclude(group = "org.kodein.di")
     }
 }
 

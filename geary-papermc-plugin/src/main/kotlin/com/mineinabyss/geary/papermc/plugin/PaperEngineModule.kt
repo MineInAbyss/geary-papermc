@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.plugin
 
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.mineinabyss.features.get
+import com.mineinabyss.geary.engine.archetypes.ArchetypeEngine
 import com.mineinabyss.geary.helpers.async.IgnoringAsyncCatcher
 import com.mineinabyss.geary.modules.ArchetypeEngineModule
 import com.mineinabyss.geary.modules.GearyModule
@@ -12,8 +13,7 @@ import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 
 private fun GearyPlugin.paperModule() = DI.Module("geary-papermc") {
-    bindSingleton<GearyPlugin> { this@paperModule }
-    bindSingleton {
+    bindSingleton<ArchetypeEngine>(overrides = true) {
         PaperMCEngine(get(), get(), instance("engineThread"))
     }
 }
@@ -33,7 +33,8 @@ fun GearyPlugin.PaperEngineModule(config: GearyPaperConfig): GearyModule {
     return GearyModule(
         DI.Module("geary-papermc") {
             bindSingleton("asyncCatcher.write") { chooseCatcher(config.catch.asyncWrite) }
-            importAll(paperModule(), engine.module)
+            import(engine.module)
+            import(paperModule(), allowOverride = true)
         },
     )
 }

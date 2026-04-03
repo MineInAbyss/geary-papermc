@@ -42,7 +42,6 @@ val PrefabsFeature = feature("prefab-files") {
 
     onEnable {
         world {
-
             val config = get<GearyPaperConfig>()
             val prefabs = get<PrefabsModule>()
             val plugin = get<Plugin>()

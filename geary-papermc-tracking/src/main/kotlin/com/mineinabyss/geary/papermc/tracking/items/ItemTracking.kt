@@ -20,7 +20,9 @@ import org.kodein.di.instance
 
 val ItemTracking = feature<ItemTrackingModule>("item-tracking") {
     dependsOn {
-        condition("Item tracking must be enabled in config") { instance<GearyPaperConfig>().items.enabled }
+        condition {
+            require(instance<GearyPaperConfig>().items.enabled) { "Item tracking must be enabled in config" }
+        }
     }
 
     dependencies {

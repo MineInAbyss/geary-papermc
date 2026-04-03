@@ -10,6 +10,7 @@ import com.mineinabyss.geary.papermc.mythicmobs.skills.MythicPrefabsListeners
 import com.mineinabyss.geary.papermc.mythicmobs.spawning.markMMAsCustomMob
 import com.mineinabyss.geary.papermc.mythicmobs.spawning.mythicMobSpawner
 import com.mineinabyss.idofront.features.listeners
+import com.mineinabyss.idofront.features.plugins
 import org.kodein.di.bindSingletonOf
 
 val MythicMobsFeature = feature("mythicMobs") {

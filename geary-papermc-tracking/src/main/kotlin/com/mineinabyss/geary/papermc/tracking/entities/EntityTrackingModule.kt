@@ -21,6 +21,7 @@ import com.mineinabyss.geary.papermc.tracking.entities.systems.createBukkitEntit
 import com.mineinabyss.geary.systems.query.query
 import com.mineinabyss.idofront.features.listeners
 import com.mineinabyss.idofront.typealiases.BukkitEntity
+import org.bukkit.Bukkit
 import org.kodein.di.bindSingleton
 import org.kodein.di.bindSingletonOf
 
@@ -68,11 +69,11 @@ val EntityTracking = feature<EntityTrackingModule>("entity-tracking") {
         world {
             createBukkitEntityRemoveListener()
             createBukkitEntitySetListener()
-//            Bukkit.getServer().worlds.forEach { world ->
-//                world.entities.forEach entities@{ entity ->
-//                    get<BukkitEntity2Geary>().getOrCreate(entity)
-//                }
-//            }
+            Bukkit.getServer().worlds.forEach { world ->
+                world.entities.forEach entities@{ entity ->
+                    get<BukkitEntity2Geary>().getOrCreate(entity)
+                }
+            }
         }
     }
 }

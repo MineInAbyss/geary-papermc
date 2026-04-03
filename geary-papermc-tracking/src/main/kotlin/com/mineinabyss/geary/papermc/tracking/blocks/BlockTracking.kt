@@ -22,7 +22,9 @@ data class BlockTrackingModule(
 
 val BlockTracking = feature<BlockTrackingModule>("blocks") {
     dependsOn {
-        condition("Block tracking disabled in config") { instance<GearyPaperConfig>().trackBlocks }
+        condition {
+            require(instance<GearyPaperConfig>().trackBlocks) { "Block tracking disabled in config" }
+        }
     }
 
     dependencies {

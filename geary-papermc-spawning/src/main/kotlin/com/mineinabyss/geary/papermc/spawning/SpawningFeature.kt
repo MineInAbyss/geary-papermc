@@ -45,7 +45,7 @@ import kotlin.io.path.Path
 val SpawningFeature = feature("spawning") {
     dependsOn {
         plugins("WorldGuard", "MythicMobs")
-        condition("Spawning must be enabled in config") { get<GearyPaperConfig>().spawning }
+        condition { require(get<GearyPaperConfig>().spawning) { "Spawning must be enabled in config" } }
     }
 
     dependencies {
@@ -82,14 +82,12 @@ val SpawningFeature = feature("spawning") {
 
         // -- Regular spawning logic --
         bindSingletonOf(::SpawnEntryReader)
-        bindSingletonOf(::SpawnEntryReader)
         bindSingletonOf(::WorldGuardSpawning)
         bindSingletonOf(::MobCaps)
         bindSingletonOf(::SpawnChooser)
         bindSingleton { LocationSpread(triesForNearbyLoc = 10) }
         bindSingletonOf(::MobSpawner)
         bindSingletonOf(::SpawnLocationChooser)
-        bindSingletonOf(::SpawnTask)
 
         // -- Spread Spawn logic --
         bindSingletonOf(::SpawningContext)
@@ -103,8 +101,6 @@ val SpawningFeature = feature("spawning") {
         // -- Listeners --
         bindSingletonOf(::GearySpawnTypeListener)
         bindSingletonOf(::MythicSpawnTypeListener)
-        bindSingletonOf(::ListSpawnListener)
-        bindSingletonOf(::SpreadEntityDeathListener)
         bindSingletonOf(::ListSpawnListener)
         bindSingletonOf(::SpreadEntityDeathListener)
     }

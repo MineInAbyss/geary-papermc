@@ -25,7 +25,7 @@ class GearyItemContext(
                     set<ItemStack>(this@toGearyOrNull)
                 }
             }
-            return entity
+            entity ?: return null
         }
     }
 

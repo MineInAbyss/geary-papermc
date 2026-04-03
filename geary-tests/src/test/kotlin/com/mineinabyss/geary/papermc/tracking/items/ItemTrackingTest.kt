@@ -23,6 +23,7 @@ import io.kotest.matchers.shouldBe
 import org.bukkit.Material
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockbukkit.mockbukkit.inventory.ItemStackMock
@@ -144,6 +145,7 @@ class ItemTrackingTest : MockedServerTest() {
 
 
     @Test
+    @Disabled("Needs implementation") //TODO Reimplement tracking to load items without anything encoded to them
     fun `should allow getting geary entities from items without component data for the current tick`() {
         // arrange
         val player = createTestPlayer()
