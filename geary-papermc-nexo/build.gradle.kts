@@ -7,10 +7,16 @@ plugins {
 }
 
 dependencies {
+    // Plugins
+    compileOnly("com.nexomc:nexo:1.20.1")
     compileOnly(idofrontLibs.idofront.nms)
+
+    // Other deps
+    compileOnly(idofrontLibs.kotlinx.serialization.json)
+    compileOnly(idofrontLibs.kotlinx.serialization.kaml)
     compileOnly(idofrontLibs.minecraft.mccoroutine)
-    implementation(libs.geary.uuid)
-    //api(project(":geary-papermc-nexo"))
-    api(project(":geary-papermc-datastore"))
-    api(project(":geary-papermc-core"))
+
+    compileOnly(libs.geary.actions)
+    implementation(project(":geary-papermc-tracking"))
+    implementation(project(":geary-papermc-features"))
 }

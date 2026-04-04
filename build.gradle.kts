@@ -8,6 +8,7 @@ plugins {
 dependencies {
     api(project(":geary-papermc-tracking"))
     api(project(":geary-papermc-mythicmobs"))
+    api(project(":geary-papermc-nexo"))
     api(project(":geary-papermc-features"))
     api(project(":geary-papermc-spawning"))
     api(libs.geary.core)
@@ -26,6 +27,7 @@ allprojects {
         maven("https://repo.mineinabyss.com/releases")
         maven("https://repo.mineinabyss.com/snapshots")
         maven("https://repo.mineinabyss.com/mirror")
+        maven("https://repo.nexomc.com/releases")
         mavenLocal()
     }
 
