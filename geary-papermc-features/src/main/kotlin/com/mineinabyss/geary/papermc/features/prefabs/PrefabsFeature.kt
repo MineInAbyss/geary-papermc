@@ -1,22 +1,18 @@
 package com.mineinabyss.geary.papermc.features.prefabs
 
-import com.mineinabyss.features.feature
-import com.mineinabyss.features.get
-import com.mineinabyss.geary.addons.world
+import com.mineinabyss.dependencies.get
+import com.mineinabyss.dependencies.module
 import com.mineinabyss.geary.components.relations.InstanceOf
 import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.helpers.parent
 import com.mineinabyss.geary.modules.findEntities
-import com.mineinabyss.geary.papermc.GearyPaperConfig
-import com.mineinabyss.geary.papermc.WorldManager
-import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.*
 import com.mineinabyss.geary.papermc.tracking.GearyArgs
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.UpdateMob
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.PrefabLoader.PrefabLoadResult
 import com.mineinabyss.geary.prefabs.Prefabs
-import com.mineinabyss.geary.prefabs.PrefabsModule
 import com.mineinabyss.geary.prefabs.PrefabsModuleExtensions.fromDirectory
 import com.mineinabyss.geary.prefabs.helpers.inheritPrefabsIfNeeded
 import com.mineinabyss.idofront.commands.brigadier.Args
@@ -34,81 +30,72 @@ import java.nio.file.Path
 import kotlin.io.path.*
 
 //TODO move geary.configure definition into here as well
-val PrefabsFeature = feature("prefab-files") {
-    dependsOn {
-        condition { get<GearyPaperConfig>().loading.prefabs }
-        features(Prefabs)
+val PrefabsFeature = module("prefab-files") {
+    require(get<GearyPaperConfig>().loading.prefabs) { "Prefabs must be enabled in config" }
+    val plugin = get<Plugin>()
+
+    gearyWorld {
+        val prefabs = getAddon(Prefabs)
+        // Load prefabs in Geary/prefabs folder, each subfolder is considered its own namespace
+        plugin.dataPath
+            .resolve("prefabs")
+            .createDirectories()
+            .listDirectoryEntries()
+            .filter(Path::isDirectory)
+            .forEach { folder ->
+                prefabs.fromDirectory(folder.name, folder)
+            }
+
+        // Force item refresh if any players are online
+        plugin.server.onlinePlayers.forEach { it.inventory.toGeary()?.forceRefresh(ignoreCached = true) }
     }
-
-    onEnable {
-        world {
-            val config = get<GearyPaperConfig>()
-            val prefabs = get<PrefabsModule>()
-            val plugin = get<Plugin>()
-
-            // Load prefabs in Geary/prefabs folder, each subfolder is considered its own namespace
-            if (config.loading.prefabs) plugin
-                .dataPath
-                .resolve("prefabs")
-                .createDirectories()
-                .listDirectoryEntries()
-                .filter(Path::isDirectory)
-                .forEach { folder ->
-                    prefabs.fromDirectory(folder.name, folder)
+}.mainCommand {
+    "prefab" {
+        permission = "geary.admin.prefab"
+        "count" {
+            executes.args("prefab" to GearyArgs.prefab()) { prefab ->
+                val geary = get<WorldManager>().global
+                with(geary) {
+                    val count = geary.queryManager.getEntitiesMatching(family {
+                        hasRelation<InstanceOf?>(prefab)
+                        not { has<PrefabKey>() }
+                    }).count()
+                    sender.success("There are $count direct instances of ${prefab.get<PrefabKey>()}")
                 }
-
-            // Force item refresh if any players are online
-            plugin.server.onlinePlayers.forEach { it.inventory.toGeary()?.forceRefresh(ignoreCached = true) }
+            }
         }
-    }
+        "reload" {
+            executes.args("prefab" to GearyArgs.prefab()) { prefab ->
+                get<GearyPlugin>().forEachWorld {
+                    runCatching { getAddon(Prefabs).loader.reload(prefab) }
+                        .onSuccess { sender.success("Reread prefab $prefab") }
+                        .onFailure { sender.error("Failed to reread prefab $prefab:\n${it.message}") }
 
-    mainCommand {
-        "prefab" {
-            permission = "geary.admin.prefab"
-            "count" {
-                executes.args("prefab" to GearyArgs.prefab()) { prefab ->
-                    val geary = get<WorldManager>().global
-                    with(geary) {
-                        val count = geary.queryManager.getEntitiesMatching(family {
-                            hasRelation<InstanceOf?>(prefab)
-                            not { has<PrefabKey>() }
-                        }).count()
-                        sender.success("There are $count direct instances of ${prefab.get<PrefabKey>()}")
+
+                    // Reload entities
+                    findEntities {
+                        hasRelation<InstanceOf?>(prefab)
+                        has<BukkitEntity>()
+                    }.forEach {
+                        UpdateMob.recreateGearyEntity(it.get<BukkitEntity>() ?: return@forEach)
                     }
+
+                    // Reload items
+                    findEntities {
+                        hasRelation<InstanceOf?>(prefab)
+                        has<ItemStack>()
+                    }.toSet()
+                        .mapNotNull { it.parent }
+                        .forEach { it.get<Player>()?.inventory?.toGeary()?.forceRefresh(ignoreCached = true) }
                 }
             }
-            "reload" {
-                executes.args("prefab" to GearyArgs.prefab()) { prefab ->
-                    with(gearyPaper.worldManager.global) {
-                        runCatching { getAddon(Prefabs).loader.reload(prefab) }
-                            .onSuccess { sender.success("Reread prefab $prefab") }
-                            .onFailure { sender.error("Failed to reread prefab $prefab:\n${it.message}") }
-
-
-                        // Reload entities
-                        findEntities {
-                            hasRelation<InstanceOf?>(prefab)
-                            has<BukkitEntity>()
-                        }.forEach {
-                            UpdateMob.recreateGearyEntity(it.get<BukkitEntity>() ?: return@forEach)
-                        }
-
-                        // Reload items
-                        findEntities {
-                            hasRelation<InstanceOf?>(prefab)
-                            has<ItemStack>()
-                        }.toSet()
-                            .mapNotNull { it.parent }
-                            .forEach { it.get<Player>()?.inventory?.toGeary()?.forceRefresh(ignoreCached = true) }
-                    }
-                }
-            }
-            "load" {
-                executes.args(
-                    "namespace" to GearyArgs.namespace(),
-                    "path" to Args.word().suggests {
-                        //TODO get previous argument in suggestion
-                        val namespace = input.split(" ").dropLast(1).lastOrNull() ?: return@suggests
+        }
+        "load" {
+            executes.args(
+                "namespace" to GearyArgs.namespace(),
+                "path" to Args.word().suggests {
+                    //TODO get previous argument in suggestion
+                    val namespace = input.split(" ").dropLast(1).lastOrNull() ?: return@suggests
 //                plugin.dataFolder.resolve("prefabs").resolve(namespace).walk()
 //                    .filter {
 //                        it.name.startsWith(args[3].lowercase()) && it.extension == "yml" && prefabManager[PrefabKey.of(
@@ -119,9 +106,10 @@ val PrefabsFeature = feature("prefab-files") {
 //                        it.relativeTo(plugin.dataFolder.resolve(args[2])).toString()
 //                    }
 //                    .toList()
-                    }
-                ) { namespace, path ->
-                    val prefabs = get<WorldManager>().global.getAddon(Prefabs)
+                }
+            ) { namespace, path ->
+                get<GearyPlugin>().forEachWorld {
+                    val prefabs = getAddon(Prefabs)
                     // Ensure not already registered
                     if (prefabs[PrefabKey.of(namespace, Path(path).nameWithoutExtension)] != null) {
                         fail("Prefab $namespace:$path already exists")
@@ -130,7 +118,7 @@ val PrefabsFeature = feature("prefab-files") {
                     // Try to load from file
                     val load = prefabs.loader.loadFromPath(
                         namespace,
-                        kotlinx.io.files.Path(gearyPaper.plugin.dataFolder.resolve(namespace).resolve(path).path)
+                        kotlinx.io.files.Path(gearyPaper.dataFolder.resolve(namespace).resolve(path).path)
                     )
                     when (load) {
                         is PrefabLoadResult.Failure -> {

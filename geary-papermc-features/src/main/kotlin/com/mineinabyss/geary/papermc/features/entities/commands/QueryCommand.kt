@@ -13,15 +13,17 @@ import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.IdoCommand
 import com.mineinabyss.idofront.commands.brigadier.context.IdoPlayerCommandContext
 import com.mineinabyss.idofront.commands.brigadier.suggests
+import com.mineinabyss.idofront.features.DICommandContext
 import com.mineinabyss.idofront.messaging.info
 import com.mineinabyss.idofront.messaging.success
 import org.bukkit.entity.Entity
 
+context(context: DICommandContext)
 internal fun IdoCommand.mobsQuery() {
     val mobs: List<String> by lazy {
         buildList {
             addAll(listOf("custom"))
-            addAll(gearyPaper.features.get(EntityTracking).query.prefabs.getKeyStrings())
+            addAll(context.scope[EntityTracking]!!.query.prefabs.getKeyStrings())
         }
     }
 
@@ -49,7 +51,7 @@ internal fun IdoCommand.mobsQuery() {
 
 
 private fun IdoPlayerCommandContext.removeOrInfo(query: String, radius: Int, isInfo: Boolean) {
-    val worlds = gearyPaper.plugin.server.worlds
+    val worlds = gearyPaper.server.worlds
     var entityCount = 0
     val entities = mutableSetOf<Entity>()
     val types = query.split("+")

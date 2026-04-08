@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.tracking.blocks.systems
 
+import com.mineinabyss.dependencies.get
 import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.modules.observe
 import com.mineinabyss.geary.observers.events.OnSet
@@ -7,10 +8,9 @@ import com.mineinabyss.geary.papermc.tracking.blocks.Block2Prefab
 import com.mineinabyss.geary.papermc.tracking.blocks.components.SetBlock
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.systems.query.query
-import org.kodein.di.instance
 
 fun WorldScoped.createTrackOnSetBlockComponentListener(
-    blocks: Block2Prefab = instance(),
+    blocks: Block2Prefab = get(),
 ) = observe<OnSet>()
     .involving(query<SetBlock, PrefabKey>())
     .exec { (block, prefab) ->

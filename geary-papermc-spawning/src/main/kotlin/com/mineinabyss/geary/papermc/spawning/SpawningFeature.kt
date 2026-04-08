@@ -3,8 +3,10 @@ package com.mineinabyss.geary.papermc.spawning
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.github.shynixn.mccoroutine.bukkit.launch
-import com.mineinabyss.features.feature
-import com.mineinabyss.features.get
+import com.mineinabyss.dependencies.get
+import com.mineinabyss.dependencies.module
+import com.mineinabyss.dependencies.new
+import com.mineinabyss.dependencies.single
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.data.SpawnsQueries
@@ -36,77 +38,64 @@ import com.sk89q.worldguard.WorldGuard
 import kotlinx.serialization.json.Json
 import me.dvyy.sqlite.Database
 import org.bukkit.Bukkit
-import org.bukkit.World
 import org.bukkit.plugin.Plugin
-import org.kodein.di.bindSingleton
-import org.kodein.di.bindSingletonOf
 import kotlin.io.path.Path
 
-val SpawningFeature = feature("spawning") {
-    dependsOn {
-        plugins("WorldGuard", "MythicMobs")
-        condition { require(get<GearyPaperConfig>().spawning) { "Spawning must be enabled in config" } }
+val SpawningFeature = module("spawning") {
+    requirePlugins("WorldGuard", "MythicMobs")
+    require(get<GearyPaperConfig>().spawning) { "Spawning must be enabled in config" }
+
+    val spawning by singleConfig<SpawnConfig>("spawning.yml") { default = SpawnConfig() }
+    val spreadConfig by singleConfig<SpreadEntityTypesConfig>("spread_config.yml") {
+        withSerializersModule(get<Geary>().getAddon(SerializableComponents).formats.module)
+        default = SpreadEntityTypesConfig()
     }
-
-    dependencies {
-        bindConfig<SpawnConfig>("spawning.yml") { default = SpawnConfig() }
-        bindConfig<SpreadEntityTypesConfig>("spread_config.yml") {
-            withSerializersModule(get<Geary>().getAddon(SerializableComponents).formats.module)
-            default = SpreadEntityTypesConfig()
+    single { new(::SpawnsQueries) }
+    val spawnDB by single<Database> {
+        get<Plugin>().sqliteDatabase(Path("spawns.db")) {
+            get<SpawnsQueries>().create()
         }
-        bindSingletonOf(::SpawnsQueries)
-        bindSingleton<Database> {
-            plugin.sqliteDatabase(Path("spawns.db")) {
-                get<SpawnsQueries>().create()
-            }
+    }
+    single {
+        Json {
+            prettyPrint = true
+            ignoreUnknownKeys = true
         }
-
-        bindSingleton<Json> {
-            Json {
-                prettyPrint = true
-                ignoreUnknownKeys = true
-            }
-        }
-        bindSingleton<Yaml> {
-            Yaml(
-                serializersModule = gearyPaper.worldManager.global.getAddon(SerializableComponents).formats.module,
-                configuration = YamlConfiguration(
-                    strictMode = false
-                )
+    }
+    single {
+        Yaml(
+            serializersModule = gearyPaper.worldManager.global.getAddon(SerializableComponents).formats.module,
+            configuration = YamlConfiguration(
+                strictMode = false
             )
-        }
-        bindSingleton<World> {
-            Bukkit.getWorld(get<SpreadEntityTypesConfig>().worldName) ?: error("Spawn config main world not found!")
-        }
-
-
-        // -- Regular spawning logic --
-        bindSingletonOf(::SpawnEntryReader)
-        bindSingletonOf(::WorldGuardSpawning)
-        bindSingletonOf(::MobCaps)
-        bindSingletonOf(::SpawnChooser)
-        bindSingleton { LocationSpread(triesForNearbyLoc = 10) }
-        bindSingletonOf(::MobSpawner)
-        bindSingletonOf(::SpawnLocationChooser)
-
-        // -- Spread Spawn logic --
-        bindSingletonOf(::SpawningContext)
-        bindSingletonOf(::InChunkLocationChooser)
-        bindSingletonOf(::SpreadChunkChooser)
-        bindSingletonOf(::SpreadSpawner)
-
-        bindSingletonOf(::SpawnTask)
-        bindSingletonOf(::SpreadSpawnTask)
-
-        // -- Listeners --
-        bindSingletonOf(::GearySpawnTypeListener)
-        bindSingletonOf(::MythicSpawnTypeListener)
-        bindSingletonOf(::ListSpawnListener)
-        bindSingletonOf(::SpreadEntityDeathListener)
+        )
     }
+    single { Bukkit.getWorld(get<SpreadEntityTypesConfig>().worldName) ?: error("Spawn config main world not found!") }
+    // -- Regular spawning logic --
+    single { new(::SpawnEntryReader) }
+    single { new(::WorldGuardSpawning) }
+    single { new(::MobCaps) }
+    single { new(::SpawnChooser) }
+    single { LocationSpread(triesForNearbyLoc = 10) }
+    single { new(::MobSpawner) }
+    single { new(::SpawnLocationChooser) }
 
+    // -- Spread Spawn logic --
+    single { new(::SpawningContext) }
+    single { new(::InChunkLocationChooser) }
+    single { new(::SpreadChunkChooser) }
+    single { new(::SpreadSpawner) }
 
-    onLoad {
+    single { new(::SpawnTask) }
+    single { new(::SpreadSpawnTask) }
+
+    // -- Listeners --
+    val spawnTypeListener by single { new(::GearySpawnTypeListener) }
+    val mythicSpawnListener by single { new(::MythicSpawnTypeListener) }
+    val listSpawnListener by single { new(::ListSpawnListener) }
+    val spreadDeathListener by single { new(::SpreadEntityDeathListener) }
+
+    onServerStartup {
         runCatching {
             val registry = WorldGuard.getInstance().flagRegistry
             registry.register(SpawningWorldGuardFlags.OVERRIDE_LOWER_PRIORITY_SPAWNS)
@@ -115,47 +104,42 @@ val SpawningFeature = feature("spawning") {
             it.printStackTrace()
         }
     }
+    listeners(
+        spawnTypeListener,
+        mythicSpawnListener,
+        listSpawnListener,
+        spreadDeathListener,
+    )
 
-    onEnable {
-        listeners(
-            get<GearySpawnTypeListener>(),
-            get<MythicSpawnTypeListener>(),
-            get<ListSpawnListener>(),
-            get<SpreadEntityDeathListener>(),
-        )
+    // -- Tasks registration --
+    task(get<SpawnTask>().job)
+    task(get<SpreadSpawnTask>().job)
 
-        // -- Tasks registration --
-        task(get<SpawnTask>().job)
-        task(get<SpreadSpawnTask>().job)
-
-    }
-
-    mainCommand {
-        "spawns" {
-            "getNearbyDBEntries" {
-                executes.asPlayer {
-                    get<SpawningContext>().dumpDB(player.location, player)
-                }
+}.mainCommand {
+    "spawns" {
+        "getNearbyDBEntries" {
+            executes.asPlayer {
+                get<SpawningContext>().dumpDB(player.location, player)
             }
-            "clearDB" {
-                executes.asPlayer {
-                    get<Plugin>().launch { get<SpreadSpawnRepository>().dropAll(player.world) }
-                    sender.success("Cleared spawn locations from the database.")
-                }
+        }
+        "clearDB" {
+            executes.asPlayer {
+                get<Plugin>().launch { get<SpreadSpawnRepository>().dropAll(player.world) }
+                sender.success("Cleared spawn locations from the database.")
             }
+        }
 
-            "test" {
-                executes.asPlayer().args(
-                    "Spawn name" to Args.string().suggests { suggestFiltering(get<SpawningContext>().spawnEntriesByName.map { it.key }) }
-                ) { spawnName ->
-                    val mobSpawner = get<MobSpawner>()
-                    val spawn = get<SpawningContext>().spawnEntriesByName.get(spawnName) ?: fail("Could not find spawn named $spawnName")
-                    runCatching { mobSpawner.checkSpawnConditions(spawn, player.location) }
-                        .onSuccess {
-                            if (it) sender.success("Conditions for $spawnName passed") else sender.error("Conditions for $spawnName failed")
-                        }
-                        .onFailure { sender.error("Conditions for $spawnName failed:\n${it.message}") }
-                }
+        "test" {
+            executes.asPlayer().args(
+                "Spawn name" to Args.string().suggests { suggestFiltering(get<SpawningContext>().spawnEntriesByName.map { it.key }) }
+            ) { spawnName ->
+                val mobSpawner = get<MobSpawner>()
+                val spawn = get<SpawningContext>().spawnEntriesByName.get(spawnName) ?: fail("Could not find spawn named $spawnName")
+                runCatching { mobSpawner.checkSpawnConditions(spawn, player.location) }
+                    .onSuccess {
+                        if (it) sender.success("Conditions for $spawnName passed") else sender.error("Conditions for $spawnName failed")
+                    }
+                    .onFailure { sender.error("Conditions for $spawnName failed:\n${it.message}") }
             }
         }
     }

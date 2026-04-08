@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.actions
 
 import com.github.shynixn.mccoroutine.bukkit.launch
+import com.mineinabyss.dependencies.get
 import com.mineinabyss.geary.actions.Action
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.Tasks
@@ -22,10 +23,10 @@ class GhostSeekAction(
     private val sortedRadii = radii.entries.sortedBy { it.key }
 
     override fun ActionGroupContext.execute() {
-        val spawner = gearyPaper.features.getScoped<SpreadSpawnRepository>(SpawningFeature) ?: return
+        val spawner = gearyPaper.features.get(SpawningFeature)?.get<SpreadSpawnRepository>() ?: return
         val player = entity?.get<Player>() ?: return
 
-        gearyPaper.plugin.launch {
+        gearyPaper.launch {
             // Represents first radius which contains any skeletons within it
             val greatestRadius = sortedRadii.firstOrNull {
                 spawner.countNearby(player.location, it.key, listOf(type)) > 0

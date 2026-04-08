@@ -68,7 +68,7 @@ class SpreadSpawner(
         return chunkChooser.chooseChunkInBB(boundingBox, config, type)
     }
 
-    private suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? = withContext(gearyPaper.plugin.minecraftDispatcher) {
+    private suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? = withContext(gearyPaper.minecraftDispatcher) {
         posChooser.chooseSpotInChunk(chunkLoc, config)
     }
 

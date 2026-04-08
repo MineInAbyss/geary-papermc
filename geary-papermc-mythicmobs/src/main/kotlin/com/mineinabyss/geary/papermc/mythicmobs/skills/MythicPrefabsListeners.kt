@@ -52,7 +52,7 @@ class MythicPrefabsListeners(
         val mob = skillMetadata.caster as? ActiveMob ?: return
 
         // Run on sync thread
-        gearyPaper.plugin.launch {
+        gearyPaper.launch {
             addPrefabs(mob, "Load")
         }
     }

@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.spawning.conditions
 
+import com.mineinabyss.dependencies.get
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.Condition
 import com.mineinabyss.geary.actions.expressions.Expression
@@ -17,7 +18,7 @@ import kotlinx.serialization.Serializable
 class NearbyCondition(
     val amount: Int,
     val types: Expression<List<String>> = Expression.Variable("spawnTypes"),
-    val radius: Double = gearyPaper.features.getScoped<SpawnConfig>(SpawningFeature)?.range?.defaultNearbyRange ?: 128.0,
+    val radius: Double = gearyPaper.features.get(SpawningFeature)?.get<SpawnConfig>()?.range?.defaultNearbyRange ?: 128.0,
 ) : Condition {
     override fun ActionGroupContext.execute(): Boolean {
         val types = eval(types)

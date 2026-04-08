@@ -1,16 +1,17 @@
 package com.mineinabyss.geary.papermc.plugin
 
-import com.mineinabyss.features.FeatureManager
-import com.mineinabyss.features.feature
+import co.touchlab.kermit.Logger
+import com.mineinabyss.dependencies.*
 import com.mineinabyss.geary.actions.GearyActions
-import com.mineinabyss.geary.autoscan.AutoScanAddon
+import com.mineinabyss.geary.autoscan.autoscan
 import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.*
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
 import com.mineinabyss.geary.papermc.features.entities.MinecraftFeatures
-import com.mineinabyss.geary.papermc.features.items.ItemsFeature
+import com.mineinabyss.geary.papermc.features.items.CustomItemsFeature
 import com.mineinabyss.geary.papermc.features.items.recipes.RecipeFeature
 import com.mineinabyss.geary.papermc.features.prefabs.PrefabsFeature
 import com.mineinabyss.geary.papermc.features.resourcepacks.ResourcepackGeneratorFeature
@@ -19,57 +20,63 @@ import com.mineinabyss.geary.papermc.plugin.commands.DebugFeature
 import com.mineinabyss.geary.papermc.plugin.commands.TestingFeature
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
-import com.mineinabyss.geary.papermc.tracking.entities.EntityTracking
+import com.mineinabyss.geary.papermc.tracking.entities.MCEntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
-import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
+import com.mineinabyss.geary.papermc.tracking.items.MCItemTracking
 import com.mineinabyss.geary.prefabs.Prefabs
-import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.geary.serialization.dsl.withCommonComponentNames
 import com.mineinabyss.geary.serialization.formats.YamlFormat
 import com.mineinabyss.geary.serialization.helpers.withSerialName
+import com.mineinabyss.geary.serialization.serialization
 import com.mineinabyss.geary.uuid.SynchronizedUUID2GearyMap
 import com.mineinabyss.geary.uuid.UUID2GearyMap
 import com.mineinabyss.geary.uuid.UUIDTracking
-import com.mineinabyss.idofront.config.config
 import com.mineinabyss.idofront.features.MainCommand
 import com.mineinabyss.idofront.features.MainCommandFeature
-import com.mineinabyss.idofront.features.bindConfig
+import com.mineinabyss.idofront.features.singleConfig
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.serialization.LocationSerializer
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.bindSingleton
-import org.kodein.di.bindSingletonOf
-import org.kodein.di.instance
-import kotlin.io.path.div
 
-class GearyPluginImpl : GearyPlugin(), DIAware {
-    override val di = DI {
-        bindSingleton<Plugin> { this@GearyPluginImpl }
-        bindConfig<GearyPaperConfig>("config.yml") { default = GearyPaperConfig() }
-        bindSingleton<ComponentLogger> { ComponentLogger.forPlugin(instance(), minSeverity = instance<GearyPaperConfig>().logLevel) }
-        bindSingletonOf(::WorldManager)
-        bindSingleton {
-            MainCommand(names = listOf("geary"), description = null, reloadCommandName = "reload", reloadCommandPermission = "geary.admin.reload")
+class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
+    override val di: DIContext = DI {
+        single<Plugin> { this@GearyPluginImpl }
+        singleConfig<GearyPaperConfig>("config.yml") { default = GearyPaperConfig() }
+        single<ComponentLogger> { ComponentLogger.forPlugin(get(), minSeverity = get<GearyPaperConfig>().logLevel) }.and<Logger>()
+        single { new(::WorldManager) }
+        single {
+            MainCommand(
+                names = listOf("geary"),
+                description = null,
+                reloadCommandName = "reload",
+                reloadCommandPermission = "geary.admin.reload",
+                reloadableFeatures = listOf(
+                    PrefabsFeature,
+                    ResourcepackGeneratorFeature
+                )
+            )
         }
     }
 
-    val config by instance<GearyPaperConfig>()
-    val worldManager by instance<WorldManager>()
+
+    override val config: GearyPaperConfig = get()
+    override val logger: ComponentLogger = get()
+    override val features: DIScope = get()
+    override val worldManager: WorldManager = get<WorldManager>()
+    private val geary = geary(PaperEngineModule(logger, di.get<GearyPaperConfig>()))
+    val globalGeary by geary.getLazy<Geary>()
 
     override fun onLoad() {
-        val globalGeary = geary(PaperEngineModule(config), extendDI = this@GearyPluginImpl.di) {
+        with(geary) {
             // Install default addons
-            install(UUIDTracking.overrideScope {
-                bindSingleton<UUID2GearyMap>(overrides = true) { SynchronizedUUID2GearyMap() }
+            install(UUIDTracking.override {
+                single<UUID2GearyMap>(ignoreOverride = true) { SynchronizedUUID2GearyMap() }
             })
 
-
-            install(SerializableComponents) {
+            serialization {
                 formats.registerFormat("yml", ::YamlFormat)
                 withUUIDSerializer()
                 registerComponentSerializers(
@@ -78,60 +85,47 @@ class GearyPluginImpl : GearyPlugin(), DIAware {
                 withCommonComponentNames()
             }
 
-            install(AutoScanAddon) {
-                scan(classLoader, listOf("com.mineinabyss.geary")) {
+            autoscan {
+                scan(this@GearyPluginImpl.classLoader, listOf("com.mineinabyss.geary")) {
                     components()
                 }
             }
 
             install(Prefabs)
-
-            install(feature("geary-actions-papermc") {
-                dependsOn {
-                    condition { require(instance<GearyPaperConfig>().actions) { "Actions must be enabled in config" } }
-                    features(GearyActions)
-                }
-            })
         }
+
         // Register DI
-        val configModule = object : GearyPaperModule {
-            private val di = globalGeary
-
-            override val plugin = di.instance<Plugin>() as JavaPlugin
-            override val config: GearyPaperConfig = di.instance()
-            override val logger: ComponentLogger = di.instance()
-            override val features: FeatureManager = di.instance()
-            override val worldManager: WorldManager = di.instance()
-        }
         worldManager.setGlobalEngine(globalGeary)
-        //TODO deprecate in favor of koin
-        com.mineinabyss.idofront.di.DI.add<GearyPaperModule>(configModule)
+        GearyPlugin.instance = this
+    }
 
-        val featureManager = globalGeary.instance<FeatureManager>()
-        featureManager.loadAll(
-            EntityTracking,
-            ItemTracking,
+    override fun onEnable() {
+        val geary = worldManager.global
+        // Run init steps registered by other plugins in onLoad. In the future this would be done per-world
+        geary.configure { this@GearyPluginImpl.worldManager.initSteps.forEach { it() } }
+
+
+        di.scope.loadCatching(module("geary-actions-papermc") {
+            require(get<GearyPaperConfig>().actions) { "Actions must be enabled in config" }
+            gearyWorld {
+                world.install(GearyActions)
+            }
+        })
+        di.scope.loadAllCatching(
+            MCEntityTracking,
+            MCItemTracking,
             BlockTracking,
             PrefabsFeature,
             MinecraftFeatures,
             ResourcepackGeneratorFeature,
-            ItemsFeature,
+            CustomItemsFeature,
             RecipeFeature,
             SpawningFeature,
             MythicMobsFeature,
             DebugFeature,
             TestingFeature,
         )
-
-        featureManager.load(MainCommandFeature)
-    }
-
-    override fun onEnable() {
-        val geary = worldManager.global
-        // Run init steps registered by other plugins in onLoad. In the future this would be done per-world
-        geary.configure { worldManager.initSteps.forEach { it() } }
-
-        geary.instance<FeatureManager>().enableAll()
+        di.scope.load(MainCommandFeature)
 
         // Start engine ticking
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, {
@@ -141,7 +135,7 @@ class GearyPluginImpl : GearyPlugin(), DIAware {
 
     override fun onDisable() {
         val geary = worldManager.global
-        geary.instance<FeatureManager>().disableAll()
+        geary.get<DIScope>().close()
         server.worlds.forEach { world ->
             with(world.toGeary()) {
                 world.entities.forEach entities@{ entity ->
@@ -152,5 +146,13 @@ class GearyPluginImpl : GearyPlugin(), DIAware {
             }
         }
         server.scheduler.cancelTasks(this)
+    }
+
+    override fun configure(builder: WorldScoped.() -> Unit): AutoCloseable {
+        return globalGeary.newScope().apply(builder)
+    }
+
+    override fun forEachWorld(builder: Geary.() -> Unit) {
+        builder(globalGeary)
     }
 }

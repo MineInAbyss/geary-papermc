@@ -22,17 +22,17 @@ object UpdateMob {
         val loc = entity.location
         val prefab = gearyEntity.prefabs.first()
 
-        Bukkit.getScheduler().scheduleSyncDelayedTask(gearyPaper.plugin, {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(gearyPaper, {
             entity.remove()
         }, 1)
-        Bukkit.getScheduler().scheduleSyncDelayedTask(gearyPaper.plugin, {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(gearyPaper, {
             loc.spawnFromPrefab(prefab, entity.persistentDataContainer)
                 .getOrThrow()
         }, 10)
     }
 
     fun scheduleRemove(entity: BukkitEntity) {
-        Bukkit.getScheduler().scheduleSyncDelayedTask(gearyPaper.plugin, {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(gearyPaper, {
             entity.remove()
         }, 10)
     }

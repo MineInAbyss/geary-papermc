@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.features.items
 
-import com.mineinabyss.features.feature
+import com.mineinabyss.dependencies.get
+import com.mineinabyss.dependencies.module
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.features.items.food.ReplaceBurnedDropListener
 import com.mineinabyss.geary.papermc.features.items.holdsentity.SpawnHeldPrefabListener
@@ -13,35 +14,28 @@ import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.default
 import com.mineinabyss.idofront.features.listeners
 import com.mineinabyss.idofront.features.mainCommand
-import org.kodein.di.instance
 
-val ItemsFeature = feature("items") {
-    dependsOn {
-        condition { instance<GearyPaperConfig>().items.enabled }
-    }
+val CustomItemsFeature = module("custom-items") {
+    require(get<GearyPaperConfig>().items.enabled) { "Items must be enabled in config" }
 
-    onEnable {
-        listeners(
-            SpawnHeldPrefabListener(),
-            DisableItemInteractionsListener(),
-            ReplaceBurnedDropListener(),
-        )
-    }
-
-    mainCommand {
-        "give" {
-            permission = "geary.items.give"
-            executes.asPlayer().args(
-                "item" to Args.geary.item(),
-                "amount" to Args.integer(min = 1).default { 1 },
-                "other" to Args.otherPlayer(),
-            ) { item, amount, player ->
-                val gearyItems = player.world.toGeary().getAddon(ItemTracking)
-                val key = item.get<PrefabKey>() ?: fail("Could not find item prefab: $item")
-                val item = gearyItems.createItem(key) ?: fail("Failed to create item from $key")
-                item.amount = amount.coerceIn(1, item.maxStackSize)
-                player.inventory.addItem(item)
-            }
+    listeners(
+        SpawnHeldPrefabListener(),
+        DisableItemInteractionsListener(),
+        ReplaceBurnedDropListener(),
+    )
+}.mainCommand {
+    "give" {
+        permission = "geary.items.give"
+        executes.asPlayer().args(
+            "item" to Args.geary.item(),
+            "amount" to Args.integer(min = 1).default { 1 },
+            "other" to Args.otherPlayer(),
+        ) { item, amount, player ->
+            val gearyItems = player.world.toGeary().getAddon(ItemTracking)
+            val key = item.get<PrefabKey>() ?: fail("Could not find item prefab: $item")
+            val item = gearyItems.createItem(key) ?: fail("Failed to create item from $key")
+            item.amount = amount.coerceIn(1, item.maxStackSize)
+            player.inventory.addItem(item)
         }
     }
 }

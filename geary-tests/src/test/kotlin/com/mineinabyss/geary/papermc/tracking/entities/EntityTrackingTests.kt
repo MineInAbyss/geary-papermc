@@ -1,8 +1,8 @@
 package com.mineinabyss.geary.papermc.tracking.entities
 
-import com.mineinabyss.features.FeatureManager
+import com.mineinabyss.dependencies.DI
 import com.mineinabyss.geary.datatypes.GearyEntity
-import com.mineinabyss.geary.modules.GearySetup
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.datastore.decode
 import com.mineinabyss.geary.papermc.helpers.MockedServerTest
 import com.mineinabyss.geary.papermc.helpers.SomeData
@@ -23,15 +23,15 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class EntityTrackingTests : MockedServerTest() {
-    override fun GearySetup.setupGeary() {
+    override fun Geary.setupGeary() {
         serialization {
             withTestSerializers()
         }
-        install(UUIDTracking)
-        install(TestEntityTracking)
+        scope.load(UUIDTracking)
     }
 
-    override fun FeatureManager.setupFeatureManager() {
+    override fun DI.Scope.setupPaper() {
+        load(TestEntityTracking)
     }
 
     @Test

@@ -1,22 +1,15 @@
 package com.mineinabyss.geary.papermc.plugin
 
+import co.touchlab.kermit.Logger
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
-import com.mineinabyss.features.get
+import com.mineinabyss.dependencies.DI
+import com.mineinabyss.dependencies.get
+import com.mineinabyss.dependencies.single
 import com.mineinabyss.geary.engine.archetypes.ArchetypeEngine
 import com.mineinabyss.geary.helpers.async.IgnoringAsyncCatcher
 import com.mineinabyss.geary.modules.ArchetypeEngineModule
-import com.mineinabyss.geary.modules.GearyModule
 import com.mineinabyss.geary.papermc.*
 import kotlinx.coroutines.CoroutineName
-import org.kodein.di.DI
-import org.kodein.di.bindSingleton
-import org.kodein.di.instance
-
-private fun GearyPlugin.paperModule() = DI.Module("geary-papermc") {
-    bindSingleton<ArchetypeEngine>(overrides = true) {
-        PaperMCEngine(get(), get(), instance("engineThread"))
-    }
-}
 
 private fun chooseCatcher(catchType: CatchType) = when (catchType) {
     CatchType.IGNORE -> IgnoringAsyncCatcher()
@@ -24,17 +17,17 @@ private fun chooseCatcher(catchType: CatchType) = when (catchType) {
     CatchType.ERROR -> PaperAsyncCatcher()
 }
 
-fun GearyPlugin.PaperEngineModule(config: GearyPaperConfig): GearyModule {
+fun GearyPlugin.PaperEngineModule(
+    logger: Logger,
+    config: GearyPaperConfig,
+): DI.Module {
     val engine = ArchetypeEngineModule(
-        logger = null,
+        logger = logger,
         useSynchronized = true,
         engineThread = { minecraftDispatcher + CoroutineName("Geary Engine") },
-    )
-    return GearyModule(
-        DI.Module("geary-papermc") {
-            bindSingleton("asyncCatcher.write") { chooseCatcher(config.catch.asyncWrite) }
-            import(engine.module)
-            import(paperModule(), allowOverride = true)
-        },
-    )
+    ).override {
+        single("asyncCatcher.write") { chooseCatcher(config.catch.asyncWrite) }
+        single<ArchetypeEngine>(ignoreOverride = true) { PaperMCEngine(get(), get(), get("engineThread")) }
+    }
+    return engine
 }

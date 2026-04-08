@@ -24,7 +24,7 @@ class PrefabsMechanic(
     override fun castAtEntity(meta: SkillMetadata?, target: AbstractEntity?): SkillResult {
         val bukkit = BukkitAdapter.adapt(target)
         with(bukkit.world.toGeary()) {
-            gearyPaper.plugin.launch {
+            gearyPaper.launch {
                 prefabs.mapNotNull { entityOfOrNull(PrefabKey.of(it)) }
                     .forEach(bukkit.toGeary()::extend)
             }

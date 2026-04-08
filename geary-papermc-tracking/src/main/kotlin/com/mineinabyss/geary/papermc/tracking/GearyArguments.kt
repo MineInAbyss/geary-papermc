@@ -28,7 +28,7 @@ object GearyArgs {
     }
 
     fun namespace() = Args.word().suggests {
-        suggest(gearyPaper.plugin.dataFolder.resolve("prefabs").listFiles()?.filter {
+        suggest(gearyPaper.dataFolder.resolve("prefabs").listFiles()?.filter {
             it.isDirectory && it.name.startsWith(suggestions.remaining.lowercase())
         }?.map { it.name } ?: emptyList())
     }

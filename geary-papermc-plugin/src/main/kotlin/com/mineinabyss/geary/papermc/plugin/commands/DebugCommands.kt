@@ -2,7 +2,7 @@ package com.mineinabyss.geary.papermc.plugin.commands
 
 import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.launch
-import com.mineinabyss.features.feature
+import com.mineinabyss.dependencies.module
 import com.mineinabyss.geary.engine.archetypes.ArchetypeQueryManager
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.Geary
@@ -22,75 +22,73 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.BlockStateMeta
 import org.bukkit.plugin.Plugin
 
-val DebugFeature = feature("debug") {
-    mainCommand {
-        "debug" {
-            permission = "geary.admin.debug"
-            "inventory" {
-                executes.asPlayer {
-                    repeat(64) {
-                        val entities = player.toGeary()
-                            .get<PlayerItemCache<*>>()
-                            ?.getEntities() ?: return@asPlayer
+val DebugFeature = module("debug") { }.mainCommand {
+    "debug" {
+        permission = "geary.admin.debug"
+        "inventory" {
+            executes.asPlayer {
+                repeat(64) {
+                    val entities = player.toGeary()
+                        .get<PlayerItemCache<*>>()
+                        ?.getEntities() ?: return@asPlayer
 
-                        player.info(
-                            entities
-                                .mapIndexedNotNull { slot, entity -> entity?.getAll()?.map { it::class }?.to(slot) }
-                                .joinToString(separator = "\n") { (components, slot) -> "$slot: $components" }
-                        )
-                    }
+                    player.info(
+                        entities
+                            .mapIndexedNotNull { slot, entity -> entity?.getAll()?.map { it::class }?.to(slot) }
+                            .joinToString(separator = "\n") { (components, slot) -> "$slot: $components" }
+                    )
                 }
             }
-            "resourcepack_items" {
-                executes.asPlayer {
-                    val world = player.world.toGeary()
-                    val gearyItems = world.getAddon(ItemTracking)
-                    val items = gearyItems.prefabs.mapNotNull {
-                        world.entityOfOrNull(it.key)?.has<ResourcePackContent>()?.takeIf { it }
-                            ?.let { _ -> gearyItems.itemProvider.serializePrefabToItemStack(it.key) }
-                    }
-                        .chunked(27)
-                    val shulkers = items.map { content ->
-                        ItemStack.of(Material.SHULKER_BOX).editItemMeta<BlockStateMeta> {
-                            blockState = blockState.apply {
-                                (this as ShulkerBox).inventory.addItem(*content.toTypedArray())
-                                this.update()
-                            }
+        }
+        "resourcepack_items" {
+            executes.asPlayer {
+                val world = player.world.toGeary()
+                val gearyItems = world.getAddon(ItemTracking)
+                val items = gearyItems.prefabs.mapNotNull {
+                    world.entityOfOrNull(it.key)?.has<ResourcePackContent>()?.takeIf { it }
+                        ?.let { _ -> gearyItems.itemProvider.serializePrefabToItemStack(it.key) }
+                }
+                    .chunked(27)
+                val shulkers = items.map { content ->
+                    ItemStack.of(Material.SHULKER_BOX).editItemMeta<BlockStateMeta> {
+                        blockState = blockState.apply {
+                            (this as ShulkerBox).inventory.addItem(*content.toTypedArray())
+                            this.update()
                         }
                     }
-                    player.inventory.addItem(*shulkers.toTypedArray())
                 }
+                player.inventory.addItem(*shulkers.toTypedArray())
             }
-            "stats" {
-                executes {
-                    val world = get<Geary>()
-                    val tempEntity = world.entity()
+        }
+        "stats" {
+            executes {
+                val world = get<Geary>()
+                val tempEntity = world.entity()
 
-                    sender.info(
-                        """
+                sender.info(
+                    """
                         |Archetype count: ${get<ArchetypeQueryManager>().archetypeCount}
                         |Next entity ID: ${tempEntity.id}
                         |""".trimMargin()
-                    )
+                )
 
-                    tempEntity.removeEntity()
-                }
+                tempEntity.removeEntity()
             }
-            "async" {
-                "read" {
-                    executes.asPlayer {
-                        val plugin = get<Plugin>()
-                        plugin.launch(plugin.asyncDispatcher) {
-                            player.toGeary().get<PlayerItemCache<*>>()
-                        }
+        }
+        "async" {
+            "read" {
+                executes.asPlayer {
+                    val plugin = get<Plugin>()
+                    plugin.launch(plugin.asyncDispatcher) {
+                        player.toGeary().get<PlayerItemCache<*>>()
                     }
                 }
-                "write" {
-                    executes.asPlayer {
-                        val plugin = get<Plugin>()
-                        plugin.launch(plugin.asyncDispatcher) {
-                            player.toGeary().set(DebugComponent())
-                        }
+            }
+            "write" {
+                executes.asPlayer {
+                    val plugin = get<Plugin>()
+                    plugin.launch(plugin.asyncDispatcher) {
+                        player.toGeary().set(DebugComponent())
                     }
                 }
             }

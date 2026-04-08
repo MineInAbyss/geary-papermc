@@ -1,8 +1,8 @@
 package com.mineinabyss.geary.papermc.tracking.items
 
-import com.mineinabyss.features.FeatureManager
+import com.mineinabyss.dependencies.DI
 import com.mineinabyss.geary.helpers.entity
-import com.mineinabyss.geary.modules.GearySetup
+import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.datastore.decode
 import com.mineinabyss.geary.papermc.datastore.decodePrefabs
 import com.mineinabyss.geary.papermc.datastore.encode
@@ -29,17 +29,18 @@ import org.junit.jupiter.api.Test
 import org.mockbukkit.mockbukkit.inventory.ItemStackMock
 
 class ItemTrackingTest : MockedServerTest() {
-    override fun GearySetup.setupGeary() {
+    override fun Geary.setupGeary() {
         serialization {
             withTestSerializers()
         }
         install(Prefabs)
     }
 
-    override fun FeatureManager.setupFeatureManager() {
+    override fun DI.Scope.setupPaper() {
         load(TestItemTracking)
         load(TestEntityTracking)
     }
+
 
     val prefabKey = PrefabKey.of("test:prefab")
     val prefab = entity {

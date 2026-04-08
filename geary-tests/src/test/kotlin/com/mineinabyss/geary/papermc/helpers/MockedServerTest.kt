@@ -1,17 +1,15 @@
 package com.mineinabyss.geary.papermc.helpers
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent
-import com.mineinabyss.features.FeatureManager
-import com.mineinabyss.features.get
+import com.mineinabyss.dependencies.*
 import com.mineinabyss.geary.modules.Geary
-import com.mineinabyss.geary.modules.GearySetup
 import com.mineinabyss.geary.modules.TestEngineModule
+import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.GearyPaperConfig
-import com.mineinabyss.geary.papermc.GearyPaperModule
+import com.mineinabyss.geary.papermc.GearyPlugin
 import com.mineinabyss.geary.papermc.WorldManager
 import com.mineinabyss.geary.test.GearyTest
-import com.mineinabyss.idofront.di.DI
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.plugin.Services
 import com.mineinabyss.idofront.services.ItemProvider
@@ -26,8 +24,6 @@ import org.bukkit.entity.Pig
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
 import org.junit.jupiter.api.AfterAll
-import org.kodein.di.bindSingleton
-import org.kodein.di.instance
 import org.mockbukkit.mockbukkit.MockBukkit
 import org.mockbukkit.mockbukkit.ServerMock
 import org.mockbukkit.mockbukkit.inventory.ItemStackMock
@@ -57,62 +53,49 @@ abstract class MockedServerTest : GearyTest() {
         EntityAddToWorldEvent(it, mcWorld).callEvent()
     }
 
-    val TestMinecraftModule
-        get() = TestEngineModule.withOverrides {
-            bindSingleton<Plugin> { plugin }
-            bindSingleton<GearyPaperConfig> { GearyPaperConfig() }
-            bindSingleton { ComponentLogger.fallback() }
-            bindSingleton<WorldManager> {
-                WorldManager().apply {
-                    setGlobalEngine(get())
-                }
-            }
-//                includes(module)
-//            bindSingleton<FeatureManager>() {
-//                FeatureManager(org.kodein.di.DI {
-//                    bindSingleton<Geary> { get<Geary>() }
-//                }).apply { setupFeatureManager() }
-//            }
-            onReady {
-                instance<FeatureManager>().setupFeatureManager()
-            }
-//                with(plugin) {
-//                    singleFeatureManager {
-//                        setupFeatureManager()
-//                    }
-//                }
-        }
-
-
     final override fun setupGeary(): Geary {
+        return geary(TestEngineModule).also { it.setupGeary() }
+    }
+
+    init {
+        println("Initializing bukkit mock")
         val server = MockBukkit.mock()
         mcContext = MinecraftContext(
             server,
             MockBukkit.createMockPlugin("Geary"),
             server.addSimpleWorld("world")
         )
-        return geary(TestMinecraftModule) {
-            setupGeary()
-        }
-    }
+        val configModule = object : GearyPlugin, Plugin by MockBukkit.createMockPlugin() {
+            val di = scope {
+                single<Plugin> { this@MockedServerTest.plugin }
+                single<GearyPaperConfig> { GearyPaperConfig() }
+                single { ComponentLogger.fallback() }
+                single<WorldManager> {
+                    WorldManager().apply {
+                        setGlobalEngine(this@MockedServerTest.world)
+                    }
+                }
+            }
+            override val config: GearyPaperConfig = di.get()
+            override val logger: ComponentLogger = di.get()
+            override val features: DIScope = di.get()
+            override fun configure(builder: WorldScoped.() -> Unit): AutoCloseable {
+                return world.newScope().apply(builder)
+            }
 
-    init {
-        val configModule = object : GearyPaperModule {
-            override val plugin = world.instance<Plugin>() as JavaPlugin
-            override val config: GearyPaperConfig = world.instance()
-            override val logger: ComponentLogger = world.instance()
-            override val features: FeatureManager = world.instance()
-            override val worldManager: WorldManager = world.instance()
+            override fun forEachWorld(builder: Geary.() -> Unit) {
+                world.apply(builder)
+            }
+
+            override val worldManager: WorldManager = di.get()
         }
+        GearyPlugin.instance = configModule
         registerItemService()
-        DI.add<GearyPaperModule>(configModule)
-        world.instance<FeatureManager>().enableAll()
+        configModule.di.setupPaper()
     }
 
-    open fun GearySetup.setupGeary() {}
-
-    open fun FeatureManager.setupFeatureManager() {}
-
+    open fun Geary.setupGeary() {}
+    open fun DI.Scope.setupPaper() {}
 
     private fun registerItemService() {
         Services.register<SerializableItemStackService>(plugin, object : SerializableItemStackService {
@@ -129,7 +112,8 @@ abstract class MockedServerTest : GearyTest() {
 
     @AfterAll
     fun clearMocks() {
+        println("Unmocking bukkit")
         MockBukkit.unmock()
-        DI.clear()
+        GearyPlugin.instance = null
     }
 }

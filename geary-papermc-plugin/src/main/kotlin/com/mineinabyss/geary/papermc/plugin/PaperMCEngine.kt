@@ -12,5 +12,5 @@ class PaperMCEngine(
     pipeline: Pipeline,
     coroutineContext: () -> CoroutineContext,
 ) : ArchetypeEngine(pipeline, logger, tickDuration = 1.ticks, coroutineContext) {
-    private val plugin get() = gearyPaper.plugin
+    private val plugin get() = gearyPaper
 }

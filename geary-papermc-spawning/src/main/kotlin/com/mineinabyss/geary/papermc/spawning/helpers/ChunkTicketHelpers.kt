@@ -9,10 +9,10 @@ import org.bukkit.Chunk
  * Adds a plugin ticket to this chunk, ensuring it doesn't unload until [block] completes.
  */
 inline fun <T> Chunk.withTicket(block: (Chunk) -> T): T = try {
-    addPluginChunkTicket(gearyPaper.plugin)
+    addPluginChunkTicket(gearyPaper)
     block(this)
 } finally {
-    removePluginChunkTicket(gearyPaper.plugin)
+    removePluginChunkTicket(gearyPaper)
 }
 
 /**
@@ -21,14 +21,14 @@ inline fun <T> Chunk.withTicket(block: (Chunk) -> T): T = try {
  */
 suspend inline fun <T> Chunk.launchWithTicket(crossinline block: suspend (Chunk) -> T): Deferred<T> {
     val deferred = CompletableDeferred<T>()
-//    gearyPaper.plugin.launch {
+//    gearyPaper.launch {
     try {
-        addPluginChunkTicket(gearyPaper.plugin)
+        addPluginChunkTicket(gearyPaper)
         deferred.complete(block(this@launchWithTicket))
     } catch (e: Exception) {
         deferred.completeExceptionally(e)
     } finally {
-        removePluginChunkTicket(gearyPaper.plugin)
+        removePluginChunkTicket(gearyPaper)
     }
 //    }
     return deferred

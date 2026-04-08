@@ -5,8 +5,10 @@ import com.mineinabyss.geary.papermc.tracking.entities.helpers.spawnFromPrefab
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.IdoCommand
+import com.mineinabyss.idofront.features.DICommandContext
 import com.mineinabyss.idofront.messaging.error
 
+context(context: DICommandContext)
 internal fun IdoCommand.mobs() = ("mobs" / "m") {
     permission = "geary.mobs"
     ("spawn" / "s") {

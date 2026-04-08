@@ -49,6 +49,5 @@ include(
 //    "schema-generator"
 )
 
-includeBuild("../Idofront")
 includeBuild("../geary")
 includeBuild("../sqlite-kt")

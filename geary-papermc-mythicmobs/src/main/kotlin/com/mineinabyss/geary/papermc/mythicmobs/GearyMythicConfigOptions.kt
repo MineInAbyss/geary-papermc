@@ -20,7 +20,7 @@ object GearyMythicConfigOptions {
         val bukkit = BukkitAdapter.adapt(entity)
         with(bukkit.world.toGeary()) {
             val gearyMob = bukkit.toGeary()
-            gearyPaper.plugin.launch {
+            gearyPaper.launch {
                 prefabs.mapNotNull { entityOfOrNull(it) }
                     .forEach(gearyMob::extend)
             }

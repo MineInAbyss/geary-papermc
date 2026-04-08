@@ -1,21 +1,23 @@
 package com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype
 
+import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.MobTypeConversion
-import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.entities.components.SetEntityType
 import com.mineinabyss.geary.papermc.tracking.entities.events.GearyEntityAddToWorldEvent
 import com.mineinabyss.idofront.nms.aliases.toNMS
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
-class ConvertEntityTypesListener() : Listener {
+class ConvertEntityTypesListener(
+    private val config: GearyPaperConfig,
+) : Listener {
     @EventHandler
     fun GearyEntityAddToWorldEvent.onAdd() {
-        if (gearyPaper.config.mobTypeConversion == MobTypeConversion.IGNORE) return
+        if (config.mobTypeConversion == MobTypeConversion.IGNORE) return
         val type = gearyEntity.get<SetEntityType>() ?: return
         if(entity.toNMS().type == type.entityTypeFromRegistry) return
 
-        when (gearyPaper.config.mobTypeConversion) {
+        when (config.mobTypeConversion) {
             MobTypeConversion.MIGRATE -> {
                 UpdateMob.scheduleRecreation(entity, gearyEntity)
             }

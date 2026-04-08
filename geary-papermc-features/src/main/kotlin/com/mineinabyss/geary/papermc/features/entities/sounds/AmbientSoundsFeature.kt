@@ -1,15 +1,13 @@
 package com.mineinabyss.geary.papermc.features.entities.sounds
 
-import com.mineinabyss.features.feature
-import com.mineinabyss.geary.addons.world
+import com.mineinabyss.dependencies.module
+import com.mineinabyss.geary.papermc.gearyWorld
 import com.mineinabyss.idofront.features.listeners
 
-val AmbientSoundsFeature = feature("ambient-sounds") {
-    onEnable {
-        world {
-            playAmbientSounds()
-            silenceVanillaSounds()
-        }
-        listeners(OverrideMobSoundsListener())
+val AmbientSoundsFeature = module("ambient-sounds") {
+    gearyWorld {
+        playAmbientSounds()
+        silenceVanillaSounds()
     }
+    listeners(OverrideMobSoundsListener())
 }
