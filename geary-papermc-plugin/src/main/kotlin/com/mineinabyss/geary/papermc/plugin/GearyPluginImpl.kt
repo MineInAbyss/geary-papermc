@@ -19,6 +19,7 @@ import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsFeature
 import com.mineinabyss.geary.papermc.plugin.commands.DebugFeature
 import com.mineinabyss.geary.papermc.plugin.commands.TestingFeature
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
+import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.SpawningWorldGuardFlags
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
 import com.mineinabyss.geary.papermc.tracking.entities.MCEntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
@@ -36,6 +37,7 @@ import com.mineinabyss.idofront.features.MainCommandFeature
 import com.mineinabyss.idofront.features.singleConfig
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.serialization.LocationSerializer
+import com.sk89q.worldguard.WorldGuard
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.plugin.Plugin
@@ -56,7 +58,8 @@ class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
                 reloadableFeatures = listOf(
                     PrefabsFeature,
                     ResourcepackGeneratorFeature,
-                    RecipeFeature
+                    RecipeFeature,
+                    SpawningFeature
                 )
             )
         }
@@ -98,6 +101,15 @@ class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
         // Register DI
         worldManager.setGlobalEngine(globalGeary)
         GearyPlugin.instance = this
+
+        // Register WorldGuard flags (must be done in onLoad)
+        runCatching {
+            val registry = WorldGuard.getInstance().flagRegistry
+            registry.register(SpawningWorldGuardFlags.OVERRIDE_LOWER_PRIORITY_SPAWNS)
+        }.onFailure {
+            get<ComponentLogger>().w { "Failed to register WorldGuard flags for Geary spawning" }
+            it.printStackTrace()
+        }
     }
 
     override fun onEnable() {

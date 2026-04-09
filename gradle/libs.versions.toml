@@ -1,6 +1,6 @@
 [versions]
 geary = "0.29.0-dev.0"
-sqlite-kt = "0.0.3-alpha.3"
+sqlite-kt = "0.0.3-alpha.4"
 [libraries]
 geary-core = { module = "com.mineinabyss:geary-core", version.ref = "geary" }
 geary-actions = { module = "com.mineinabyss:geary-actions", version.ref = "geary" }

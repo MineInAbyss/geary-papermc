@@ -7,13 +7,11 @@ import com.mineinabyss.dependencies.get
 import com.mineinabyss.dependencies.module
 import com.mineinabyss.dependencies.new
 import com.mineinabyss.dependencies.single
-import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.data.SpawnsDatabase
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.choosing.*
 import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
-import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.SpawningWorldGuardFlags
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpawning
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
@@ -31,14 +29,11 @@ import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.suggests
 import com.mineinabyss.idofront.features.*
-import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.success
-import com.sk89q.worldguard.WorldGuard
 import kotlinx.serialization.json.Json
 import me.dvyy.sqlite.Database
 import org.bukkit.Bukkit
-import org.bukkit.World
 import org.bukkit.plugin.Plugin
 import kotlin.io.path.Path
 
@@ -46,16 +41,11 @@ val SpawningFeature = module("spawning") {
     requirePlugins("WorldGuard", "MythicMobs")
     require(get<GearyPaperConfig>().spawning) { "Spawning must be enabled in config" }
 
+    // -- Configs --
     val spawning by singleConfig<SpawnConfig>("spawning.yml") { default = SpawnConfig() }
     val spreadConfig by singleConfig<SpreadEntityTypesConfig>("spread_config.yml") {
-        withSerializersModule(get<Geary>().getAddon(SerializableComponents).formats.module)
+        withSerializersModule(gearyPaper.worldManager.global.getAddon(SerializableComponents).formats.module)
         default = SpreadEntityTypesConfig()
-    }
-    single { new(::SpawnsDatabase) }
-    val spawnDB by single<Database> {
-        get<Plugin>().sqliteDatabase(Path("spawns.db")) {
-            get<SpawnsDatabase>().create()
-        }
     }
     single {
         Json {
@@ -71,9 +61,19 @@ val SpawningFeature = module("spawning") {
             )
         )
     }
-    single { Bukkit.getWorld(get<SpreadEntityTypesConfig>().worldName) ?: error("Spawn config main world not found!") }
+    single { Bukkit.getWorld(spreadConfig.worldName) ?: error("Spawn config main world not found!") }
+
+    // -- Configure database --
+    val spawnDAO by single { new(::SpawnsDatabase) }
+    val spawnDB by single<Database> {
+        get<Plugin>().sqliteDatabase(Path("spawns.db")) {
+            spawnDAO.create()
+        }
+    }
+    single { spawnDAO.spawnQueries }
+    single { new(::SpreadSpawnRepository) }
+
     // -- Regular spawning logic --
-    val mainWorld by single<World> { Bukkit.getWorld(spreadConfig.worldName) ?: error("World ${spreadConfig.worldName} not found, cannot initialize spread spawning") }
     single { new(::SpawnEntryReader) }
     single { new(::WorldGuardSpawning) }
     single { new(::MobCaps) }
@@ -98,15 +98,6 @@ val SpawningFeature = module("spawning") {
     val listSpawnListener by single { new(::ListSpawnListener) }
     val spreadDeathListener by single { new(::SpreadEntityDeathListener) }
 
-    onServerStartup {
-        runCatching {
-            val registry = WorldGuard.getInstance().flagRegistry
-            registry.register(SpawningWorldGuardFlags.OVERRIDE_LOWER_PRIORITY_SPAWNS)
-        }.onFailure {
-            get<ComponentLogger>().w { "Failed to register WorldGuard flags for Geary spawning" }
-            it.printStackTrace()
-        }
-    }
     listeners(
         spawnTypeListener,
         mythicSpawnListener,

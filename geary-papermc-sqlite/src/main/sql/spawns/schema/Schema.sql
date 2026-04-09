@@ -1,4 +1,4 @@
-CREATE VIRTUAL TABLE spawn_rtree USING rtree_i32
+CREATE VIRTUAL TABLE IF NOT EXISTS spawn_rtree USING rtree_i32
 (
     id,
     minX,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS spawn_data
     data BLOB NOT NULL
 ) STRICT;
 
-CREATE TABLE spawn_categories
+CREATE TABLE IF NOT EXISTS spawn_categories
 (
     id   INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL
