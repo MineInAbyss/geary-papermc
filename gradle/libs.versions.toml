@@ -1,6 +1,6 @@
 [versions]
-geary = "0.27.1-dev.9"
-
+geary = "0.29.0-dev.0"
+sqlite-kt = "0.0.3-alpha.3"
 [libraries]
 geary-core = { module = "com.mineinabyss:geary-core", version.ref = "geary" }
 geary-actions = { module = "com.mineinabyss:geary-actions", version.ref = "geary" }
@@ -10,4 +10,7 @@ geary-serialization = { module = "com.mineinabyss:geary-serialization", version.
 geary-uuid = { module = "com.mineinabyss:geary-uuid", version.ref = "geary" }
 geary-test = { module = "com.mineinabyss:geary-test", version.ref = "geary" }
 bytebuddy = "net.bytebuddy:byte-buddy:1.18.2"
-sqlite-kt = "me.dvyy:sqlite-kt:0.0.3-alpha.1"
+sqlite-kt = { module = "me.dvyy.sqlite:sqlite-kt", version.ref = "sqlite-kt" }
+
+[plugins]
+sqlite-kt = { id = "me.dvyy.sqlite.codegen", version.ref = "sqlite-kt" }

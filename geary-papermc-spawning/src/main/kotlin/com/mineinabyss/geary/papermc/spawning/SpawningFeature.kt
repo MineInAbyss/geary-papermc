@@ -9,7 +9,7 @@ import com.mineinabyss.dependencies.new
 import com.mineinabyss.dependencies.single
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.GearyPaperConfig
-import com.mineinabyss.geary.papermc.data.SpawnsQueries
+import com.mineinabyss.geary.papermc.data.SpawnsDatabase
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.choosing.*
 import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
@@ -50,10 +50,10 @@ val SpawningFeature = module("spawning") {
         withSerializersModule(get<Geary>().getAddon(SerializableComponents).formats.module)
         default = SpreadEntityTypesConfig()
     }
-    single { new(::SpawnsQueries) }
+    single { new(::SpawnsDatabase) }
     val spawnDB by single<Database> {
         get<Plugin>().sqliteDatabase(Path("spawns.db")) {
-            get<SpawnsQueries>().create()
+            get<SpawnsDatabase>().create()
         }
     }
     single {

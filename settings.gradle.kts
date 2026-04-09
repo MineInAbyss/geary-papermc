@@ -10,7 +10,6 @@ pluginManagement {
         google()
         mavenLocal()
     }
-    includeBuild("../sqlite-kt")
 }
 
 dependencyResolutionManagement {
@@ -48,6 +47,3 @@ include(
     "geary-tests",
 //    "schema-generator"
 )
-
-includeBuild("../geary")
-includeBuild("../sqlite-kt")
