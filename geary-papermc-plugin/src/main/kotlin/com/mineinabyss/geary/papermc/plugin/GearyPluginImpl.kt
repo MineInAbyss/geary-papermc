@@ -55,7 +55,8 @@ class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
                 reloadCommandPermission = "geary.admin.reload",
                 reloadableFeatures = listOf(
                     PrefabsFeature,
-                    ResourcepackGeneratorFeature
+                    ResourcepackGeneratorFeature,
+                    RecipeFeature
                 )
             )
         }

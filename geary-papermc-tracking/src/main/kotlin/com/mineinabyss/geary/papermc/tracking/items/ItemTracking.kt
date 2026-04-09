@@ -16,7 +16,7 @@ import com.mineinabyss.idofront.plugin.Services
 import com.mineinabyss.idofront.services.SerializableItemStackService
 import org.bukkit.entity.Player
 
-val MCItemTracking = module("item-tracking") {
+val MCItemTracking = module("minecraft-item-tracking") {
     require(get<GearyPaperConfig>().items.enabled) { "Item tracking must be enabled in config" }
 
     gearyWorld {

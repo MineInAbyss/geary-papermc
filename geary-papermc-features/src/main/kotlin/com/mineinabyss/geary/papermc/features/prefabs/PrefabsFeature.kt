@@ -30,7 +30,7 @@ import java.nio.file.Path
 import kotlin.io.path.*
 
 //TODO move geary.configure definition into here as well
-val PrefabsFeature = module("prefab-files") {
+val PrefabsFeature = module("prefabs") {
     require(get<GearyPaperConfig>().loading.prefabs) { "Prefabs must be enabled in config" }
     val plugin = get<Plugin>()
 

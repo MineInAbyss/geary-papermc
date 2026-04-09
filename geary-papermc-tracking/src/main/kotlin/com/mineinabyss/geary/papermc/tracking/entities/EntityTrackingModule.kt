@@ -36,7 +36,7 @@ data class EntityTrackingModule(
     val queries: EntityTrackingQueries,
 )
 
-val EntityTracking = gearyAddon("entity-tracking") {
+val EntityTracking = gearyAddon("minecraft-entity-tracking") {
     single { new(::GearyMobPrefabQuery) }
     single { new(::EntityTrackingQueries) }
     single { BukkitEntity2Geary(get<GearyPaperConfig>().catch.asyncEntityConversion == CatchType.ERROR, get(), get()) }
