@@ -45,7 +45,7 @@ import org.bukkit.plugin.java.JavaPlugin
 
 class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
     override val di: DIContext = DI {
-        single<Plugin> { this@GearyPluginImpl }
+        single<GearyPlugin> { this@GearyPluginImpl }.and<Plugin>()
         singleConfig<GearyPaperConfig>("config.yml") { default = GearyPaperConfig() }
         single<ComponentLogger> { ComponentLogger.forPlugin(get(), minSeverity = get<GearyPaperConfig>().logLevel) }.and<Logger>()
         single { new(::WorldManager) }

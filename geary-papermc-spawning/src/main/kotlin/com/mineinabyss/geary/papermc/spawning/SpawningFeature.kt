@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.spawning
 
+import co.touchlab.kermit.Logger
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.github.shynixn.mccoroutine.bukkit.launch
@@ -83,7 +84,7 @@ val SpawningFeature = module("spawning") {
     single { new(::SpawnLocationChooser) }
 
     // -- Spread Spawn logic --
-    single { new(::SpawningContext) }
+    val context by single { new(::SpawningContext) }
     single { new(::InChunkLocationChooser) }
     single { new(::SpreadChunkChooser) }
     single { new(::SpreadSpawner) }
@@ -98,6 +99,8 @@ val SpawningFeature = module("spawning") {
     val listSpawnListener by single { new(::ListSpawnListener) }
     val spreadDeathListener by single { new(::SpreadEntityDeathListener) }
 
+    val logger = get<Logger>()
+    logger.i { "Loaded ${context.spawns.size} normal spawn types and ${spreadConfig.types.size} spread spawn types" }
     listeners(
         spawnTypeListener,
         mythicSpawnListener,

@@ -1,9 +1,9 @@
 package com.mineinabyss.geary.papermc.spawning.config
 
 import com.charleskorn.kaml.Yaml
-import com.mineinabyss.geary.papermc.EntryWithNode
-import com.mineinabyss.geary.papermc.MultiEntryYamlReader
 import com.mineinabyss.geary.papermc.spawning.spawn_types.SpawnType
+import com.mineinabyss.idofront.config.ConfigEntryWithKey
+import com.mineinabyss.idofront.config.config
 import org.bukkit.plugin.Plugin
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.div
@@ -12,10 +12,12 @@ class SpawnEntryReader(
     private val plugin: Plugin,
     private val yamlFormat: Yaml,
 ) {
-    private val reader = MultiEntryYamlReader(SpawnEntry.serializer(), yamlFormat)
+    private val reader = config<SpawnEntry> {
+        format = yamlFormat
+    }.multiEntry((plugin.dataPath / "spawns").createParentDirectories())
 
-    fun readSpawnEntries(): Map<String, EntryWithNode<SpawnEntry>> {
-        return reader.decodeRecursive((plugin.dataPath / "spawns").createParentDirectories())
-            .filterValues { it.entry.type != SpawnType.None }
+    fun readSpawnEntries(): List<ConfigEntryWithKey<SpawnEntry>> {
+        return reader.read()
+            .filter { it.entry.type != SpawnType.None }
     }
 }

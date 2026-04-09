@@ -11,7 +11,7 @@ class WorldGuardSpawning(
     context: SpawningContext,
 ) {
     val regionToSpawns: Map<String, List<SpawnEntry>> = context.spawns
-        .map { it.value.entry }
+        .map { it.entry }
         .flatMap { spawnEntry -> spawnEntry.regions.map { region -> region to spawnEntry } }
         .groupBy({ it.first }, { it.second })
 

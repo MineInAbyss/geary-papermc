@@ -7,7 +7,6 @@ import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawnLocation
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawnRepository
-import com.mineinabyss.geary.papermc.spawning.tasks.SpreadSpawnTask
 import com.mineinabyss.idofront.textcomponents.miniMsg
 import kotlinx.serialization.json.Json
 import me.dvyy.sqlite.Database
@@ -18,7 +17,6 @@ import org.bukkit.entity.Player
 
 class SpawningContext(
     val reader: SpawnEntryReader,
-    val spreadSpawnTask: SpreadSpawnTask,
     val database: Database,
     val spawnsLocs: SpreadSpawnRepository,
     val plugin: GearyPlugin,
@@ -26,7 +24,7 @@ class SpawningContext(
     val logger: Logger,
 ) {
     val spawns = reader.readSpawnEntries()
-    val spawnEntriesByName: Map<String, SpawnEntry> = spawns.mapValues { it.value.entry }
+    val spawnEntriesByName: Map<String, SpawnEntry> = spawns.associate { it.key to it.entry }
 
     fun sendTpButton(player: Player, spawnLocation: SpreadSpawnLocation) {
         val loc = spawnLocation.location

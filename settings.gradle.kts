@@ -47,3 +47,5 @@ include(
     "geary-tests",
 //    "schema-generator"
 )
+
+includeBuild("../features")

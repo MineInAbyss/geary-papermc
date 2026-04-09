@@ -6,7 +6,10 @@ import com.mineinabyss.geary.components.relations.InstanceOf
 import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.helpers.parent
 import com.mineinabyss.geary.modules.findEntities
-import com.mineinabyss.geary.papermc.*
+import com.mineinabyss.geary.papermc.GearyPaperConfig
+import com.mineinabyss.geary.papermc.WorldManager
+import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.gearyWorld
 import com.mineinabyss.geary.papermc.tracking.GearyArgs
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.UpdateMob
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
@@ -66,7 +69,7 @@ val PrefabsFeature = module("prefabs") {
         }
         "reload" {
             executes.args("prefab" to GearyArgs.prefab()) { prefab ->
-                get<GearyPlugin>().forEachWorld {
+                gearyPaper.forEachWorld {
                     runCatching { getAddon(Prefabs).loader.reload(prefab) }
                         .onSuccess { sender.success("Reread prefab $prefab") }
                         .onFailure { sender.error("Failed to reread prefab $prefab:\n${it.message}") }
@@ -108,7 +111,7 @@ val PrefabsFeature = module("prefabs") {
 //                    .toList()
                 }
             ) { namespace, path ->
-                get<GearyPlugin>().forEachWorld {
+                gearyPaper.forEachWorld {
                     val prefabs = getAddon(Prefabs)
                     // Ensure not already registered
                     if (prefabs[PrefabKey.of(namespace, Path(path).nameWithoutExtension)] != null) {
