@@ -38,6 +38,7 @@ import com.sk89q.worldguard.WorldGuard
 import kotlinx.serialization.json.Json
 import me.dvyy.sqlite.Database
 import org.bukkit.Bukkit
+import org.bukkit.World
 import org.bukkit.plugin.Plugin
 import kotlin.io.path.Path
 
@@ -72,6 +73,7 @@ val SpawningFeature = module("spawning") {
     }
     single { Bukkit.getWorld(get<SpreadEntityTypesConfig>().worldName) ?: error("Spawn config main world not found!") }
     // -- Regular spawning logic --
+    val mainWorld by single<World> { Bukkit.getWorld(spreadConfig.worldName) ?: error("World ${spreadConfig.worldName} not found, cannot initialize spread spawning") }
     single { new(::SpawnEntryReader) }
     single { new(::WorldGuardSpawning) }
     single { new(::MobCaps) }
@@ -88,6 +90,7 @@ val SpawningFeature = module("spawning") {
 
     single { new(::SpawnTask) }
     single { new(::SpreadSpawnTask) }
+
 
     // -- Listeners --
     val spawnTypeListener by single { new(::GearySpawnTypeListener) }

@@ -75,10 +75,10 @@ fun getClosestEntity(player: Player, radius: Double): Entity? {
 class ShulkerBulletHitListener : Listener {
     @EventHandler
     fun ProjectileHitEvent.onProjectileHit() {
-        this.isCancelled = true;
         val data = (entity as? ShulkerBullet)?.toGearyOrNull()?.get<ShulkerBulletData>() ?: return
-
         val hitEntity = hitEntity as? LivingEntity ?: return
+        this.isCancelled = true;
+
         hitEntity.damage(data.damage, data.owner)
         hitEntity.removePotionEffect(PotionEffectType.LEVITATION)
         data.effects.forEach(hitEntity::addPotionEffect)
