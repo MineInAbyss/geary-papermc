@@ -5,7 +5,6 @@ import com.mineinabyss.geary.datatypes.GearyComponent
 import com.mineinabyss.geary.datatypes.GearyEntityType
 import com.mineinabyss.geary.datatypes.toRelation
 import com.mineinabyss.geary.helpers.componentId
-import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.modules.relationOf
 import com.mineinabyss.geary.papermc.datastore.PaperDatastore.COMPONENTS_KEY
@@ -24,18 +23,18 @@ import org.bukkit.persistence.PersistentDataType
 import org.bukkit.persistence.PersistentDataType.BYTE_ARRAY
 
 @PublishedApi
-internal val Geary.serializers get() = getAddon(SerializableComponents).serializers
+internal val WorldScoped.serializers get() = getAddon(SerializableComponents).serializers
 
 @PublishedApi
-internal val Geary.formats get() = getAddon(SerializableComponents).formats
+internal val WorldScoped.formats get() = getAddon(SerializableComponents).formats
 
 /** Returns whether this [PersistentDataContainer] has a component [T] encoded in it. */
-context(world: Geary)
+context(world: WorldScoped)
 inline fun <reified T : GearyComponent> PersistentDataContainer.has(): Boolean {
     return has(world.serializers.getNamespacedKeyFor<T>() ?: return false, BYTE_ARRAY)
 }
 
-context(world: Geary)
+context(world: WorldScoped)
 inline fun <reified T : GearyComponent> PersistentDataContainer.remove() {
     return remove(world.serializers.getNamespacedKeyFor<T>() ?: return)
 }

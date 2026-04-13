@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.entities
 
 import com.mineinabyss.geary.datatypes.GearyEntity
-import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.papermc.withGeary
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import org.bukkit.entity.Entity
@@ -16,7 +16,7 @@ fun BukkitEntity.toGearyOrNull(): GearyEntity? =
 fun GearyEntity.toBukkit(): BukkitEntity? =
     with(world) { get(getAddon(EntityTracking).bukkitEntityComponent) as? BukkitEntity }
 
-context(world: Geary)
+context(world: WorldScoped)
 @JvmName("toBukkitAndCast")
 inline fun <reified T : Entity> GearyEntity.toBukkit(): T? =
     get(world.getAddon(EntityTracking).bukkitEntityComponent) as? T
