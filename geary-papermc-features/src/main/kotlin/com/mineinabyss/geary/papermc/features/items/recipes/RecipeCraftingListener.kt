@@ -23,7 +23,7 @@ class RecipeCraftingListener : Listener {
      * when they have a [DenyInVanillaRecipes] component, by setting result to null.
      */
     @EventHandler(priority = EventPriority.HIGHEST)
-    fun PrepareItemCraftEvent.onCraftWithCustomItem() = with((inventory.holder as Player).world.toGeary()) {
+    fun PrepareItemCraftEvent.onCraftWithCustomItem(): Unit = with((inventory.holder as Player).world.toGeary()) {
         // Ensure this only cancels vanilla recipes
         if (recipe == null || (recipe as? Keyed)?.key()?.namespace() != "minecraft") return
 
@@ -36,7 +36,7 @@ class RecipeCraftingListener : Listener {
     }
 
     @EventHandler
-    fun PrepareSmithingEvent.onCustomSmithingTransform() = with((inventory.viewers.first() as Player).world.toGeary()) {
+    fun PrepareSmithingEvent.onCustomSmithingTransform(): Unit = with((inventory.viewers.first() as Player).world.toGeary()) {
         // Smithing will cache the last recipe, so even with 0 input
         // recipe will return as not null if say a Diamond Hoe was put in before
         if (inventory.contents.any { it?.isEmpty != false }) return

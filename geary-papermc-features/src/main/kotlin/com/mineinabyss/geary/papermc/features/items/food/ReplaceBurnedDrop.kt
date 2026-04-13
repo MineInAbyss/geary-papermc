@@ -19,7 +19,7 @@ value class ReplaceBurnedDrop(
 
 class ReplaceBurnedDropListener : Listener {
     @EventHandler
-    fun EntityDeathEvent.replaceBurnedDrops() = entity.withGeary {
+    fun EntityDeathEvent.replaceBurnedDrops(): Unit = entity.withGeary {
         if (entity.fireTicks == 0) return
 
         itemEntityContext {
