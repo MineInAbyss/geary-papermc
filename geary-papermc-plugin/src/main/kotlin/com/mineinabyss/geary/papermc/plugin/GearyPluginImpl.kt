@@ -32,6 +32,7 @@ import com.mineinabyss.geary.serialization.serialization
 import com.mineinabyss.geary.uuid.SynchronizedUUID2GearyMap
 import com.mineinabyss.geary.uuid.UUID2GearyMap
 import com.mineinabyss.geary.uuid.UUIDTracking
+import com.mineinabyss.idofront.config.SingleConfig
 import com.mineinabyss.idofront.features.MainCommand
 import com.mineinabyss.idofront.features.MainCommandFeature
 import com.mineinabyss.idofront.features.singleConfig
@@ -60,7 +61,11 @@ class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
                     ResourcepackGeneratorFeature,
                     RecipeFeature,
                     SpawningFeature
-                )
+                ),
+                onBeforeReload = {
+                    // Reload config
+                    get<SingleConfig<GearyPaperConfig>>().updateCached()
+                }
             )
         }
     }
