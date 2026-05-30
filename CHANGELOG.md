@@ -5,7 +5,7 @@ All notable changes to this project between Minecraft versions will be documente
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). We currently do not follow semver while
 MAJOR is set to zero.
 
-## [Unreleased]
+## [0.34.0] - 2026-05-30
 
 ### Added
 

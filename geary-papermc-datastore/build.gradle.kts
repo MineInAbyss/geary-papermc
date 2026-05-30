@@ -1,8 +1,8 @@
 plugins {
-    id(idofrontLibs.plugins.mia.kotlin.jvm.get().pluginId)
-    id(idofrontLibs.plugins.mia.papermc.get().pluginId)
-    id(idofrontLibs.plugins.mia.publication.get().pluginId)
-    alias(idofrontLibs.plugins.kotlinx.serialization)
+    id(miaLibs.plugins.mia.kotlin.jvm.get().pluginId)
+    id(miaLibs.plugins.mia.papermc.get().pluginId)
+    id(miaLibs.plugins.mia.publication.get().pluginId)
+    alias(miaLibs.plugins.kotlinx.serialization)
 }
 
 dependencies {
@@ -10,6 +10,6 @@ dependencies {
     api(libs.geary.prefabs)
     api(libs.geary.serialization)
 
-    compileOnly(idofrontLibs.kotlinx.serialization.json)
-    compileOnly(idofrontLibs.kotlinx.serialization.cbor)
+    compileOnly(miaLibs.kotlinx.serialization.json)
+    compileOnly(miaLibs.kotlinx.serialization.cbor)
 }

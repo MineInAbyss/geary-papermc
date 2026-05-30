@@ -1,7 +1,7 @@
 plugins {
-    id(idofrontLibs.plugins.mia.kotlin.jvm.get().pluginId)
-    id(idofrontLibs.plugins.mia.testing.get().pluginId)
-    alias(idofrontLibs.plugins.kotlinx.serialization)
+    id(miaLibs.plugins.mia.kotlin.jvm.get().pluginId)
+    id(miaLibs.plugins.mia.testing.get().pluginId)
+    alias(miaLibs.plugins.kotlinx.serialization)
 }
 
 repositories {
@@ -13,13 +13,13 @@ dependencies {
     implementation(project(":"))
 
     testImplementation(libs.geary.test)
-    testImplementation(idofrontLibs.idofront.features)
-    testImplementation(idofrontLibs.idofront.serializers)
-    testImplementation(idofrontLibs.idofront.services)
-    testImplementation(idofrontLibs.minecraft.mccoroutine.core)
-    testImplementation(idofrontLibs.minecraft.mockbukkit)
-    testImplementation(idofrontLibs.minecraft.papermc)
-    testImplementation(idofrontLibs.logback.classic)
-    testImplementation(idofrontLibs.kotlinx.serialization.kaml)
+    testImplementation(miaLibs.idofront.di)
+    testImplementation(miaLibs.idofront.serializers)
+    testImplementation(miaLibs.idofront.services)
+    testImplementation(miaLibs.minecraft.mccoroutine.core)
+    testImplementation(miaLibs.minecraft.mockbukkit)
+    testImplementation(miaLibs.minecraft.papermc)
+    testImplementation(miaLibs.logback.classic)
+    testImplementation(miaLibs.kotlinx.serialization.kaml)
     testImplementation(libs.bytebuddy)
 }
