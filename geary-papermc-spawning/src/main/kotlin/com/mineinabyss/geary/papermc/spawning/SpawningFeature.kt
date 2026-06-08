@@ -14,11 +14,7 @@ import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.choosing.*
 import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpawning
-import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
-import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
-import com.mineinabyss.geary.papermc.spawning.config.SpawnLocationsConfig
-import com.mineinabyss.geary.papermc.spawning.config.SpawnLocationsUnified
-import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
+import com.mineinabyss.geary.papermc.spawning.config.*
 import com.mineinabyss.geary.papermc.spawning.listeners.ListSpawnListener
 import com.mineinabyss.geary.papermc.spawning.listeners.SpreadEntityDeathListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
@@ -35,6 +31,8 @@ import com.mineinabyss.idofront.config.config
 import com.mineinabyss.idofront.features.*
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.success
+import com.mineinabyss.idofront.time.ticks
+import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import me.dvyy.sqlite.Database
 import org.bukkit.Bukkit
@@ -114,9 +112,6 @@ val SpawningFeature = module("spawning") {
     val mythicSpawnListener by single { new(::MythicSpawnTypeListener) }
     val listSpawnListener by single { new(::ListSpawnListener) }
     val spreadDeathListener by single { new(::SpreadEntityDeathListener) }
-
-    val logger = get<Logger>()
-    logger.i { "Loaded ${context.spawns.size} normal spawn types and ${spreadConfig.types.size} spread spawn types" }
     listeners(
         spawnTypeListener,
         mythicSpawnListener,
@@ -128,6 +123,14 @@ val SpawningFeature = module("spawning") {
     task(get<SpawnTask>().job)
     task(get<SpreadSpawnTask>().job)
 
+
+    val logger = get<Logger>()
+
+    plugin.launch {
+        delay(1.ticks) // Let other plugins register components
+        context // Load context (reads all spawns)
+        logger.i { "Loaded ${context.spawns.size} normal spawn types and ${spreadConfig.types.size} spread spawn types" }
+    }
 }.mainCommand {
     "spawns" {
         "getNearbyDBEntries" {
