@@ -11,6 +11,7 @@ dependencies {
     compileOnly(miaLibs.idofront.services)
     compileOnly(miaLibs.minecraft.mccoroutine)
     implementation(libs.geary.uuid)
+    api(project(":geary-papermc-services"))
     api(project(":geary-papermc-datastore"))
     api(project(":geary-papermc-core"))
 }
