@@ -1,17 +1,17 @@
 package com.mineinabyss.geary.papermc
 
-import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.entityOfOrNull
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import org.bukkit.block.Block
 import org.bukkit.block.TileState
 
-context(world: Geary)
+context(world: WorldScoped)
 fun PrefabKey.toEntityOrNull() = world.entityOfOrNull(this)
 
-inline fun <T, R : BukkitEntity> R.withGeary(run: Geary.(R) -> T) = with(world.toGeary()) { run(this@withGeary) }
+inline fun <T, R : BukkitEntity> R.withGeary(run: WorldScoped.(R) -> T) = with(world.toGeary()) { run(this@withGeary) }
 
-inline fun <T, R : TileState> R.withGeary(run: Geary.(R) -> T) = with(world.toGeary()) { run(this@withGeary) }
+inline fun <T, R : TileState> R.withGeary(run: WorldScoped.(R) -> T) = with(world.toGeary()) { run(this@withGeary) }
 
-inline fun <T, R : Block> R.withGeary(run: Geary.(R) -> T) = with(world.toGeary()) { run(this@withGeary) }
+inline fun <T, R : Block> R.withGeary(run: WorldScoped.(R) -> T) = with(world.toGeary()) { run(this@withGeary) }

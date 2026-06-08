@@ -1,30 +1,30 @@
 plugins {
-    id(idofrontLibs.plugins.mia.kotlin.jvm.get().pluginId)
-    id(idofrontLibs.plugins.mia.papermc.get().pluginId)
-    id(idofrontLibs.plugins.mia.nms.get().pluginId)
-    id(idofrontLibs.plugins.mia.testing.get().pluginId)
-    alias(idofrontLibs.plugins.mia.publication)
-    alias(idofrontLibs.plugins.kotlinx.serialization)
+    id(miaLibs.plugins.mia.kotlin.jvm.get().pluginId)
+    id(miaLibs.plugins.mia.papermc.get().pluginId)
+    id(miaLibs.plugins.mia.nms.get().pluginId)
+    id(miaLibs.plugins.mia.testing.get().pluginId)
+    alias(miaLibs.plugins.mia.publication)
+    alias(miaLibs.plugins.kotlinx.serialization)
 }
 
 dependencies {
     implementation(libs.sqlite.kt)
     // Plugins
-    compileOnly(idofrontLibs.minecraft.plugin.mythic.dist)
-    compileOnly(idofrontLibs.idofront.nms)
-    compileOnly(idofrontLibs.idofront.util)
+    compileOnly(miaLibs.minecraft.plugin.mythic.dist)
+    compileOnly(miaLibs.idofront.nms)
+    compileOnly(miaLibs.idofront.util)
 
     // Other deps
-    compileOnly(idofrontLibs.kotlinx.serialization.json)
-    compileOnly(idofrontLibs.kotlinx.serialization.kaml)
-    compileOnly(idofrontLibs.minecraft.mccoroutine)
-    testImplementation(idofrontLibs.mockk)
+    compileOnly(miaLibs.kotlinx.serialization.json)
+    compileOnly(miaLibs.kotlinx.serialization.kaml)
+    compileOnly(miaLibs.minecraft.mccoroutine)
+    testImplementation(miaLibs.mockk)
 
     compileOnly(libs.geary.actions)
     implementation(projects.gearyPapermcSqlite)
     implementation(projects.gearyPapermcTracking)
-    testImplementation(idofrontLibs.kotlinx.coroutines.test)
-//    compileOnly(idofrontLibs.kotlinx.dataframe)
+    testImplementation(miaLibs.kotlinx.coroutines.test)
+//    compileOnly(miaLibs.kotlinx.dataframe)
 //    implementation(project(":geary-papermc-features"))
 }
 

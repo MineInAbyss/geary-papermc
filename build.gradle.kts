@@ -1,8 +1,8 @@
 plugins {
     `java-library`
-    alias(idofrontLibs.plugins.mia.publication)
-    alias(idofrontLibs.plugins.mia.kotlin.jvm)
-    alias(idofrontLibs.plugins.mia.autoversion)
+    alias(miaLibs.plugins.mia.publication)
+    alias(miaLibs.plugins.mia.kotlin.jvm)
+    alias(miaLibs.plugins.mia.autoversion)
 }
 
 dependencies {
@@ -34,15 +34,14 @@ allprojects {
         apply(plugin = "kotlin")
 
         dependencies {
-            compileOnly(rootProject.idofrontLibs.bundles.idofront.core)
-            compileOnly(rootProject.idofrontLibs.idofront.features)
-            compileOnly(rootProject.idofrontLibs.minecraft.plugin.worldguard) {
+            compileOnly(rootProject.miaLibs.bundles.idofront.core)
+            compileOnly(rootProject.miaLibs.minecraft.plugin.worldguard) {
                 exclude(group = "org.bukkit")
                 exclude(group = "com.google.guava")
                 exclude(group = "com.google.code.gson")
                 exclude(group = "it.unimi.dsi")
             }
-            testImplementation(rootProject.idofrontLibs.bundles.idofront.core)
+            testImplementation(rootProject.miaLibs.bundles.idofront.core)
         }
         kotlin {
             compilerOptions {

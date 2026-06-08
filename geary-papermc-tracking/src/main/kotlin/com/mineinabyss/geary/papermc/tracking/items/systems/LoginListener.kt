@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.tracking.items.systems
 
 import com.mineinabyss.geary.datatypes.GearyEntity
-import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.papermc.datastore.decodePrefabs
 import com.mineinabyss.geary.papermc.datastore.hasComponentsEncoded
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
@@ -20,9 +20,8 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 
 class LoginListener(
-    world: Geary,
     val cacheImpl: (holder: GearyEntity) -> PlayerItemCache<*>,
-) : Listener, Geary by world {
+) : Listener {
     @EventHandler
     fun PlayerJoinEvent.track() {
         val entity = player.toGeary()
@@ -36,21 +35,21 @@ class LoginListener(
     }
 
     companion object {
-        context(world: Geary)
+        context(world: WorldScoped)
         fun readItemInfo(item: NMSItemStack): ItemInfo {
             if (item.isEmpty) return ItemInfo.NothingEncoded
             val pdc = item.fastPDC ?: return ItemInfo.NothingEncoded
             return readItemInfo(pdc)
         }
 
-        context(world: Geary)
+        context(world: WorldScoped)
         fun readItemInfo(item: ItemStack): ItemInfo {
             if (item.isEmpty) return ItemInfo.NothingEncoded
             val pdc = item.persistentDataContainer
             return readItemInfo(pdc)
         }
 
-        context(world: Geary)
+        context(world: WorldScoped)
         fun readItemInfo(pdc: PersistentDataContainerView): ItemInfo {
             if (!pdc.hasComponentsEncoded) return ItemInfo.NothingEncoded
             val prefabKeys = pdc.decodePrefabs()
