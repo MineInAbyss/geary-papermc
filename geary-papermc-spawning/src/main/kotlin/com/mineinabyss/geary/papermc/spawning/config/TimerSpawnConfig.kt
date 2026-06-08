@@ -1,4 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.config
 
-class TimerSpawnConfig {
+class TimerSpawnConfig(
+    val entry: SpawnEntry,
+
+) {
 }

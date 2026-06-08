@@ -48,6 +48,13 @@ class SpawnLocationConfig(
                 location.y >= locMin.y && location.y <= locMax.y &&
                 location.z >= locMin.z && location.z <= locMax.z
     }
+
+    fun getSize() : Double {
+        val xSize = locMax.x - locMin.x
+        val ySize = locMax.y - locMin.y
+        val zSize = locMax.z - locMin.z
+        return xSize * ySize * zSize
+    }
 }
 
 

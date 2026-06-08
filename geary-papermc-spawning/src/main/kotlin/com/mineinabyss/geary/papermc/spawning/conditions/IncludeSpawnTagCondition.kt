@@ -22,17 +22,22 @@ class IncludeSpawnTagCondition(
         val config = unified.unified;
         val loc = location ?: return false;
 
-        for (tag in tags) {
-            for (regionDef in config.values) {
-                if (regionDef.group == tag) {
-                    if (regionDef.isInside(loc)) {
-                        return true;
-                    }
-                }
-            }
+        val validRegions = config.values.filter { regionDef ->
+            regionDef.group in tags && regionDef.isInside(loc)
         }
 
+        if (validRegions.isEmpty())
+            return false
 
-        return false
+        val activeOverride = config.values
+            .filter { it.gearySpawnOverride && it.isInside(loc) }
+            .minByOrNull { it.getSize() }
+
+        if (activeOverride != null && activeOverride !in validRegions) {
+            return false
+        }
+
+        return true
     }
+
 }
