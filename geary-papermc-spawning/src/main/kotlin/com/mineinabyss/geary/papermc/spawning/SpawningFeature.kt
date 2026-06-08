@@ -52,14 +52,7 @@ val SpawningFeature = module("spawning") {
         default = SpreadEntityTypesConfig()
     }
 
-    val locationConfigReader = config<SpawnLocationsConfig> {
-        format = get<Yaml>()
-    }.multiEntry((plugin.dataPath / "locations").createParentDirectories())
 
-    val locationConfig: SpawnLocationsUnified by single {
-        val entries = locationConfigReader.read()
-        SpawnLocationsUnified(entries)
-    }
 
     single {
         Json {
@@ -74,6 +67,16 @@ val SpawningFeature = module("spawning") {
                 strictMode = false
             )
         )
+    }
+
+    val locationConfigReader = config<SpawnLocationsConfig> {
+        format = get<Yaml>()
+    }.multiEntry((plugin.dataPath / "locations").createParentDirectories())
+
+
+    val locationConfig: SpawnLocationsUnified by single {
+        val entries = locationConfigReader.read()
+        SpawnLocationsUnified(entries)
     }
 
     single { Bukkit.getWorld(spreadConfig.worldName) ?: error("Spawn config main world not found!") }
@@ -112,6 +115,7 @@ val SpawningFeature = module("spawning") {
     val mythicSpawnListener by single { new(::MythicSpawnTypeListener) }
     val listSpawnListener by single { new(::ListSpawnListener) }
     val spreadDeathListener by single { new(::SpreadEntityDeathListener) }
+
     listeners(
         spawnTypeListener,
         mythicSpawnListener,
@@ -123,8 +127,8 @@ val SpawningFeature = module("spawning") {
     task(get<SpawnTask>().job)
     task(get<SpreadSpawnTask>().job)
 
-
     val logger = get<Logger>()
+
 
     plugin.launch {
         delay(1.ticks) // Let other plugins register components
@@ -135,6 +139,7 @@ val SpawningFeature = module("spawning") {
     "spawns" {
         "getNearbyDBEntries" {
             executes.asPlayer {
+                println("[Geary] - Querying DB entries")
                 get<SpawningContext>().dumpDB(player.location, player)
             }
         }
