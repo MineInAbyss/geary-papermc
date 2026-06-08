@@ -16,6 +16,8 @@ import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpawning
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
+import com.mineinabyss.geary.papermc.spawning.config.SpawnLocationsConfig
+import com.mineinabyss.geary.papermc.spawning.config.SpawnLocationsUnified
 import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
 import com.mineinabyss.geary.papermc.spawning.listeners.ListSpawnListener
 import com.mineinabyss.geary.papermc.spawning.listeners.SpreadEntityDeathListener
@@ -29,6 +31,7 @@ import com.mineinabyss.geary.papermc.sqlite.sqliteDatabase
 import com.mineinabyss.geary.serialization.SerializableComponents
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.suggests
+import com.mineinabyss.idofront.config.config
 import com.mineinabyss.idofront.features.*
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.success
@@ -37,6 +40,8 @@ import me.dvyy.sqlite.Database
 import org.bukkit.Bukkit
 import org.bukkit.plugin.Plugin
 import kotlin.io.path.Path
+import kotlin.io.path.createParentDirectories
+import kotlin.io.path.div
 
 val SpawningFeature = module("spawning") {
     requirePlugins("WorldGuard", "MythicMobs")
@@ -48,6 +53,16 @@ val SpawningFeature = module("spawning") {
         withSerializersModule(gearyPaper.worldManager.global.getAddon(SerializableComponents).formats.module)
         default = SpreadEntityTypesConfig()
     }
+
+    val locationConfigReader = config<SpawnLocationsConfig> {
+        format = get<Yaml>()
+    }.multiEntry((plugin.dataPath / "locations").createParentDirectories())
+
+    val locationConfig: SpawnLocationsUnified by single {
+        val entries = locationConfigReader.read()
+        SpawnLocationsUnified(entries)
+    }
+
     single {
         Json {
             prettyPrint = true
@@ -62,6 +77,7 @@ val SpawningFeature = module("spawning") {
             )
         )
     }
+
     single { Bukkit.getWorld(spreadConfig.worldName) ?: error("Spawn config main world not found!") }
 
     // -- Configure database --
