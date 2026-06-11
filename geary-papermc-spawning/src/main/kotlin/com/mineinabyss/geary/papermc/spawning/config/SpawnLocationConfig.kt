@@ -12,7 +12,7 @@ import org.bukkit.Location
 class SpawnLocationConfig(
 
     @EncodeDefault(EncodeDefault.Mode.NEVER)
-    val group: String? = null, // group tag of the location
+    val tags: List<String> = emptyList(),
 
 
     //aabb definition of the location
