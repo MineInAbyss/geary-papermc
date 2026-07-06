@@ -20,6 +20,7 @@ import com.mineinabyss.geary.papermc.plugin.commands.DebugFeature
 import com.mineinabyss.geary.papermc.plugin.commands.TestingFeature
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.SpawningWorldGuardFlags
+import com.mineinabyss.geary.papermc.spawning.locations.LocationsFeature
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
 import com.mineinabyss.geary.papermc.tracking.entities.MCEntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
@@ -60,6 +61,7 @@ class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
                     PrefabsFeature,
                     ResourcepackGeneratorFeature,
                     RecipeFeature,
+                    LocationsFeature,
                     SpawningFeature
                 ),
                 onBeforeReload = {
@@ -138,6 +140,7 @@ class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
             MythicMobsFeature,
             DebugFeature,
             TestingFeature,
+            LocationsFeature,
             SpawningFeature,
             PrefabsFeature,
             RecipeFeature,

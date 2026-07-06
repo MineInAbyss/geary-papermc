@@ -5,9 +5,9 @@ import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.Condition
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.location
-import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.spawning.config.SpawnLocationConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnLocationsUnified
+import com.mineinabyss.geary.papermc.spawning.locations.LocationsFeature
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -18,7 +18,7 @@ class InRegionsCondition(
 ) : Condition {
     override fun ActionGroupContext.execute(): Boolean {
 
-        val unified = gearyPaper.features.get(SpawningFeature).get<SpawnLocationsUnified>()
+        val unified = gearyPaper.features.get(LocationsFeature).get<SpawnLocationsUnified>()
         val config = unified.unified;
         val loc = location ?: return false;
 

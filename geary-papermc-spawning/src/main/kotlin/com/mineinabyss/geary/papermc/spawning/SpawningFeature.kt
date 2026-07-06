@@ -16,6 +16,7 @@ import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpawning
 import com.mineinabyss.geary.papermc.spawning.config.*
 import com.mineinabyss.geary.papermc.spawning.listeners.ListSpawnListener
+import com.mineinabyss.geary.papermc.spawning.locations.LocationsFeature
 import com.mineinabyss.geary.papermc.spawning.listeners.SpreadEntityDeathListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.mythic.MythicSpawnTypeListener
@@ -74,15 +75,7 @@ val SpawningFeature = module("spawning") {
         )
     }
 
-    val locationConfigReader = config<SpawnLocationsConfig> {
-        format = get<Yaml>()
-    }.multiEntry((plugin.dataPath / "locations").createParentDirectories())
-
-
-    val locationConfig: SpawnLocationsUnified by single {
-        val entries = locationConfigReader.read()
-        SpawnLocationsUnified(entries)
-    }
+    single<SpawnLocationsUnified> { gearyPaper.features.get(LocationsFeature).get() }
 
     single { Bukkit.getWorld(spreadConfig.worldName) ?: error("Spawn config main world not found!") }
 
