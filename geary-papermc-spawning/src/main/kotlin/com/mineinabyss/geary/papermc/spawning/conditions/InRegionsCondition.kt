@@ -23,18 +23,7 @@ class InRegionsCondition(
         val loc = location ?: return false;
 
 
-//         return regions.any { testedRegion ->
-//             config.Locations[testedRegion]?.isInside(loc) == true
-//         }
-        var anyMatch = false
-        for (i in regions.indices) {
-            val def = config[regions[i]] ?: continue
-            if (def.isInside(loc)) {
-                anyMatch = true
-                break
-            }
-        }
-        if (!anyMatch) return false
+        if (config.values.none {it.isInside(loc)}) return false
 
         var activeOverride: SpawnLocationConfig? = null
         var smallestSize = Double.MAX_VALUE

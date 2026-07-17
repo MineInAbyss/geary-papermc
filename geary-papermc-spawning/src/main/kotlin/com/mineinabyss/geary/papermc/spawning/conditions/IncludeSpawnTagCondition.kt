@@ -22,14 +22,7 @@ class IncludeSpawnTagCondition(
         val config = unified.unified
         val loc = location ?: return false
 
-        var anyMatch = false
-        for (def in config.values) {
-            if (hasAllTags(def) && def.isInside(loc)) {
-                anyMatch = true
-                break
-            }
-        }
-        if (!anyMatch) return false
+        if (config.values.none { hasAllTags(it) && it.isInside(loc)}) return false
 
         var activeOverride: SpawnLocationConfig? = null
         var smallestSize = Double.MAX_VALUE
@@ -46,11 +39,7 @@ class IncludeSpawnTagCondition(
     }
 
     private fun hasAllTags(def: SpawnLocationConfig): Boolean {
-        if (def.tags.isEmpty()) return false
-        for (i in tags.indices) {
-            if (tags[i] !in def.tags) return false
-        }
-        return true
+        return !(def.tags.isEmpty() || tags.any { it in def.tags })
     }
 
 }
