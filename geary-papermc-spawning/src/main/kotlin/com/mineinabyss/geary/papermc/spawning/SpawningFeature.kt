@@ -16,6 +16,7 @@ import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpawning
 import com.mineinabyss.geary.papermc.spawning.config.*
 import com.mineinabyss.geary.papermc.spawning.listeners.ListSpawnListener
+import com.mineinabyss.geary.papermc.spawning.locations.LocationsFeature
 import com.mineinabyss.geary.papermc.spawning.listeners.SpreadEntityDeathListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.mythic.MythicSpawnTypeListener
@@ -74,15 +75,7 @@ val SpawningFeature = module("spawning") {
         )
     }
 
-    val locationConfigReader = config<SpawnLocationsConfig> {
-        format = get<Yaml>()
-    }.multiEntry((plugin.dataPath / "locations").createParentDirectories())
-
-
-    val locationConfig: SpawnLocationsUnified by single {
-        val entries = locationConfigReader.read()
-        SpawnLocationsUnified(entries)
-    }
+    single<SpawnLocationsUnified> { gearyPaper.features.get(LocationsFeature).get() }
 
     single { Bukkit.getWorld(spreadConfig.worldName) ?: error("Spawn config main world not found!") }
 
@@ -175,7 +168,7 @@ val SpawningFeature = module("spawning") {
                             cy = ((region.locMin.y + region.locMax.y) / 2).toInt()
                             cz = ((region.locMin.z + region.locMax.z) / 2).toInt()
                         }
-                        val tag = if (region.group != null) " <gray>[${region.group}]</gray>" else ""
+                        val tags = region.tags.joinToString("") { "<gray>{$it}</gray>" }
                         val override = if (region.gearySpawnOverride) " <yellow>(override)</yellow>" else ""
                         val hoverLines = buildList {
                             add("center: <gray>[$cx, $cy, $cz]</gray>")
@@ -184,7 +177,7 @@ val SpawningFeature = module("spawning") {
                             else if (region.radius != null)
                                 add("radius: <gray>${region.radius}${if (region.radiusY != null) " / ${region.radiusY}Y" else ""}</gray>")
                         }.joinToString("\n")
-                        val msg = " <white>$id</white>$tag$override <dark_gray>[click to TP]</dark_gray>".miniMsg()
+                        val msg = " <white>$id</white>$tags$override <dark_gray>[click to TP]</dark_gray>".miniMsg()
                             .hoverEvent(HoverEvent.showText(hoverLines.miniMsg()))
                             .clickEvent(ClickEvent.runCommand("/tp $cx $cy $cz"))
                         player.sendMessage(msg)
@@ -203,9 +196,9 @@ val SpawningFeature = module("spawning") {
                     } else {
                         sender.success("Inside ${matching.size} region(s):")
                         matching.forEach { (id, region) ->
-                            val tag = if (region.group != null) " [${region.group}]" else ""
+                            val tags = region.tags.joinToString("") { "{$it}" }
                             val override = if (region.gearySpawnOverride) " (override)" else ""
-                            sender.info("  - $id$tag$override")
+                            sender.info("  - $id$tags$override")
                         }
                     }
                 }
