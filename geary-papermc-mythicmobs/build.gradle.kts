@@ -1,21 +1,21 @@
 plugins {
-    id(idofrontLibs.plugins.mia.kotlin.jvm.get().pluginId)
-    id(idofrontLibs.plugins.mia.papermc.get().pluginId)
-    id(idofrontLibs.plugins.mia.nms.get().pluginId)
-    id(idofrontLibs.plugins.mia.publication.get().pluginId)
-    alias(idofrontLibs.plugins.kotlinx.serialization)
+    id(miaLibs.plugins.mia.kotlin.jvm.get().pluginId)
+    id(miaLibs.plugins.mia.papermc.get().pluginId)
+    id(miaLibs.plugins.mia.nms.get().pluginId)
+    id(miaLibs.plugins.mia.publication.get().pluginId)
+    alias(miaLibs.plugins.kotlinx.serialization)
 }
 
 dependencies {
     // Plugins
-    compileOnly(idofrontLibs.minecraft.plugin.mythic.dist)
-    compileOnly(idofrontLibs.minecraft.plugin.modelengine)
-    compileOnly(idofrontLibs.idofront.nms)
+    compileOnly(miaLibs.minecraft.plugin.mythic.dist)
+    compileOnly(miaLibs.minecraft.plugin.modelengine)
+    compileOnly(miaLibs.idofront.nms)
 
     // Other deps
-    compileOnly(idofrontLibs.kotlinx.serialization.json)
-    compileOnly(idofrontLibs.kotlinx.serialization.kaml)
-    compileOnly(idofrontLibs.minecraft.mccoroutine)
+    compileOnly(miaLibs.kotlinx.serialization.json)
+    compileOnly(miaLibs.kotlinx.serialization.kaml)
+    compileOnly(miaLibs.minecraft.mccoroutine)
 
     compileOnly(libs.geary.actions)
     implementation(project(":geary-papermc-tracking"))

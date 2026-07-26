@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.features.prefabs
 
+import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.dependencies.get
 import com.mineinabyss.dependencies.module
 import com.mineinabyss.geary.components.relations.InstanceOf
@@ -25,7 +26,9 @@ import com.mineinabyss.idofront.features.mainCommand
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.success
 import com.mineinabyss.idofront.messaging.warn
+import com.mineinabyss.idofront.time.ticks
 import com.mineinabyss.idofront.typealiases.BukkitEntity
+import kotlinx.coroutines.delay
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
@@ -40,17 +43,21 @@ val PrefabsFeature = module("prefabs") {
     gearyWorld {
         val prefabs = getAddon(Prefabs)
         // Load prefabs in Geary/prefabs folder, each subfolder is considered its own namespace
-        plugin.dataPath
-            .resolve("prefabs")
-            .createDirectories()
-            .listDirectoryEntries()
-            .filter(Path::isDirectory)
-            .forEach { folder ->
-                prefabs.fromDirectory(folder.name, folder)
-            }
+        plugin.launch {
+            delay(1.ticks) // Let other plugins register components
 
-        // Force item refresh if any players are online
-        plugin.server.onlinePlayers.forEach { it.inventory.toGeary()?.forceRefresh(ignoreCached = true) }
+            plugin.dataPath
+                .resolve("prefabs")
+                .createDirectories()
+                .listDirectoryEntries()
+                .filter(Path::isDirectory)
+                .forEach { folder ->
+                    prefabs.fromDirectory(folder.name, folder)
+                }
+
+            // Force item refresh if any players are online
+            plugin.server.onlinePlayers.forEach { it.inventory.toGeary()?.forceRefresh(ignoreCached = true) }
+        }
     }
 }.mainCommand {
     "prefab" {

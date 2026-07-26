@@ -1,9 +1,9 @@
 plugins {
-    id(idofrontLibs.plugins.mia.kotlin.jvm.get().pluginId)
-    id(idofrontLibs.plugins.mia.papermc.get().pluginId)
-    id(idofrontLibs.plugins.mia.publication.get().pluginId)
-    id(idofrontLibs.plugins.mia.nms.get().pluginId)
-    alias(idofrontLibs.plugins.kotlinx.serialization)
+    id(miaLibs.plugins.mia.kotlin.jvm.get().pluginId)
+    id(miaLibs.plugins.mia.papermc.get().pluginId)
+    id(miaLibs.plugins.mia.publication.get().pluginId)
+    id(miaLibs.plugins.mia.nms.get().pluginId)
+    alias(miaLibs.plugins.kotlinx.serialization)
 }
 
 dependencies {
@@ -14,12 +14,12 @@ dependencies {
     implementation(libs.geary.actions)
 
     // MineInAbyss platform
-    compileOnly(idofrontLibs.kotlin.stdlib)
-    compileOnly(idofrontLibs.kotlinx.serialization.json)
-    compileOnly(idofrontLibs.kotlinx.serialization.kaml)
-    compileOnly(idofrontLibs.kotlinx.coroutines)
-    compileOnly(idofrontLibs.minecraft.mccoroutine)
-    compileOnly(idofrontLibs.idofront.nms)
-    compileOnly(idofrontLibs.creative.serializer.minecraft)
-    compileOnly(idofrontLibs.creative.api)
+    compileOnly(miaLibs.kotlin.stdlib)
+    compileOnly(miaLibs.kotlinx.serialization.json)
+    compileOnly(miaLibs.kotlinx.serialization.kaml)
+    compileOnly(miaLibs.kotlinx.coroutines)
+    compileOnly(miaLibs.minecraft.mccoroutine)
+    compileOnly(miaLibs.idofront.nms)
+    compileOnly(miaLibs.creative.serializer.minecraft)
+    compileOnly(miaLibs.creative.api)
 }

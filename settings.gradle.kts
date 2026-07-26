@@ -13,7 +13,7 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
-    val idofrontVersion: String by settings
+    val miaLibs: String by settings
 
     repositories {
         maven("https://repo.mineinabyss.com/releases")
@@ -22,10 +22,8 @@ dependencyResolutionManagement {
     }
 
     versionCatalogs {
-        create("idofrontLibs") {
-            from("com.mineinabyss:catalog:$idofrontVersion")
-            version("mockbukkit", "4.108.0")
-            version("minecraft", "1.21.11-R0.1-SNAPSHOT")
+        create("miaLibs") {
+            from("com.mineinabyss:catalog:$miaLibs")
         }
     }
 }
@@ -42,6 +40,7 @@ include(
     "geary-papermc-datastore",
     "geary-papermc-plugin",
     "geary-papermc-spawning",
+    "geary-papermc-services",
     "geary-papermc-tracking",
     "geary-papermc-sqlite",
     "geary-tests",

@@ -26,4 +26,10 @@ data class SpawnEntry(
      */
     val chance: Double = 1.0,
     val conditions: List<EnsureAction> = listOf(),
+    /**
+     * Tag of the spawn entry,
+     *
+     *
+     */
+    val spawnTag: String ? = null,
 )

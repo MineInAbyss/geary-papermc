@@ -57,7 +57,7 @@ class ResourcePackGenerator(
         }
 
         if (resourcePack.packMeta() == null) {
-            val format = PackFormat.format(FormatVersion.of(75), FormatVersion.of(75), FormatVersion.of(99))
+            val format = PackFormat.format(FormatVersion.of(75))
             resourcePack.packMeta(PackMeta.of(format, Component.text("Geary ResourcePack")))
         }
 

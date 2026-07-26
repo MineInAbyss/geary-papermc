@@ -5,6 +5,8 @@ import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.choosing.InChunkLocationChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.SpreadChunkChooser
+import com.mineinabyss.geary.papermc.spawning.config.SpawnLocationConfig
+import com.mineinabyss.geary.papermc.spawning.config.SpawnLocationsUnified
 import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
 import com.sk89q.worldedit.bukkit.BukkitAdapter
@@ -25,6 +27,7 @@ class SpreadSpawner(
     private val chunkChooser: SpreadChunkChooser,
     private val posChooser: InChunkLocationChooser,
     private val logger: Logger,
+    private val regConfig: SpawnLocationsUnified,
 ) {
     suspend fun spawnSpreadEntities() {
         for ((type, spreadConfigs) in configs.types) {
@@ -33,7 +36,7 @@ class SpreadSpawner(
             val wgWorld: com.sk89q.worldedit.world.World = BukkitAdapter.adapt(world)
             val regions: RegionManager? = container.get(wgWorld)
 
-            for ((regionName, config) in spreadConfigs.sectionsConfig) {
+            spawnAll@ for ((regionName, config) in spreadConfigs.sectionsConfig) {
 
                 val region = regions?.getRegion(regionName) ?: run {
                     logger.w { "Region $regionName not found in world ${world.name}" }
@@ -49,6 +52,16 @@ class SpreadSpawner(
 
                 val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue
 
+                for (blacklisted in config.blacklistRegions) {
+                    val region: SpawnLocationConfig? = regConfig.unified[blacklisted]
+                    if (region == null) {
+                        logger.e { "Blacklist region $blacklisted not found" }
+                        continue
+                    }
+                    if (region.isInside(spawnPos)) {
+                        continue@spawnAll
+                    }
+                }
                 val spawnedEntity = StoredEntity(
                     type = if (random() * 100 <= config.altSpawnChance) config.altSpawnEntry.type.key else config.entry.type.key,
                     category = type

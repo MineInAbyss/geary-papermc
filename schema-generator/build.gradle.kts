@@ -1,6 +1,6 @@
 plugins {
-    id(idofrontLibs.plugins.kotlin.multiplatform.get().pluginId)
-    id(idofrontLibs.plugins.mia.papermc.get().pluginId)
+    id(miaLibs.plugins.kotlin.multiplatform.get().pluginId)
+    id(miaLibs.plugins.mia.papermc.get().pluginId)
 }
 
 kotlin {
@@ -22,9 +22,9 @@ kotlin {
             dependencies {
                 implementation(project(":"))
                 implementation(libs.kts.to.typescript)
-                implementation(idofrontLibs.bundles.idofront.core)
-                implementation(idofrontLibs.kotlin.reflect)
-                implementation(idofrontLibs.kotlinx.serialization.kaml)
+                implementation(miaLibs.bundles.idofront.core)
+                implementation(miaLibs.kotlin.reflect)
+                implementation(miaLibs.kotlinx.serialization.kaml)
             }
         }
     }

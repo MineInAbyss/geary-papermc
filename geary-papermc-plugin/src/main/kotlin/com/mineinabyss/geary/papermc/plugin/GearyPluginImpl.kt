@@ -1,7 +1,6 @@
 package com.mineinabyss.geary.papermc.plugin
 
 import co.touchlab.kermit.Logger
-import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mineinabyss.dependencies.*
 import com.mineinabyss.geary.actions.GearyActions
 import com.mineinabyss.geary.autoscan.autoscan
@@ -21,6 +20,7 @@ import com.mineinabyss.geary.papermc.plugin.commands.DebugFeature
 import com.mineinabyss.geary.papermc.plugin.commands.TestingFeature
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.SpawningWorldGuardFlags
+import com.mineinabyss.geary.papermc.spawning.locations.LocationsFeature
 import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
 import com.mineinabyss.geary.papermc.tracking.entities.MCEntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
@@ -39,9 +39,7 @@ import com.mineinabyss.idofront.features.MainCommandFeature
 import com.mineinabyss.idofront.features.singleConfig
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.serialization.LocationSerializer
-import com.mineinabyss.idofront.time.ticks
 import com.sk89q.worldguard.WorldGuard
-import kotlinx.coroutines.delay
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.plugin.Plugin
@@ -63,6 +61,7 @@ class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
                     PrefabsFeature,
                     ResourcepackGeneratorFeature,
                     RecipeFeature,
+                    LocationsFeature,
                     SpawningFeature
                 ),
                 onBeforeReload = {
@@ -141,24 +140,19 @@ class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
             MythicMobsFeature,
             DebugFeature,
             TestingFeature,
+            LocationsFeature,
+            SpawningFeature,
+            PrefabsFeature,
+            RecipeFeature,
+            ResourcepackGeneratorFeature,
         )
+
         di.scope.load(MainCommandFeature)
 
         // Start engine ticking
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, {
             geary.tick()
         }, 0, 1)
-
-        // Schedule these for next tick as they may rely on other plugins registering new components on startup
-        launch {
-            delay(1.ticks)
-            di.scope.loadAllCatching(
-                PrefabsFeature,
-                RecipeFeature,
-                SpawningFeature,
-                ResourcepackGeneratorFeature,
-            )
-        }
     }
 
     override fun onDisable() {
