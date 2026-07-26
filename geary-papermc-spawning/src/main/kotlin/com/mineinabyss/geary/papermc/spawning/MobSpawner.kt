@@ -1,10 +1,14 @@
 package com.mineinabyss.geary.papermc.spawning
 
+import co.touchlab.kermit.Logger
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.papermc.location
 import com.mineinabyss.geary.papermc.spawning.choosing.LocationSpread
 import com.mineinabyss.geary.papermc.spawning.choosing.SpawnChooser
+import com.mineinabyss.geary.papermc.spawning.conditions.IncludeSpawnTagCondition
+import com.mineinabyss.geary.papermc.spawning.conditions.InRegionsCondition
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
+import com.mineinabyss.geary.papermc.spawning.config.SpawnLocationsUnified
 import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
 import com.mineinabyss.idofront.util.randomOrMin
 import org.bukkit.Location
@@ -13,8 +17,12 @@ import kotlin.random.Random
 class MobSpawner(
     val spawnChooser: SpawnChooser,
     val spreadRepo: LocationSpread,
+    val spawnLocations: SpawnLocationsUnified,
+    val logger: Logger,
 ) {
     fun checkSpawnConditions(spawn: SpawnEntry, location: Location): Boolean {
+        if (!passesOverrideRegions(spawn, location)) return false
+
         // Check dynamic conditions
         return spawn.conditions.all {
             it.conditionsMet(
@@ -23,6 +31,27 @@ class MobSpawner(
                     environment["spawnTypes"] = listOf(spawn.type.key)
                 }
             )
+        }
+    }
+
+    private fun passesOverrideRegions(spawn: SpawnEntry, location: Location): Boolean {
+        val overrides = spawnLocations.unified.filterValues { it.gearySpawnOverride && it.isInside(location) }
+        if (overrides.isEmpty()) return true
+        if (overrides.size > 1) logger.w {
+            "Multiple override regions (${overrides.keys.joinToString()}) contain location " +
+                    "[${location.blockX}, ${location.blockY}, ${location.blockZ}] in ${location.world?.name}, using smallest."
+        }
+        val (regionId, region) = overrides.entries.minBy { it.value.getSize() }
+
+        return spawn.conditions.any { ensure ->
+            ensure.conditions.any { condition ->
+                when (condition) {
+                    is IncludeSpawnTagCondition ->
+                        condition.tags.isNotEmpty() && condition.tags.all { it in region.tags }
+                    is InRegionsCondition -> regionId in condition.regions
+                    else -> false
+                }
+            }
         }
     }
 

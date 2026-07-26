@@ -40,6 +40,7 @@ include(
     "geary-papermc-datastore",
     "geary-papermc-plugin",
     "geary-papermc-spawning",
+    "geary-papermc-services",
     "geary-papermc-tracking",
     "geary-papermc-sqlite",
     "geary-tests",

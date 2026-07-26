@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.spawning.config
 
 import com.charleskorn.kaml.YamlComment
 import com.mineinabyss.idofront.serialization.DurationSerializer
+import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration
@@ -24,8 +25,12 @@ class SpreadSpawnConfig(
     val splitSize: Int,
     @YamlComment("How many times to try and spawn an entity in a chunk before giving up")
     val spawnAttempts: Int,
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
     val altSpawnChance: Double = 0.0,
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
     val altSpawnEntry: SpawnEntry = entry,
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val blacklistRegions: List<String> = emptyList(),
 )
 
 @Serializable

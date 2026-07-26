@@ -1,5 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.tasks
 
+import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
+import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.launchTickRepeating
 import com.mineinabyss.geary.papermc.spawning.MobSpawner
 import com.mineinabyss.geary.papermc.spawning.choosing.SpawnLocationChooser
@@ -9,6 +11,7 @@ import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
 import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.time.inWholeTicks
 import com.mineinabyss.idofront.time.ticks
+import kotlinx.coroutines.withContext
 import org.bukkit.Bukkit
 import org.bukkit.GameMode.SPECTATOR
 import org.bukkit.plugin.Plugin
@@ -25,8 +28,12 @@ class SpawnTask(
     private val spawnAttempts: Int = config.maxSpawnAttemptsPerPlayer
 
     val job = plugin.launchTickRepeating(config.taskDelay) {
-        runCatching { run() }.onFailure {
-            logger.d { it.stackTraceToString() }
+        withContext(gearyPaper.minecraftDispatcher) {
+            runCatching {
+                run()
+            }.onFailure {
+                logger.d { it.stackTraceToString() }
+            }
         }
     }
 
