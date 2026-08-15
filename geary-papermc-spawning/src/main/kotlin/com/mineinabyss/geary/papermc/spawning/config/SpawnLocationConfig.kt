@@ -26,8 +26,15 @@ class SpawnLocationConfig(
 
     val gearySpawnOverride: Boolean = false,
 
-)
+    )
 {
+    private val minX = minOf(locMin.x, locMax.x)
+    private val maxX = maxOf(locMin.x, locMax.x)
+    private val minY = minOf(locMin.y, locMax.y)
+    private val maxY = maxOf(locMin.y, locMax.y)
+    private val minZ = minOf(locMin.z, locMax.z)
+    private val maxZ = maxOf(locMin.z, locMax.z)
+
     fun isInside(location: Location): Boolean {
         if (center != null && radius != null) {
             val dx = location.x - center.x
@@ -44,15 +51,15 @@ class SpawnLocationConfig(
             return horizontalDistSq <= radiusSq
         }
 
-        return location.x >= locMin.x && location.x <= locMax.x &&
-                location.y >= locMin.y && location.y <= locMax.y &&
-                location.z >= locMin.z && location.z <= locMax.z
+        return location.x >= minX && location.x <= maxX &&
+                location.y >= minY && location.y <= maxY &&
+                location.z >= minZ && location.z <= maxZ
     }
 
-    fun getSize() : Double {
-        val xSize = locMax.x - locMin.x
-        val ySize = locMax.y - locMin.y
-        val zSize = locMax.z - locMin.z
+    fun getSize(): Double {
+        val xSize = maxX - minX
+        val ySize = maxY - minY
+        val zSize = maxZ - minZ
         return xSize * ySize * zSize
     }
 }
