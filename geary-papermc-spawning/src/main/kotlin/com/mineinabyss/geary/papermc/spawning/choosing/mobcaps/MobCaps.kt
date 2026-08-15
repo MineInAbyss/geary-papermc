@@ -1,15 +1,27 @@
 package com.mineinabyss.geary.papermc.spawning.choosing.mobcaps
 
+import com.google.common.cache.Cache
+import com.google.common.cache.CacheBuilder
 import com.mineinabyss.geary.papermc.spawning.components.SpawnCategory
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.spawn_types.GearyReadSpawnCategoryEvent
+import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.idofront.events.call
+import io.lumine.mythic.bukkit.MythicBukkit
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
+import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.util.BoundingBox
+import java.util.UUID
 import java.util.function.Predicate
+import kotlin.jvm.optionals.getOrNull
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.toJavaDuration
 
 class MobCaps(
     config: SpawnConfig,
@@ -17,6 +29,15 @@ class MobCaps(
     private val caps: Map<SpawnCategory, Int> = config.playerCaps
     private val defaultCapLimit: Int = config.defaultCap
     private val searchRadius: Int = config.range.playerCapRadius
+
+    private val mythicLoaded: Boolean by lazy {
+        Bukkit.getPluginManager().getPlugin("MythicMobs")?.isEnabled == true
+    }
+    val mobSpawnCategoryCache = CacheBuilder.newBuilder()
+        .expireAfterWrite(1.minutes.toJavaDuration())
+        .maximumSize(1000)
+        .build<String, String>()
+
 
     companion object {
         private val IGNORED_ENTITY_TYPES = ObjectOpenHashSet.of<EntityType>(
@@ -37,11 +58,34 @@ class MobCaps(
         )
     }
 
+
+    private val entityCategoryCache = CacheBuilder.newBuilder()
+        .expireAfterWrite(30.seconds.toJavaDuration())
+        .build<UUID, SpawnCategory>()
+
+    fun getCategory(entity: Entity): SpawnCategory =
+        entityCategoryCache.get(entity.uniqueId) { computeCategory(entity) }
+
+
+    private fun computeCategory(entity: Entity): SpawnCategory {
+        val cat = entity.toGearyOrNull()?.get<SpawnCategory>() ?: run mmCat@{
+            if (!mythicLoaded) return@mmCat null
+            val registry = MythicBukkit.inst().mobManager.mobRegistry
+            val mob = registry.getActiveMob(entity.uniqueId).getOrNull() ?: return@mmCat null
+            val category = mobSpawnCategoryCache.get(mob.mobType) {
+                mob.type.config.getString("SpawnCategory") ?: "default"
+            }
+            return@mmCat SpawnCategory(category)
+        }
+        return cat ?: SpawnCategory.of(entity)
+    }
+
     fun calculateCategoriesNear(location: Location): Map<SpawnCategory, Int> {
         val boundingBox = BoundingBox.of(location, searchRadius.toDouble(), searchRadius.toDouble(), searchRadius.toDouble())
         val entities = location.world.getNearbyEntities(boundingBox) { it.type !in IGNORED_ENTITY_TYPES }
         return entities.groupingBy {
-            GearyReadSpawnCategoryEvent(it).also { it.call() }.category ?: SpawnCategory.of(it)
+            //GearyReadSpawnCategoryEvent(it).also { it.call() }.category ?: SpawnCategory.of(it)
+            getCategory(it)
         }.eachCount()
     }
 
