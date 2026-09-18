@@ -4,9 +4,10 @@ import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.modules.observe
 import com.mineinabyss.geary.observers.events.OnSet
 import com.mineinabyss.geary.systems.query.query
-import com.mineinabyss.idofront.nms.aliases.NMSEntityType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.resources.Identifier
 import net.minecraft.world.entity.EntityType
 
 @JvmInline
@@ -14,9 +15,8 @@ import net.minecraft.world.entity.EntityType
 @SerialName("geary:set.entity_type")
 value class SetEntityType(val key: String) {
     val entityTypeFromRegistry: EntityType<*>
-        get() = NMSEntityType
-            .byString(key)
-            .orElseGet { error("An entity type with key $key was not found.") }
+        get() = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.tryParse(key))
+            ?: error("An entity type with key $key was not found.")
 }
 
 fun WorldScoped.markSetEntityTypeAsCustomMob() = observe<OnSet>()

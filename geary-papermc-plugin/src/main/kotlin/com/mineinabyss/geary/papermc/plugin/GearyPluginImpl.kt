@@ -16,6 +16,7 @@ import com.mineinabyss.geary.papermc.features.items.recipes.RecipeFeature
 import com.mineinabyss.geary.papermc.features.prefabs.PrefabsFeature
 import com.mineinabyss.geary.papermc.features.resourcepacks.ResourcepackGeneratorFeature
 import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsFeature
+import com.mineinabyss.geary.papermc.nexo.NexoFeature
 import com.mineinabyss.geary.papermc.plugin.commands.DebugFeature
 import com.mineinabyss.geary.papermc.plugin.commands.TestingFeature
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
@@ -138,6 +139,7 @@ class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
             MinecraftFeatures,
             CustomItemsFeature,
             MythicMobsFeature,
+            NexoFeature,
             DebugFeature,
             TestingFeature,
             LocationsFeature,

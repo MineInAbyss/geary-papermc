@@ -33,6 +33,13 @@ allprojects {
     if (project.name != "schema-generator") {
         apply(plugin = "kotlin")
 
+        // WorldGuard 7.1.0-SNAPSHOT is built for jdk25, override the catalog's java 21 default
+        plugins.withId("com.mineinabyss.conventions.kotlin.jvm") {
+            val idofront = extensions.getByName("idofront")
+            @Suppress("UNCHECKED_CAST")
+            (idofront.javaClass.getMethod("getJvmVersion").invoke(idofront) as Property<Int>).set(25)
+        }
+
         dependencies {
             compileOnly(rootProject.miaLibs.bundles.idofront.core)
             compileOnly(rootProject.miaLibs.minecraft.plugin.worldguard) {

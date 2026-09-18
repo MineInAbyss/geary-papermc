@@ -36,6 +36,7 @@ if(includeGeary.toBoolean()) includeBuild("../geary")
 include(
     "geary-papermc-features",
     "geary-papermc-mythicmobs",
+    "geary-papermc-nexo",
     "geary-papermc-core",
     "geary-papermc-datastore",
     "geary-papermc-plugin",

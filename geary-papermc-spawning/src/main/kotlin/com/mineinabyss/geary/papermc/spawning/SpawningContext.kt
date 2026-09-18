@@ -39,7 +39,7 @@ class SpawningContext(
                 |stored: <gray>${prettyPrintJson.encodeToString(spawnLocation.stored)}</gray>
             """.trimMargin().miniMsg()
             )
-            .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, command))
+            .clickEvent(ClickEvent.runCommand(command))
         player.sendMessage(message)
     }
 

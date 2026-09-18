@@ -26,6 +26,7 @@ paperweight.reobfArtifactConfiguration.set(ReobfArtifactConfiguration.MOJANG_PRO
 
 dependencies {
     implementation(project(":"))
+    implementation(project(":geary-papermc-nexo"))
 
     // MineInAbyss platform
     compileOnly(miaLibs.kotlin.stdlib)
@@ -52,6 +53,11 @@ paper {
             joinClasspath = true
         }
         register("MythicMobs") {
+            required = false
+            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
+            joinClasspath = true
+        }
+        register("Nexo") {
             required = false
             load = PaperPluginDescription.RelativeLoadOrder.BEFORE
             joinClasspath = true
