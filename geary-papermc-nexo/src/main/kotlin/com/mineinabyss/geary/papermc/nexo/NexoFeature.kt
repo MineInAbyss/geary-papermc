@@ -9,11 +9,14 @@ import com.mineinabyss.geary.papermc.gearyWorld
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.systems.query.query
+import com.mineinabyss.idofront.features.listeners
 import com.mineinabyss.idofront.features.requirePlugins
 import com.nexomc.nexo.api.NexoItems
 import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.plugin.java.JavaPlugin
 
-private const val OWNER = "geary"
+// Nexo keys external items by the owning plugin so it can unregister them all on unload
+private val owner: JavaPlugin get() = JavaPlugin.getProvidingPlugin(NexoCustomBlock::class.java)
 
 /**
  * Lets prefabs define Nexo items, so a [NexoFurniture] or [NexoCustomBlock] component registers its
@@ -22,6 +25,8 @@ private const val OWNER = "geary"
 val NexoFeature = module("nexo") {
     requirePlugins("Nexo")
 
+    listeners(NexoFurnitureListener())
+
     gearyWorld {
         fun GearyEntity.register(prefabKey: PrefabKey, setItem: SetItem, section: () -> ConfigurationSection) {
             val nexoId = nexoId(prefabKey)
@@ -29,7 +34,7 @@ val NexoFeature = module("nexo") {
             // Setting the item below retriggers the observer, nothing left to do on that pass
             if (setItem.item.prefab == nexoPrefab && NexoItems.exists(nexoId)) return
 
-            runCatching { NexoItems.registerExternalItem(OWNER, section()) }
+            runCatching { NexoItems.registerExternalItem(owner, section()) }
                 .onFailure { logger.w("Failed to register nexo item for $prefabKey: ${it.message}") }
 
             // Base the item on its own Nexo entry, so items geary hands out carry Nexo's id and its mechanic applies
@@ -39,15 +44,15 @@ val NexoFeature = module("nexo") {
         observe<OnSet>()
             .involving(query<NexoFurniture, PrefabKey, SetItem>())
             .exec { (furniture, prefabKey, setItem) ->
-                entity.register(prefabKey, setItem) { furniture.toItemSection(prefabKey, setItem.item.type) }
+                entity.register(prefabKey, setItem) { furniture.toItemSection(prefabKey, setItem.item.type, setItem.item.itemModel) }
             }
 
         observe<OnSet>()
             .involving(query<NexoCustomBlock, PrefabKey, SetItem>())
             .exec { (block, prefabKey, setItem) ->
-                entity.register(prefabKey, setItem) { block.toItemSection(prefabKey, setItem.item.type) }
+                entity.register(prefabKey, setItem) { block.toItemSection(prefabKey, setItem.item.type, setItem.item.itemModel) }
             }
     }
 
-    addCloseable { NexoItems.unregisterExternalItems(OWNER) }
+    addCloseable { NexoItems.unregisterExternalItems(owner) }
 }

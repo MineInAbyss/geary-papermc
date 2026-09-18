@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.nexo
 
 import com.mineinabyss.geary.prefabs.PrefabKey
+import net.kyori.adventure.key.Key
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.bukkit.Material
@@ -16,6 +17,6 @@ import org.bukkit.configuration.ConfigurationSection
 @SerialName("nexo:furniture")
 @JvmInline
 value class NexoFurniture(val mechanic: RawConfig = RawConfig()) {
-    fun toItemSection(prefabKey: PrefabKey, material: Material?): ConfigurationSection =
-        mechanic.toItemSection(prefabKey, material, "furniture")
+    fun toItemSection(prefabKey: PrefabKey, material: Material?, itemModel: Key?): ConfigurationSection =
+        mechanic.toItemSection(prefabKey, material, itemModel, "furniture")
 }
