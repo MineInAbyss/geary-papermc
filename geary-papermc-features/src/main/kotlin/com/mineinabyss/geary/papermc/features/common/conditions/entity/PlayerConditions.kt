@@ -7,6 +7,7 @@ import com.mineinabyss.idofront.serialization.IntRangeSerializer
 import com.mineinabyss.idofront.util.FloatRange
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.bukkit.Material
 import org.bukkit.entity.Player
 
 @Serializable
@@ -31,7 +32,6 @@ class PlayerConditions(
     val inPowderedSnow: Boolean? = null,
     val inCobweb: Boolean? = null,
     val insideVehicle: Boolean? = null,
-    val conversing: Boolean? = null,
     val riptiding: Boolean? = null,
     val invisible: Boolean? = null,
     val glowing: Boolean? = null,
@@ -44,6 +44,7 @@ class PlayerConditions(
     infix fun Boolean?.nullOrEquals(other: Boolean) = this == null || this == other
     override fun ActionGroupContext.execute(): Boolean {
         val player = entity?.get<Player>() ?: return false
+        val blockAt = player.location.block.type
         return player.isOnline && // Just to align syntax below
                 sneaking nullOrEquals player.isSneaking &&
                 sprinting nullOrEquals player.isSprinting &&
@@ -55,16 +56,15 @@ class PlayerConditions(
                 jumping nullOrEquals player.isJumping &&
                 inLava nullOrEquals player.isInLava &&
                 inWater nullOrEquals player.isInWater &&
-                inBubbleColumn nullOrEquals player.isInBubbleColumn &&
+                inBubbleColumn nullOrEquals (blockAt == Material.BUBBLE_COLUMN) &&
                 inRain nullOrEquals player.isInRain &&
                 flying nullOrEquals player.isFlying &&
                 gliding nullOrEquals player.isGliding &&
                 frozen nullOrEquals player.isFrozen &&
                 freezeTickingLocked nullOrEquals player.isFreezeTickingLocked &&
                 inPowderedSnow nullOrEquals player.isInPowderedSnow &&
-                inCobweb nullOrEquals (player.location.block.type == org.bukkit.Material.COBWEB) &&
+                inCobweb nullOrEquals (blockAt == Material.COBWEB) &&
                 insideVehicle nullOrEquals player.isInsideVehicle &&
-                conversing nullOrEquals player.isConversing &&
                 riptiding nullOrEquals player.isRiptiding &&
                 invisible nullOrEquals player.isInvisible &&
                 glowing nullOrEquals player.isGlowing &&

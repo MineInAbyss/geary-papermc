@@ -22,7 +22,7 @@ class GearyPlayerTracker : Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    fun PlayerQuitEvent.onPlayerLogout() = player.withGeary {
+    fun PlayerQuitEvent.onPlayerLogout(): Unit = player.withGeary {
         logger.v { "PlayerQuitEvent: Untracking ${player.name}" }
         val gearyEntity = player.toGearyOrNull() ?: return
         gearyEntity.encodeComponentsTo(player)

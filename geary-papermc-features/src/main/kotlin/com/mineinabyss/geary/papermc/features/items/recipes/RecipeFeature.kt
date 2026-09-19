@@ -30,6 +30,6 @@ val RecipeFeature = module("recipes") {
     plugin.launch {
         delay(1.ticks) // Allow other plugins to register recipes
         recipeManager.registerRecipes()
-        recipeManager.registerPotionMixes()
+        recipeManager.registerBrewingRecipes()
     }
 }

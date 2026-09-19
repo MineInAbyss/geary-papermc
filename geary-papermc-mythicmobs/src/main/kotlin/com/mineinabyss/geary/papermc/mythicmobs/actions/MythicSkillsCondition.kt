@@ -37,4 +37,4 @@ class MythicSkillsCondition(
     }
 }
 
-inline fun <T> ActionGroupContext.getOrNull(key: String): T? = environment[key] as? T
+fun <T> ActionGroupContext.getOrNull(key: String): T? = environment[key] as? T

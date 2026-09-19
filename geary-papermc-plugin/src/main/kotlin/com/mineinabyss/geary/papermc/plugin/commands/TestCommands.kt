@@ -22,8 +22,7 @@ val TestingFeature = module("testing").mainCommand {
             val decoded = runCatching {
                 gearyPaper.worldManager.global.getAddon(SerializableComponents)
                     .formats.getFormat("yml")
-                    ?.decodeFromString(PolymorphicListAsMapSerializer.ofComponents(), yaml)
-                    ?: fail("Could not decode yaml")
+                    .decodeFromString(PolymorphicListAsMapSerializer.ofComponents(), yaml)
             }.getOrElse { fail("Could not decode yaml:\n${it.message}") }
             decoded.forEach { comp ->
                 val className = comp::class.simpleName ?: return@forEach

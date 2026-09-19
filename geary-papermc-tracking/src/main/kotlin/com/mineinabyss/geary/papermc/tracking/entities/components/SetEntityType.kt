@@ -16,7 +16,6 @@ import net.minecraft.world.entity.EntityType
 value class SetEntityType(val key: String) {
     val entityTypeFromRegistry: EntityType<*>
         get() = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.tryParse(key))
-            ?: error("An entity type with key $key was not found.")
 }
 
 fun WorldScoped.markSetEntityTypeAsCustomMob() = observe<OnSet>()

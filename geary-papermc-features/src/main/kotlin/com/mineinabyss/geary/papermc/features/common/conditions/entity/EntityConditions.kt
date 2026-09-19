@@ -6,6 +6,7 @@ import com.mineinabyss.idofront.serialization.DoubleRangeSerializer
 import com.mineinabyss.idofront.util.DoubleRange
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.bukkit.Material
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 
@@ -43,19 +44,20 @@ class EntityConditions(
 
     override fun ActionGroupContext.execute(): Boolean {
         val livingEntity = entity?.get<LivingEntity>() ?: return false
+        val blockAt = livingEntity.location.block.type
         return sleeping nullOrEquals livingEntity.isSleeping &&
                 swimming nullOrEquals livingEntity.isSwimming &&
                 climbing nullOrEquals livingEntity.isClimbing &&
                 jumping nullOrEquals livingEntity.isJumping &&
                 inLava nullOrEquals livingEntity.isInLava &&
                 inWater nullOrEquals livingEntity.isInWater &&
-                inBubbleColumn nullOrEquals livingEntity.isInBubbleColumn &&
+                inBubbleColumn nullOrEquals (blockAt == Material.BUBBLE_COLUMN) &&
                 inRain nullOrEquals livingEntity.isInRain &&
                 onGround nullOrEquals livingEntity.isOnGround &&
                 gliding nullOrEquals livingEntity.isGliding &&
                 frozen nullOrEquals livingEntity.isFrozen &&
                 inPowderedSnow nullOrEquals livingEntity.isInPowderedSnow &&
-                inCobweb nullOrEquals (livingEntity.location.block.type == org.bukkit.Material.COBWEB) &&
+                inCobweb nullOrEquals (blockAt == Material.COBWEB) &&
                 insideVehicle nullOrEquals livingEntity.isInsideVehicle &&
                 riptiding nullOrEquals livingEntity.isRiptiding &&
                 invisible nullOrEquals livingEntity.isInvisible &&

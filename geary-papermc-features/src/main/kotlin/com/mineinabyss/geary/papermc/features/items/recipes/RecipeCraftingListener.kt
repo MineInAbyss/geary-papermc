@@ -50,10 +50,10 @@ class RecipeCraftingListener : Listener {
         val smithingTransformRecipes = Bukkit.recipeIterator().asSequence()
             .filterIsInstance<SmithingTransformRecipe>()
             .filter { it.result.fastPDC?.hasComponentsEncoded == true }
-        val customRecipeResult = smithingTransformRecipes.filter {
+        val customRecipeResult = smithingTransformRecipes.firstOrNull {
             it.base.itemStack.persistentDataContainer.decodePrefabs().firstOrNull() == inputGearyEntity
                     && it.template.test(template) && it.addition.test(mineral)
-        }.firstOrNull()?.result
+        }?.result
 
         result = (customRecipeResult ?: ItemStack.empty()).let {
             result?.toSerializable()?.toItemStack(it)

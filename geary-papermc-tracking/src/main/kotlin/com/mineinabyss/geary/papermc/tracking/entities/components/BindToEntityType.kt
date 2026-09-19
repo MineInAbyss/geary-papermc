@@ -12,5 +12,4 @@ import net.minecraft.world.entity.EntityType
 value class BindToEntityType(val key: String) {
     val entityTypeFromRegistry: EntityType<*>
         get() = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.tryParse(key))
-            ?: error("An entity type with key $key was not found.")
 }

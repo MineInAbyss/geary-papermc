@@ -23,7 +23,7 @@ internal fun IdoCommand.mobsQuery() {
     val mobs: List<String> by lazy {
         buildList {
             addAll(listOf("custom"))
-            addAll(context.scope[EntityTracking]!!.query.prefabs.getKeyStrings())
+            addAll(context.scope[EntityTracking].query.prefabs.getKeyStrings())
         }
     }
 

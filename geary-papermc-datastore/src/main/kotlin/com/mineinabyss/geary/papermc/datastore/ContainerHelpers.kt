@@ -14,17 +14,14 @@ import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataHolder
 
 /** Encodes this entity's persisting components into a [PersistentDataContainer] */
-fun GearyEntity.encodeComponentsTo(pdc: PersistentDataContainer) = with(world) {
-    val persisting = getAllPersisting()
-    if (persisting.isEmpty() && getRelations<InstanceOf?, Any?>().isEmpty()) {
-        pdc.hasComponentsEncoded = false
-        return
+fun GearyEntity.encodeComponentsTo(pdc: PersistentDataContainer) {
+    with(world) {
+        val persisting = getAllPersisting()
+        if (persisting.isEmpty() && getRelations<InstanceOf?, Any?>().isEmpty()) pdc.hasComponentsEncoded = false else {
+            for (it in persisting) getRelation<Persists>(component(it::class))?.hash = it.hashCode()
+            pdc.encodeComponents(persisting, type)
+        }
     }
-    // Update hashes
-    persisting.forEach {
-        getRelation<Persists>(component(it::class))?.hash = it.hashCode()
-    }
-    pdc.encodeComponents(persisting, type)
 }
 
 context(world: WorldScoped)

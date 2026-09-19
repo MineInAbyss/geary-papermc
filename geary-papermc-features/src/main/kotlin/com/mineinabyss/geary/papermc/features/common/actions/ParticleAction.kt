@@ -51,7 +51,7 @@ class ParticleAction(
             }
             .color(eval(color))
             .count(eval(count))
-            .extra(eval(speed))
+            .speed(eval(speed))
             .receivers(eval(radius))
             .data(eval(item)?.toItemStackOrNull())
             .spawn()

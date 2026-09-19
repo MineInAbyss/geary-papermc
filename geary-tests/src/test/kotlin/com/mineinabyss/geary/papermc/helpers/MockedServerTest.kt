@@ -40,7 +40,7 @@ abstract class MockedServerTest : GearyTest() {
 
     data class MinecraftContext(val server: ServerMock, val plugin: JavaPlugin, val world: World)
 
-    private lateinit var mcContext: MinecraftContext
+    private var mcContext: MinecraftContext
     val server get() = mcContext.server
     val plugin get() = mcContext.plugin
     val mcWorld get() = mcContext.world

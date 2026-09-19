@@ -10,6 +10,7 @@ import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
+import kotlin.collections.forEachIndexed
 
 //TODO functions for hot-reloading individual recipes
 class RecipeManager(
@@ -19,7 +20,7 @@ class RecipeManager(
     private val gearyItems: ItemTrackingModule,
 ) : AutoCloseable {
     internal val recipesQuery by lazy { with(world) { cache(query<SetRecipes, PrefabKey>()) } }
-    internal val potionMixes by lazy { with(world) { cache(query<SetPotionMixes, PrefabKey>()) } }
+    internal val brewingRecipes by lazy { with(world) { cache(query<SetBrewingRecipes, PrefabKey>()) } }
 
     var loadedRecipes: LoadedRecipes = LoadedRecipes()
         private set
@@ -69,26 +70,20 @@ class RecipeManager(
     }
 
     /**
-     * Registers potion mix recipes for any entities matched by [potionMixes].
+     * Registers brewing recipes for any entities matched by [brewingRecipes].
      *
      * If a recipe already exists, it is skipped and not re-registered due to clientside lag when resending all recipes.
      */
-    fun registerPotionMixes() = potionMixes.forEach { (potionMixes, prefabKey) ->
-        val result = potionMixes.result?.toItemStackOrNull() ?: gearyItems.createItem(prefabKey)
-        val brewer = plugin.server.potionBrewer
+    fun registerBrewingRecipes() = brewingRecipes.forEach { (brewing, prefabKey) ->
+        val result = brewing.result?.toItemStackOrNull() ?: gearyItems.createItem(prefabKey)
 
         if (result != null) {
-            potionMixes.potionmixes.forEachIndexed { i, potionmix ->
+            brewing.recipes.forEachIndexed { i, recipe ->
                 val key = NamespacedKey(prefabKey.namespace, "${prefabKey.key}$i")
                 // Skip recipes that were already registered, resending all causes large lag spike to clients
-                try {
-                    brewer.addPotionMix(potionmix.toPotionMix(key, result))
-                } catch (_: IllegalArgumentException) {
-                    // Thrown when recipe already registered
-                    return@forEachIndexed
-                }
+                Bukkit.getRecipe(key) ?: Bukkit.addRecipe(recipe.toBrewingRecipe(key, result))
             }
-        } else logger.w { "PotionMix $prefabKey is missing result item" }
+        } else logger.w { "Brewing recipe $prefabKey is missing result item" }
     }
 
     private fun getResultOrNull(prefabKey: PrefabKey, recipes: SetRecipes): ItemStack? {
@@ -109,7 +104,7 @@ class RecipeManager(
 
     override fun close() {
         recipesQuery.close()
-        potionMixes.close()
+        brewingRecipes.close()
     }
 
     data class LoadedRecipes(

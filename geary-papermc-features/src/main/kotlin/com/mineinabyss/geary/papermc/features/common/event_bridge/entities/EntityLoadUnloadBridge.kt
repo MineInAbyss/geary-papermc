@@ -29,13 +29,13 @@ class EntityLoadUnloadBridge : Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun EntitySpawnEvent.emitOnSpawn() = with(entity.world.toGeary()) {
+    fun EntitySpawnEvent.emitOnSpawn(): Unit = with(entity.world.toGeary()) {
         val gearyEntity = entity.toGearyOrNull() ?: return
         gearyEntity.emit<OnSpawn>()
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun EntityDeathEvent.emitOnDeath() = with(entity.world.toGeary()) {
+    fun EntityDeathEvent.emitOnDeath(): Unit = with(entity.world.toGeary()) {
         val gearyEntity = entity.toGearyOrNull() ?: return
         gearyEntity.emit<OnDeath>()
     }

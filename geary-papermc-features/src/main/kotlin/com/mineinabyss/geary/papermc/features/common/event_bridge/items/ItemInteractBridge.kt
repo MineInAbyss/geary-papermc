@@ -100,7 +100,7 @@ class ItemInteractBridge : Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun PlayerInteractEntityEvent.onRightClickEntity() = with(player.world.toGeary()) {
+    fun PlayerInteractEntityEvent.onRightClickEntity(): Unit = with(player.world.toGeary()) {
         val heldItem = player.inventory.toGeary()?.get(hand) ?: return
         heldItem.emit<OnItemRightClickEntity>()
     }

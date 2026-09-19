@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.spawning.choosing
 
 import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
+import com.mineinabyss.idofront.operators.plus
 import org.bukkit.Location
 import org.bukkit.util.BoundingBox
 import kotlin.math.ceil
@@ -55,10 +56,10 @@ class LocationSpread(val triesForNearbyLoc: Int) {
     ): Location {
         // generate x, z offsets within the radius using a normal distribution
         repeat(triesForNearbyLoc) {
-            val dx = random.nextGaussian(0.0, horizontalRange).toInt()
-            val dz = random.nextGaussian(0.0, horizontalRange).toInt()
+            val dx = random.nextGaussian(0.0, horizontalRange).toInt().toDouble()
+            val dz = random.nextGaussian(0.0, horizontalRange).toInt().toDouble()
             val dy = verticalRange * random.nextDouble(0.0, 1.0).toInt()
-            val offsetLoc = loc.clone().apply { add(dx.toDouble(), dy.toDouble(), dz.toDouble()) }
+            val offsetLoc = loc.clone().add(dx, dy, dz)
             if (SpawnPositionReader.spawnPositionFor(offsetLoc) == position) return offsetLoc
         }
         return loc

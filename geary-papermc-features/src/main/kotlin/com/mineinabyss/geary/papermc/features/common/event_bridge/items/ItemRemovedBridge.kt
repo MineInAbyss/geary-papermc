@@ -39,7 +39,7 @@ class ItemRemovedBridge : Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun PlayerDropItemEvent.emitOnItemDrop() = with(player.world.toGeary()) {
+    fun PlayerDropItemEvent.emitOnItemDrop(): Unit = with(player.world.toGeary()) {
         itemEntityContext {
             val droppedItem = itemDrop.itemStack.toGearyOrNull() ?: return
             droppedItem.addParent(player.toGeary())

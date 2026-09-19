@@ -14,12 +14,11 @@ import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.prefabs.entityOfOrNull
 import com.mineinabyss.idofront.features.get
 import com.mineinabyss.idofront.features.mainCommand
-import com.mineinabyss.idofront.items.editItemMeta
 import com.mineinabyss.idofront.messaging.info
+import io.papermc.paper.datacomponent.DataComponentTypes
+import io.papermc.paper.datacomponent.item.ItemContainerContents
 import org.bukkit.Material
-import org.bukkit.block.ShulkerBox
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.BlockStateMeta
 import org.bukkit.plugin.Plugin
 
 val DebugFeature = module("debug") { }.mainCommand {
@@ -50,11 +49,8 @@ val DebugFeature = module("debug") { }.mainCommand {
                 }
                     .chunked(27)
                 val shulkers = items.map { content ->
-                    ItemStack.of(Material.SHULKER_BOX).editItemMeta<BlockStateMeta> {
-                        blockState = blockState.apply {
-                            (this as ShulkerBox).inventory.addItem(*content.toTypedArray())
-                            this.update()
-                        }
+                    ItemStack.of(Material.SHULKER_BOX).apply {
+                        setData(DataComponentTypes.CONTAINER, ItemContainerContents.containerContents(content))
                     }
                 }
                 player.inventory.addItem(*shulkers.toTypedArray())
