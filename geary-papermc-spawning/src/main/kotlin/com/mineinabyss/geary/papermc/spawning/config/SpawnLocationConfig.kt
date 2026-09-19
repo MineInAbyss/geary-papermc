@@ -83,9 +83,13 @@ class SpawnLocationsUnified(configs: List<ConfigEntryWithKey<SpawnLocationsConfi
                     println("Warning: Duplicate spawn location ID '$id' found in config '${config.key}'. Skipping this entry.")
                     continue
                 }
-                unified[id] = location;
+                unified[id] = location
             }
         }
     }
 
+    /** The smallest override region containing [location], which takes precedence over any other spawn rules there. */
+    fun overrideAt(location: Location): Map.Entry<String, SpawnLocationConfig>? = unified.entries
+        .filter { it.value.gearySpawnOverride && it.value.isInside(location) }
+        .minByOrNull { it.value.getSize() }
 }

@@ -6,29 +6,24 @@ import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import org.bukkit.World
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.world.ChunkLoadEvent
+import org.bukkit.event.world.EntitiesLoadEvent
 
-// listen to chunk load event and spawn entity if its in the list of entities
+// EntitiesLoadEvent rather than ChunkLoadEvent, since persisted entities are not in yet at chunk load
 class ListSpawnListener(
     private val spawns: SpreadSpawnRepository,
     private val mainWorld: World,
 ) : Listener {
 
     @EventHandler
-    suspend fun ChunkLoadEvent.onChunkLoad() {
+    suspend fun EntitiesLoadEvent.onEntitiesLoad() {
         if (chunk.world != mainWorld) return
-        val chunkEntities = chunk.entities.toList()
-        val list: List<SpreadSpawnLocation> = spawns.getSpawnsInChunk(chunk)
+        val existingIds = entities.mapNotNullTo(HashSet()) { it.toGearyOrNull()?.get<SpreadSpawnLocation>()?.id }
+        val stored = spawns.getSpawnsInChunk(chunk)
 
-        for (spread: SpreadSpawnLocation in list) {
-            val idToCheck = spread.id
-            val alreadyExists = chunkEntities.any { entity ->
-                val checkspread = entity.toGearyOrNull()?.get<SpreadSpawnLocation>() ?: return@any false
-                checkspread.id == idToCheck
-            }
-            if (alreadyExists) {
-                continue
-            }
+        // The entity section may have unloaded while the query ran
+        if (!chunk.isEntitiesLoaded) return
+        for (spread in stored) {
+            if (spread.id in existingIds) continue
             spread.spawn()
         }
     }

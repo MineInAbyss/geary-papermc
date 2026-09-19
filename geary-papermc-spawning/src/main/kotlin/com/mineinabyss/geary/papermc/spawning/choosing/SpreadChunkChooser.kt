@@ -72,12 +72,12 @@ class SpreadChunkChooser(
         return Location(mainWorld, noisyX.toDouble(), 0.0, noisyZ.toDouble())
     }
 
-    private suspend fun findNearestSq(x: Int, z: Int, type: String): Double = TODO() /*db.read {
+    private suspend fun findNearestSq(x: Int, z: Int, type: String): Double {
         val loc = Location(mainWorld, x.toDouble(), 0.0, z.toDouble())
-        dao.getClosestSpawnOfType(loc, 1000.0, type)
+        return spawnLocs.getClosestSpawn(loc, 1000.0, listOf(type))
             ?.location?.distanceSquared(loc)
             ?: Double.MAX_VALUE
-    }*/
+    }
 }
 
 

@@ -54,11 +54,10 @@ class LocationSpread(val triesForNearbyLoc: Int) {
         horizontalRange: Double,
         verticalRange: Double,
     ): Location {
-        // generate x, z offsets within the radius using a normal distribution
         repeat(triesForNearbyLoc) {
             val dx = random.nextGaussian(0.0, horizontalRange).toInt().toDouble()
             val dz = random.nextGaussian(0.0, horizontalRange).toInt().toDouble()
-            val dy = verticalRange * random.nextDouble(0.0, 1.0).toInt()
+            val dy = random.nextGaussian(0.0, verticalRange).toInt().toDouble()
             val offsetLoc = loc.clone().add(dx, dy, dz)
             if (SpawnPositionReader.spawnPositionFor(offsetLoc) == position) return offsetLoc
         }
