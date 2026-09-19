@@ -8,6 +8,7 @@ import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.gearyWorld
 import com.mineinabyss.geary.papermc.mythicmobs.actions.runMMSkillAction
 import com.mineinabyss.geary.papermc.mythicmobs.items.MythicMobDropListener
+import com.mineinabyss.geary.papermc.mythicmobs.pvp.MythicPvpGuardListener
 import com.mineinabyss.geary.papermc.mythicmobs.skills.MythicPrefabsListeners
 import com.mineinabyss.geary.papermc.mythicmobs.spawning.markMMAsCustomMob
 import com.mineinabyss.geary.papermc.mythicmobs.spawning.mythicMobSpawner
@@ -20,11 +21,12 @@ val MythicMobsFeature = module("mythicMobs") {
 
     val dropListener by single { new(::MythicMobDropListener) }
     val prefabListener by single { new(::MythicPrefabsListeners) }
+    val pvpGuardListener by single { new(::MythicPvpGuardListener) }
 
     gearyWorld {
         runMMSkillAction()
         mythicMobSpawner()
         markMMAsCustomMob()
     }
-    listeners(dropListener, prefabListener)
+    listeners(dropListener, prefabListener, pvpGuardListener)
 }

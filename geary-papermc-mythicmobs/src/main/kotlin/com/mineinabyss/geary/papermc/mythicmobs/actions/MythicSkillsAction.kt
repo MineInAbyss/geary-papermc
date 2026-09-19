@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.mythicmobs.actions
 import com.google.common.collect.Lists
 import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.modules.observeWithData
+import com.mineinabyss.geary.papermc.mythicmobs.pvp.SkillCasterTracker
 import com.mineinabyss.geary.serialization.serializers.InnerSerializer
 import com.mineinabyss.geary.systems.query.query
 import com.mineinabyss.idofront.typealiases.BukkitEntity
@@ -14,6 +15,7 @@ import io.lumine.mythic.core.skills.SkillTriggers
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
+import org.bukkit.entity.Player
 import kotlin.jvm.optionals.getOrNull
 
 @Serializable(with = MythicSkillsAction.Serializer::class)
@@ -43,6 +45,6 @@ fun WorldScoped.runMMSkillAction() = observeWithData<MythicSkillsAction>()
                 null,
                 1.0f
             )
-            skill?.execute(meta)
+            SkillCasterTracker.withCaster(bukkit as? Player) { skill?.execute(meta) }
         }
     }
