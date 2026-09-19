@@ -7,6 +7,7 @@ import com.mineinabyss.idofront.typealiases.BukkitEntity
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.serializer
 import org.bukkit.Location
+import org.bukkit.util.BoundingBox
 
 @Serializable(with = SpawnType.Serializer::class)
 interface SpawnType {
@@ -14,6 +15,9 @@ interface SpawnType {
     val category: SpawnCategory
 
     fun spawnAt(location: Location): BukkitEntity
+
+    /** The box the entity would occupy if spawned at [location], or null when unknown before spawning. */
+    fun boundingBoxAt(location: Location): BoundingBox? = null
 
     object Serializer : InnerSerializer<String, SpawnType>(
         serialName = "SpawnType",

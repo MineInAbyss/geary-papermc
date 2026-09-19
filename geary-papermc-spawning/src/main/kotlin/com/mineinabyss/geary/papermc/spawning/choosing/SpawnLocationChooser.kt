@@ -23,6 +23,9 @@ class SpawnLocationChooser(
             randomSign() * horizontalRange.randomOrMin().toDouble(),
         )
 
+        // Block reads below would otherwise sync-load the chunk
+        if (!spawnLocation.isChunkLoaded) return null
+
         if (Random.nextDouble() < 0.2) {
             spawnLocation.y = tryGetHighestBlockWithinYRange(spawnLocation, config.maxVerticalDistance).y
         }

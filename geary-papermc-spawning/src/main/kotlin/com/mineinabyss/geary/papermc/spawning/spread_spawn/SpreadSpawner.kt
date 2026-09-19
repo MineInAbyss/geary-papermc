@@ -30,12 +30,10 @@ class SpreadSpawner(
     private val regConfig: SpawnLocationsUnified,
 ) {
     suspend fun spawnSpreadEntities() {
+        val container: RegionContainer = WorldGuard.getInstance().platform.regionContainer
+        val regions: RegionManager? = container.get(BukkitAdapter.adapt(world))
+
         for ((type, spreadConfigs) in configs.types) {
-
-            val container: RegionContainer = WorldGuard.getInstance().platform.regionContainer
-            val wgWorld: com.sk89q.worldedit.world.World = BukkitAdapter.adapt(world)
-            val regions: RegionManager? = container.get(wgWorld)
-
             spawnAll@ for ((regionName, config) in spreadConfigs.sectionsConfig) {
 
                 val region = regions?.getRegion(regionName) ?: run {

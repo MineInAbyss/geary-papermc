@@ -5,8 +5,10 @@ import com.mineinabyss.geary.papermc.spawning.spawn_types.SpawnType
 import com.mineinabyss.idofront.typealiases.BukkitEntity
 import io.lumine.mythic.bukkit.BukkitAdapter
 import io.lumine.mythic.bukkit.MythicBukkit
+import net.minecraft.world.entity.EntityDimensions
 import org.bukkit.Location
 import org.bukkit.craftbukkit.entity.CraftEntityType
+import org.bukkit.util.BoundingBox
 import kotlin.jvm.optionals.getOrNull
 
 class MythicSpawnType(
@@ -20,15 +22,31 @@ class MythicSpawnType(
             ?: error("Mythic mob $mobName not found")
     }
 
+    private val bukkitEntityType by lazy { CraftEntityType.stringToBukkit(mythicMob.entityType.name) }
+
+    // Null when MythicMobs uses an entity name Bukkit cannot map, e.g. BABY_ZOMBIE
+    private val dimensions: EntityDimensions? by lazy {
+        runCatching { CraftEntityType.bukkitToMinecraft(bukkitEntityType).dimensions }.getOrNull()
+    }
+
     override fun spawnAt(location: Location): BukkitEntity {
         val spawned = mythicMob.spawn(BukkitAdapter.adapt(location), 1.0)
         return spawned.entity.bukkitEntity
     }
 
+    override fun boundingBoxAt(location: Location): BoundingBox? {
+        val dims = dimensions ?: return null
+        val halfWidth = dims.width() / 2.0
+        return BoundingBox(
+            location.x - halfWidth, location.y, location.z - halfWidth,
+            location.x + halfWidth, location.y + dims.height(), location.z + halfWidth,
+        )
+    }
+
     override val category: SpawnCategory by lazy {
         SpawnCategory(
             mythicMob.config.getString("SpawnCategory")
-                ?: SpawnCategory.of(CraftEntityType.stringToBukkit(mythicMob.entityType.name))
+                ?: SpawnCategory.of(bukkitEntityType)
         )
     }
 }

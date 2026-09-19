@@ -8,10 +8,10 @@ import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.location
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
-import com.mineinabyss.geary.papermc.spawning.spawn_types.GearyReadEntityTypeEvent
-import com.mineinabyss.idofront.events.call
+import com.mineinabyss.geary.papermc.spawning.spawn_types.EntityTypeNames
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.bukkit.entity.Player
 
 @Serializable
 @SerialName("geary:max_nearby")
@@ -21,10 +21,15 @@ class NearbyCondition(
     val radius: Double = gearyPaper.features.getOrNull(SpawningFeature)?.get<SpawnConfig>()?.range?.defaultNearbyRange ?: 128.0,
 ) : Condition {
     override fun ActionGroupContext.execute(): Boolean {
-        val types = eval(types)
+        val types = eval(types).toSet()
         val location = location ?: return true
-        return location.world.getNearbyEntities(location, radius, radius, radius) {
-            GearyReadEntityTypeEvent(it).apply { call() }.type in types
-        }.size < amount
+        if (amount <= 0) return false
+        var count = 0
+        for (entity in location.world.getNearbyLivingEntities(location, radius, radius, radius)) {
+            if (entity is Player) continue
+            if (EntityTypeNames.of(entity) !in types) continue
+            if (++count >= amount) return false
+        }
+        return true
     }
 }
