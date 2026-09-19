@@ -13,16 +13,22 @@ class MythicSpawnType(
     override val key: String,
     mobName: String,
 ) : SpawnType {
-    val mythicMob = MythicBukkit.inst().mobManager.getMythicMob(mobName).getOrNull()
-        ?: error("Mythic mob $mobName not found")
+    // Mobs declaring a Template are registered in a later pass than plain ones, so they are missing from
+    // MythicMobs' registry while we read spawn configs on enable, and may only be resolved once the server is up
+    val mythicMob by lazy {
+        MythicBukkit.inst().mobManager.getMythicMob(mobName).getOrNull()
+            ?: error("Mythic mob $mobName not found")
+    }
 
     override fun spawnAt(location: Location): BukkitEntity {
         val spawned = mythicMob.spawn(BukkitAdapter.adapt(location), 1.0)
         return spawned.entity.bukkitEntity
     }
 
-    override val category: SpawnCategory = SpawnCategory(
-        mythicMob.config.getString("SpawnCategory")
-            ?: SpawnCategory.of(CraftEntityType.stringToBukkit(mythicMob.entityType.name))
-    )
+    override val category: SpawnCategory by lazy {
+        SpawnCategory(
+            mythicMob.config.getString("SpawnCategory")
+                ?: SpawnCategory.of(CraftEntityType.stringToBukkit(mythicMob.entityType.name))
+        )
+    }
 }

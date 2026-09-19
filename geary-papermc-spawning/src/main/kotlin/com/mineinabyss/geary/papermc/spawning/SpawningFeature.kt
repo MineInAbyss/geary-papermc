@@ -132,6 +132,18 @@ val SpawningFeature = module("spawning") {
         delay(1.ticks) // Let other plugins register components
         context // Load context (reads all spawns)
         logger.i { "Loaded ${context.spawns.size} normal spawn types and ${spreadConfig.types.size} spread spawn types" }
+
+        val spreadEntries = spreadConfig.types.values
+            .flatMap { it.sectionsConfig.values }
+            .flatMap { listOf(it.entry, it.altSpawnEntry) }
+        (context.spawnEntriesByName.values + spreadEntries)
+            .map { it.type }
+            .distinctBy { it.key }
+            .forEach { type ->
+                // Reading the category resolves the backing mob, which spawn types defer until other plugins have registered theirs
+                runCatching { type.category }
+                    .onFailure { logger.e { "Spawn type ${type.key} could not be resolved: ${it.message}" } }
+            }
     }
 }.mainCommand {
     "spawns" {
