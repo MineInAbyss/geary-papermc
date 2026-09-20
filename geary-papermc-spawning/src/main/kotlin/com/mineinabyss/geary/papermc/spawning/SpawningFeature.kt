@@ -41,6 +41,7 @@ import com.mineinabyss.idofront.time.ticks
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import me.dvyy.sqlite.Database
+import me.dvyy.sqlite.WriteTransaction
 import org.bukkit.Bukkit
 import org.bukkit.plugin.Plugin
 import kotlin.io.path.Path
@@ -83,6 +84,7 @@ val SpawningFeature = module("spawning") {
     val spawnDAO by single { new(::SpawnsDatabase) }
     val spawnDB by single<Database> {
         get<Plugin>().sqliteDatabase(Path("spawns.db")) {
+            migrateSpawnDataToText()
             spawnDAO.create()
         }
     }
@@ -114,12 +116,11 @@ val SpawningFeature = module("spawning") {
     val listSpawnListener by single { new(::ListSpawnListener) }
     val spreadDeathListener by single { new(::SpreadEntityDeathListener) }
 
-    listeners(
-        spawnTypeListener,
-        mythicSpawnListener,
-        listSpawnListener,
-        spreadDeathListener,
-    )
+    // Deserializing a spawn type fires GearyReadTypeEvent, so these must be live before any listener
+    // below pulls a spawn config in through its constructor
+    listeners(spawnTypeListener, mythicSpawnListener)
+
+    listeners(listSpawnListener, spreadDeathListener)
 
     // -- Tasks registration --
     task(get<SpawnTask>().job)
@@ -228,4 +229,20 @@ val SpawningFeature = module("spawning") {
             }
         }
     }
+}
+
+// spawn_data was briefly declared BLOB while insertData writes json(), which returns TEXT and a STRICT
+// table rejects. Databases created in that window hold no rows, since every insert failed.
+private fun WriteTransaction.migrateSpawnDataToText() {
+    val dataType = getOrNull("SELECT type FROM pragma_table_info('spawn_data') WHERE name = 'data'") { getText(0) }
+    if (dataType == null || !dataType.equals("BLOB", ignoreCase = true)) return
+
+    exec("DROP VIEW IF EXISTS spawn_view")
+    exec("DROP TRIGGER IF EXISTS spawn_data_on_delete")
+    exec("DROP INDEX IF EXISTS spawn_data_created_time")
+    exec("DROP INDEX IF EXISTS spawn_data_category")
+    exec("ALTER TABLE spawn_data RENAME TO spawn_data_old")
+    exec("CREATE TABLE spawn_data (id INTEGER PRIMARY KEY, data TEXT NOT NULL) STRICT")
+    exec("INSERT INTO spawn_data(id, data) SELECT id, CAST(data AS TEXT) FROM spawn_data_old")
+    exec("DROP TABLE spawn_data_old")
 }

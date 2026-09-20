@@ -117,8 +117,12 @@ VALUES (:id, json(:data));
 
 -- insertRtree
 INSERT INTO spawn_rtree(minX, maxX, minY, maxY, minZ, maxZ)
-VALUES (:x, :x, :y, :y, :z, :z)
-RETURNING id;
+VALUES (:x, :x, :y, :y, :z, :z);
+
+-- RETURNING gives NULL on an rtree table, which assigns the rowid after the values it hands back.
+-- Only valid on the same connection, immediately after insertRtree.
+-- lastInsertedRtreeId
+SELECT last_insert_rowid() AS id;
 
 -- deleteSpawnsOlderThan
 DELETE
