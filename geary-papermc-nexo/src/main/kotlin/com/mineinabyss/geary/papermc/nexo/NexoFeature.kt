@@ -28,14 +28,23 @@ val NexoFeature = module("nexo") {
     listeners(NexoFurnitureListener())
 
     gearyWorld {
-        fun GearyEntity.register(prefabKey: PrefabKey, setItem: SetItem, section: () -> ConfigurationSection) {
+        fun GearyEntity.register(
+            prefabKey: PrefabKey,
+            setItem: SetItem,
+            mechanic: String,
+            section: () -> ConfigurationSection,
+        ) {
             val nexoId = nexoId(prefabKey)
             val nexoPrefab = "nexo $nexoId"
             // Setting the item below retriggers the observer, nothing left to do on that pass
             if (setItem.item.prefab == nexoPrefab && NexoItems.exists(nexoId)) return
 
-            runCatching { NexoItems.registerExternalItem(owner, section()) }
-                .onFailure { logger.w("Failed to register nexo item for $prefabKey: ${it.message}") }
+            // Nexo saves whatever parsing filled in back to an items-file, ours has to go onto the prefab instead
+            runCatching {
+                NexoItems.registerExternalItem(owner, section()) { parsed ->
+                    persistNexoAssignments(prefabKey, mechanic, parsed, logger)
+                }
+            }.onFailure { logger.w("Failed to register nexo item for $prefabKey: ${it.message}") }
 
             // Base the item on its own Nexo entry, so items geary hands out carry Nexo's id and its mechanic applies
             if (setItem.item.prefab != nexoPrefab) set(SetItem(setItem.item.copy(prefab = nexoPrefab)))
@@ -44,13 +53,13 @@ val NexoFeature = module("nexo") {
         observe<OnSet>()
             .involving(query<NexoFurniture, PrefabKey, SetItem>())
             .exec { (furniture, prefabKey, setItem) ->
-                entity.register(prefabKey, setItem) { furniture.toItemSection(prefabKey, setItem.item.type, setItem.item.itemModel) }
+                entity.register(prefabKey, setItem, "furniture") { furniture.toItemSection(prefabKey, setItem.item.type, setItem.item.itemModel) }
             }
 
         observe<OnSet>()
             .involving(query<NexoCustomBlock, PrefabKey, SetItem>())
             .exec { (block, prefabKey, setItem) ->
-                entity.register(prefabKey, setItem) { block.toItemSection(prefabKey, setItem.item.type, setItem.item.itemModel) }
+                entity.register(prefabKey, setItem, "custom_block") { block.toItemSection(prefabKey, setItem.item.type, setItem.item.itemModel) }
             }
     }
 

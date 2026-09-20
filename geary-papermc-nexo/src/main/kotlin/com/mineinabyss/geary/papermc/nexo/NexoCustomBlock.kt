@@ -12,7 +12,8 @@ import org.bukkit.configuration.ConfigurationSection
  *
  * The component body is Nexo's `Mechanics.custom_block` section, handed to the custom block factory untouched,
  * so it takes everything that block does in an item config. `type` is required, one of Nexo's registered block
- * types, and `custom_variation` is picked automatically from the `model` when left out.
+ * types. `custom_variation` is picked from the `model` when left out and written back into this prefab, since
+ * an unpinned one is handed out in registration order and would renumber blocks already placed in the world.
  */
 @Serializable
 @SerialName("nexo:custom_block")
