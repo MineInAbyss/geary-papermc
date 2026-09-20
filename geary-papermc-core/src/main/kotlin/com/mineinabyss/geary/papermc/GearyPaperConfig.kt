@@ -13,8 +13,6 @@ class GearyPaperConfig(
     val entities: EntityTrackingConfig = EntityTrackingConfig(),
     val items: ItemTrackingConfig = ItemTrackingConfig(),
     val loading: Loading = Loading(),
-    @YamlComment("Convert blocks to and from geary.")
-    val trackBlocks: Boolean = true,
     @YamlComment("Whether to enable Minecraft-specific features for Geary like event bridging. Requires item and entity tracking to be enabled.")
     val minecraftFeatures: Boolean = true,
     @YamlComment("Whether to enable Geary actions (ex. used for item configs.)")

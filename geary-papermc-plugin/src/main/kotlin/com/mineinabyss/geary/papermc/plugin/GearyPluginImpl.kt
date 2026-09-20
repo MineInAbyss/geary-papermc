@@ -22,7 +22,6 @@ import com.mineinabyss.geary.papermc.plugin.commands.TestingFeature
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.SpawningWorldGuardFlags
 import com.mineinabyss.geary.papermc.spawning.locations.LocationsFeature
-import com.mineinabyss.geary.papermc.tracking.blocks.BlockTracking
 import com.mineinabyss.geary.papermc.tracking.entities.MCEntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.MCItemTracking
@@ -135,7 +134,6 @@ class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
         di.scope.loadAllCatching(
             MCEntityTracking,
             MCItemTracking,
-            BlockTracking,
             MinecraftFeatures,
             CustomItemsFeature,
             MythicMobsFeature,

@@ -1,7 +1,9 @@
 package com.mineinabyss.geary.papermc.nexo
 
 import com.mineinabyss.dependencies.addCloseable
+import com.mineinabyss.dependencies.gets
 import com.mineinabyss.dependencies.module
+import com.mineinabyss.dependencies.single
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.modules.observe
 import com.mineinabyss.geary.observers.events.OnSet
@@ -27,6 +29,8 @@ val NexoFeature = module("nexo") {
 
     listeners(NexoFurnitureListener())
 
+    val nexo2Prefab by single { Nexo2Prefab() }
+
     gearyWorld {
         fun GearyEntity.register(
             prefabKey: PrefabKey,
@@ -36,6 +40,7 @@ val NexoFeature = module("nexo") {
         ) {
             val nexoId = nexoId(prefabKey)
             val nexoPrefab = "nexo $nexoId"
+            nexo2Prefab[nexoId] = prefabKey
             // Setting the item below retriggers the observer, nothing left to do on that pass
             if ((setItem == null || setItem.item.prefab == nexoPrefab) && NexoItems.exists(nexoId)) return
 
@@ -69,4 +74,4 @@ val NexoFeature = module("nexo") {
     }
 
     addCloseable { NexoItems.unregisterExternalItems(owner) }
-}
+}.gets<Nexo2Prefab>()
