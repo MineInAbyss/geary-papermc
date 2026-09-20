@@ -27,6 +27,7 @@ paperweight.reobfArtifactConfiguration.set(ReobfArtifactConfiguration.MOJANG_PRO
 dependencies {
     implementation(project(":"))
     implementation(project(":geary-papermc-nexo"))
+    implementation(project(":geary-papermc-menus"))
 
     // MineInAbyss platform
     compileOnly(miaLibs.kotlin.stdlib)
@@ -58,6 +59,11 @@ paper {
             joinClasspath = true
         }
         register("Nexo") {
+            required = false
+            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
+            joinClasspath = true
+        }
+        register("Guiy") {
             required = false
             load = PaperPluginDescription.RelativeLoadOrder.BEFORE
             joinClasspath = true

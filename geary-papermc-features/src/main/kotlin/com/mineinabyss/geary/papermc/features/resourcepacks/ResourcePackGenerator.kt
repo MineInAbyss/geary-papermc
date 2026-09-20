@@ -2,6 +2,7 @@ package com.mineinabyss.geary.papermc.features.resourcepacks
 
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.GearyPaperConfig
+import com.mineinabyss.geary.papermc.MenuModels
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
@@ -14,6 +15,7 @@ import org.bukkit.plugin.Plugin
 import team.unnamed.creative.ResourcePack
 import team.unnamed.creative.item.Item
 import team.unnamed.creative.item.ItemModel
+import team.unnamed.creative.item.property.ItemBooleanProperty
 import team.unnamed.creative.metadata.pack.FormatVersion
 import team.unnamed.creative.metadata.pack.PackFormat
 import team.unnamed.creative.metadata.pack.PackMeta
@@ -56,12 +58,37 @@ class ResourcePackGenerator(
             if (resourcePack.item(itemKey) == null) resourcePack.item(item)
         }
 
+        addMenuModels()
+
         if (resourcePack.packMeta() == null) {
             val format = PackFormat.format(FormatVersion.of(97), FormatVersion.of(99))
             resourcePack.packMeta(PackMeta.of(format, Component.text("Geary ResourcePack")))
         }
 
         ResourcePacks.writeToFile(resourcePackFile, resourcePack)
+    }
+
+    private fun addMenuModels() {
+        val textures = config.menus.textures
+        fun flatModel(key: Key, texture: String): ItemModel {
+            Model.model().key(key).parent(Key.key("minecraft:item/generated"))
+                .textures(ModelTextures.of(listOf(ModelTexture.ofKey(Key.key(texture))), null, emptyMap()))
+                .build().addTo(resourcePack)
+            return ItemModel.reference(key)
+        }
+        fun menuItem(key: Key, model: ItemModel) {
+            if (resourcePack.item(key) == null) resourcePack.item(Item.item(key, model))
+        }
+
+        menuItem(MenuModels.SCROLL_UP, flatModel(MenuModels.SCROLL_UP, textures.scrollUp))
+        menuItem(MenuModels.SCROLL_DOWN, flatModel(MenuModels.SCROLL_DOWN, textures.scrollDown))
+        menuItem(
+            MenuModels.GROUP_BY_FOLDERS, ItemModel.conditional(
+                ItemBooleanProperty.customModelData(0),
+                flatModel(Key.key(MenuModels.GROUP_BY_FOLDERS.namespace(), MenuModels.GROUP_BY_FOLDERS.value() + "_on"), textures.groupByFoldersOn),
+                flatModel(Key.key(MenuModels.GROUP_BY_FOLDERS.namespace(), MenuModels.GROUP_BY_FOLDERS.value() + "_off"), textures.groupByFoldersOff),
+            )
+        )
     }
 
     private fun generatePredicateModels(

@@ -37,6 +37,7 @@ include(
     "geary-papermc-features",
     "geary-papermc-mythicmobs",
     "geary-papermc-nexo",
+    "geary-papermc-menus",
     "geary-papermc-core",
     "geary-papermc-datastore",
     "geary-papermc-plugin",

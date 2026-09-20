@@ -25,6 +25,7 @@ class GearyPaperConfig(
     val resourcePack: ResourcePack = ResourcePack(),
     @YamlComment("Whether to enable Geary's spawning system")
     val spawning: Boolean = true,
+    val menus: MenusConfig = MenusConfig(),
 ) {
     @Serializable
     data class Loading(
@@ -95,3 +96,27 @@ data class ResourcePack(
     @YamlComment("Points to a resourcepack in zip or directory format to merge into Geary's pack")
     val includedPackPath: String = "",
 )
+
+@Serializable
+data class MenusConfig(
+    @YamlComment("Emojy title of the main menu, the sections open below it")
+    val mainTitle: String = ":space_-8::geary_menu:",
+    @YamlComment("Emojy title of a section grid, 8 columns wide with the buttons in the right column")
+    val gridTitle: String = ":space_-8::geary_grid_menu:",
+    @YamlComment("Emojy title of the search dialog")
+    val searchTitle: String = ":space_-24::geary_search_menu:",
+    @YamlComment("SCROLLING moves one row at a time, PAGINATED swaps the whole grid")
+    val scrollMode: ScrollMode = ScrollMode.SCROLLING,
+    @YamlComment("Textures the generated resourcepack puts on the grid buttons")
+    val textures: MenuTextures = MenuTextures(),
+)
+
+@Serializable
+data class MenuTextures(
+    val scrollUp: String = "mineinabyss:ui/geary/geary_scrolling_up",
+    val scrollDown: String = "mineinabyss:ui/geary/geary_scrolling_down",
+    val groupByFoldersOn: String = "mineinabyss:ui/geary/geary_folders_on",
+    val groupByFoldersOff: String = "mineinabyss:ui/geary/geary_folders_off",
+)
+
+enum class ScrollMode { SCROLLING, PAGINATED }

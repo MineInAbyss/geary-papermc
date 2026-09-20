@@ -10,6 +10,7 @@ dependencies {
     api(project(":geary-papermc-mythicmobs"))
     api(project(":geary-papermc-features"))
     api(project(":geary-papermc-spawning"))
+    api(project(":geary-papermc-menus"))
     api(libs.geary.core)
     api(libs.geary.autoscan)
     api(libs.geary.prefabs)
