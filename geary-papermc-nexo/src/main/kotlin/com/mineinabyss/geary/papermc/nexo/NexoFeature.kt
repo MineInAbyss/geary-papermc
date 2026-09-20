@@ -27,7 +27,7 @@ private val owner: JavaPlugin get() = JavaPlugin.getProvidingPlugin(NexoCustomBl
 val NexoFeature = module("nexo") {
     requirePlugins("Nexo")
 
-    listeners(NexoFurnitureListener())
+    listeners(NexoFurnitureListener(), NexoItemLoadListener())
 
     val nexo2Prefab by single { Nexo2Prefab() }
 

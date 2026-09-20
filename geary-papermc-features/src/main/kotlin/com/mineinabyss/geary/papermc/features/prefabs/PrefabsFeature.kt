@@ -8,6 +8,7 @@ import com.mineinabyss.geary.datatypes.family.family
 import com.mineinabyss.geary.helpers.parent
 import com.mineinabyss.geary.modules.findEntities
 import com.mineinabyss.geary.papermc.GearyPaperConfig
+import com.mineinabyss.geary.papermc.PrefabLoading
 import com.mineinabyss.geary.papermc.WorldManager
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.gearyWorld
@@ -42,21 +43,29 @@ val PrefabsFeature = module("prefabs") {
 
     gearyWorld {
         val prefabs = getAddon(Prefabs)
+        // Flagged out here rather than inside the coroutine, a plugin asking whether prefabs are still
+        // loading may well have asked before that first delay is even up
+        PrefabLoading.started()
         // Load prefabs in Geary/prefabs folder, each subfolder is considered its own namespace
         plugin.launch {
-            delay(1.ticks) // Let other plugins register components
+            try {
+                delay(1.ticks) // Let other plugins register components
 
-            plugin.dataPath
-                .resolve("prefabs")
-                .createDirectories()
-                .listDirectoryEntries()
-                .filter(Path::isDirectory)
-                .forEach { folder ->
-                    prefabs.fromDirectory(folder.name, folder)
-                }
+                plugin.dataPath
+                    .resolve("prefabs")
+                    .createDirectories()
+                    .listDirectoryEntries()
+                    .filter(Path::isDirectory)
+                    .forEach { folder ->
+                        prefabs.fromDirectory(folder.name, folder)
+                    }
 
-            // Force item refresh if any players are online
-            plugin.server.onlinePlayers.forEach { it.inventory.toGeary()?.forceRefresh(ignoreCached = true) }
+                // Force item refresh if any players are online
+                plugin.server.onlinePlayers.forEach { it.inventory.toGeary()?.forceRefresh(ignoreCached = true) }
+            } finally {
+                // A namespace throwing still ends the load, whoever waits on it must not hang
+                PrefabLoading.finished()
+            }
         }
     }
 }.mainCommand {
