@@ -30,14 +30,14 @@ val NexoFeature = module("nexo") {
     gearyWorld {
         fun GearyEntity.register(
             prefabKey: PrefabKey,
-            setItem: SetItem,
+            setItem: SetItem?,
             mechanic: String,
             section: () -> ConfigurationSection,
         ) {
             val nexoId = nexoId(prefabKey)
             val nexoPrefab = "nexo $nexoId"
             // Setting the item below retriggers the observer, nothing left to do on that pass
-            if (setItem.item.prefab == nexoPrefab && NexoItems.exists(nexoId)) return
+            if ((setItem == null || setItem.item.prefab == nexoPrefab) && NexoItems.exists(nexoId)) return
 
             // Nexo saves whatever parsing filled in back to an items-file, ours has to go onto the prefab instead
             runCatching {
@@ -47,7 +47,7 @@ val NexoFeature = module("nexo") {
             }.onFailure { logger.w("Failed to register nexo item for $prefabKey: ${it.message}") }
 
             // Base the item on its own Nexo entry, so items geary hands out carry Nexo's id and its mechanic applies
-            if (setItem.item.prefab != nexoPrefab) set(SetItem(setItem.item.copy(prefab = nexoPrefab)))
+            if (setItem != null && setItem.item.prefab != nexoPrefab) set(SetItem(setItem.item.copy(prefab = nexoPrefab)))
         }
 
         observe<OnSet>()
@@ -56,10 +56,15 @@ val NexoFeature = module("nexo") {
                 entity.register(prefabKey, setItem, "furniture") { furniture.toItemSection(prefabKey, setItem.item.type, setItem.item.itemModel) }
             }
 
+        // SetItem is left out of the query, the children of a directional block are blocks with no item of
+        // their own and Nexo still has to know them, a parent resolves its x/y/z_block against registered ids
         observe<OnSet>()
-            .involving(query<NexoCustomBlock, PrefabKey, SetItem>())
-            .exec { (block, prefabKey, setItem) ->
-                entity.register(prefabKey, setItem, "custom_block") { block.toItemSection(prefabKey, setItem.item.type, setItem.item.itemModel) }
+            .involving(query<NexoCustomBlock, PrefabKey>())
+            .exec { (block, prefabKey) ->
+                val setItem = entity.get<SetItem>()
+                entity.register(prefabKey, setItem, "custom_block") {
+                    block.toItemSection(prefabKey, setItem?.item?.type, setItem?.item?.itemModel)
+                }
             }
     }
 
