@@ -2,12 +2,14 @@ package com.mineinabyss.geary.papermc.features.common.conditions.location
 
 class Checks() {
     var failed = StringBuilder()
+    var errored = StringBuilder()
 
     inline fun check(name: String, run: () -> Boolean) {
         val result = runCatching { run() }
             .onFailure { exception ->
-                if (failed.isNotEmpty()) failed.appendLine()
-                failed.append("$name: ${exception.message}")
+                // Could not be evaluated at all, which is a config problem rather than a mismatch
+                if (errored.isNotEmpty()) errored.appendLine()
+                errored.append("$name: ${exception.message}")
             }
             .getOrNull() ?: return
         if (!result) {
@@ -21,7 +23,12 @@ class Checks() {
         check(name) { run(argument) }
     }
 
-    val result get() = if (failed.isEmpty()) CheckResult.Success else CheckResult.Failure(failed.toString())
+    val result
+        get() = when {
+            errored.isNotEmpty() -> CheckResult.Error(errored.toString())
+            failed.isNotEmpty() -> CheckResult.Failure(failed.toString())
+            else -> CheckResult.Success
+        }
 }
 
 inline fun checks(check: Checks.() -> Unit): CheckResult {

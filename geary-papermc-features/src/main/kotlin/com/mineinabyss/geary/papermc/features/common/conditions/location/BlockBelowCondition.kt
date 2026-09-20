@@ -12,6 +12,6 @@ import kotlinx.serialization.Serializable
 @SerialName("geary:block_below")
 value class BlockBelowCondition(val conditions: BlockConditions) : Condition {
     override fun ActionGroupContext.execute(): Boolean {
-        return conditions.check(location?.clone()?.down(1)).successOrThrow()
+        return conditions.check(location?.clone()?.down(1)).passedOrThrow()
     }
 }
