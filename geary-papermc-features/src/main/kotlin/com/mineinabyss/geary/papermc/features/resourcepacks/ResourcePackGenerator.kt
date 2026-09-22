@@ -3,12 +3,11 @@ package com.mineinabyss.geary.papermc.features.resourcepacks
 import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.MenuModels
-import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
+import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
 import com.mineinabyss.geary.systems.query.GearyQuery
 import com.mineinabyss.idofront.resourcepacks.ResourcePacks
-import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 import org.bukkit.plugin.Plugin
@@ -37,7 +36,7 @@ class ResourcePackGenerator(
         val resourcePackFile = plugin.dataFolder.resolve(config.resourcePack.outputPath)
         resourcePackFile.deleteRecursively()
 
-        resourcePackQuery.forEach { (prefabKey, content, itemStack) ->
+        resourcePackQuery.forEach { (prefabKey, content, itemModel) ->
             // Generates any missing models for predicates if only textures are provided
             generatePredicateModels(resourcePack, content, prefabKey)
 
@@ -51,9 +50,7 @@ class ResourcePackGenerator(
                 )
             }
 
-            val itemKey = itemStack?.getData(DataComponentTypes.ITEM_MODEL)
-                ?.takeIf { itemStack.isDataOverridden(DataComponentTypes.ITEM_MODEL) }
-                ?: content.itemModel ?: Key.key(prefabKey.full)
+            val itemKey = itemModel ?: content.itemModel ?: Key.key(prefabKey.full)
             val item = Item.item(itemKey, ItemModel.reference(content.model ?: Key.key(prefabKey.namespace, prefabKey.key), content.tintSources))
             if (resourcePack.item(itemKey) == null) resourcePack.item(item)
         }
@@ -126,7 +123,10 @@ class ResourcePackGenerator(
     class ResourcePackQuery(world: Geary) : GearyQuery(world) {
         private val prefabKey by get<PrefabKey>()
         private val resourcePackContent by get<ResourcePackContent>()
-        //private val itemstack by get<SerializableItemStack>().orNull()
+
+        // Read off the prefab rather than off a built item, building one resolves item providers like Nexo's,
+        // which have not loaded their own items yet while the pack is generated
+        private val setItem by get<SetItem>().orNull()
 
         override fun ensure() = this {
             has<Prefab>()
@@ -134,6 +134,6 @@ class ResourcePackGenerator(
 
         operator fun component1() = prefabKey
         operator fun component2() = resourcePackContent
-        operator fun component3() = world.getAddon(ItemTracking).itemProvider.serializePrefabToItemStack(prefabKey)
+        operator fun component3() = setItem?.item?.itemModel
     }
 }
