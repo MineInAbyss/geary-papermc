@@ -6,19 +6,11 @@ import com.mineinabyss.dependencies.module
 import com.mineinabyss.geary.engine.archetypes.ArchetypeQueryManager
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.Geary
-import com.mineinabyss.geary.papermc.features.resourcepacks.ResourcePackContent
-import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.entities.toGeary
-import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
-import com.mineinabyss.geary.prefabs.entityOfOrNull
 import com.mineinabyss.idofront.features.get
 import com.mineinabyss.idofront.features.mainCommand
 import com.mineinabyss.idofront.messaging.info
-import io.papermc.paper.datacomponent.DataComponentTypes
-import io.papermc.paper.datacomponent.item.ItemContainerContents
-import org.bukkit.Material
-import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 
 val DebugFeature = module("debug") { }.mainCommand {
@@ -37,23 +29,6 @@ val DebugFeature = module("debug") { }.mainCommand {
                             .joinToString(separator = "\n") { (components, slot) -> "$slot: $components" }
                     )
                 }
-            }
-        }
-        "resourcepack_items" {
-            executes.asPlayer {
-                val world = player.world.toGeary()
-                val gearyItems = world.getAddon(ItemTracking)
-                val items = gearyItems.prefabs.mapNotNull {
-                    world.entityOfOrNull(it.key)?.has<ResourcePackContent>()?.takeIf { it }
-                        ?.let { _ -> gearyItems.itemProvider.serializePrefabToItemStack(it.key) }
-                }
-                    .chunked(27)
-                val shulkers = items.map { content ->
-                    ItemStack.of(Material.SHULKER_BOX).apply {
-                        setData(DataComponentTypes.CONTAINER, ItemContainerContents.containerContents(content))
-                    }
-                }
-                player.inventory.addItem(*shulkers.toTypedArray())
             }
         }
         "stats" {
