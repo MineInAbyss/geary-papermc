@@ -15,10 +15,6 @@ import com.mineinabyss.idofront.features.listeners
 import com.mineinabyss.idofront.features.requirePlugins
 import com.nexomc.nexo.api.NexoItems
 import org.bukkit.configuration.ConfigurationSection
-import org.bukkit.plugin.java.JavaPlugin
-
-// Nexo keys external items by the owning plugin so it can unregister them all on unload
-private val owner: JavaPlugin get() = JavaPlugin.getProvidingPlugin(NexoCustomBlock::class.java)
 
 /**
  * Lets prefabs define Nexo items, so a [NexoFurniture] or [NexoCustomBlock] component registers its
@@ -44,12 +40,7 @@ val NexoFeature = module("nexo") {
             // Setting the item below retriggers the observer, nothing left to do on that pass
             if ((setItem == null || setItem.item.prefab == nexoPrefab) && NexoItems.exists(nexoId)) return
 
-            // Nexo saves whatever parsing filled in back to an items-file, ours has to go onto the prefab instead
-            runCatching {
-                NexoItems.registerExternalItem(owner, section()) { parsed ->
-                    persistNexoAssignments(prefabKey, mechanic, parsed, logger)
-                }
-            }.onFailure { logger.w("Failed to register nexo item for $prefabKey: ${it.message}") }
+            registerNexoItem(prefabKey, mechanic, section())
 
             // Base the item on its own Nexo entry, so items geary hands out carry Nexo's id and its mechanic applies
             if (setItem != null && setItem.item.prefab != nexoPrefab) set(SetItem(setItem.item.copy(prefab = nexoPrefab)))
@@ -73,5 +64,5 @@ val NexoFeature = module("nexo") {
             }
     }
 
-    addCloseable { NexoItems.unregisterExternalItems(owner) }
+    addCloseable { NexoItems.unregisterExternalItems(nexoOwner) }
 }.gets<Nexo2Prefab>()

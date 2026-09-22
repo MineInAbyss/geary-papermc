@@ -30,39 +30,60 @@ internal fun persistNexoAssignments(
             "give it an itemModel so Nexo stops generating one"
     )
 
-    val variation = section.getConfigurationSection("Mechanics.$mechanic")
-        ?.takeIf { it.isInt("custom_variation") }
-        ?.getInt("custom_variation") ?: return
-
+    val mechanicSection = section.getConfigurationSection("Mechanics.$mechanic") ?: return
     val file = prefabKey.toEntityOrNull()?.get<Prefab>()?.file?.let { File(it.toString()) }
-        ?: return logger.w("Cannot pin custom_variation $variation, $prefabKey was not loaded from a file")
+        ?: return logger.w("Cannot pin the variations of $prefabKey, it was not loaded from a file")
 
-    runCatching { file.insertComponentKey("nexo:$mechanic", "custom_variation", variation) }
-        .onSuccess { if (it) logger.i("Pinned custom_variation $variation onto $prefabKey") }
-        .onFailure { logger.w("Failed pinning custom_variation $variation onto $prefabKey: ${it.message}") }
+    // A directional parent without explicit children gets one variation per child, pinned for the same reason
+    val assigned = buildList {
+        mechanicSection.takeIf { it.isInt("custom_variation") }?.let { add(listOf("custom_variation") to it.getInt("custom_variation")) }
+        mechanicSection.getConfigurationSection("directional")?.let { directional ->
+            directional.getKeys(false).filter { it.endsWith("_variation") && directional.isInt(it) }
+                .forEach { add(listOf("directional", it) to directional.getInt(it)) }
+        }
+    }
+
+    assigned.forEach { (path, variation) ->
+        runCatching { file.insertComponentKey("nexo:$mechanic", path, variation) }
+            .onSuccess { if (it) logger.i("Pinned ${path.joinToString(".")} $variation onto $prefabKey") }
+            .onFailure { logger.w("Failed pinning ${path.joinToString(".")} $variation onto $prefabKey: ${it.message}") }
+    }
 }
 
 /**
- * Inserts [key] into this prefab's top-level [component] block, returning whether anything was written.
+ * Inserts the key at the end of [path] into this prefab's top-level [component] block, walking any
+ * nested blocks before it, and returns whether anything was written.
  *
  * Edited as text rather than reserialized, prefabs carry comments worth keeping and geary cannot write one
  * back anyway, its prefab serializer only decodes
  */
-private fun File.insertComponentKey(component: String, key: String, value: Int): Boolean {
+private fun File.insertComponentKey(component: String, path: List<String>, value: Int): Boolean {
     val lines = readLines()
-    val header = lines.indexOfFirst { it.trimEnd() == "$component:" }
+    var header = lines.indexOfFirst { it.trimEnd() == "$component:" }
     if (header == -1) return false
+    var body = blockBody(lines, header)
 
-    // A top-level component ends at the next line starting in column 0
-    val end = (header + 1..lines.lastIndex)
-        .firstOrNull { lines[it].isNotBlank() && !lines[it].first().isWhitespace() } ?: lines.size
-    val body = header + 1 until end
+    // Each nested block must already be there, a block that is missing was never part of the config
+    for (block in path.dropLast(1)) {
+        header = body.firstOrNull { lines[it].trim() == "$block:" } ?: return false
+        body = blockBody(lines, header)
+    }
+    val key = path.last()
     if (body.any { lines[it].trimStart().startsWith("$key:") }) return false
 
     val indent = body.firstOrNull { lines[it].isNotBlank() }
-        ?.let { lines[it].takeWhile(Char::isWhitespace) } ?: "  "
+        ?.let { lines[it].takeWhile(Char::isWhitespace) }
+        ?: lines[header].takeWhile(Char::isWhitespace) + "  "
 
     val updated = lines.subList(0, header + 1) + "$indent$key: $value" + lines.subList(header + 1, lines.size)
     writeText(updated.joinToString("\n", postfix = "\n"))
     return true
+}
+
+/** The lines under [header] indented deeper than it, a block ends at the next line that is not */
+private fun blockBody(lines: List<String>, header: Int): IntRange {
+    val indent = lines[header].takeWhile(Char::isWhitespace).length
+    val end = (header + 1..lines.lastIndex)
+        .firstOrNull { lines[it].isNotBlank() && lines[it].takeWhile(Char::isWhitespace).length <= indent } ?: lines.size
+    return header + 1 until end
 }

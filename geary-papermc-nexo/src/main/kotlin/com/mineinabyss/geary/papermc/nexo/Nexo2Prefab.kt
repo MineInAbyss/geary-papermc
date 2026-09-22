@@ -9,13 +9,16 @@ import com.mineinabyss.geary.prefabs.PrefabKey
  * so the pairing is recorded as prefabs register instead
  */
 class Nexo2Prefab {
-    private val prefabs = mutableMapOf<String, PrefabKey>()
+    private val byNexoId = mutableMapOf<String, PrefabKey>()
 
-    operator fun get(nexoId: String): PrefabKey? = prefabs[nexoId]
+    operator fun get(nexoId: String): PrefabKey? = byNexoId[nexoId]
 
     operator fun set(nexoId: String, prefabKey: PrefabKey) {
-        prefabs[nexoId] = prefabKey
+        byNexoId[nexoId] = prefabKey
     }
 
-    operator fun contains(nexoId: String): Boolean = nexoId in prefabs
+    operator fun contains(nexoId: String): Boolean = nexoId in byNexoId
+
+    /** In registration order, re-registering a key keeps its place */
+    val prefabs: Collection<PrefabKey> get() = byNexoId.values
 }

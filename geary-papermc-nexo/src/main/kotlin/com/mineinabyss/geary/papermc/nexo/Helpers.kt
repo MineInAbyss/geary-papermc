@@ -9,7 +9,7 @@ import org.bukkit.block.Block
 import org.bukkit.block.data.BlockData
 
 // Resolves to null when Nexo is missing, where the feature never loaded
-private val WorldScoped.nexo2Prefab get() = world.scope.getOrNull(NexoFeature)
+internal val WorldScoped.nexo2Prefab get() = world.scope.getOrNull(NexoFeature)
 
 private fun WorldScoped.prefabKeyOf(itemId: String?) = itemId?.let { nexo2Prefab?.get(it) }
 
