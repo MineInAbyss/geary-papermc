@@ -150,14 +150,19 @@ val SpawningFeature = module("spawning") {
     "spawns" {
         "getNearbyDBEntries" {
             executes.asPlayer {
-                println("[Geary] - Querying DB entries")
+                sender.info("Querying nearby spawn locations from the database...")
                 get<SpawningContext>().dumpDB(player.location, player)
             }
         }
         "clearDB" {
             executes.asPlayer {
-                get<Plugin>().launch { get<SpreadSpawnRepository>().dropAll(player.world) }
-                sender.success("Cleared spawn locations from the database.")
+                val world = player.world
+                val repository = get<SpreadSpawnRepository>()
+                get<Plugin>().launch {
+                    runCatching { repository.dropAll(world) }
+                        .onSuccess { sender.success("Cleared spawn locations in ${world.name} from the database") }
+                        .onFailure { sender.error("Failed to clear spawn locations in ${world.name}:\n${it.message}") }
+                }
             }
         }
 

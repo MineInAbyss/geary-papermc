@@ -7,6 +7,8 @@ import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntryReader
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawnLocation
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawnRepository
+import com.mineinabyss.idofront.messaging.info
+import com.mineinabyss.idofront.messaging.success
 import com.mineinabyss.idofront.textcomponents.miniMsg
 import kotlinx.serialization.json.Json
 import me.dvyy.sqlite.Database
@@ -46,7 +48,12 @@ class SpawningContext(
     fun dumpDB(loc: Location, player: Player) {
         plugin.launch {
             val locations = spawnsLocs.getSpawnsNear(loc, 10000.0)
-            player.sendMessage("Total spawn locations: ${locations.size}")
+            if (locations.isEmpty()) {
+                player.info("No spawn locations stored within 10000 blocks")
+                return@launch
+            }
+
+            player.success("Found ${locations.size} spawn locations within 10000 blocks")
             locations.forEach { location ->
                 sendTpButton(player, location)
             }

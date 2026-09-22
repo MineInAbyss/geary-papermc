@@ -79,33 +79,38 @@ val PrefabsFeature = module("prefabs") {
                         hasRelation<InstanceOf?>(prefab)
                         not { has<PrefabKey>() }
                     }).count()
-                    sender.success("There are $count direct instances of ${prefab.get<PrefabKey>()}")
+                    sender.success("There are <aqua>$count</aqua> direct instances of <gold>${prefab.get<PrefabKey>()}</gold>")
                 }
             }
         }
         "reload" {
             executes.args("prefab" to GearyArgs.prefab()) { prefab ->
                 gearyPaper.forEachWorld {
+                    val key = prefab.get<PrefabKey>() ?: prefab
                     runCatching { getAddon(Prefabs).loader.reload(prefab) }
-                        .onSuccess { sender.success("Reread prefab $prefab") }
-                        .onFailure { sender.error("Failed to reread prefab $prefab:\n${it.message}") }
-
+                        .onFailure { fail("Failed to reread prefab <gold>$key</gold>:\n${it.message}") }
 
                     // Reload entities
+                    var entityCount = 0
                     findEntities {
                         hasRelation<InstanceOf?>(prefab)
                         has<BukkitEntity>()
                     }.forEach {
                         UpdateMob.recreateGearyEntity(it.get<BukkitEntity>() ?: return@forEach)
+                        entityCount++
                     }
 
                     // Reload items
-                    findEntities {
+                    val players = findEntities {
                         hasRelation<InstanceOf?>(prefab)
                         has<ItemStack>()
                     }.toSet()
                         .mapNotNull { it.parent }
-                        .forEach { it.get<Player>()?.inventory?.toGeary()?.forceRefresh(ignoreCached = true) }
+                        .mapNotNull { it.get<Player>() }
+                        .toSet()
+                    players.forEach { it.inventory.toGeary()?.forceRefresh(ignoreCached = true) }
+
+                    sender.success("Reread prefab <gold>$key</gold>, updated <yellow>$entityCount</yellow> entities and items for <aqua>${players.size}</aqua> players")
                 }
             }
         }
@@ -131,7 +136,7 @@ val PrefabsFeature = module("prefabs") {
                     val prefabs = getAddon(Prefabs)
                     // Ensure not already registered
                     if (prefabs[PrefabKey.of(namespace, Path(path).nameWithoutExtension)] != null) {
-                        fail("Prefab $namespace:$path already exists")
+                        fail("Prefab <gold>$namespace:$path</gold> already exists")
                     }
 
                     // Try to load from file
@@ -141,17 +146,17 @@ val PrefabsFeature = module("prefabs") {
                     )
                     when (load) {
                         is PrefabLoadResult.Failure -> {
-                            sender.error("Failed to read prefab $namespace:$path:\n${load.error.message}")
+                            sender.error("Failed to read prefab <gold>$namespace:$path</gold>:\n${load.error.message}")
                         }
 
                         is PrefabLoadResult.Success -> {
                             load.entity.inheritPrefabsIfNeeded()
-                            sender.success("Read prefab $namespace:$path")
+                            sender.success("Read prefab <gold>$namespace:$path</gold>")
                         }
 
                         is PrefabLoadResult.Warn -> {
                             load.entity.inheritPrefabsIfNeeded()
-                            sender.warn("Read prefab $namespace:$path with warnings")
+                            sender.warn("Read prefab <gold>$namespace:$path</gold> with warnings")
                         }
 
                         is PrefabLoadResult.Defer -> {

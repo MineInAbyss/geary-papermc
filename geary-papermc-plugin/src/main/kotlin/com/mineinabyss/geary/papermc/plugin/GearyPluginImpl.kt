@@ -19,6 +19,7 @@ import com.mineinabyss.geary.papermc.menus.MenusFeature
 import com.mineinabyss.geary.papermc.mythicmobs.MythicMobsFeature
 import com.mineinabyss.geary.papermc.nexo.NexoFeature
 import com.mineinabyss.geary.papermc.plugin.commands.DebugFeature
+import com.mineinabyss.geary.papermc.plugin.commands.ReloadFeature
 import com.mineinabyss.geary.papermc.plugin.commands.TestingFeature
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.SpawningWorldGuardFlags
@@ -34,7 +35,6 @@ import com.mineinabyss.geary.serialization.serialization
 import com.mineinabyss.geary.uuid.SynchronizedUUID2GearyMap
 import com.mineinabyss.geary.uuid.UUID2GearyMap
 import com.mineinabyss.geary.uuid.UUIDTracking
-import com.mineinabyss.idofront.config.SingleConfig
 import com.mineinabyss.idofront.features.MainCommand
 import com.mineinabyss.idofront.features.MainCommandFeature
 import com.mineinabyss.idofront.features.singleConfig
@@ -53,22 +53,10 @@ class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
         single<ComponentLogger> { ComponentLogger.forPlugin(get(), minSeverity = get<GearyPaperConfig>().logLevel) }.and<Logger>()
         single { new(::WorldManager) }
         single {
+            // Reload lives in ReloadFeature so it can carry the rl alias, which MainCommand's single name cannot
             MainCommand(
                 names = listOf("geary"),
                 description = null,
-                reloadCommandName = "reload",
-                reloadCommandPermission = "geary.admin.reload",
-                reloadableFeatures = listOf(
-                    PrefabsFeature,
-                    ResourcepackGeneratorFeature,
-                    RecipeFeature,
-                    LocationsFeature,
-                    SpawningFeature
-                ),
-                onBeforeReload = {
-                    // Reload config
-                    get<SingleConfig<GearyPaperConfig>>().updateCached()
-                }
             )
         }
     }
@@ -142,6 +130,7 @@ class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
             MenusFeature,
             DebugFeature,
             TestingFeature,
+            ReloadFeature,
             LocationsFeature,
             SpawningFeature,
             PrefabsFeature,

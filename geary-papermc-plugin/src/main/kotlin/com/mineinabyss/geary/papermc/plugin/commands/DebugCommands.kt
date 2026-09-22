@@ -10,7 +10,9 @@ import com.mineinabyss.geary.papermc.tracking.entities.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.idofront.features.get
 import com.mineinabyss.idofront.features.mainCommand
+import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.info
+import com.mineinabyss.idofront.messaging.success
 import org.bukkit.plugin.Plugin
 
 val DebugFeature = module("debug") { }.mainCommand {
@@ -21,7 +23,7 @@ val DebugFeature = module("debug") { }.mainCommand {
                 repeat(64) {
                     val entities = player.toGeary()
                         .get<PlayerItemCache<*>>()
-                        ?.getEntities() ?: return@asPlayer
+                        ?.getEntities() ?: fail("No item cache tracked for ${player.name}")
 
                     player.info(
                         entities
@@ -51,7 +53,9 @@ val DebugFeature = module("debug") { }.mainCommand {
                 executes.asPlayer {
                     val plugin = get<Plugin>()
                     plugin.launch(plugin.asyncDispatcher) {
-                        player.toGeary().get<PlayerItemCache<*>>()
+                        runCatching { player.toGeary().get<PlayerItemCache<*>>() }
+                            .onSuccess { sender.success("Async read succeeded, cache ${if (it == null) "missing" else "present"}") }
+                            .onFailure { sender.error("Async read failed:\n${it.message}") }
                     }
                 }
             }
@@ -59,7 +63,9 @@ val DebugFeature = module("debug") { }.mainCommand {
                 executes.asPlayer {
                     val plugin = get<Plugin>()
                     plugin.launch(plugin.asyncDispatcher) {
-                        player.toGeary().set(DebugComponent())
+                        runCatching { player.toGeary().set(DebugComponent()) }
+                            .onSuccess { sender.success("Async write succeeded") }
+                            .onFailure { sender.error("Async write failed:\n${it.message}") }
                     }
                 }
             }

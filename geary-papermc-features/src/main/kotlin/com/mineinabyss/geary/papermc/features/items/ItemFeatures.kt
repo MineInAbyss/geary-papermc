@@ -14,6 +14,7 @@ import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.default
 import com.mineinabyss.idofront.features.listeners
 import com.mineinabyss.idofront.features.mainCommand
+import com.mineinabyss.idofront.messaging.success
 
 val CustomItemsFeature = module("custom-items") {
     require(get<GearyPaperConfig>().items.enabled) { "Items must be enabled in config" }
@@ -35,7 +36,10 @@ val CustomItemsFeature = module("custom-items") {
             val key = item.get<PrefabKey>() ?: fail("Could not find item prefab: $item")
             val item = gearyItems.createItem(key) ?: fail("Failed to create item from $key")
             item.amount = amount.coerceIn(1, item.maxStackSize)
-            player.inventory.addItem(item)
+            val leftover = player.inventory.addItem(item).values.sumOf { it.amount }
+            val given = item.amount - leftover
+            if (given <= 0) fail("<yellow>${player.name}</yellow>'s inventory is full, gave no <gold>$key</gold>")
+            sender.success("Gave <yellow>${player.name}</yellow> <aqua>>$given</aqua> <gold>$key</gold>" + if (leftover > 0) ", <aqua>$leftover</aqua> did not fit" else "")
         }
     }
 }

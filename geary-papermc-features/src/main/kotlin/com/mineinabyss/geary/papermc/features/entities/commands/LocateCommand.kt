@@ -16,19 +16,25 @@ fun IdoCommand.locate() = "locate" {
     permission = "geary.mobs.locate"
     executes.asPlayer().args("mob" to GearyArgs.mob(), "radius" to Args.integer(min = 0).default { 0 }) { mob, radius ->
         val prefabKey = mob.get<PrefabKey>()
-        if (radius <= 0) {
-            Bukkit.getWorlds().forEach { world ->
-                world.entities.filter { it.toGeary().deepInstanceOf(mob) }.forEach { entity ->
-                    val (x, y, z) = entity.location.toBlockLocation().toVector()
-                    player.info("<gold>Found <yellow>${prefabKey}</yellow> at <click:run_command:/teleport $x $y $z><aqua>$x,$y,$z</aqua> in ${entity.world.name}")
-                }
-            }
+        val found = if (radius <= 0) {
+            Bukkit.getWorlds().flatMap { world -> world.entities.filter { it.toGeary().deepInstanceOf(mob) } }
         } else {
             player.location.getNearbyEntities(radius.toDouble(), radius.toDouble(), radius.toDouble())
-                .filter { it.toGeary().deepInstanceOf(mob) }.forEach { entity ->
-                    val (x, y, z) = entity.location.toBlockLocation().toVector()
-                    player.info("<gold>Found <yellow>${prefabKey}</yellow> at <click:run_command:/teleport $x $y $z><aqua>$x,$y,$z")
-                }
+                .filter { it.toGeary().deepInstanceOf(mob) }
         }
+
+        if (found.isEmpty()) {
+            player.info(
+                "<gold>Found no <yellow>$prefabKey</yellow>" +
+                        if (radius <= 0) " in loaded chunks" else " within $radius blocks"
+            )
+            return@args
+        }
+
+        found.forEach { entity ->
+            val (x, y, z) = entity.location.toBlockLocation().toVector()
+            player.info("<gold>Found <yellow>${prefabKey}</yellow> at <click:run_command:/teleport $x $y $z><aqua>$x,$y,$z</aqua> in ${entity.world.name}")
+        }
+        player.info("<gold>Found <yellow>${found.size}</yellow> total")
     }
 }
