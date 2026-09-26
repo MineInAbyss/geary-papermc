@@ -46,7 +46,7 @@ abstract class PlayerItemCache<T>(
     fun updateToMatch(
         inventory: Array<T?>,
         ignoreCached: Boolean = false,
-        heldSlot: Int = -1,
+        heldSlot: Int = previousHeldSlot,
     ) {
         inventory.fastForEachWithIndex { slot, item ->
             // Generally an identical item reference => the same item, but not vice versa
@@ -78,6 +78,7 @@ abstract class PlayerItemCache<T>(
                     // Add components based on slot
                     when (slot) {
                         in 36..39 -> newEntity.add<Equipped>()
+                        heldSlot -> newEntity.add<InHand>()
                     }
 
                     logger.v { "Adding $newEntity (${newEntity.prefabs.map { it.get<PrefabKey>() }}) in slot $slot" }
@@ -87,8 +88,8 @@ abstract class PlayerItemCache<T>(
             }
         }
         if (heldSlot != previousHeldSlot) {
-            if (previousHeldSlot != -1) entities[previousHeldSlot].toGeary().remove<InHand>()
-            if (heldSlot != -1) entities[heldSlot].toGeary().add<InHand>()
+            if (previousHeldSlot != -1) get(previousHeldSlot)?.remove<InHand>()
+            if (heldSlot != -1) get(heldSlot)?.add<InHand>()
             previousHeldSlot = heldSlot
         }
     }
