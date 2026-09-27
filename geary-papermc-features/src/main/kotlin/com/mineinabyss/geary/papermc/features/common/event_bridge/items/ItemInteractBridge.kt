@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.features.common.event_bridge.items
 
+import com.mineinabyss.geary.papermc.features.common.inventory.equippedItems
 import com.mineinabyss.geary.papermc.toGeary
-import com.mineinabyss.geary.papermc.tracking.items.inventory.GearyPlayerInventory
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.idofront.entities.leftClicked
 import com.mineinabyss.idofront.entities.rightClicked
@@ -86,17 +86,7 @@ class ItemInteractBridge : Listener {
     private val rightClickCooldowns = Int2IntOpenHashMap()
 
     private inline fun <reified E : Any>emitToAll(player: Player) {
-        val inventory = player.inventory.toGeary()
-
-        // Armor Slots
-        inventory?.itemInHelmet?.emit<E>()
-        inventory?.itemInChestplate?.emit<E>()
-        inventory?.itemInLeggings?.emit<E>()
-        inventory?.itemInBoots?.emit<E>()
-
-        // Passive Slots
-        inventory?.get(9)?.emit<E>()
-        inventory?.get(10)?.emit<E>()
+        player.inventory.toGeary()?.equippedItems()?.forEach { it.emit<E>() }
     }
 
     @EventHandler(ignoreCancelled = true)
