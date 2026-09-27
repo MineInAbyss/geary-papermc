@@ -13,7 +13,7 @@ import kotlinx.coroutines.delay
 
 val ResourcepackGeneratorFeature = module("resourcepack") {
     require(get<GearyPaperConfig>().resourcePack.generate) { "Resourcepack generation is disabled" }
-    val generator by single { ResourcePackGenerator(gearyPaper.worldManager.global, get(), get()) }
+    val generator by single { ResourcePackGenerator(gearyPaper.worldManager.global, get(), get(), get()) }
     addCloseables(generator)
     plugin.launch {
         delay(1.ticks) // Allow other plugins to register resourcepack parts

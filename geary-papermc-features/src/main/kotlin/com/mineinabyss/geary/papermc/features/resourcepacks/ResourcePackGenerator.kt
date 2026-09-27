@@ -7,6 +7,7 @@ import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.configuration.components.Prefab
 import com.mineinabyss.geary.systems.query.GearyQuery
+import com.mineinabyss.idofront.messaging.ComponentLogger
 import com.mineinabyss.idofront.resourcepacks.ResourcePacks
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
@@ -26,8 +27,10 @@ class ResourcePackGenerator(
     private val geary: Geary,
     private val plugin: Plugin,
     private val config: GearyPaperConfig,
+    private val logger: ComponentLogger,
 ) : AutoCloseable {
     private val resourcePackQuery = geary.cache(::ResourcePackQuery)
+    private val itemModelQuery = geary.cache(::ItemModelQuery)
     private val includedPackPath = config.resourcePack.includedPackPath.takeUnless(String::isEmpty)
         ?.let { plugin.dataFolder.resolve(it) }
     private val resourcePack = includedPackPath?.let(ResourcePacks::readToResourcePack) ?: ResourcePack.resourcePack()
@@ -35,6 +38,9 @@ class ResourcePackGenerator(
     fun generateResourcePack() {
         val resourcePackFile = plugin.dataFolder.resolve(config.resourcePack.outputPath)
         resourcePackFile.deleteRecursively()
+
+        // Runs first so the item definitions it builds win over the plain references below
+        buildItemModels()
 
         resourcePackQuery.forEach { (prefabKey, content, itemModel) ->
             // Generates any missing models for predicates if only textures are provided
@@ -58,11 +64,24 @@ class ResourcePackGenerator(
         addMenuModels()
 
         if (resourcePack.packMeta() == null) {
-            val format = PackFormat.format(FormatVersion.of(97), FormatVersion.of(99))
-            resourcePack.packMeta(PackMeta.of(format, Component.text("Geary ResourcePack")))
+            resourcePack.packMeta(PackMeta.of(PACK_FORMAT, Component.text("Geary ResourcePack")))
         }
 
         ResourcePacks.writeToFile(resourcePackFile, resourcePack)
+    }
+
+    private fun buildItemModels() {
+        val modelBuilder = ModelBuilder(resourcePack, PACK_FORMAT)
+
+        itemModelQuery.forEach { (prefabKey, builder, itemModel) ->
+            val prefabModel = Key.key(prefabKey.full)
+            val model = runCatching { ItemModelResolver(modelBuilder, prefabModel).resolve(builder.model) }
+                .onFailure { logger.w { "Failed to build the item model of $prefabKey: ${it.message}" } }
+                .getOrNull() ?: return@forEach
+
+            val itemKey = builder.key ?: itemModel ?: prefabModel
+            resourcePack.item(Item.item(itemKey, model))
+        }
     }
 
     private fun addMenuModels() {
@@ -118,6 +137,21 @@ class ResourcePackGenerator(
 
     override fun close() {
         resourcePackQuery.close()
+        itemModelQuery.close()
+    }
+
+    class ItemModelQuery(world: Geary) : GearyQuery(world) {
+        private val prefabKey by get<PrefabKey>()
+        private val itemModelBuilder by get<ItemModelBuilder>()
+        private val setItem by get<SetItem>().orNull()
+
+        override fun ensure() = this {
+            has<Prefab>()
+        }
+
+        operator fun component1() = prefabKey
+        operator fun component2() = itemModelBuilder
+        operator fun component3() = setItem?.item?.itemModel
     }
 
     class ResourcePackQuery(world: Geary) : GearyQuery(world) {
@@ -135,5 +169,9 @@ class ResourcePackGenerator(
         operator fun component1() = prefabKey
         operator fun component2() = resourcePackContent
         operator fun component3() = setItem?.item?.itemModel
+    }
+
+    companion object {
+        val PACK_FORMAT: PackFormat = PackFormat.format(FormatVersion.of(97), FormatVersion.of(99))
     }
 }

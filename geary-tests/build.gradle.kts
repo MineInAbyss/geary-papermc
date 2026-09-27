@@ -21,5 +21,7 @@ dependencies {
     testImplementation(miaLibs.minecraft.papermc)
     testImplementation(miaLibs.logback.classic)
     testImplementation(miaLibs.kotlinx.serialization.kaml)
+    testImplementation(miaLibs.creative.api)
+    testImplementation(miaLibs.creative.serializer.minecraft)
     testImplementation(libs.bytebuddy)
 }
