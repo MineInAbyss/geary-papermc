@@ -3,6 +3,7 @@ plugins {
     id(miaLibs.plugins.mia.papermc.get().pluginId)
     id(miaLibs.plugins.mia.publication.get().pluginId)
     id(miaLibs.plugins.mia.nms.get().pluginId)
+    id(miaLibs.plugins.mia.testing.get().pluginId)
     alias(miaLibs.plugins.kotlinx.serialization)
 }
 
@@ -22,4 +23,8 @@ dependencies {
     compileOnly(miaLibs.idofront.nms)
     compileOnly(miaLibs.creative.serializer.minecraft)
     compileOnly(miaLibs.creative.api)
+
+    testImplementation(libs.geary.test)
+    testImplementation(miaLibs.idofront.services)
+    testImplementation(miaLibs.kotlinx.serialization.kaml)
 }

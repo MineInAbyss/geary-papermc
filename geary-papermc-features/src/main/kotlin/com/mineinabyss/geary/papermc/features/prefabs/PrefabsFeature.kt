@@ -10,6 +10,8 @@ import com.mineinabyss.geary.modules.findEntities
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.PrefabLoading
 import com.mineinabyss.geary.papermc.WorldManager
+import com.mineinabyss.geary.papermc.features.items.recipes.RecipeFeature
+import com.mineinabyss.geary.papermc.features.items.recipes.SetRecipes
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.gearyWorld
 import com.mineinabyss.geary.papermc.tracking.GearyArgs
@@ -22,6 +24,7 @@ import com.mineinabyss.geary.prefabs.PrefabsModuleExtensions.fromDirectory
 import com.mineinabyss.geary.prefabs.helpers.inheritPrefabsIfNeeded
 import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.suggests
+import com.mineinabyss.idofront.features.DICommandContext
 import com.mineinabyss.idofront.features.get
 import com.mineinabyss.idofront.features.mainCommand
 import com.mineinabyss.idofront.messaging.error
@@ -85,10 +88,13 @@ val PrefabsFeature = module("prefabs") {
         }
         "reload" {
             executes.args("prefab" to GearyArgs.prefab()) { prefab ->
+                var hasRecipes = false
                 gearyPaper.forEachWorld {
                     val key = prefab.get<PrefabKey>() ?: prefab
+                    hasRecipes = hasRecipes || prefab.has<SetRecipes>()
                     runCatching { getAddon(Prefabs).loader.reload(prefab) }
                         .onFailure { fail("Failed to reread prefab <gold>$key</gold>:\n${it.message}") }
+                    hasRecipes = hasRecipes || prefab.has<SetRecipes>()
 
                     // Reload entities
                     var entityCount = 0
@@ -112,6 +118,10 @@ val PrefabsFeature = module("prefabs") {
 
                     sender.success("Reread prefab <gold>$key</gold>, updated <yellow>$entityCount</yellow> entities and items for <aqua>${players.size}</aqua> players")
                 }
+
+                if (!hasRecipes || !get<GearyPaperConfig>().loading.recipes) return@args
+                if (contextOf<DICommandContext>().scope.reload(RecipeFeature).isSuccess) sender.success("Reloaded recipes")
+                else sender.error("Failed to reload recipes, see console for details")
             }
         }
         "load" {

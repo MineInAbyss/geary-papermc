@@ -40,7 +40,7 @@ object PassiveSlotRules {
             }
             // Shift clicks land in the first free top slot, which is a locked one when no filler item is configured
             action == InventoryAction.MOVE_TO_OTHER_INVENTORY -> if (!allowed(player, currentItem) || hasOpenLockedSlot(passive)) return cancel()
-            // Double clicking gathers matching stacks out of the passive slots too
+            // Double-clicking gathers matching stacks out of the passive slots too
             action == InventoryAction.COLLECT_TO_CURSOR -> return true
             else -> return false
         }

@@ -4,8 +4,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * A component to indicate that an ItemStack should not be allowed in vanilla crafting recipes.
- * Meaning if a GearyItem has a base-material of PAPER and this component, it cannot be used to craft books.
+ * Keeps an item out of recipes that only ask for its base material or a tag, so a PAPER based item cannot craft books.
+ * Recipes with an ingredient naming its prefab still accept it
  */
 @Serializable
 @SerialName("geary:deny_in_vanilla_recipes")

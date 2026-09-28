@@ -63,10 +63,7 @@ class PassiveMenuListener : Listener {
     fun InventoryClickEvent.enforceRules() {
         val passive = view.topInventory.holder as? PassiveInventory ?: return
         val player = whoClicked as? Player ?: return
-        if (!PassiveSlots.isActive(passive)) {
-            isCancelled = true
-            return
-        }
+        if (!PassiveSlots.isActive(passive)) return run { isCancelled = true }
         if (PassiveSlotRules.handleClick(this, passive)) saveLater(passive, player)
     }
 
@@ -74,10 +71,7 @@ class PassiveMenuListener : Listener {
     fun InventoryDragEvent.enforceRules() {
         val passive = view.topInventory.holder as? PassiveInventory ?: return
         val player = whoClicked as? Player ?: return
-        if (!PassiveSlots.isActive(passive)) {
-            isCancelled = true
-            return
-        }
+        if (!PassiveSlots.isActive(passive)) return run { isCancelled = true }
         if (PassiveSlotRules.handleDrag(this, passive)) saveLater(passive, player)
     }
 
@@ -88,10 +82,8 @@ class PassiveMenuListener : Listener {
     // The menu can stay open across a vanilla autosave, so the persisted copy must follow every change
     private fun saveLater(passive: PassiveInventory, clicker: Player) {
         val pending = pendingSaves[passive]
-        if (pending != null) {
-            pending.clickers += clicker
-            return
-        }
+        if (pending != null) return run { pending.clickers += clicker }
+
         pendingSaves[passive] = PendingSave(Bukkit.getCurrentTick(), mutableSetOf(clicker))
         Bukkit.getScheduler().runTask(gearyPaper, Runnable {
             val save = pendingSaves.remove(passive) ?: return@Runnable

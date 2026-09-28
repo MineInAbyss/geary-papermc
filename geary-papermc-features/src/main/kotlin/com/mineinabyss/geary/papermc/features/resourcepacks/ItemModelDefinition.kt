@@ -78,6 +78,7 @@ class ItemModelResolver(
             "reference" -> return reference(node.key("model") ?: fallbackModel, node.get("tints"))
         }
 
+        MODEL_FIELDS.filter { node.get(it)?.isJsonNull == true }.forEach(node::remove)
         MODEL_FIELDS.filter(node::has).forEach { node.add(it, expand(node.get(it))) }
         node.get("models")?.asJsonArray?.let { models -> models.forEachIndexed { i, it -> models.set(i, expand(it)) } }
         ENTRY_LISTS.mapNotNull { node.get(it)?.asJsonArray }.flatten().map(JsonElement::getAsJsonObject).forEach { entry ->
