@@ -6,6 +6,7 @@ import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.features.items.food.ReplaceBurnedDropListener
 import com.mineinabyss.geary.papermc.features.items.holdsentity.SpawnHeldPrefabListener
 import com.mineinabyss.geary.papermc.features.items.nointeraction.DisableItemInteractionsListener
+import com.mineinabyss.geary.papermc.features.items.repair.RepairKitListener
 import com.mineinabyss.geary.papermc.features.items.transform.TransformOnPickupListener
 import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.geary
@@ -25,6 +26,7 @@ val CustomItemsFeature = module("custom-items") {
         DisableItemInteractionsListener(),
         ReplaceBurnedDropListener(),
         TransformOnPickupListener(),
+        RepairKitListener(),
     )
 }.mainCommand {
     "give" {
