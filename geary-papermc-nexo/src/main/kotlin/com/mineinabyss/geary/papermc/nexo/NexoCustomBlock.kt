@@ -1,9 +1,11 @@
 package com.mineinabyss.geary.papermc.nexo
 
 import com.mineinabyss.geary.prefabs.PrefabKey
-import net.kyori.adventure.key.Key
+import com.nexomc.nexo.api.NexoBlocks
+import com.nexomc.nexo.mechanics.custom_block.CustomBlockMechanic
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import net.kyori.adventure.key.Key
 import org.bukkit.Material
 import org.bukkit.configuration.ConfigurationSection
 
@@ -18,7 +20,9 @@ import org.bukkit.configuration.ConfigurationSection
 @Serializable
 @SerialName("nexo:custom_block")
 @JvmInline
-value class NexoCustomBlock(val mechanic: RawConfig = RawConfig()) {
+value class NexoCustomBlock(val config: RawConfig = RawConfig()) {
     fun toItemSection(prefabKey: PrefabKey, material: Material?, itemModel: Key?): ConfigurationSection =
-        mechanic.toItemSection(prefabKey, material, itemModel, "custom_block")
+        config.toItemSection(prefabKey, material, itemModel, "custom_block")
+
+    fun mechanic(prefabKey: PrefabKey): CustomBlockMechanic? = NexoBlocks.customBlockMechanic(nexoId(prefabKey))
 }
