@@ -52,6 +52,9 @@ class GearyPlayerInventory(
     // We use custom cursor slot so can't just call get
     val itemOnCursor: GearyEntity? get() = get(PlayerItemCache.CURSOR_SLOT)
 
+    val passiveItems: List<GearyEntity?>
+        get() = PlayerItemCache.PASSIVE_SLOTS.map { get(it) }
+
     val itemInMainHand: GearyEntity?
         get() = get(inventory.heldItemSlot)
 

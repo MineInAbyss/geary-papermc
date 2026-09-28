@@ -4,7 +4,10 @@ import ca.spottedleaf.moonrise.common.util.TickThread
 import co.touchlab.kermit.Severity
 import com.charleskorn.kaml.YamlComment
 import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.idofront.serialization.SerializableDataTypes
+import com.mineinabyss.idofront.serialization.SerializableItemStack
 import kotlinx.serialization.Serializable
+import org.bukkit.Material
 import org.bukkit.entity.EntityType
 import org.spigotmc.AsyncCatcher
 
@@ -35,6 +38,19 @@ class GearyPaperConfig(
         val recipes: Boolean = true,
     )
 }
+
+@Serializable
+class PassiveSlotsConfig(
+    @YamlComment("How many of the 9 passive slots new players start with unlocked")
+    val defaultUnlockedSlots: Int = 2,
+    @YamlComment("Title of the passive slots menu opened from the recipe book button")
+    val menuTitle: String = "Passive slots",
+    @YamlComment("Item shown in locked slots, remove to leave them empty, they reject items either way")
+    val lockedSlotItem: SerializableItemStack? = SerializableItemStack(
+        type = Material.BARRIER,
+        tooltipDisplay = SerializableDataTypes.TooltipDisplay(hideTooltip = true),
+    ),
+)
 
 @Serializable
 class Catching(
@@ -78,6 +94,7 @@ data class ItemTrackingConfig(
     @YamlComment("If an item has no prefabs encoded, try to find its prefab by matching custom model data.")
     val migrateByCustomModelData: Boolean = false,
     val autoDiscoverVanillaRecipes: Boolean = false,
+    val passiveSlots: PassiveSlotsConfig = PassiveSlotsConfig(),
 )
 
 @Serializable

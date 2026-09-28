@@ -11,9 +11,12 @@ import com.mineinabyss.geary.papermc.gearyWorld
 import com.mineinabyss.geary.papermc.services.GearyItemService
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.migration.createItemMigrationListener
+import com.mineinabyss.geary.papermc.tracking.items.passive.PassiveItemsListener
+import com.mineinabyss.geary.papermc.tracking.items.passive.PassiveSlots
 import com.mineinabyss.geary.papermc.tracking.items.systems.createInventoryTrackerSystem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.systems.query.query
+import com.mineinabyss.idofront.features.listeners
 import com.mineinabyss.idofront.features.plugin
 import com.mineinabyss.idofront.plugin.Services
 import com.mineinabyss.idofront.services.SerializableItemStackService
@@ -27,6 +30,7 @@ val MCItemTracking = module("minecraft-item-tracking") {
     gearyWorld {
         world.install(ItemTracking)
     }
+    listeners(PassiveItemsListener())
 
     val itemService = object : GearyItemService {
         override fun getItem(namespace: String, key: String): ItemStack? {
@@ -54,6 +58,7 @@ val ItemTracking = gearyAddon("item-tracking") {
 
     // Create PlayerItemCache on player entities
     observe<OnSet>().involving(query<Player>()).exec { (player) ->
+        PassiveSlots.load(entity, player)
         entity.set<PlayerItemCache<*>>(itemTracking.createCache(entity))
     }
     observe<OnRemove>().involving(query<PlayerItemCache<*>>()).exec { (cache) ->

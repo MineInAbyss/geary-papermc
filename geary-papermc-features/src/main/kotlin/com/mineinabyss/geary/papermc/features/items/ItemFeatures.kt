@@ -6,9 +6,11 @@ import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.features.items.food.ReplaceBurnedDropListener
 import com.mineinabyss.geary.papermc.features.items.holdsentity.SpawnHeldPrefabListener
 import com.mineinabyss.geary.papermc.features.items.nointeraction.DisableItemInteractionsListener
+import com.mineinabyss.geary.papermc.features.items.passive.PassiveMenuListener
 import com.mineinabyss.geary.papermc.features.items.repair.RepairKitListener
 import com.mineinabyss.geary.papermc.features.items.transform.TransformOnPickupListener
 import com.mineinabyss.geary.papermc.toGeary
+import com.mineinabyss.geary.papermc.tracking.items.passive.PassiveSlots
 import com.mineinabyss.geary.papermc.tracking.geary
 import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.PrefabKey
@@ -27,8 +29,21 @@ val CustomItemsFeature = module("custom-items") {
         ReplaceBurnedDropListener(),
         TransformOnPickupListener(),
         RepairKitListener(),
+        PassiveMenuListener(),
     )
 }.mainCommand {
+    "passive" {
+        "slots" {
+            permission = "geary.admin.passive"
+            executes.args(
+                "slots" to Args.integer(min = 0, max = PassiveSlots.COUNT),
+                "other" to Args.otherPlayer(),
+            ) { slots, player ->
+                if (!PassiveSlots.setUnlocked(player, slots)) fail("Could not change passive slots for ${player.name}")
+                sender.success("<yellow>${player.name}</yellow> now has <aqua>$slots</aqua> passive slots unlocked")
+            }
+        }
+    }
     "give" {
         permission = "geary.items.give"
         executes.asPlayer().args(

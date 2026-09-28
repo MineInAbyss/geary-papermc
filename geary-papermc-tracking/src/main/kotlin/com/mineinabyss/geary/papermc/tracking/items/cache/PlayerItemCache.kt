@@ -9,6 +9,7 @@ import com.mineinabyss.geary.papermc.tracking.items.cache.ItemInfo.EntityEncoded
 import com.mineinabyss.geary.papermc.tracking.items.components.Equipped
 import com.mineinabyss.geary.papermc.tracking.items.components.InHand
 import com.mineinabyss.geary.papermc.tracking.items.components.InInventory
+import com.mineinabyss.geary.papermc.tracking.items.components.InPassive
 import com.mineinabyss.geary.prefabs.PrefabKey
 import org.bukkit.inventory.ItemStack
 
@@ -73,12 +74,16 @@ abstract class PlayerItemCache<T>(
                     }
                     if (holder != null) newEntity.addParent(holder)
                     newEntity.set<ItemStack>(convertToItemStack(item))
-                    newEntity.add<InInventory>()
 
-                    // Add components based on slot
                     when (slot) {
-                        in 36..39 -> newEntity.add<Equipped>()
-                        heldSlot -> newEntity.add<InHand>()
+                        in PASSIVE_SLOTS -> newEntity.add<InPassive>()
+                        else -> {
+                            newEntity.add<InInventory>()
+                            when (slot) {
+                                in 36..39 -> newEntity.add<Equipped>()
+                                heldSlot -> newEntity.add<InHand>()
+                            }
+                        }
                     }
 
                     logger.v { "Adding $newEntity (${newEntity.prefabs.map { it.get<PrefabKey>() }}) in slot $slot" }
@@ -123,5 +128,10 @@ abstract class PlayerItemCache<T>(
     companion object {
         const val MAX_SIZE = 64
         const val CURSOR_SLOT = 63
+
+        // Player inventory contents end at 42 (36 items and 7 equipment slots)
+        const val PASSIVE_SLOT_START = 48
+        const val PASSIVE_SLOT_COUNT = 2
+        val PASSIVE_SLOTS = PASSIVE_SLOT_START until PASSIVE_SLOT_START + PASSIVE_SLOT_COUNT
     }
 }
