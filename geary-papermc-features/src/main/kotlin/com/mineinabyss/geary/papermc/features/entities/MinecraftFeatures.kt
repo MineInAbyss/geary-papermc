@@ -6,8 +6,6 @@ import com.mineinabyss.dependencies.new
 import com.mineinabyss.dependencies.submodule
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.features.common.actions.ShulkerBulletHitListener
-import com.mineinabyss.geary.papermc.features.common.cooldowns.clearOldCooldownsSystem
-import com.mineinabyss.geary.papermc.features.common.cooldowns.cooldownDisplaySystem
 import com.mineinabyss.geary.papermc.features.common.event_bridge.entities.EntityDamageBridge
 import com.mineinabyss.geary.papermc.features.common.event_bridge.entities.EntityLoadUnloadBridge
 import com.mineinabyss.geary.papermc.features.common.event_bridge.entities.EntityShearedBridge
@@ -36,8 +34,6 @@ val MinecraftFeatures = module("minecraft-features") {
     submodule(PreventEventsFeature)
 
     gearyWorld {
-        cooldownDisplaySystem()
-        clearOldCooldownsSystem()
         addPathfindersSystem()
         createAttemptSpawnListener()
         markSetEntityTypeAsCustomMob()
