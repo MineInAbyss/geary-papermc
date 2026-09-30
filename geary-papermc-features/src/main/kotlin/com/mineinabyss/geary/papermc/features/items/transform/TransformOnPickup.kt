@@ -7,7 +7,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * Transforms items picked up by a player while this item is equipped, the first [ItemTransform] whose conditions pass wins.
+ * Transforms items picked up by a player while this item is in a passive slot, the first [ItemTransform] whose conditions pass wins.
  */
 @JvmInline
 @Serializable

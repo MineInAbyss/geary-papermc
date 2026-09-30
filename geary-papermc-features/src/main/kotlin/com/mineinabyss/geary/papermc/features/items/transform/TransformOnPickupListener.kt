@@ -2,7 +2,6 @@ package com.mineinabyss.geary.papermc.features.items.transform
 
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.execute
-import com.mineinabyss.geary.papermc.features.common.inventory.equippedItems
 import com.mineinabyss.geary.papermc.item
 import com.mineinabyss.geary.papermc.location
 import com.mineinabyss.geary.papermc.toGeary
@@ -18,8 +17,8 @@ class TransformOnPickupListener : Listener {
     @EventHandler(ignoreCancelled = true)
     fun EntityPickupItemEvent.transformPickedUpItem() {
         val player = entity as? Player ?: return
-        val transforms = player.inventory.toGeary()?.equippedItems()
-            ?.flatMap { it.get<TransformOnPickup>()?.transforms ?: emptyList() }
+        val transforms = player.inventory.toGeary()?.passiveItems
+            ?.flatMap { it?.get<TransformOnPickup>()?.transforms ?: emptyList() }
             ?.takeIf { it.isNotEmpty() } ?: return
 
         val pickedUp = item.itemStack
