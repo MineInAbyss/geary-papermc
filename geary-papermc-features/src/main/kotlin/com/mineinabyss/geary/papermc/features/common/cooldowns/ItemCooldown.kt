@@ -18,7 +18,8 @@ import kotlin.time.Duration
 /**
  * Without [group], the cooldown is applied to the item itself, which is what the client renders.
  * A [group] the item does not carry is tracked by the server but has no overlay,
- * so it can gate a secondary action on an item that already uses its own cooldown
+ * so it can gate a secondary action on an item that already uses its own cooldown.
+ * A [group] also works once the actions have become the player, so it can sit after conditions that should not consume it
  */
 @Serializable
 @SerialName("geary:item_cooldown")
@@ -28,7 +29,8 @@ class ItemCooldown(
     val duration: @Serializable(with = DurationSerializer::class) Duration? = null,
 ) : Condition {
     override fun ActionGroupContext.execute(): Boolean {
-        val player = entity?.parent?.get<Player>()?.takeUnless { it.gameMode == GameMode.CREATIVE && ignoreCreative } ?: return true
+        val player = (entity?.get<Player>() ?: entity?.parent?.get<Player>())
+            ?.takeUnless { it.gameMode == GameMode.CREATIVE && ignoreCreative } ?: return true
         val item = entity?.get<SetItem>()?.item?.toItemStackOrNull()
         val useCooldown = item?.getData(DataComponentTypes.USE_COOLDOWN)
         val ticks = duration?.inWholeTicks?.toInt() ?: useCooldown?.let { (it.seconds() * 20).toInt() } ?: return true

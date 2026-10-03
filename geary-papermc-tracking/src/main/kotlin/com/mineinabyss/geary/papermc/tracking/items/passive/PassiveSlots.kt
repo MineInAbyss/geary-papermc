@@ -39,7 +39,6 @@ object PassiveSlots {
     fun get(player: Player): PassiveInventory? = player.toGearyOrNull()?.get<PassiveInventory>()
 
     fun load(entity: GearyEntity, player: Player): PassiveInventory {
-        // An offline session holds newer contents than the data the player just loaded from disk
         val handedOver = detached.remove(player.uniqueId)?.passive
         val passive = handedOver ?: PassiveInventory.create(
             player,
