@@ -8,7 +8,6 @@ import com.mineinabyss.geary.papermc.tracking.items.components.PassiveItem
 import com.mineinabyss.geary.papermc.tracking.items.itemEntityContext
 import com.mineinabyss.geary.papermc.tracking.items.passive.PassiveInventory
 import com.mineinabyss.geary.papermc.tracking.items.passive.PassiveSlots
-import kotlinx.coroutines.NonCancellable.cancel
 import kotlinx.coroutines.delay
 import org.bukkit.entity.Player
 import org.bukkit.event.Cancellable
@@ -30,6 +29,8 @@ object PassiveSlotRules {
         when {
             clickedInventory === view.topInventory -> {
                 if (!passive.isUnlocked(slot)) return cancel()
+                // The item leaving a bundle is not known before the click resolves, and items put into a bundle skip the passive check
+                if (action in bundleActions) return cancel()
                 val entering = when (action) {
                     InventoryAction.PLACE_ALL, InventoryAction.PLACE_ONE, InventoryAction.PLACE_SOME, InventoryAction.SWAP_WITH_CURSOR -> cursor
                     InventoryAction.HOTBAR_SWAP -> player.inventory.let { if (hotbarButton == -1) it.itemInOffHand else it.getItem(hotbarButton) }
@@ -37,8 +38,10 @@ object PassiveSlotRules {
                 }
                 if (!allowed(player, entering)) return cancel()
             }
-            // Shift clicks land in the first free top slot, fillers keep locked slots occupied
-            action == InventoryAction.MOVE_TO_OTHER_INVENTORY -> if (!allowed(player, currentItem)) return cancel()
+            // Shift clicks land in the first free top slot, which is a locked one when no filler item is configured
+            action == InventoryAction.MOVE_TO_OTHER_INVENTORY -> if (!allowed(player, currentItem) || hasOpenLockedSlot(passive)) return cancel()
+            // Double clicking gathers matching stacks out of the passive slots too
+            action == InventoryAction.COLLECT_TO_CURSOR -> return true
             else -> return false
         }
         validateLater(player, passive)
@@ -58,13 +61,28 @@ object PassiveSlotRules {
     private fun validateLater(player: Player, passive: PassiveInventory) {
         gearyPaper.launch {
             delay(1.ticks)
+            // The owner's data was saved when the inventory went inactive, moving items out now would duplicate them
+            if (!PassiveSlots.isActive(passive)) return@launch
+            var corrected = false
             repeat(PassiveSlots.COUNT) { slot ->
                 val item = passive.inventory.getItem(slot) ?: return@repeat
                 if (PassiveSlots.isFiller(item) || (passive.isUnlocked(slot) && allowed(player, item))) return@repeat
                 passive.inventory.setItem(slot, null)
                 player.inventory.addItem(item).values.forEach { player.world.dropItemNaturally(player.location, it) }
+                corrected = true
             }
+            if (corrected) PassiveSlots.save(passive)
         }
+    }
+
+    private val bundleActions = setOf(
+        InventoryAction.PLACE_FROM_BUNDLE,
+        InventoryAction.PLACE_ALL_INTO_BUNDLE,
+        InventoryAction.PLACE_SOME_INTO_BUNDLE,
+    )
+
+    private fun hasOpenLockedSlot(passive: PassiveInventory) = (0 until PassiveSlots.COUNT).any { slot ->
+        !passive.isUnlocked(slot) && passive.inventory.getItem(slot).let { it == null || it.isEmpty }
     }
 
     private fun Cancellable.cancel(): Boolean {

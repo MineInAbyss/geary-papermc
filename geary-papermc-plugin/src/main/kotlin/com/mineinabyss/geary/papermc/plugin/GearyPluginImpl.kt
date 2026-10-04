@@ -27,6 +27,7 @@ import com.mineinabyss.geary.papermc.spawning.locations.LocationsFeature
 import com.mineinabyss.geary.papermc.tracking.entities.MCEntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.geary.papermc.tracking.items.MCItemTracking
+import com.mineinabyss.geary.papermc.tracking.items.passive.PassiveSlots
 import com.mineinabyss.geary.prefabs.Prefabs
 import com.mineinabyss.geary.serialization.dsl.withCommonComponentNames
 import com.mineinabyss.geary.serialization.formats.YamlFormat
@@ -147,6 +148,7 @@ class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
     }
 
     override fun onDisable() {
+        PassiveSlots.saveAll()
         val geary = worldManager.global
         geary.get<DIScope>().close()
         server.worlds.forEach { world ->

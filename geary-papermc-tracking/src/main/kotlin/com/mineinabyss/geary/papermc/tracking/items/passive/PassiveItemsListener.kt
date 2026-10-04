@@ -9,6 +9,9 @@ class PassiveItemsListener : Listener {
     // Runs before the geary player tracker encodes components at HIGHEST
     @EventHandler(priority = EventPriority.LOW)
     fun PlayerQuitEvent.savePassiveItems() {
+        PassiveSlots.get(player)?.inventory?.viewers?.toList()
+            ?.filter { it.uniqueId != player.uniqueId }
+            ?.forEach { it.closeInventory() }
         PassiveSlots.save(player)
     }
 }

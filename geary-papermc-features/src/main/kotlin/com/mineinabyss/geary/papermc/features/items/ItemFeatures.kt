@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.features.items
 
+import com.mineinabyss.dependencies.addCloseable
 import com.mineinabyss.dependencies.get
 import com.mineinabyss.dependencies.module
 import com.mineinabyss.geary.papermc.GearyPaperConfig
@@ -31,6 +32,8 @@ val CustomItemsFeature = module("custom-items") {
         RepairKitListener(),
         PassiveMenuListener(),
     )
+    PassiveSlots.menuEnabled = true
+    addCloseable { PassiveSlots.menuEnabled = false }
 }.mainCommand {
     "passive" {
         "slots" {

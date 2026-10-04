@@ -9,8 +9,7 @@ import org.bukkit.inventory.InventoryHolder
 import java.util.UUID
 
 /**
- * Live contents of a player's passive slots while they are online.
- * Shown to the player as the passive slots menu, never to other players
+ * Lives on the player while they are online, or detached through [PassiveSlots.inventoryFor] while others view them offline
  */
 class PassiveInventory(
     val playerId: UUID,

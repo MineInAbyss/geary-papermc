@@ -1,16 +1,15 @@
 package com.mineinabyss.geary.papermc.features.items.passive
 
-import com.github.shynixn.mccoroutine.bukkit.launch
-import com.github.shynixn.mccoroutine.bukkit.ticks
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.tracking.items.passive.PassiveInventory
 import com.mineinabyss.geary.papermc.tracking.items.passive.PassiveSlots
 import com.mineinabyss.idofront.nms.aliases.toNMS
-import kotlinx.coroutines.delay
 import net.minecraft.network.protocol.game.ClientboundRecipeBookSettingsPacket
 import net.minecraft.world.inventory.RecipeBookType
 import org.bukkit.entity.Player
+import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
@@ -37,33 +36,61 @@ class PassiveMenuListener : Listener {
         open(player)
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun InventoryClickEvent.enforceRules() {
-        val holder = view.topInventory.holder as? PassiveInventory ?: return
+        val passive = view.topInventory.holder as? PassiveInventory ?: return
         val player = whoClicked as? Player ?: return
-        val passive = PassiveSlots.get(player) ?: return
-        if (passive.playerId != holder.playerId) return
-        if (PassiveSlotRules.handleClick(this, passive)) saveLater(player)
+        if (!PassiveSlots.isActive(passive)) {
+            isCancelled = true
+            return
+        }
+        if (PassiveSlotRules.handleClick(this, passive)) saveLater(passive, player)
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun InventoryDragEvent.enforceRules() {
-        val holder = view.topInventory.holder as? PassiveInventory ?: return
+        val passive = view.topInventory.holder as? PassiveInventory ?: return
         val player = whoClicked as? Player ?: return
-        val passive = PassiveSlots.get(player) ?: return
-        if (passive.playerId != holder.playerId) return
-        if (PassiveSlotRules.handleDrag(this, passive)) saveLater(player)
+        if (!PassiveSlots.isActive(passive)) {
+            isCancelled = true
+            return
+        }
+        if (PassiveSlotRules.handleDrag(this, passive)) saveLater(passive, player)
     }
+
+    private class PendingSave(val clickTick: Int, val clickers: MutableSet<Player> = mutableSetOf())
+
+    private val pendingSaves = mutableMapOf<PassiveInventory, PendingSave>()
 
     // The menu can stay open across a vanilla autosave, so the persisted copy must follow every change
-    private fun saveLater(player: Player) = gearyPaper.launch {
-        delay(1.ticks)
-        PassiveSlots.save(player)
+    private fun saveLater(passive: PassiveInventory, clicker: Player) {
+        val pending = pendingSaves[passive]
+        if (pending != null) {
+            pending.clickers += clicker
+            return
+        }
+        pendingSaves[passive] = PendingSave(Bukkit.getCurrentTick(), mutableSetOf(clicker))
+        Bukkit.getScheduler().runTask(gearyPaper, Runnable {
+            val save = pendingSaves.remove(passive) ?: return@Runnable
+            PassiveSlots.save(passive)
+            flushToDisk(passive, save)
+        })
+    }
+
+    // Staff and owner files are autosaved minutes apart, so a crash could leave a moved item in both or neither.
+    // An owner autosave since the click wrote their inventory next to the old passive data
+    private fun flushToDisk(passive: PassiveInventory, save: PendingSave) {
+        val staff = save.clickers.filter { it.uniqueId != passive.playerId && it.isOnline }
+        staff.forEach { it.saveData() }
+        val owner = passive.player ?: return
+        if (staff.isNotEmpty() || owner.toNMS().lastSave >= save.clickTick) owner.saveData()
     }
 
     @EventHandler
     fun InventoryCloseEvent.saveOnClose() {
-        if (inventory.holder !is PassiveInventory) return
-        PassiveSlots.save(player as? Player ?: return)
+        val passive = inventory.holder as? PassiveInventory ?: return
+        PassiveSlots.save(passive)
+        // The closing player is still listed as a viewer until the event finishes
+        Bukkit.getScheduler().runTask(gearyPaper, Runnable { PassiveSlots.releaseIfUnused(passive) })
     }
 }
