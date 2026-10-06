@@ -3,11 +3,14 @@ package com.mineinabyss.geary.papermc.features.items
 import com.mineinabyss.dependencies.addCloseable
 import com.mineinabyss.dependencies.get
 import com.mineinabyss.dependencies.module
+import com.mineinabyss.dependencies.submodule
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.features.items.food.ReplaceBurnedDropListener
 import com.mineinabyss.geary.papermc.features.items.holdsentity.SpawnHeldPrefabListener
+import com.mineinabyss.geary.papermc.features.items.lightsource.LightSourceFeature
 import com.mineinabyss.geary.papermc.features.items.nointeraction.DisableItemInteractionsListener
 import com.mineinabyss.geary.papermc.features.items.passive.PassiveMenuListener
+import com.mineinabyss.geary.papermc.features.items.posteffects.PostEffectsFeature
 import com.mineinabyss.geary.papermc.features.items.repair.RepairKitListener
 import com.mineinabyss.geary.papermc.features.items.transform.TransformOnPickupListener
 import com.mineinabyss.geary.papermc.toGeary
@@ -23,6 +26,9 @@ import com.mineinabyss.idofront.messaging.success
 
 val CustomItemsFeature = module("custom-items") {
     require(get<GearyPaperConfig>().items.enabled) { "Items must be enabled in config" }
+
+    submodule(PostEffectsFeature)
+    submodule(LightSourceFeature)
 
     listeners(
         SpawnHeldPrefabListener(),
