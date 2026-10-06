@@ -39,7 +39,8 @@ class GearyPlayerInventory(
             EquipmentSlot.CHEST -> itemInChestplate
             EquipmentSlot.LEGS -> itemInLeggings
             EquipmentSlot.FEET -> itemInBoots
-            EquipmentSlot.BODY, EquipmentSlot.SADDLE -> null
+            EquipmentSlot.BODY -> itemInBodyArmor
+            EquipmentSlot.SADDLE -> itemInSaddle
         }
     }
 
@@ -61,15 +62,19 @@ class GearyPlayerInventory(
     val itemInOffhand: GearyEntity?
         get() = get(Inventory.SLOT_OFFHAND)
 
-    // This is literally how bukkit gets armor slots, I'm actually sobbing.
+    // inventory.size also counts offhand, body and saddle, so armour cannot be counted back from it
 
-    val itemInHelmet get() = get(inventory.size - 2)
+    val itemInBoots get() = get(Inventory.INVENTORY_SIZE)
 
-    val itemInChestplate get() = get(inventory.size - 3)
+    val itemInLeggings get() = get(Inventory.INVENTORY_SIZE + 1)
 
-    val itemInLeggings get() = get(inventory.size - 4)
+    val itemInChestplate get() = get(Inventory.INVENTORY_SIZE + 2)
 
-    val itemInBoots get() = get(inventory.size - 5)
+    val itemInHelmet get() = get(Inventory.INVENTORY_SIZE + 3)
+
+    val itemInBodyArmor get() = get(Inventory.SLOT_BODY_ARMOR)
+
+    val itemInSaddle get() = get(Inventory.SLOT_SADDLE)
 }
 
 fun PlayerInventory.toGeary(): GearyPlayerInventory? {
