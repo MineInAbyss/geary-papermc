@@ -5,6 +5,7 @@ import com.mineinabyss.geary.helpers.fastForEach
 import com.mineinabyss.geary.papermc.tracking.items.cache.NMSItemCache
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
 import com.mineinabyss.geary.papermc.tracking.items.passive.PassiveInventory
+import com.mineinabyss.geary.papermc.tracking.items.passive.PassiveSlots
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
 import com.mineinabyss.idofront.nms.aliases.NMSPlayerInventory
 import com.mineinabyss.idofront.nms.aliases.toNMS
@@ -50,7 +51,7 @@ class NMSInventoryCacheWrapper(
                 array[slot] = item
                 slot++
             }
-            if (passive != null) repeat(PlayerItemCache.PASSIVE_SLOT_COUNT) { i ->
+            if (passive != null) repeat(PassiveSlots.COUNT) { i ->
                 array[PlayerItemCache.PASSIVE_SLOT_START + i] = passive.nmsItem(i)
             }
             // Include cursor as last slot

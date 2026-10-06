@@ -10,6 +10,7 @@ import com.mineinabyss.geary.papermc.tracking.items.components.Equipped
 import com.mineinabyss.geary.papermc.tracking.items.components.InHand
 import com.mineinabyss.geary.papermc.tracking.items.components.InInventory
 import com.mineinabyss.geary.papermc.tracking.items.components.InPassive
+import com.mineinabyss.geary.papermc.tracking.items.passive.PassiveSlots
 import com.mineinabyss.geary.prefabs.PrefabKey
 import org.bukkit.inventory.ItemStack
 
@@ -131,7 +132,6 @@ abstract class PlayerItemCache<T>(
 
         // Player inventory contents end at 42 (36 items and 7 equipment slots)
         const val PASSIVE_SLOT_START = 48
-        const val PASSIVE_SLOT_COUNT = 2
-        val PASSIVE_SLOTS = PASSIVE_SLOT_START until PASSIVE_SLOT_START + PASSIVE_SLOT_COUNT
+        val PASSIVE_SLOTS = PASSIVE_SLOT_START until PASSIVE_SLOT_START + PassiveSlots.COUNT
     }
 }
