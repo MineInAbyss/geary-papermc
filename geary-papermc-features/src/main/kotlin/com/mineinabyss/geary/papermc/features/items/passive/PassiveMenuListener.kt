@@ -6,6 +6,7 @@ import com.mineinabyss.geary.papermc.tracking.items.passive.PassiveSlots
 import com.mineinabyss.idofront.nms.aliases.toNMS
 import net.minecraft.network.protocol.game.ClientboundRecipeBookSettingsPacket
 import net.minecraft.world.inventory.RecipeBookType
+import net.minecraft.world.item.ItemStack
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
@@ -21,7 +22,19 @@ import org.bukkit.event.player.PlayerRecipeBookSettingsChangeEvent
 class PassiveMenuListener : Listener {
     fun open(player: Player) {
         val passive = PassiveSlots.get(player) ?: return
-        player.openInventory(passive.inventory)
+        player.openInventory(passive.inventory)?.takeUnless { it.topInventory.holder !== passive } ?: return
+        carryCursorOver(player)
+    }
+
+    private fun carryCursorOver(player: Player) {
+        val nmsPlayer = player.toNMS()
+        val playerInv = nmsPlayer.inventoryMenu.takeUnless { it.carried.isEmpty } ?: return
+        val passiveInv = nmsPlayer.containerMenu.takeUnless { playerInv === it } ?: return
+
+        val playerCursor = playerInv.carried
+        playerInv.carried = ItemStack.EMPTY
+        passiveInv.carried = playerCursor
+        passiveInv.broadcastCarriedItem()
     }
 
     @EventHandler
