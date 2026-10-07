@@ -16,6 +16,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.inventory.InventoryType
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerRecipeBookSettingsChangeEvent
 
 /** Opens the passive inventory as a 3x3 menu from the recipe book button in the player inventory */
@@ -37,16 +38,25 @@ class PassiveMenuListener : Listener {
         passiveInv.broadcastCarriedItem()
     }
 
+    // The book state is sent before join, so a book saved as open would show over the player inventory
+    @EventHandler
+    fun PlayerJoinEvent.closeRecipeBook() = closeCraftingBook(player)
+
     @EventHandler
     fun PlayerRecipeBookSettingsChangeEvent.openOnRecipeBook() {
-        if (!isOpen || recipeBookType != PlayerRecipeBookSettingsChangeEvent.RecipeBookType.CRAFTING) return
+        if (recipeBookType != PlayerRecipeBookSettingsChangeEvent.RecipeBookType.CRAFTING) return
         if (player.openInventory.type != InventoryType.CRAFTING) return
 
-        // The client already flipped its book open, put it back so the next click sends open again
+        // Paper applies the packet's book state after this event, closing it now would be overwritten
+        Bukkit.getScheduler().runTask(gearyPaper, Runnable { if (player.isOnline) closeCraftingBook(player) })
+        open(player)
+    }
+
+    private fun closeCraftingBook(player: Player) {
         val nmsPlayer = player.toNMS()
+        if (!nmsPlayer.recipeBook.isOpen(RecipeBookType.CRAFTING)) return
         nmsPlayer.recipeBook.setOpen(RecipeBookType.CRAFTING, false)
         nmsPlayer.connection.send(ClientboundRecipeBookSettingsPacket(nmsPlayer.recipeBook.bookSettings))
-        open(player)
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
