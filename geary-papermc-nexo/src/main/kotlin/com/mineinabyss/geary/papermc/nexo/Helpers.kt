@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.nexo
 
 import com.mineinabyss.geary.modules.WorldScoped
+import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.withGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.entityOfOrNull
@@ -8,8 +9,8 @@ import com.nexomc.nexo.api.NexoBlocks
 import org.bukkit.block.Block
 import org.bukkit.block.data.BlockData
 
-// Resolves to null when Nexo is missing, where the feature never loaded
-internal val WorldScoped.nexo2Prefab get() = world.scope.getOrNull(NexoFeature)
+@Suppress("UnusedReceiverParameter")
+internal val WorldScoped.nexo2Prefab get() = gearyPaper.features.getOrNull(NexoFeature)
 
 private fun WorldScoped.prefabKeyOf(itemId: String?) = itemId?.let { nexo2Prefab?.get(it) }
 

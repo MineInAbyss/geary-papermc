@@ -23,7 +23,9 @@ import org.bukkit.configuration.ConfigurationSection
 val NexoFeature = module("nexo") {
     requirePlugins("Nexo")
 
-    listeners(NexoFurnitureListener(), NexoItemLoadListener())
+    listeners(NexoListener())
+    registerAxiomPlacerStrip()
+    addCloseable { unregisterAxiomPlacerStrip() }
 
     val nexo2Prefab by single { Nexo2Prefab() }
 
