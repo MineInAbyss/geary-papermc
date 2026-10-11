@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.nexo
 
 import com.mineinabyss.geary.modules.WorldScoped
+import com.mineinabyss.geary.papermc.ExternalItemLoading
 import com.mineinabyss.geary.papermc.PrefabLoading
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.hasComponentsEncoded
@@ -37,7 +38,10 @@ class NexoListener : Listener {
     }
 
     @EventHandler
-    fun NexoItemsLoadedEvent.onItemsLoaded() = registerAxiomPlacerStrip()
+    fun NexoItemsLoadedEvent.onItemsLoaded() {
+        registerAxiomPlacerStrip()
+        ExternalItemLoading.finished()
+    }
 
     @EventHandler
     fun NexoPreItemsLoadEvent.onPreItemsLoad() {

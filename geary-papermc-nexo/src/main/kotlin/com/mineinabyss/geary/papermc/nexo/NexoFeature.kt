@@ -6,6 +6,7 @@ import com.mineinabyss.dependencies.module
 import com.mineinabyss.dependencies.single
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.modules.observe
+import com.mineinabyss.geary.papermc.ExternalItemLoading
 import com.mineinabyss.geary.observers.events.OnSet
 import com.mineinabyss.geary.papermc.gearyWorld
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
@@ -22,6 +23,9 @@ import org.bukkit.configuration.ConfigurationSection
  */
 val NexoFeature = module("nexo") {
     requirePlugins("Nexo")
+
+    val nexoItemsLoaded = NexoItems.itemNames().isNotEmpty()
+    if (!nexoItemsLoaded) ExternalItemLoading.started()
 
     listeners(NexoListener())
     registerAxiomPlacerStrip()

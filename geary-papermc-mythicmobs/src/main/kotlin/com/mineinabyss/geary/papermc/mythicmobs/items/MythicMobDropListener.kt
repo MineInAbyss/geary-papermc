@@ -53,15 +53,22 @@ class GearyDrop(
     line: String, config: MythicLineConfig, item: AbstractItemStack,
     val randomAmount: RandomDouble,
 ) : VanillaItemDrop(line, config, item, randomAmount) {
-    val cookedItem = world.entityOfOrNull(prefab)?.get<ReplaceBurnedDrop>()?.replaceWith?.toItemStack()
-    val cookedDrop = cookedItem?.let { VanillaItemDrop(line, config, ItemComponentBukkitItemStack(it), randomAmount) }
+    private val drop by lazy {
+        world.getAddon(ItemTracking).createItem(prefab)
+            ?.let { VanillaItemDrop(line, config, ItemComponentBukkitItemStack(it), randomAmount) }
+    }
+    private val cookedDrop by lazy {
+        world.entityOfOrNull(prefab)?.get<ReplaceBurnedDrop>()?.replaceWith?.toItemStack()
+            ?.let { VanillaItemDrop(line, config, ItemComponentBukkitItemStack(it), randomAmount) }
+    }
 
     override fun getDrop(metadata: DropMetadata?, amount: Double): AbstractItemStack {
         val isOnFire = (metadata?.dropper?.getOrNull()?.entity?.bukkitEntity?.fireTicks ?: 0) > 0
         val itemInKillerHand = (BukkitAdapter.adapt(metadata?.cause?.getOrNull()) as? Player)?.inventory?.itemInMainHand
         val lootingLvl = if (noLooting) 0 else itemInKillerHand?.enchantments?.get(Enchantment.LOOTING) ?: 0
         val amount = (randomAmount.min.toInt()..(randomAmount.max.toInt() + lootingLvl)).random().toDouble()
+        val cookedDrop = cookedDrop
         return if (isOnFire && cookedDrop != null) cookedDrop.getDrop(metadata, amount)
-        else super.getDrop(metadata, amount)
+        else drop?.getDrop(metadata, amount) ?: super.getDrop(metadata, amount)
     }
 }

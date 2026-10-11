@@ -13,6 +13,7 @@ import kotlinx.serialization.serializer
 import net.minecraft.world.entity.ai.goal.Goal
 import org.bukkit.entity.Mob
 import java.lang.reflect.Constructor
+import java.lang.reflect.Parameter
 
 @Serializable(with = PathfinderWrapper.Serializer::class)
 data class PathfinderWrapper(
@@ -21,20 +22,23 @@ data class PathfinderWrapper(
     val priority: Int,
 ) {
     @Transient
-    val constructor: Constructor<*> = Class.forName(PATHFINDER_PACKAGE + type)
-        .constructors.filter {
-            it.parameterCount == (parameters.size + 1) && NMSMob::class.java.isAssignableFrom(it.parameters.first().type)
-        }.firstOrNull {
-            it.parameters.drop(1).map { it.name }.containsAll(parameters.keys)
-        } ?: error("Could not find constructor for pathfinder $type, has the class name changed?")
+    private val candidates = Class.forName(PATHFINDER_PACKAGE + type).constructors.filter {
+        it.parameterCount == (parameters.size + 1) && NMSMob::class.java.isAssignableFrom(it.parameters.first().type)
+    }
 
     @Transient
-    val serializers = constructor.parameters.drop(1).map { it.name to serializer(it.type) }
+    val constructor: Constructor<*> = candidates.firstOrNull { it.goalParameters.map { it.name }.containsAll(parameters.keys) }
+        ?: candidates.singleOrNull { it.goalParameters.none(Parameter::isNamePresent) }
+        ?: error("Could not find constructor for pathfinder $type, has the class name changed?")
 
     @Transient
-    val decoded = serializers.map { (name, serializer) ->
-        Yaml.default.decodeFromString(serializer, parameters[name] ?: error("Missing parameter $name"))
+    val decoded = constructor.goalParameters.mapIndexed { index, param ->
+        val value = if (param.isNamePresent) parameters[param.name] ?: error("Missing parameter ${param.name}")
+        else parameters.values.elementAt(index)
+        Yaml.default.decodeFromString(serializer(param.type), value)
     }.toTypedArray()
+
+    private val Constructor<*>.goalParameters get() = parameters.drop(1)
 
     fun toPaperPathfinder(mob: Mob): PaperGoal<Mob> =
         PaperGoal<Mob>(constructor.newInstance(mob.toNMS(), *decoded) as Goal)
