@@ -9,9 +9,14 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import net.kyori.adventure.key.Key
 import org.junit.jupiter.api.Test
 import team.unnamed.creative.ResourcePack
+import team.unnamed.creative.item.CompositeItemModel
 import team.unnamed.creative.item.ConditionItemModel
+import team.unnamed.creative.item.ItemModel
+import team.unnamed.creative.item.RangeDispatchItemModel
 import team.unnamed.creative.item.ReferenceItemModel
 import team.unnamed.creative.item.SelectItemModel
+import team.unnamed.creative.item.property.ItemBooleanProperty
+import team.unnamed.creative.item.tint.TintSource
 import team.unnamed.creative.metadata.pack.FormatVersion
 import team.unnamed.creative.metadata.pack.PackFormat
 
@@ -32,20 +37,22 @@ class ItemModelDefinitionTest {
     private fun resolve(definition: ItemModelDefinition, pack: ResourcePack = ResourcePack.resourcePack()) =
         ItemModelResolver(ModelBuilder(pack, format), Key.key("mineinabyss:fallback")).resolve(definition)
 
+    private fun resolve(config: String, pack: ResourcePack = ResourcePack.resourcePack()) = resolve(decode(config), pack)
+
+    private fun ItemModel.reference() = shouldBeInstanceOf<ReferenceItemModel>().model()
+
     @Test
     fun `should read a model key on its own`() {
-        decode("mineinabyss:dishes/cut_meat") shouldBe
-                ItemModelDefinition.Reference(model = Key.key("mineinabyss:dishes/cut_meat"))
+        resolve("mineinabyss:dishes/cut_meat").reference() shouldBe Key.key("mineinabyss:dishes/cut_meat")
     }
 
     @Test
     fun `should read untyped branches as what they build from`() {
-        decode("texture: mineinabyss:dishes/cut_meat_raw") shouldBe
-                ItemModelDefinition.Texture(texture = Key.key("mineinabyss:dishes/cut_meat_raw"))
-        decode("bbmodel: mineinabyss:dishes/cut_meat") shouldBe
-                ItemModelDefinition.BBModel(bbmodel = Key.key("mineinabyss:dishes/cut_meat"))
-        decode("model: mineinabyss:dishes/cut_meat") shouldBe
-                ItemModelDefinition.Reference(model = Key.key("mineinabyss:dishes/cut_meat"))
+        val pack = ResourcePack.resourcePack()
+        resolve("texture: mineinabyss:dishes/cut_meat_raw", pack).reference() shouldBe
+                Key.key("mineinabyss:dishes/cut_meat_raw")
+        pack.model(Key.key("mineinabyss:dishes/cut_meat_raw")).shouldNotBeNull()
+        resolve("model: mineinabyss:dishes/cut_meat").reference() shouldBe Key.key("mineinabyss:dishes/cut_meat")
     }
 
     @Test
@@ -63,10 +70,9 @@ class ItemModelDefinitionTest {
         )
 
         val condition = model.shouldBeInstanceOf<ConditionItemModel>()
-        condition.onTrue().shouldBeInstanceOf<ReferenceItemModel>().model() shouldBe
-                Key.key("mineinabyss:dishes/cut_meat_cooked")
-        condition.onFalse().shouldBeInstanceOf<ReferenceItemModel>().model() shouldBe
-                Key.key("mineinabyss:dishes/cut_meat_raw")
+        condition.condition() shouldBe ItemBooleanProperty.customModelData(0)
+        condition.onTrue().reference() shouldBe Key.key("mineinabyss:dishes/cut_meat_cooked")
+        condition.onFalse().reference() shouldBe Key.key("mineinabyss:dishes/cut_meat_raw")
     }
 
     @Test
@@ -102,8 +108,8 @@ class ItemModelDefinitionTest {
             .parent() shouldBe Key.key("minecraft:item/generated")
 
         // The branches point at the models that were just generated
-        model.shouldBeInstanceOf<ConditionItemModel>().onTrue()
-            .shouldBeInstanceOf<ReferenceItemModel>().model() shouldBe Key.key("mineinabyss:dishes/cut_meat_cooked")
+        model.shouldBeInstanceOf<ConditionItemModel>().onTrue().reference() shouldBe
+                Key.key("mineinabyss:dishes/cut_meat_cooked")
     }
 
     @Test
@@ -127,13 +133,44 @@ class ItemModelDefinitionTest {
         val select = model.shouldBeInstanceOf<SelectItemModel>()
         select.cases().map { case -> case.`when`().map { it.asString } } shouldBe
                 listOf(listOf("shred"), listOf("stew", "soup"))
-        select.fallback().shouldNotBeNull().shouldBeInstanceOf<ReferenceItemModel>().model() shouldBe
-                Key.key("mineinabyss:dishes/cut_meat_cooked")
+        select.fallback().shouldNotBeNull().reference() shouldBe Key.key("mineinabyss:dishes/cut_meat_cooked")
     }
 
     @Test
     fun `should fall back to the prefab model when a reference names nothing`() {
-        resolve(decode("tints: []")).shouldBeInstanceOf<ReferenceItemModel>().model() shouldBe
-                Key.key("mineinabyss:fallback")
+        resolve("tints: []").reference() shouldBe Key.key("mineinabyss:fallback")
+    }
+
+    @Test
+    fun `should pass vanilla properties and tints through to creative`() {
+        val model = resolve(
+            """
+            type: composite
+            models:
+            - type: condition
+              property: has_component
+              component: dyed_color
+              onTrue:
+                type: texture
+                texture: mineinabyss:gear/armor/orphan_chestplate_dyeable
+                tints:
+                - type: dye
+                  default: 16777215
+              onFalse: { texture: mineinabyss:gear/armor/orphan_chestplate }
+            - type: range_dispatch
+              property: count
+              entries:
+              - threshold: 2
+                model: mineinabyss:dishes/stack
+            """
+        )
+
+        val (condition, range) = model.shouldBeInstanceOf<CompositeItemModel>().models()
+        condition.shouldBeInstanceOf<ConditionItemModel>().condition() shouldBe ItemBooleanProperty.hasComponent("dyed_color")
+        val dyeable = condition.onTrue().shouldBeInstanceOf<ReferenceItemModel>()
+        dyeable.model() shouldBe Key.key("mineinabyss:gear/armor/orphan_chestplate_dyeable")
+        dyeable.tints() shouldBe listOf(TintSource.dye(16777215))
+        range.shouldBeInstanceOf<RangeDispatchItemModel>().entries().single().model().reference() shouldBe
+                Key.key("mineinabyss:dishes/stack")
     }
 }
