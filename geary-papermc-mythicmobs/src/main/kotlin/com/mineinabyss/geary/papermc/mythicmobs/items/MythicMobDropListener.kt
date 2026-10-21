@@ -27,8 +27,7 @@ class MythicMobDropListener : Listener {
         if (dropName.lowercase() != "geary") return
         val lines = container.line.lowercase().split(" ")
         val prefabKey = PrefabKey.of(lines[1])
-        val amount = lines.getOrNull(2)?.takeIf { "-" in it } ?: "1-1"
-        val noLooting = "nolooting" in lines
+        val amount = lines.getOrNull(2)?.replace("..", "-") ?: "1-1"
         val world = gearyPaper.worldManager.global
         val itemStack = world.getAddon(ItemTracking).createItem(prefabKey) ?: return
 
@@ -36,7 +35,6 @@ class MythicMobDropListener : Listener {
             GearyDrop(
                 world,
                 prefabKey,
-                noLooting,
                 container.line,
                 config,
                 ItemComponentBukkitItemStack(itemStack),
@@ -46,13 +44,7 @@ class MythicMobDropListener : Listener {
     }
 }
 
-class GearyDrop(
-    world: Geary,
-    val prefab: PrefabKey,
-    val noLooting: Boolean,
-    line: String, config: MythicLineConfig, item: AbstractItemStack,
-    val randomAmount: RandomDouble,
-) : VanillaItemDrop(line, config, item, randomAmount) {
+class GearyDrop(world: Geary, val prefab: PrefabKey, line: String, config: MythicLineConfig, item: AbstractItemStack, val randomAmount: RandomDouble) : VanillaItemDrop(line, config, item, randomAmount) {
     private val drop by lazy {
         world.getAddon(ItemTracking).createItem(prefab)
             ?.let { VanillaItemDrop(line, config, ItemComponentBukkitItemStack(it), randomAmount) }
@@ -63,12 +55,8 @@ class GearyDrop(
     }
 
     override fun getDrop(metadata: DropMetadata?, amount: Double): AbstractItemStack {
+        val amount = randomAmount.get()
         val isOnFire = (metadata?.dropper?.getOrNull()?.entity?.bukkitEntity?.fireTicks ?: 0) > 0
-        val itemInKillerHand = (BukkitAdapter.adapt(metadata?.cause?.getOrNull()) as? Player)?.inventory?.itemInMainHand
-        val lootingLvl = if (noLooting) 0 else itemInKillerHand?.enchantments?.get(Enchantment.LOOTING) ?: 0
-        val amount = (randomAmount.min.toInt()..(randomAmount.max.toInt() + lootingLvl)).random().toDouble()
-        val cookedDrop = cookedDrop
-        return if (isOnFire && cookedDrop != null) cookedDrop.getDrop(metadata, amount)
-        else drop?.getDrop(metadata, amount) ?: super.getDrop(metadata, amount)
+        return (cookedDrop?.takeIf { isOnFire } ?: drop)?.getDrop(metadata, amount) ?: super.getDrop(metadata, amount)
     }
 }
