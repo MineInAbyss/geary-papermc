@@ -86,6 +86,7 @@ val SpawningFeature = module("spawning") {
         get<Plugin>().sqliteDatabase(Path("spawns.db")) {
             migrateSpawnDataToText()
             spawnDAO.create()
+            backfillRtreeCategories()
         }
     }
     single { spawnDAO.spawnQueries }
@@ -250,4 +251,18 @@ private fun WriteTransaction.migrateSpawnDataToText() {
     exec("CREATE TABLE spawn_data (id INTEGER PRIMARY KEY, data TEXT NOT NULL) STRICT")
     exec("INSERT INTO spawn_data(id, data) SELECT id, CAST(data AS TEXT) FROM spawn_data_old")
     exec("DROP TABLE spawn_data_old")
+}
+
+// insertRtree once left the category dimensions at 0, hiding those rows from every typed query.
+// Category ids start at 1, so 0 only matches rows written before the fix
+internal fun WriteTransaction.backfillRtreeCategories() {
+    exec(
+        """
+        UPDATE spawn_rtree
+        SET minCategory = (SELECT c.id FROM spawn_data d JOIN spawn_categories c ON c.name = d.data ->> 'category' WHERE d.id = spawn_rtree.id),
+            maxCategory = (SELECT c.id FROM spawn_data d JOIN spawn_categories c ON c.name = d.data ->> 'category' WHERE d.id = spawn_rtree.id)
+        WHERE minCategory = 0
+          AND id IN (SELECT d.id FROM spawn_data d JOIN spawn_categories c ON c.name = d.data ->> 'category')
+        """.trimIndent()
+    )
 }

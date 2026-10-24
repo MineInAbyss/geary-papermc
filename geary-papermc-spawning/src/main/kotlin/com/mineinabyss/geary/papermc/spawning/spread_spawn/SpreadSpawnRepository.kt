@@ -96,9 +96,9 @@ class SpreadSpawnRepository(
 
     suspend fun insertSpawnLocation(location: Location, store: StoredEntity): SpreadSpawnLocation = db.write {
         val (x, y, z) = location
-        spawns.insertRtree(x = x, y = y, z = z)
-        val id = spawns.lastInsertedRtreeId().first { getLong(it.id) }
         spawns.createCategoriesIfMissing(json(listOf(store.category)))
+        spawns.insertRtree(x = x, y = y, z = z, category = store.category)
+        val id = spawns.lastInsertedRtreeId().first { getLong(it.id) }
         spawns.insertData(id = id, data = json.encodeToString(store))
 
         SpreadSpawnLocation(

@@ -116,8 +116,10 @@ VALUES (:id, json(:data));
 
 
 -- insertRtree
-INSERT INTO spawn_rtree(minX, maxX, minY, maxY, minZ, maxZ)
-VALUES (:x, :x, :y, :y, :z, :z);
+INSERT INTO spawn_rtree(minX, maxX, minY, maxY, minZ, maxZ, minCategory, maxCategory)
+SELECT :x, :x, :y, :y, :z, :z, id, id
+FROM spawn_categories
+WHERE name = :category;
 
 -- RETURNING gives NULL on an rtree table, which assigns the rowid after the values it hands back.
 -- Only valid on the same connection, immediately after insertRtree.
