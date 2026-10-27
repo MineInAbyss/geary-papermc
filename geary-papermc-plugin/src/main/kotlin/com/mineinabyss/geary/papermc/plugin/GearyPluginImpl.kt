@@ -8,6 +8,7 @@ import com.mineinabyss.geary.modules.Geary
 import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.modules.geary
 import com.mineinabyss.geary.papermc.*
+import com.mineinabyss.geary.papermc.creativetabs.CreativeTabsFeature
 import com.mineinabyss.geary.papermc.datastore.encodeComponentsTo
 import com.mineinabyss.geary.papermc.datastore.withUUIDSerializer
 import com.mineinabyss.geary.papermc.features.entities.MinecraftFeatures
@@ -129,6 +130,7 @@ class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
             MythicMobsFeature,
             NexoFeature,
             MenusFeature,
+            CreativeTabsFeature,
             DebugFeature,
             TestingFeature,
             ReloadFeature,

@@ -28,6 +28,7 @@ dependencies {
     implementation(project(":"))
     implementation(project(":geary-papermc-nexo"))
     implementation(project(":geary-papermc-menus"))
+    implementation(project(":geary-papermc-creativetabs"))
 
     // MineInAbyss platform
     compileOnly(miaLibs.kotlin.stdlib)

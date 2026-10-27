@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.plugin.commands
 import com.mineinabyss.dependencies.DI
 import com.mineinabyss.dependencies.module
 import com.mineinabyss.geary.papermc.GearyPaperConfig
+import com.mineinabyss.geary.papermc.creativetabs.CreativeTabsFeature
 import com.mineinabyss.geary.papermc.features.items.recipes.RecipeFeature
 import com.mineinabyss.geary.papermc.features.prefabs.PrefabsFeature
 import com.mineinabyss.geary.papermc.features.resourcepacks.ResourcepackGeneratorFeature
@@ -24,6 +25,7 @@ private val reloadableFeatures: List<DI.Module> = listOf(
     RecipeFeature,
     LocationsFeature,
     SpawningFeature,
+    CreativeTabsFeature,
 )
 
 val ReloadFeature = module("reload") { }.mainCommand {
