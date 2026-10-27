@@ -7,7 +7,7 @@ import com.mineinabyss.idofront.features.listeners
 import com.mineinabyss.idofront.features.requirePlugins
 import com.mineinabyss.idofront.messaging.ComponentLogger
 
-/** Sends prefab blocks and furniture as creative tabs to players running the MineInAbyss Addon mod */
+/** Sends prefab blocks, furniture and other items as creative tabs to players running the MineInAbyss Addon mod */
 val CreativeTabsFeature = module("creative-tabs") {
     requirePlugins("Nexo")
 

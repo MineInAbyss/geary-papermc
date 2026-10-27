@@ -17,31 +17,40 @@ import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.messaging.PluginMessageListener
+import org.bukkit.scheduler.BukkitTask
 import java.util.*
 import net.minecraft.world.item.ItemStack as NMSItemStack
 
 /**
  * Talks the MineInAbyss Addon mod's creative tab protocol.
  * A client says hello with the addon protocol and its game protocol, and from then on gets a clear followed by every section whenever they change.
+ * Sections only go to players holding [PERMISSION], which is checked every second so granting or revoking it applies without a rejoin.
  * The client decides how a section's entries are laid out into tabs.
  * Items go over the wire in the game's own codec, which only lines up when both sides run the same game version
  */
 class CreativeTabsChannel(private val plugin: Plugin, private val logger: ComponentLogger) : PluginMessageListener {
-    private val clients = mutableSetOf<UUID>()
+    /** Clients that said hello, mapped to whether they held [PERMISSION] when last sent to */
+    private val clients = mutableMapOf<UUID, Boolean>()
     private var packets = emptyList<ByteArray>()
-    private var open = false
+    private var isOpen = false
+    private var rebuildQueued = false
+    private var permissionCheck: BukkitTask? = null
 
     fun open() {
-        open = true
+        isOpen = true
+        permissionCheck = Bukkit.getScheduler().runTaskTimer(plugin, Runnable { resendOnPermissionChange() }, 20, 20)
         Bukkit.getMessenger().apply {
             registerIncomingPluginChannel(plugin, HELLO, this@CreativeTabsChannel)
             registerOutgoingPluginChannel(plugin, CLEAR)
             registerOutgoingPluginChannel(plugin, SECTION)
         }
+        // A reload of this feature starts empty while clients only say hello on join, the section channel only exists in clients speaking this protocol
+        Bukkit.getOnlinePlayers().filter { SECTION in it.listeningPluginChannels }.forEach { clients[it.uniqueId] = false }
     }
 
     fun close() {
-        open = false
+        isOpen = false
+        permissionCheck?.cancel()
         clients.clear()
         Bukkit.getMessenger().apply {
             unregisterIncomingPluginChannel(plugin, HELLO, this@CreativeTabsChannel)
@@ -59,34 +68,52 @@ class CreativeTabsChannel(private val plugin: Plugin, private val logger: Compon
         if (protocol != PROTOCOL || gameProtocol != SharedConstants.getProtocolVersion()) {
             return logger.i { "Not sending creative tabs to ${player.name}, addon protocol $protocol and game protocol $gameProtocol do not match $PROTOCOL and ${SharedConstants.getProtocolVersion()}" }
         }
-        clients += player.uniqueId
         send(player)
     }
 
-    fun send(player: Player) {
-        if (player.uniqueId !in clients) return
+    private fun send(player: Player) {
+        val permitted = player.hasPermission(PERMISSION)
+        clients[player.uniqueId] = permitted
         player.sendPluginMessage(plugin, CLEAR, ByteArray(0))
-        if (!player.hasPermission(PERMISSION)) return
+        if (permitted) packets.forEach { player.sendPluginMessage(plugin, SECTION, it) }
+    }
 
-        packets.forEach { player.sendPluginMessage(plugin, SECTION, it) }
+    private fun resendOnPermissionChange() {
+        clients.toList().forEach { (uuid, permitted) ->
+            val player = Bukkit.getPlayer(uuid) ?: return@forEach
+            if (player.hasPermission(PERMISSION) != permitted) send(player)
+        }
     }
 
     fun forget(player: Player) {
         clients -= player.uniqueId
     }
 
-    /** Items for Nexo backed prefabs only exist once Nexo has registered them, after prefabs are read */
+    /**
+     * Items for Nexo backed prefabs only exist once Nexo has registered them, after prefabs are read.
+     * The loading flags are only checked a tick later, since this feature can load before the prefabs feature flags its own load in the same tick.
+     * Requests made while one is already waiting share its rebuild, startup asks twice at once
+     */
     fun rebuildOnceLoaded() {
-        PrefabLoading.awaitLoaded()
-            .thenCompose { ExternalItemLoading.awaitLoaded() }
-            .thenRun { Bukkit.getScheduler().runTask(plugin, Runnable { if (open) rebuild() }) }
+        if (rebuildQueued) return
+        rebuildQueued = true
+        Bukkit.getScheduler().runTask(plugin, Runnable {
+            PrefabLoading.awaitLoaded()
+                .thenCompose { ExternalItemLoading.awaitLoaded() }
+                .thenRun {
+                    Bukkit.getScheduler().runTask(plugin, Runnable {
+                        rebuildQueued = false
+                        if (isOpen) rebuild()
+                    })
+                }
+        })
     }
 
     private fun rebuild() {
         val sections = buildCreativeSections(gearyPaper.worldManager.global)
         packets = sections.flatMap(::encode)
         logger.i { "Built creative tabs ${sections.joinToString { "${it.id} (${it.entries.size})" }}" }
-        clients.mapNotNull(Bukkit::getPlayer).forEach(::send)
+        clients.keys.mapNotNull(Bukkit::getPlayer).forEach(::send)
     }
 
     private fun encode(section: CreativeSection): List<ByteArray> {

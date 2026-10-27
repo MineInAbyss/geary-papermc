@@ -36,6 +36,7 @@ fun buildCreativeSections(world: Geary): List<CreativeSection> = with(world) {
     listOf(
         section("blocks", "Blocks", "minecraft:building_blocks") { has<NexoCustomBlock>() },
         section("furniture", "Furniture", "minecraft:functional_blocks") { has<NexoFurniture>() },
+        section("items", "Items", "minecraft:ingredients") { !has<NexoCustomBlock>() && !has<NexoFurniture>() },
     ).filter { it.entries.isNotEmpty() }
 }
 
