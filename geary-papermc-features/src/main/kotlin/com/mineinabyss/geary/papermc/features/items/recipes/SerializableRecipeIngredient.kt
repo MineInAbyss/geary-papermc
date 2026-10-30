@@ -23,7 +23,8 @@ import org.bukkit.inventory.RecipeChoice
 /**
  * [damage] takes durability off the item instead of consuming it.
  * [replacement] stands in for the crafting remainder of every item used up, or is left behind once a damaged item breaks.
- * [preserve] lists data components the result copies from this slot
+ * [preserve] lists data components the result copies from this slot.
+ * [remove] lists data components the result drops, after anything copied from this slot
  */
 @KeepGeneratedSerializer
 @Serializable(with = SerializableRecipeIngredient.Serializer::class)
@@ -34,6 +35,7 @@ data class SerializableRecipeIngredient(
     val keep: Boolean = false,
     val replacement: SerializableItemStack? = null,
     val preserve: @Serializable(StringsSerializer::class) List<String> = emptyList(),
+    val remove: @Serializable(StringsSerializer::class) List<String> = emptyList(),
 ) {
     internal fun toIngredient(context: RecipeContext, enforceAmount: Boolean = false): RecipeIngredient? {
         if (item.prefab != null && item.tag != null) context.warn("sets both a prefab and a tag on an ingredient, the tag is ignored")
@@ -69,7 +71,8 @@ data class SerializableRecipeIngredient(
             display = display,
             amount = amount,
             consumption = consumption(replacement),
-            preserved = preserve.toPreservedComponents(context),
+            preserved = PreservedComponentData.parse(preserve, context),
+            removed = RemovedComponentData.parse(remove, context),
             isPrefab = prefab != null,
             matcher = matcher,
             choice = choice,

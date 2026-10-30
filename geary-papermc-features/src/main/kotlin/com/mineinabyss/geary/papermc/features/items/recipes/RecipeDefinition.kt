@@ -230,7 +230,7 @@ class StonecuttingRecipeDefinition(
 sealed class SmithingRecipeDefinition : RecipeDefinition() {
     abstract val input: SerializableRecipeIngredient
     abstract val template: SerializableRecipeIngredient?
-    abstract val addition: SerializableRecipeIngredient
+    abstract val addition: SerializableRecipeIngredient?
 
     protected abstract val canPreserve: Boolean
 
@@ -238,45 +238,51 @@ sealed class SmithingRecipeDefinition : RecipeDefinition() {
         context: RecipeContext,
         template: RecipeIngredient?,
         base: RecipeIngredient,
-        addition: RecipeIngredient,
+        addition: RecipeIngredient?,
     ): LoadedRecipe?
 
     override fun load(context: RecipeContext): LoadedRecipe? {
         val template = template?.let { it.toPlainIngredient(context, "smithing", canPreserve) ?: return null }
         val base = input.toPlainIngredient(context, "smithing", canPreserve) ?: return null
-        val addition = addition.toPlainIngredient(context, "smithing", canPreserve) ?: return null
+        val addition = addition?.let { it.toPlainIngredient(context, "smithing", canPreserve) ?: return null }
         return create(context, template, base, addition)
     }
 }
 
-/** [preserve] adds to what [copyNbt] carries over from the input */
+/**
+ * [preserve] adds to what [copyNbt] carries over from the input.
+ * Without a result, the output is the input itself with every component kept except those its ingredient removes
+ */
 @Serializable
 @SerialName("smithing_transform")
 class SmithingTransformRecipeDefinition(
     override val input: SerializableRecipeIngredient,
     override val template: SerializableRecipeIngredient? = null,
-    override val addition: SerializableRecipeIngredient,
+    override val addition: SerializableRecipeIngredient? = null,
     val copyNbt: Boolean = false,
     val preserve: @Serializable(StringsSerializer::class) List<String> = emptyList(),
 ) : SmithingRecipeDefinition() {
     override val canPreserve: Boolean get() = true
+    override val requiresResult: Boolean get() = result != null
 
     override fun create(
         context: RecipeContext,
         template: RecipeIngredient?,
         base: RecipeIngredient,
-        addition: RecipeIngredient,
+        addition: RecipeIngredient?,
     ): LoadedRecipe {
         val preservingBase = base.preserving(preserve, context)
+        val inheritsBase = result == null
+        val displayResult = if (inheritsBase) base.display.asOne() else context.result
         val recipe = SmithingTransformRecipe(
             context.key,
-            context.result,
+            displayResult,
             template?.choice ?: RecipeChoice.empty(),
             preservingBase.choice,
-            addition.choice,
-            copyNbt,
+            addition?.choice ?: RecipeChoice.empty(),
+            copyNbt || inheritsBase,
         )
-        val custom = SmithingCustomRecipe(context.key, context.result, template, preservingBase, addition, context.permission)
+        val custom = SmithingCustomRecipe(context.key, displayResult, template, preservingBase, addition, context.permission, inheritsBase)
         return LoadedRecipe(recipe, custom)
     }
 }
@@ -286,7 +292,7 @@ class SmithingTransformRecipeDefinition(
 class SmithingTrimRecipeDefinition(
     override val input: SerializableRecipeIngredient,
     override val template: SerializableRecipeIngredient? = null,
-    override val addition: SerializableRecipeIngredient,
+    override val addition: SerializableRecipeIngredient? = null,
     val trimPattern: String,
     val copyNbt: Boolean = false,
 ) : SmithingRecipeDefinition() {
@@ -297,14 +303,14 @@ class SmithingTrimRecipeDefinition(
         context: RecipeContext,
         template: RecipeIngredient?,
         base: RecipeIngredient,
-        addition: RecipeIngredient,
+        addition: RecipeIngredient?,
     ): LoadedRecipe? {
         if (template == null) return context.warn("is a smithing trim without a template, which vanilla requires")
         val pattern = NamespacedKey.fromString(trimPattern)
             ?.let(RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_PATTERN)::get)
             ?: return context.warn("specifies an unknown trim pattern $trimPattern")
 
-        val recipe = SmithingTrimRecipe(context.key, template.choice, base.choice, addition.choice, pattern, copyNbt)
+        val recipe = SmithingTrimRecipe(context.key, template.choice, base.choice, addition?.choice ?: RecipeChoice.empty(), pattern, copyNbt)
         return LoadedRecipe(recipe, SmithingCustomRecipe(context.key, context.result, template, base, addition, context.permission))
     }
 }
@@ -386,15 +392,19 @@ private fun SerializableRecipeIngredient.toPlainIngredient(
     if (!canPreserve && ingredient.preserved.isNotEmpty()) {
         context.warn("is a $station recipe, which cannot preserve components off an ingredient")
     }
+    if (!canPreserve && ingredient.removed.isNotEmpty()) {
+        context.warn("is a $station recipe, which cannot remove components off an ingredient")
+    }
     return ingredient.withOptions(
         amount = 1,
         consumption = Consumption.Consume(),
         preserved = if (canPreserve) ingredient.preserved else emptyList(),
+        removed = if (canPreserve) ingredient.removed else emptyList(),
     )
 }
 
 private fun RecipeIngredient.preserving(names: List<String>, context: RecipeContext): RecipeIngredient =
-    if (names.isEmpty()) this else withOptions(preserved = (preserved + names.toPreservedComponents(context)).distinct())
+    if (names.isEmpty()) this else withOptions(preserved = (preserved + PreservedComponentData.parse(names, context)).distinct())
 
 private fun <T : CraftingRecipe> T.applyBook(context: RecipeContext) = apply {
     group = context.group

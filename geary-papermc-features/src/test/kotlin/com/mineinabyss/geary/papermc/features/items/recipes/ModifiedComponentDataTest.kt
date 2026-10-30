@@ -13,15 +13,15 @@ import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
 import org.junit.jupiter.api.Test
 
-class PreservedComponentsTest : RecipeTestBase() {
+class ModifiedComponentDataTest : RecipeTestBase() {
     private fun preserving(vararg types: DataComponentType) = ingredient(Material.IRON_PICKAXE, preserved = types.toList())
 
-    private fun copy(result: ItemStack, vararg sources: Pair<RecipeIngredient, ItemStack?>) = PreservedComponents.copyOnto(result, sources.toList())
+    private fun copy(result: ItemStack, vararg sources: Pair<RecipeIngredient, ItemStack?>) = ModifiedComponentData.applyAll(result, sources.toList())
 
     @Test
     fun `parses component names regardless of case or namespace, dropping ones it cannot copy with a warning`() {
-        listOf("DAMAGE", "minecraft:enchantments", "damage", "custom_data", "nope", "not a key").toPreservedComponents(context()) shouldContainExactly
-            listOf(DataComponentTypes.DAMAGE, DataComponentTypes.ENCHANTMENTS)
+        PreservedComponentData.parse(listOf("DAMAGE", "minecraft:enchantments", "damage", "custom_data", "nope", "not a key"), context()) shouldContainExactly
+            listOf(PreservedComponentData(DataComponentTypes.DAMAGE), PreservedComponentData(DataComponentTypes.ENCHANTMENTS))
         warnings shouldHaveSize 3
         warnings.first() shouldContain "custom_data"
     }
@@ -50,5 +50,14 @@ class PreservedComponentsTest : RecipeTestBase() {
         copy(stack(Material.GOLDEN_PICKAXE), damage to damaged(Material.IRON_PICKAXE, 20)).damage() shouldBe 20
         copy(stack(Material.GOLDEN_PICKAXE), damage to damaged(Material.IRON_PICKAXE, 200)).damage() shouldBe maxDamage(Material.GOLDEN_PICKAXE) - 1
         copy(stack(Material.STICK), damage to damaged(Material.IRON_PICKAXE, 20)).hasData(DataComponentTypes.DAMAGE) shouldBe false
+    }
+
+    @Test
+    fun `removes components after copying preserved ones, even ones another ingredient preserves`() {
+        val name = preserving(DataComponentTypes.CUSTOM_NAME)
+        val removing = RecipeIngredient(stack(Material.STICK), removed = listOf(RemovedComponentData(DataComponentTypes.CUSTOM_NAME)), matcher = { true })
+
+        copy(stack(Material.DIAMOND_PICKAXE), name to named(Material.IRON_PICKAXE, "Old"), removing to stack(Material.STICK))
+            .hasData(DataComponentTypes.CUSTOM_NAME) shouldBe false
     }
 }

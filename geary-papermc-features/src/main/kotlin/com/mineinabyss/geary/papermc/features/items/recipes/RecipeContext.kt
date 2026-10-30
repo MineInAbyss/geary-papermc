@@ -28,7 +28,7 @@ internal class RecipeContext(
         val conflicting = ingredients.distinct()
             .flatMap { it.preserved }.groupingBy { it }.eachCount()
             .filterValues { it > 1 }.keys.ifEmpty { return }
-            .joinToString { it.key().value() }
+            .joinToString { it.type.key().value() }
 
         warn("preserves $conflicting off several ingredients, it is taken from the first of them in the grid or definition")
     }

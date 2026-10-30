@@ -13,7 +13,7 @@ internal sealed class CustomRecipe(
     val permission: String?,
 ) {
     open val isDiscoverable: Boolean get() = true
-    val preservesComponents: Boolean = ingredients.any { it.preserved.isNotEmpty() }
+    val preservesComponents: Boolean = ingredients.any { it.preserved.isNotEmpty() || it.removed.isNotEmpty() }
 
     fun matchesPrefabIngredient(item: ItemStack?) = ingredients.any { it.isPrefab && it.matches(item) }
 
@@ -38,7 +38,7 @@ internal sealed class GridRecipe(
         if (!preservesComponents) return result.clone()
         val matched = match(matrix) ?: return result.clone()
         val sources = matched.entries.sortedBy { it.key }.map { (slot, use) -> use.ingredient to matrix[slot] }
-        return PreservedComponents.copyOnto(result, sources)
+        return ModifiedComponentData.applyAll(result, sources)
     }
 }
 
@@ -91,7 +91,7 @@ internal class TransmuteCustomRecipe(
             input.canUse(matrix[slot]) && filled.any { it != slot && material.canUse(matrix[it]) }
         } ?: return result.clone()
         val materialSlot = filled.first { it != inputSlot && material.canUse(matrix[it]) }
-        return PreservedComponents.copyOnto(result, listOf(input to matrix[inputSlot], material to matrix[materialSlot]))
+        return ModifiedComponentData.applyAll(result, listOf(input to matrix[inputSlot], material to matrix[materialSlot]))
     }
 }
 
@@ -137,14 +137,19 @@ internal class PlainCustomRecipe(
 internal class SmithingCustomRecipe(
     key: NamespacedKey,
     result: ItemStack,
-    private val template: RecipeIngredient?,
+    val template: RecipeIngredient?,
     private val base: RecipeIngredient,
-    private val addition: RecipeIngredient,
+    val addition: RecipeIngredient?,
     permission: String?,
+    val inheritsBase: Boolean = false,
 ) : CustomRecipe(key, result, listOfNotNull(template, base, addition), permission) {
+    fun canClear(baseItem: ItemStack?): Boolean =
+        !inheritsBase || base.removed.isEmpty() || baseItem != null && base.removed.any { baseItem.hasData(it.type) }
+
     fun resultFor(assembled: ItemStack, templateItem: ItemStack?, baseItem: ItemStack?, additionItem: ItemStack?): ItemStack {
-        val sources = listOfNotNull(template?.to(templateItem), base to baseItem, addition to additionItem)
-        return PreservedComponents.copyOnto(assembled, sources)
+        val sources = listOfNotNull(template?.to(templateItem), base to baseItem, addition?.to(additionItem))
+        val start = if (inheritsBase && baseItem != null) baseItem.asOne() else assembled
+        return ModifiedComponentData.applyAll(start, sources)
     }
 }
 
@@ -167,7 +172,7 @@ internal class AnvilCustomRecipe(
     }
 
     private fun resultFor(inputItem: ItemStack, materialItem: ItemStack): ItemStack? {
-        if (repair <= 0) return PreservedComponents.copyOnto(result, listOf(input to inputItem, material to materialItem))
+        if (repair <= 0) return ModifiedComponentData.applyAll(result, listOf(input to inputItem, material to materialItem))
 
         val damage = inputItem.getData(DataComponentTypes.DAMAGE)?.takeIf { it > 0 } ?: return null
         return inputItem.clone().apply { setData(DataComponentTypes.DAMAGE, (damage - repair).coerceAtLeast(0)) }

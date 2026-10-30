@@ -7,7 +7,13 @@ import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.entityOfOrNull
 import com.mineinabyss.geary.systems.query.query
 import com.mineinabyss.idofront.messaging.ComponentLogger
+import io.papermc.paper.datacomponent.DataComponentTypes
+import io.papermc.paper.registry.RegistryKey
+import io.papermc.paper.registry.TypedKey
+import io.papermc.paper.registry.tag.TagKey
+import net.kyori.adventure.key.Key
 import org.bukkit.Bukkit
+import org.bukkit.Registry
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -41,6 +47,20 @@ internal class RecipeManager(
     /** [recipe] is null for a vanilla recipe */
     fun isAllowedIn(recipe: CustomRecipe?, item: ItemStack?): Boolean =
         item.isNullOrEmpty() || isAllowedInVanillaRecipes(item) || recipe?.matchesPrefabIngredient(item) == true
+
+    /** The smithing slot an item of a prefab belongs in, or null to leave it to vanilla */
+    fun smithingSlot(item: ItemStack): Int? {
+        if (item.isEmpty || item.persistentDataContainer.isEmpty) return null
+        val smithing = recipes.values.filterIsInstance<SmithingCustomRecipe>()
+        return when {
+            smithing.any { it.template?.takeIf(RecipeIngredient::isPrefab)?.matches(item) == true } -> TEMPLATE_SLOT
+            item.hasData(DataComponentTypes.EQUIPPABLE) -> BASE_SLOT
+            smithing.any { it.addition?.matches(item) == true } || item.isTrimMaterial() -> ADDITION_SLOT
+            else -> null
+        }
+    }
+
+    private fun ItemStack.isTrimMaterial() = Registry.ITEM.getTag(TRIM_MATERIALS).contains(TypedKey.create(RegistryKey.ITEM, type.key()))
 
     fun blocksVanillaCraft(key: NamespacedKey, matrix: Array<ItemStack?>) = key in recipes || !matrix.all { isAllowedIn(null, it) }
 
@@ -221,3 +241,5 @@ internal class RecipeManager(
         var unloadedAt: Long? = null
     }
 }
+
+private val TRIM_MATERIALS = TagKey.create(RegistryKey.ITEM, Key.key("minecraft:trim_materials"))

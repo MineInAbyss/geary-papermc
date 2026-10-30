@@ -109,7 +109,7 @@ abstract class RecipeTestBase : GearyTest() {
         amount: Int = 1,
         consumption: Consumption = Consumption.Consume(),
         preserved: List<DataComponentType> = emptyList(),
-    ) = RecipeIngredient(stack(material), amount, consumption, preserved, matcher = { it.type == material })
+    ) = RecipeIngredient(stack(material), amount, consumption, preserved.map(::PreservedComponentData), matcher = { it.type == material })
 
     internal fun predicateIngredient(display: Material, amount: Int = 1, matcher: (ItemStack) -> Boolean) =
         RecipeIngredient(stack(display), amount, matcher = matcher)

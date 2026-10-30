@@ -1,6 +1,5 @@
 package com.mineinabyss.geary.papermc.features.items.recipes
 
-import io.papermc.paper.datacomponent.DataComponentType
 import io.papermc.paper.datacomponent.DataComponentTypes
 import org.bukkit.entity.LivingEntity
 import org.bukkit.inventory.ItemStack
@@ -10,7 +9,8 @@ internal class RecipeIngredient(
     val display: ItemStack,
     val amount: Int = 1,
     val consumption: Consumption = Consumption.Consume(),
-    val preserved: List<DataComponentType> = emptyList(),
+    val preserved: List<PreservedComponentData> = emptyList(),
+    val removed: List<RemovedComponentData> = emptyList(),
     val isPrefab: Boolean = false,
     private val matcher: (ItemStack) -> Boolean,
     val choice: RecipeChoice = RecipeChoice.predicateChoice({ !it.isEmpty && matcher(it) }, display),
@@ -59,8 +59,9 @@ internal class RecipeIngredient(
     fun withOptions(
         amount: Int = this.amount,
         consumption: Consumption = this.consumption,
-        preserved: List<DataComponentType> = this.preserved,
-    ) = RecipeIngredient(display, amount, consumption, preserved, isPrefab, matcher, choice)
+        preserved: List<PreservedComponentData> = this.preserved,
+        removed: List<RemovedComponentData> = this.removed,
+    ) = RecipeIngredient(display, amount, consumption, preserved, removed, isPrefab, matcher, choice)
 
     data class Consumed(val slot: ItemStack?, val leftover: ItemStack?)
 }
