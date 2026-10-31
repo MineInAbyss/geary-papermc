@@ -16,10 +16,7 @@ import com.mineinabyss.idofront.commands.brigadier.suggests
 object GearyArgs {
     fun prefabKey() = ArgsMinecraft.namespacedKey().suggests {
         with(location.world.toGeary()) {
-            suggest(getAddon(Prefabs).prefabs.keys.filter {
-                val arg = argument.lowercase()
-                it.key.startsWith(arg) || it.full.startsWith(arg)
-            }.map { it.toString() })
+            suggestRanked(getAddon(Prefabs).prefabs.keys.map { it.toString() })
         }
     }.map { PrefabKey.of(it.asString()) }
 
@@ -28,14 +25,12 @@ object GearyArgs {
     }
 
     fun namespace() = Args.word().suggests {
-        suggest(gearyPaper.dataFolder.resolve("prefabs").listFiles()?.filter {
-            it.isDirectory && it.name.startsWith(suggestions.remaining.lowercase())
-        }?.map { it.name } ?: emptyList())
+        suggestRanked(gearyPaper.dataFolder.resolve("prefabs").listFiles()?.filter { it.isDirectory }?.map { it.name } ?: emptyList())
     }
 
     fun mob() = ArgsMinecraft.namespacedKey().suggests {
         with(location.world.toGeary()) {
-            suggest(getAddon(EntityTracking).query.spawnablePrefabs.getKeys().filterPrefabs(suggestions.remaining))
+            suggestRanked(getAddon(EntityTracking).query.spawnablePrefabs.getKeys().map { it.toString() }, limit = 20)
         }
     }.map {
         with(location.world.toGeary()) {
@@ -45,9 +40,7 @@ object GearyArgs {
 
     fun item() = ArgsMinecraft.namespacedKey().suggests {
         with(location.world.toGeary()) {
-            suggest(getAddon(ItemTracking).prefabs.getKeys().filterPrefabs(suggestions.remaining).also {
-                if (it.isEmpty()) fail("Prefab ${suggestions.remaining} not found")
-            })
+            suggestRanked(getAddon(ItemTracking).prefabs.getKeys().map { it.toString() }, limit = 20)
         }
     }.map {
         with(location.world.toGeary()) {
@@ -57,7 +50,7 @@ object GearyArgs {
 
     fun block() = ArgsMinecraft.namespacedKey().suggests {
         with(location.world.toGeary()) {
-            suggest(getAddon(ItemTracking).prefabs.getKeys().filterPrefabs(suggestions.remaining))
+            suggestRanked(getAddon(ItemTracking).prefabs.getKeys().map { it.toString() }, limit = 20)
         }
     }.map {
         with(location.world.toGeary()) {
@@ -65,8 +58,5 @@ object GearyArgs {
         }
     }
 }
-
-internal fun Collection<PrefabKey>.filterPrefabs(arg: String): List<String> =
-    filter { it.key.startsWith(arg) || it.full.startsWith(arg) }.map { it.toString() }.take(20)
 
 val Args.geary get() = GearyArgs
