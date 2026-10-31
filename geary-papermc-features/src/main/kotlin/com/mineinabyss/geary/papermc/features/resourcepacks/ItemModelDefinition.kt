@@ -39,7 +39,10 @@ object ItemModelDefinitionSerializer : KSerializer<ItemModelDefinition> {
     // Select cases are matched against strings, so `when: 1` has to stay "1" while creative reads colors and thresholds only from JSON numbers
     private fun YamlNode.toJson(asStrings: Boolean = false): JsonElement = when (this) {
         is YamlMap -> JsonObject().also { json ->
-            entries.forEach { (key, value) -> json.add(key.content.camelToSnake(), value.toJson(asStrings || key.content == "when")) }
+            entries.forEach { (key, value) ->
+                val converted = value.toJson(asStrings || key.content == "when")
+                json.add(key.content.camelToSnake(), if (key.content == "tints" && converted.isJsonObject) JsonArray().apply { add(converted) } else converted)
+            }
         }
         is YamlList -> JsonArray().also { json -> items.forEach { json.add(it.toJson(asStrings)) } }
         is YamlScalar -> if (asStrings) JsonPrimitive(content) else scalar(content)
@@ -82,7 +85,7 @@ class ItemModelResolver(
         MODEL_FIELDS.filter(node::has).forEach { node.add(it, expand(node.get(it))) }
         node.get("models")?.asJsonArray?.let { models -> models.forEachIndexed { i, it -> models.set(i, expand(it)) } }
         ENTRY_LISTS.mapNotNull { node.get(it)?.asJsonArray }.flatten().map(JsonElement::getAsJsonObject).forEach { entry ->
-            entry.get("model")?.let { entry.add("model", expand(it)) }
+            entry.add("model", expand(entry.inlinedModel()))
         }
         return node
     }
@@ -95,8 +98,16 @@ class ItemModelResolver(
 
     private fun JsonObject.key(name: String): Key? = get(name)?.asString?.let(Key::key)
 
+    // An entry holding only `model` besides its `when` or `threshold` nests the model, anything else is the model written inline
+    private fun JsonObject.inlinedModel(): JsonElement {
+        val modelFields = keySet() - ENTRY_FIELDS
+        if (modelFields == setOf("model")) return get("model")
+        return JsonObject().also { model -> modelFields.forEach { model.add(it, remove(it)) } }
+    }
+
     private companion object {
         val MODEL_FIELDS = listOf("on_true", "on_false", "fallback")
         val ENTRY_LISTS = listOf("cases", "entries")
+        val ENTRY_FIELDS = setOf("when", "threshold")
     }
 }

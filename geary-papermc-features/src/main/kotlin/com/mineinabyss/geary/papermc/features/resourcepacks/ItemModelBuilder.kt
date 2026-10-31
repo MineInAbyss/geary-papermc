@@ -1,7 +1,7 @@
 package com.mineinabyss.geary.papermc.features.resourcepacks
 
-import com.mineinabyss.idofront.serialization.KeySerializer
-import kotlinx.serialization.SerialName
+import com.google.gson.JsonObject
+import com.mineinabyss.geary.serialization.serializers.InnerSerializer
 import kotlinx.serialization.Serializable
 import net.kyori.adventure.key.Key
 import team.unnamed.creative.ResourcePack
@@ -10,12 +10,29 @@ import team.unnamed.creative.model.Model
 import team.unnamed.creative.model.ModelTexture
 import team.unnamed.creative.model.ModelTextures
 
-@Serializable
-@SerialName("geary:item_model")
+@Serializable(ItemModelBuilder.Serializer::class)
 data class ItemModelBuilder(
-    val model: @Serializable(ItemModelDefinitionSerializer::class) ItemModelDefinition,
-    val key: @Serializable(KeySerializer::class) Key? = null,
-)
+    val model: ItemModelDefinition,
+    val key: Key? = null,
+) {
+    // The model may sit under `model` or inline at the root, a root holding only `model` reads the same either way
+    object Serializer : InnerSerializer<ItemModelDefinition, ItemModelBuilder>(
+        serialName = "geary:item_model",
+        inner = ItemModelDefinitionSerializer,
+        transform = { definition ->
+            val root = definition.json.takeIf { it.isJsonObject }?.asJsonObject?.deepCopy()
+            val key = root?.remove("key")?.asString?.let(Key::key)
+            val model = root?.takeIf { it.keySet() == setOf("model") }?.get("model") ?: root ?: definition.json
+            ItemModelBuilder(ItemModelDefinition(model), key)
+        },
+        inverseTransform = { builder ->
+            ItemModelDefinition(JsonObject().apply {
+                add("model", builder.model.json)
+                builder.key?.let { addProperty("key", it.asString()) }
+            })
+        },
+    )
+}
 
 /** Generates the models an [ItemModelDefinition] asks for, off the textures and .bbmodels an artist provides */
 class ModelBuilder(
