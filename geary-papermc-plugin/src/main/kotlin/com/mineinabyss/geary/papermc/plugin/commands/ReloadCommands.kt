@@ -18,6 +18,7 @@ import com.mineinabyss.idofront.features.get
 import com.mineinabyss.idofront.features.mainCommand
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.success
+import com.mineinabyss.idofront.messaging.warn
 
 private val reloadableFeatures: List<DI.Module> = listOf(
     PrefabsFeature,
@@ -38,11 +39,15 @@ private fun IdoCommand.reload() = ("reload" / "rl") {
 
     executes {
         get<SingleConfig<GearyPaperConfig>>().updateCached()
-        val result = di.scope.reload(*reloadableFeatures.toTypedArray())
-        val failed = result.results.filterValues { it.isFailure }.keys
-        if (failed.isEmpty()) sender.success("Reloaded ${result.results.size} features")
+        val results = di.scope.reload(*reloadableFeatures.toTypedArray()).results
+        val (skipped, failed) = results.filterValues { it.isFailure }.entries.partition { (_, result) -> result.isSkipped }
+        val reloaded = results.values.count { it.isSuccess }
+        val skippedNote = skipped.takeIf { it.isNotEmpty() }
+            ?.joinToString(prefix = ", skipped: ") { (feature, result) -> "${feature.name} (${result.exceptionOrNull()?.message})" }
+            .orEmpty()
+        if (failed.isEmpty()) sender.success("Reloaded $reloaded features$skippedNote")
         else sender.error(
-            "Reloaded ${result.results.size - failed.size}/${result.results.size} features, failed: ${failed.joinToString { it.name }}\n" +
+            "Reloaded $reloaded features$skippedNote, failed: ${failed.joinToString { it.key.name }}\n" +
                     "See console for details"
         )
     }
@@ -52,7 +57,14 @@ private fun IdoCommand.reload() = ("reload" / "rl") {
     ) { featureName ->
         val feature = reloadableFeatures.find { it.name == featureName } ?: fail("Feature $featureName not found")
         get<SingleConfig<GearyPaperConfig>>().updateCached()
-        if (di.scope.reload(feature).isSuccess) sender.success("Reloaded feature $featureName")
-        else sender.error("Failed to reload feature $featureName, see console for details")
+        val result = di.scope.reload(feature).results[feature]
+        when {
+            result == null || result.isSuccess -> sender.success("Reloaded feature $featureName")
+            result.isSkipped -> sender.warn("Skipped feature $featureName: ${result.exceptionOrNull()?.message}")
+            else -> sender.error("Failed to reload feature $featureName, see console for details")
+        }
     }
 }
+
+// require() in a feature throws this for a disabled config option or a missing plugin, which is not a broken reload
+private val Result<*>.isSkipped get() = exceptionOrNull() is IllegalArgumentException
