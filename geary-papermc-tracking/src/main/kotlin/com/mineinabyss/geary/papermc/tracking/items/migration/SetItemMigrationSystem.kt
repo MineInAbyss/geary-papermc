@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.tracking.items.migration
 import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.modules.observe
 import com.mineinabyss.geary.observers.events.OnSet
+import com.mineinabyss.geary.papermc.tracking.items.components.CustomModelDataVariants
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.systems.query.query
 import io.papermc.paper.datacomponent.DataComponentTypes
@@ -24,6 +25,7 @@ fun WorldScoped.createItemMigrationListener() = observe<OnSet>()
         if (itemName != null && customName != null && plainTextSerializer.serialize(customName) == plainTextSerializer.serialize(itemName))
             item.unsetData(DataComponentTypes.CUSTOM_NAME)
 
-        if (item.hasData(DataComponentTypes.CUSTOM_MODEL_DATA) && setItem.item.customModelData == null)
+        val isVariant = entity.get<CustomModelDataVariants>()?.current(item) != null
+        if (item.hasData(DataComponentTypes.CUSTOM_MODEL_DATA) && setItem.item.customModelData == null && !isVariant)
             item.unsetData(DataComponentTypes.CUSTOM_MODEL_DATA)
     }
