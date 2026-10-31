@@ -3,9 +3,15 @@ package com.mineinabyss.geary.papermc.nexo
 import com.mineinabyss.geary.modules.WorldScoped
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.papermc.toEntityOrNull
+import com.mineinabyss.geary.papermc.tracking.items.ItemTracking
 import com.mineinabyss.geary.prefabs.PrefabKey
+import com.nexomc.nexo.api.NexoFurniture as NexoFurnitureApi
 import com.nexomc.nexo.api.NexoItems
+import com.nexomc.nexo.mechanics.furniture.FurnitureMechanic
+import org.bukkit.Bukkit
 import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.entity.ItemDisplay
+import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.java.JavaPlugin
 
 // Nexo keys external items by the owning plugin so it can unregister them all on unload
@@ -16,10 +22,32 @@ context(world: WorldScoped)
 internal fun registerNexoItem(prefabKey: PrefabKey, mechanic: String, section: ConfigurationSection) {
     // Nexo saves whatever parsing filled in back to an items-file, ours has to go onto the prefab instead
     runCatching {
-        NexoItems.registerExternalItem(nexoOwner, section) { parsed ->
-            persistNexoAssignments(prefabKey, mechanic, parsed, world.logger)
-        }
+        NexoItems.registerExternalItem(
+            nexoOwner, section,
+            onConfigUpdated = { parsed -> persistNexoAssignments(prefabKey, mechanic, parsed, world.logger) },
+            // Nexo's copy only carries the section, pick-block and the like have to hand out the full geary item
+            itemFactory = { world.world.getAddon(ItemTracking).createItem(prefabKey) },
+        )
+    }.onSuccess { item ->
+        // Null while Nexo is loading items, that load refreshes placed furniture itself
+        if (item != null && mechanic == "furniture") refreshPlacedFurniture(section.name)
     }.onFailure { world.logger.w("Failed to register nexo item for $prefabKey: ${it.message}") }
+}
+
+private val pendingFurnitureRefresh = mutableSetOf<String>()
+
+/** Resends placed furniture of [nexoId] from its new mechanic, batched per tick since a full reload re-registers every prefab */
+private fun refreshPlacedFurniture(nexoId: String) {
+    if (pendingFurnitureRefresh.isEmpty()) Bukkit.getScheduler().runTask(nexoOwner, Runnable {
+        val ids = pendingFurnitureRefresh.toSet()
+        pendingFurnitureRefresh.clear()
+        Bukkit.getWorlds().forEach { world ->
+            world.getEntitiesByClass(ItemDisplay::class.java)
+                .filter { it.persistentDataContainer.get(FurnitureMechanic.FURNITURE_KEY, PersistentDataType.STRING) in ids }
+                .forEach(NexoFurnitureApi::updateFurniture)
+        }
+    })
+    pendingFurnitureRefresh += nexoId
 }
 
 /**
