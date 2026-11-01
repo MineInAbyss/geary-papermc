@@ -13,10 +13,16 @@ import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
-import kotlinx.serialization.ContextualSerializer
+import com.mineinabyss.geary.papermc.features.resourcepacks.ItemModelSchema.itemModel
+import com.mineinabyss.jsonschema.dsl.JsonSchemaDescriptor
+import com.mineinabyss.jsonschema.dsl.SchemaContext
+import com.mineinabyss.jsonschema.dsl.SchemaProperty
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.SerialKind
+import kotlinx.serialization.descriptors.buildSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import net.kyori.adventure.key.Key
@@ -26,8 +32,13 @@ import team.unnamed.creative.serialize.minecraft.item.ItemSerializer
 @Serializable(ItemModelDefinitionSerializer::class)
 class ItemModelDefinition(val json: JsonElement)
 
-object ItemModelDefinitionSerializer : KSerializer<ItemModelDefinition> {
-    override val descriptor: SerialDescriptor = ContextualSerializer(Any::class).descriptor
+object ItemModelDefinitionSerializer : KSerializer<ItemModelDefinition>, JsonSchemaDescriptor {
+    // Contextual like ContextualSerializer so kaml hands over any node, named so schema generation can tell it apart
+    @OptIn(InternalSerializationApi::class)
+    override val descriptor: SerialDescriptor = buildSerialDescriptor("geary:item_model_definition", SerialKind.CONTEXTUAL)
+
+    context(context: SchemaContext)
+    override fun SchemaProperty.defineSchema() = itemModel()
 
     override fun deserialize(decoder: Decoder): ItemModelDefinition {
         val input = decoder as? YamlInput ?: return ItemModelDefinition(JsonParser.parseString(decoder.decodeString()))

@@ -1,7 +1,11 @@
 package com.mineinabyss.geary.papermc.features.resourcepacks
 
 import com.google.gson.JsonObject
+import com.mineinabyss.geary.papermc.features.resourcepacks.ItemModelSchema.itemModelComponent
 import com.mineinabyss.geary.serialization.serializers.InnerSerializer
+import com.mineinabyss.jsonschema.dsl.JsonSchemaDescriptor
+import com.mineinabyss.jsonschema.dsl.SchemaContext
+import com.mineinabyss.jsonschema.dsl.SchemaProperty
 import kotlinx.serialization.Serializable
 import net.kyori.adventure.key.Key
 import team.unnamed.creative.ResourcePack
@@ -31,7 +35,10 @@ data class ItemModelBuilder(
                 builder.key?.let { addProperty("key", it.asString()) }
             })
         },
-    )
+    ), JsonSchemaDescriptor {
+        context(context: SchemaContext)
+        override fun SchemaProperty.defineSchema() = itemModelComponent()
+    }
 }
 
 /** Generates the models an [ItemModelDefinition] asks for, off the textures and .bbmodels an artist provides */

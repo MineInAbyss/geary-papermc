@@ -7,6 +7,10 @@ import com.charleskorn.kaml.YamlNode
 import com.charleskorn.kaml.YamlNull
 import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.YamlTaggedNode
+import com.mineinabyss.jsonschema.dsl.JsonSchemaDescriptor
+import com.mineinabyss.jsonschema.dsl.SchemaContext
+import com.mineinabyss.jsonschema.dsl.SchemaProperty
+import com.mineinabyss.jsonschema.dsl.SchemaType
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.MapSerializer
@@ -21,8 +25,13 @@ import kotlinx.serialization.encoding.Encoder
  */
 @kotlinx.serialization.Serializable(with = RawConfig.Serializer::class)
 class RawConfig(val values: Map<String, Any?> = emptyMap()) {
-    object Serializer : KSerializer<RawConfig> {
+    object Serializer : KSerializer<RawConfig>, JsonSchemaDescriptor {
         override val descriptor = MapSerializer(String.serializer(), String.serializer()).descriptor
+
+        context(context: SchemaContext)
+        override fun SchemaProperty.defineSchema() {
+            type = SchemaType.OBJECT
+        }
 
         override fun deserialize(decoder: Decoder): RawConfig {
             val input = decoder as? YamlInput

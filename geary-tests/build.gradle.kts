@@ -25,3 +25,24 @@ dependencies {
     testImplementation(miaLibs.creative.serializer.minecraft)
     testImplementation(libs.bytebuddy)
 }
+
+// Reuses the test dependencies for the plain Paper API, without the test classes so test components stay out of the schema
+val schemas by sourceSets.creating {
+    compileClasspath += sourceSets.test.get().compileClasspath - sourceSets.test.get().output
+    runtimeClasspath += output + sourceSets.test.get().runtimeClasspath - sourceSets.test.get().output
+}
+
+dependencies {
+    "schemasImplementation"(project(":geary-papermc-schemas"))
+    "schemasImplementation"(project(":geary-papermc-nexo"))
+    "schemasImplementation"(project(":geary-papermc-menus"))
+    "schemasImplementation"(project(":geary-papermc-creativetabs"))
+}
+
+tasks.register<JavaExec>("generateSchemas") {
+    group = "documentation"
+    description = "Writes JSON schemas for configs and prefabs, pass -PschemaOutput=<server-config> to write into a server config repo"
+    classpath = schemas.runtimeClasspath
+    mainClass = "SchemasKt"
+    args(providers.gradleProperty("schemaOutput").orElse(layout.buildDirectory.dir("schemas").map { it.asFile.path }).get())
+}

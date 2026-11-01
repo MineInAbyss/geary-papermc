@@ -23,6 +23,7 @@ dependencies {
     compileOnly(miaLibs.idofront.nms)
     compileOnly(miaLibs.creative.serializer.minecraft)
     compileOnly(miaLibs.creative.api)
+    compileOnly(libs.jsonschema.dsl)
 
     testImplementation(libs.geary.test)
     testImplementation(miaLibs.idofront.services)

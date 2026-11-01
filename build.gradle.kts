@@ -31,37 +31,36 @@ allprojects {
     }
 
 
-    if (project.name != "schema-generator") {
-        apply(plugin = "kotlin")
+    apply(plugin = "kotlin")
 
-        // WorldGuard 7.1.0-SNAPSHOT is built for jdk25, override the catalog's java 21 default
-        plugins.withId("com.mineinabyss.conventions.kotlin.jvm") {
-            val idofront = extensions.getByName("idofront")
-            @Suppress("UNCHECKED_CAST")
-            (idofront.javaClass.getMethod("getJvmVersion").invoke(idofront) as Property<Int>).set(25)
-        }
+    // WorldGuard 7.1.0-SNAPSHOT is built for jdk25, override the catalog's java 21 default
+    plugins.withId("com.mineinabyss.conventions.kotlin.jvm") {
+        val idofront = extensions.getByName("idofront")
+        @Suppress("UNCHECKED_CAST")
+        (idofront.javaClass.getMethod("getJvmVersion").invoke(idofront) as Property<Int>).set(25)
+    }
 
-        dependencies {
-            compileOnly(rootProject.miaLibs.bundles.idofront.core)
-            compileOnly(rootProject.miaLibs.minecraft.plugin.worldguard) {
-                exclude(group = "org.bukkit")
-                exclude(group = "com.google.guava")
-                exclude(group = "com.google.code.gson")
-                exclude(group = "it.unimi.dsi")
-            }
-            testImplementation(rootProject.miaLibs.bundles.idofront.core)
+    // The schemas library targets Java 21 for plugins on older catalogs, and these are only published for Java 25
+    if (project.name != "geary-papermc-schemas") dependencies {
+        compileOnly(rootProject.miaLibs.bundles.idofront.core)
+        compileOnly(rootProject.miaLibs.minecraft.plugin.worldguard) {
+            exclude(group = "org.bukkit")
+            exclude(group = "com.google.guava")
+            exclude(group = "com.google.code.gson")
+            exclude(group = "it.unimi.dsi")
         }
-        kotlin {
-            compilerOptions {
-                freeCompilerArgs.addAll(
-                    "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
-                    "-opt-in=kotlin.ExperimentalUnsignedTypes",
-                    "-Xcontext-parameters",
-                )
-                optIn.addAll(
-                    "kotlin.time.ExperimentalTime"
-                )
-            }
+        testImplementation(rootProject.miaLibs.bundles.idofront.core)
+    }
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll(
+                "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+                "-opt-in=kotlin.ExperimentalUnsignedTypes",
+                "-Xcontext-parameters",
+            )
+            optIn.addAll(
+                "kotlin.time.ExperimentalTime"
+            )
         }
     }
 }

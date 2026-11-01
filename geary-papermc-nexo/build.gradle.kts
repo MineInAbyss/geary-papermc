@@ -13,6 +13,7 @@ dependencies {
     compileOnly(miaLibs.kotlinx.serialization.json)
     compileOnly(miaLibs.kotlinx.serialization.kaml)
     compileOnly(miaLibs.minecraft.mccoroutine)
+    compileOnly(miaLibs.jsonschema.kt.dsl)
 
     implementation(project(":geary-papermc-tracking"))
 }

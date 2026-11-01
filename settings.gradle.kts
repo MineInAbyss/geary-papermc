@@ -47,5 +47,5 @@ include(
     "geary-papermc-tracking",
     "geary-papermc-sqlite",
     "geary-tests",
-//    "schema-generator"
+    "geary-papermc-schemas",
 )

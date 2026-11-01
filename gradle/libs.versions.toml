@@ -1,6 +1,7 @@
 [versions]
 geary = "0.29.0-dev.1"
 sqlite-kt = "0.0.3-alpha.4"
+jsonschema-kt = "0.2.0"
 [libraries]
 geary-core = { module = "com.mineinabyss:geary-core", version.ref = "geary" }
 geary-actions = { module = "com.mineinabyss:geary-actions", version.ref = "geary" }
@@ -9,6 +10,8 @@ geary-prefabs = { module = "com.mineinabyss:geary-prefabs", version.ref = "geary
 geary-serialization = { module = "com.mineinabyss:geary-serialization", version.ref = "geary" }
 geary-uuid = { module = "com.mineinabyss:geary-uuid", version.ref = "geary" }
 geary-test = { module = "com.mineinabyss:geary-test", version.ref = "geary" }
+jsonschema-dsl = { module = "com.mineinabyss.jsonschema-kt:dsl", version.ref = "jsonschema-kt" }
+jsonschema-writer = { module = "com.mineinabyss.jsonschema-kt:writer", version.ref = "jsonschema-kt" }
 bytebuddy = "net.bytebuddy:byte-buddy:1.18.2"
 sqlite-kt = { module = "me.dvyy.sqlite:sqlite-kt", version.ref = "sqlite-kt" }
 
