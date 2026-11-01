@@ -96,8 +96,6 @@ class ResourcePackGenerator(
             if (resourcePack.item(key) == null) resourcePack.item(Item.item(key, model))
         }
 
-        menuItem(MenuModels.SCROLL_UP, flatModel(MenuModels.SCROLL_UP, textures.scrollUp))
-        menuItem(MenuModels.SCROLL_DOWN, flatModel(MenuModels.SCROLL_DOWN, textures.scrollDown))
         menuItem(
             MenuModels.GROUP_BY_FOLDERS, ItemModel.conditional(
                 ItemBooleanProperty.customModelData(0),

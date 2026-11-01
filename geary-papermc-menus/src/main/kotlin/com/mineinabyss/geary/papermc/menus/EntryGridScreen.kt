@@ -14,8 +14,10 @@ import com.mineinabyss.guiy.components.lists.NavbarPosition
 import com.mineinabyss.guiy.components.lists.ScrollDirection
 import com.mineinabyss.guiy.components.lists.Scrollable
 import com.mineinabyss.guiy.components.lists.ScrollableState
+import com.mineinabyss.guiy.components.lists.VerticalScrollbarTrack
 import com.mineinabyss.guiy.modifiers.click.clickable
 import com.mineinabyss.guiy.modifiers.click.onClickEvent
+import com.mineinabyss.guiy.modifiers.scroll.scrollableWhenEmpty
 import com.mineinabyss.guiy.navigation.LocalBackGestureDispatcher
 import com.mineinabyss.idofront.textcomponents.miniMsg
 import io.papermc.paper.datacomponent.DataComponentTypes
@@ -38,8 +40,7 @@ private const val GRID_HEIGHT = 6
 // Rows of the right column, search and back sit over icons painted into the title texture
 private const val ROW_SEARCH = 0
 private const val ROW_GROUPING = 1
-private const val ROW_UP = 2
-private const val ROW_DOWN = 3
+private const val ROW_TRACK = 2
 private const val ROW_BACK = 5
 
 @Composable
@@ -61,9 +62,9 @@ fun EntryGridScreen(
             entries,
             state = state,
             navbarPosition = NavbarPosition.END,
-            scrollbar = { Sidebar(state, groupByFolders, query, onToggleGrouping, onSearch, onClearSearch) },
+            scrollbar = { Sidebar(config, state, groupByFolders, query, onToggleGrouping, onSearch, onClearSearch) },
         ) { page ->
-            VerticalGrid(Modifier.size(GRID_WIDTH.dp, GRID_HEIGHT.dp)) {
+            VerticalGrid(Modifier.size(GRID_WIDTH.dp, GRID_HEIGHT.dp).scrollableWhenEmpty()) {
                 page.forEach { entry ->
                     when (entry) {
                         is MenuEntry.Category -> Item(entry.icon, Modifier.clickable { onOpenCategory(entry) })
@@ -77,6 +78,7 @@ fun EntryGridScreen(
 
 @Composable
 private fun Sidebar(
+    config: MenusConfig,
     state: ScrollableState,
     groupByFolders: Boolean,
     query: String,
@@ -85,25 +87,21 @@ private fun Sidebar(
     onClearSearch: () -> Unit,
 ) {
     val back = LocalBackGestureDispatcher.current
-    // In VERTICAL mode a page is one row and pageMax counts rows, so the last page still on screen is pageMax - pagesOnScreen
-    val canScrollDown = state.page < state.pageMax - state.pagesOnScreen
     val grouping = remember(groupByFolders) {
         modelItem(MenuModels.GROUP_BY_FOLDERS, "<white><b>Group by Folders: ${if (groupByFolders) "<green>On" else "<red>Off"}").apply {
             setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addFlag(groupByFolders))
         }
     }
-    val up = remember { modelItem(MenuModels.SCROLL_UP, "<white><b>Scroll up") }
-    val down = remember { modelItem(MenuModels.SCROLL_DOWN, "<white><b>Scroll down") }
+    val scrollbarModel = remember(config.scrollbarModel) { Key.key(config.scrollbarModel) }
 
-    Box(Modifier.width(1.dp).fillMaxHeight()) {
+    Box(Modifier.width(1.dp).fillMaxHeight().scrollableWhenEmpty()) {
         if (query.isEmpty()) Text("<white><b>Search", modifier = Modifier.offset(0.dp, ROW_SEARCH.dp).clickable { onSearch() })
         else Text(
             "<white><b>Search: <yellow>$query", "<gray>Right click to clear",
             modifier = Modifier.offset(0.dp, ROW_SEARCH.dp).clickable { if (clickType.isRightClick) onClearSearch() else onSearch() },
         )
         Item(grouping, Modifier.offset(0.dp, ROW_GROUPING.dp).clickable { onToggleGrouping() })
-        if (state.page > 0) Item(up, Modifier.offset(0.dp, ROW_UP.dp).clickable { state.previousPage() })
-        if (canScrollDown) Item(down, Modifier.offset(0.dp, ROW_DOWN.dp).clickable { state.nextPage() })
+        VerticalScrollbarTrack(state, ROW_BACK - ROW_TRACK, scrollbarModel, Modifier.offset(0.dp, ROW_TRACK.dp))
         Text("<white><b>Back", modifier = Modifier.offset(0.dp, ROW_BACK.dp).clickable { back.onBack() })
     }
 }
