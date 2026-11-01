@@ -62,6 +62,7 @@ class ResourcePackGenerator(
         }
 
         addMenuModels()
+        ScrollbarModels(resourcePack, Key.key(config.menus.scrollbarModel)).generate()
 
         if (resourcePack.packMeta() == null) {
             resourcePack.packMeta(PackMeta.of(PACK_FORMAT, Component.text("Geary ResourcePack")))

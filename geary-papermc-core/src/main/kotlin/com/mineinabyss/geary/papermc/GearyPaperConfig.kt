@@ -124,7 +124,7 @@ data class MenusConfig(
     val searchTitle: String = ":space_-24::geary_search_menu:",
     @YamlComment("SCROLLING moves one row at a time, PAGINATED swaps the whole grid")
     val scrollMode: ScrollMode = ScrollMode.SCROLLING,
-    @YamlComment("Item model of the scrollbar, see guiy's ScrollbarTrack.kt for the custom model data it reads")
+    @YamlComment("Item model the generated resourcepack builds the scrollbar under, see guiy's ScrollbarTrack.kt for the custom model data it reads", "Its textures are read from <model>/<vertical|horizontal>/<start|middle|end|single|thumb>")
     val scrollbarModel: String = "mineinabyss:ui/scrollbar",
     @YamlComment("Textures the generated resourcepack puts on the grid buttons")
     val textures: MenuTextures = MenuTextures(),
