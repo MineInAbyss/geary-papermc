@@ -9,6 +9,7 @@ import team.unnamed.creative.item.Item
 import team.unnamed.creative.item.ItemModel
 import team.unnamed.creative.item.RangeDispatchItemModel
 import team.unnamed.creative.item.SelectItemModel
+import team.unnamed.creative.item.property.ItemBooleanProperty
 import team.unnamed.creative.item.property.ItemNumericProperty
 import team.unnamed.creative.item.property.ItemStringProperty
 import team.unnamed.creative.model.Element
@@ -26,7 +27,7 @@ import team.unnamed.creative.texture.TextureUV
 class ScrollbarModels(private val resourcePack: ResourcePack, private val model: Key) {
     private enum class Orientation { VERTICAL, HORIZONTAL }
 
-    private class Box(val x0: Float, val y0: Float, val x1: Float, val y1: Float, val translation: Vector3Float = Vector3Float.ZERO, val scale: Float = 1f)
+    private class Box(val x0: Float, val y0: Float, val x1: Float, val y1: Float, val translation: Vector3Float = Vector3Float.ZERO)
 
     fun generate() {
         if (resourcePack.item(model) != null) return
@@ -48,12 +49,11 @@ class ScrollbarModels(private val resourcePack: ResourcePack, private val model:
         }
         val thumbs = (0..MAX_THUMB_OFFSET).map { offset ->
             val modelKey = key(orientation, "thumb/$offset")
-            addModel(modelKey, key(orientation, "thumb"), place(orientation, thumbBox(offset)))
+            addModel(modelKey, key(orientation, "thumb"), place(orientation, THUMB.raised(offset.toFloat())))
             RangeDispatchItemModel.Entry.entry(offset.toFloat(), ItemModel.reference(modelKey))
         }
         val thumb = ItemModel.rangeDispatch(ItemNumericProperty.customModelData(0), 1f, thumbs, ItemModel.empty())
-        val thumbOnLastSlot = SelectItemModel.Case._case(thumb, listOf(JsonPrimitive("end"), JsonPrimitive("single")))
-        return ItemModel.composite(select(1, pieces), select(1, listOf(thumbOnLastSlot)))
+        return ItemModel.composite(select(1, pieces), ItemModel.conditional(ItemBooleanProperty.customModelData(0), thumb, ItemModel.empty()))
     }
 
     private fun select(index: Int, cases: List<SelectItemModel.Case>) =
@@ -62,7 +62,7 @@ class ScrollbarModels(private val resourcePack: ResourcePack, private val model:
     // Boxes are laid out vertically, horizontal maps model (x, y) to (16 - y, x) to mirror them across the slot's diagonal like its textures
     private fun place(orientation: Orientation, box: Box): Box = when (orientation) {
         Orientation.VERTICAL -> box
-        Orientation.HORIZONTAL -> Box(16 - box.y1, box.x0, 16 - box.y0, box.x1, Vector3Float(-box.translation.y(), box.translation.x(), 0f), box.scale)
+        Orientation.HORIZONTAL -> Box(16 - box.y1, box.x0, 16 - box.y0, box.x1, Vector3Float(-box.translation.y(), box.translation.x(), 0f))
     }
 
     private fun addModel(key: Key, texture: Key, box: Box) {
@@ -78,7 +78,7 @@ class ScrollbarModels(private val resourcePack: ResourcePack, private val model:
                     .build()
             )
             .guiLight(Model.GuiLight.FRONT)
-            .display(mapOf(ItemTransform.Type.GUI to ItemTransform.transform(Vector3Float.ZERO, box.translation, Vector3Float(box.scale, box.scale, box.scale))))
+            .display(mapOf(ItemTransform.Type.GUI to ItemTransform.transform(Vector3Float.ZERO, box.translation, Vector3Float.ONE)))
             .build()
             .addTo(resourcePack)
     }
@@ -86,23 +86,12 @@ class ScrollbarModels(private val resourcePack: ResourcePack, private val model:
     companion object {
         private val PIECES = listOf("start", "middle", "end", "single")
 
-        // Covers a full chest row, the farthest a 9 slot track moves its thumb
-        private const val MAX_THUMB_OFFSET = 8 * 18 - 3
+        // The thumb only moves within the 18 px slot pitch, past that guiy hands it to the next slot
+        private const val MAX_THUMB_OFFSET = 17
 
         private val TRACK = Box(-2f, -1f, 18f, 17f)
+        private val THUMB = Box(2f, 3f, 14f, 18f)
 
-        private fun up(pixels: Float) = Vector3Float(0f, pixels, 0f)
-
-        private fun thumbBox(offset: Int): Box = when {
-            offset <= 80 -> Box(2f, 3f, 14f, 18f, up(offset.toFloat()))
-            // Display translation is clamped to 80 px, so the element itself is raised 14 px
-            offset <= 94 -> Box(2f, 17f, 14f, 32f, up(offset - 14f))
-            // Elements are clamped to -16..32 as well, so the farthest offsets draw a third size thumb at scale 3 around the model centre
-            else -> {
-                val translation = (80 downTo 78).first { (offset - 5 - it) % 3 == 0 }
-                val y = 8f + (offset - 5 - translation) / 3
-                Box(6f, y, 10f, y + 5, up(translation.toFloat()), 3f)
-            }
-        }
+        private fun Box.raised(pixels: Float) = Box(x0, y0, x1, y1, Vector3Float(0f, pixels, 0f))
     }
 }
