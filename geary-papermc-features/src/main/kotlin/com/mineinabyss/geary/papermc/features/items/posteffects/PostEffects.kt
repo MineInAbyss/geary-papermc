@@ -11,5 +11,10 @@ import net.kyori.adventure.key.Key
 value class PostEffects(val effects: List<@Serializable(KeySerializer::class) Key>) {
     init {
         require(effects.isNotEmpty()) { "PostEffects must list at least one effect" }
+        require(effects.all { it.namespace() == NAMESPACE }) { "PostEffects must be in the $NAMESPACE namespace" }
+    }
+
+    companion object {
+        const val NAMESPACE = "geary"
     }
 }
