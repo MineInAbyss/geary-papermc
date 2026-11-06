@@ -57,9 +57,15 @@ object GearyPrefabSchemas {
             .distinctBy { (serializer, _) -> serializer.descriptor.serialName }
             .sortedBy { (serializer, _) -> serializer.descriptor.serialName }
 
-        val fragmentsDir = root / ".idea" / "schema-fragments" / "geary"
         (fragmentsDir / "$id.json").createParentDirectories()
             .writeText(SchemaWriter.prettyJson.encodeToString(fragment(scanned)) + "\n")
+        mergeGearyPrefabs()
+    }
+
+    val SchemaWriter.fragmentsDir get() = root / ".idea" / "schema-fragments" / "geary"
+
+    fun SchemaWriter.mergeGearyPrefabs() {
+        if (fragmentsDir.notExists()) return
         writeJson("$SCHEMA_ID.json", merge(fragmentsDir.listDirectoryEntries("*.json").sorted().map {
             Json.parseToJsonElement(it.readText()).jsonObject
         }))
