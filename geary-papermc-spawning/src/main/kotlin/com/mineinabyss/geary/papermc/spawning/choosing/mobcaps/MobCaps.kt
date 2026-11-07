@@ -4,10 +4,12 @@ import com.google.common.cache.CacheBuilder
 import com.mineinabyss.geary.papermc.spawning.components.SpawnCategory
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
+import com.mineinabyss.geary.papermc.spawning.spawn_types.EntityTypeNames
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import io.lumine.mythic.bukkit.MythicBukkit
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.World
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import java.util.UUID
@@ -37,13 +39,8 @@ class MobCaps(
         .expireAfterWrite(30.seconds.toJavaDuration())
         .build<UUID, SpawnCategory>()
 
-    // Counts are shared by everyone in the same 16x16x16 section while they stay fresh,
-    // and callers bump them as they spawn so the cap still holds between scans
-    private val sectionCountsCache = CacheBuilder.newBuilder()
-        .expireAfterWrite(2.seconds.toJavaDuration())
-        .build<SectionKey, MutableMap<SpawnCategory, Int>>()
-
-    private data class SectionKey(val world: UUID, val x: Int, val y: Int, val z: Int)
+    // Main thread only, callers record what they spawn so caps still hold between refreshes
+    private val worldMobs = HashMap<UUID, WorldMobs>()
 
     fun getCategory(entity: Entity): SpawnCategory =
         entityCategoryCache.get(entity.uniqueId) { computeCategory(entity) }
@@ -61,19 +58,25 @@ class MobCaps(
         return cat ?: SpawnCategory.of(entity)
     }
 
-    fun calculateCategoriesNear(location: Location): MutableMap<SpawnCategory, Int> {
-        val radius = searchRadius.toDouble()
-        val counts = HashMap<SpawnCategory, Int>()
-        for (entity in location.world.getNearbyLivingEntities(location, radius, radius, radius)) {
+    private fun scanWorld(world: World, tick: Int): WorldMobs {
+        val snapshot = WorldMobs(world.uid, tick)
+        val entityLoc = Location(world, 0.0, 0.0, 0.0)
+        for (entity in world.livingEntities) {
             if (entity is Player) continue
-            counts.merge(getCategory(entity), 1, Int::plus)
+            entity.getLocation(entityLoc)
+            snapshot.add(EntityTypeNames.of(entity), getCategory(entity), entityLoc.x, entityLoc.y, entityLoc.z)
         }
-        return counts
+        return snapshot
     }
 
-    fun countsNear(location: Location): MutableMap<SpawnCategory, Int> {
-        val key = SectionKey(location.world.uid, location.blockX shr 4, location.blockY shr 4, location.blockZ shr 4)
-        return sectionCountsCache.get(key) { calculateCategoriesNear(location) }
+    // Refreshing here, on the first call in a world after the interval, means a refresh always runs before any spawn in that tick.
+    // A refresh after a recorded spawn would count that mob twice
+    fun nearbyMobs(location: Location): NearbyMobs {
+        val world = location.world
+        val tick = Bukkit.getCurrentTick()
+        val snapshot = worldMobs[world.uid]?.takeIf { tick - it.tick < SNAPSHOT_REFRESH_TICKS }
+            ?: scanWorld(world, tick).also { worldMobs[world.uid] = it }
+        return snapshot.around(location.x, location.y, location.z, searchRadius.toDouble())
     }
 
     /** Filters [spawns] to those under their category cap given [counts], skipping entries whose backing mob cannot be resolved. */
@@ -84,5 +87,10 @@ class MobCaps(
             val limit = caps.getOrDefault(category, defaultCapLimit)
             currentCount < limit
         }
+    }
+
+    private companion object {
+        // 1 s at 20 TPS, and the old 2 s section cache lifetime at 10 TPS
+        const val SNAPSHOT_REFRESH_TICKS = 20
     }
 }

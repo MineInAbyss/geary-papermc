@@ -7,6 +7,7 @@ import com.mineinabyss.geary.actions.expressions.Expression
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.location
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
+import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.NearbyMobs
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.geary.papermc.spawning.spawn_types.EntityTypeNames
 import kotlinx.serialization.SerialName
@@ -24,6 +25,9 @@ class NearbyCondition(
         val types = eval(types).toSet()
         val location = location ?: return true
         if (amount <= 0) return false
+        val nearby = environment[NearbyMobs.ENVIRONMENT_KEY] as? NearbyMobs
+        nearby?.countNear(types, location, radius, stopAt = amount)?.let { return it < amount }
+
         var count = 0
         for (entity in location.world.getNearbyLivingEntities(location, radius, radius, radius)) {
             if (entity is Player) continue

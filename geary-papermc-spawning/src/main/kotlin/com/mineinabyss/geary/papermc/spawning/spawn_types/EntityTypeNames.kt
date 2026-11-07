@@ -13,11 +13,17 @@ object EntityTypeNames {
         .expireAfterWrite(30.seconds.toJavaDuration())
         .build<UUID, String>()
 
-    // Misses are not cached since MythicMobs attaches its data after entities load
+    // Misses expire quickly since MythicMobs attaches its data after entities load
+    private val misses = CacheBuilder.newBuilder()
+        .expireAfterWrite(5.seconds.toJavaDuration())
+        .build<UUID, Unit>()
+
     fun of(entity: Entity): String? {
-        cache.getIfPresent(entity.uniqueId)?.let { return it }
-        val type = GearyReadEntityTypeEvent(entity).apply { call() }.type ?: return null
-        cache.put(entity.uniqueId, type)
+        val uuid = entity.uniqueId
+        cache.getIfPresent(uuid)?.let { return it }
+        if (misses.getIfPresent(uuid) != null) return null
+        val type = GearyReadEntityTypeEvent(entity).apply { call() }.type
+        if (type == null) misses.put(uuid, Unit) else cache.put(uuid, type)
         return type
     }
 }

@@ -3,14 +3,14 @@ package com.mineinabyss.geary.papermc.spawning.choosing
 import com.mineinabyss.geary.datatypes.GearyComponent
 import com.mineinabyss.geary.papermc.spawning.SpawningContext
 import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
+import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.NearbyMobs
 import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpawning
-import com.mineinabyss.geary.papermc.spawning.components.SpawnCategory
 import com.mineinabyss.geary.papermc.spawning.conditions.InRegionsCondition
 import com.mineinabyss.geary.papermc.spawning.conditions.IncludeSpawnTagCondition
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.config.SpawnLocationsUnified
 import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
-import com.mineinabyss.geary.papermc.spawning.helpers.WeightedList
+import com.mineinabyss.geary.papermc.spawning.helpers.weightedRandomOrNull
 import org.bukkit.Location
 
 class SpawnChooser(
@@ -25,11 +25,13 @@ class SpawnChooser(
             .filter { entry -> entry.regions.isEmpty() && entry.regionConditions().any() }
     }
 
-    /** [categoryCounts] is only evaluated once a spawn matches the region and position. */
+    val positionsWithSpawns: Set<SpawnPosition> = context.spawns.mapTo(mutableSetOf()) { it.entry.position }
+
+    /** [nearby] is only evaluated once a spawn matches the region and position. */
     fun getAllowedSpawnsNear(
         location: Location,
         position: SpawnPosition,
-        categoryCounts: Lazy<MutableMap<SpawnCategory, Int>> = lazy { caps.countsNear(location) },
+        nearby: Lazy<NearbyMobs> = lazy { caps.nearbyMobs(location) },
     ): List<SpawnEntry>? {
         val regions = wg.getRegionsAt(location)
         val wgSpawns = wg.getSpawnsForRegions(regions)
@@ -37,16 +39,16 @@ class SpawnChooser(
         val spawnsInRegion = (wgSpawns + customSpawns).filter { it.position == position }
         if (spawnsInRegion.isEmpty()) return null
 
-        return caps.filterAllowed(spawnsInRegion, categoryCounts.value)
+        return caps.filterAllowed(spawnsInRegion, nearby.value.categoryCounts)
     }
 
     fun chooseAllowedSpawnNear(
         location: Location,
         position: SpawnPosition,
-        categoryCounts: Lazy<MutableMap<SpawnCategory, Int>> = lazy { caps.countsNear(location) },
+        nearby: Lazy<NearbyMobs> = lazy { caps.nearbyMobs(location) },
     ): SpawnEntry? {
-        val allowedSpawns = getAllowedSpawnsNear(location, position, categoryCounts)?.takeUnless { it.isEmpty() } ?: return null
-        return WeightedList(allowedSpawns.associateWith { it.priority }).roll()
+        val allowedSpawns = getAllowedSpawnsNear(location, position, nearby) ?: return null
+        return allowedSpawns.weightedRandomOrNull { it.priority }
     }
 
     private fun SpawnEntry.regionConditions(): Sequence<GearyComponent> {

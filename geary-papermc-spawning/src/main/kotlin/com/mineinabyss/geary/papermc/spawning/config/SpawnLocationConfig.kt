@@ -88,8 +88,11 @@ class SpawnLocationsUnified(configs: List<ConfigEntryWithKey<SpawnLocationsConfi
         }
     }
 
+    private val overridesBySize = unified.entries
+        .filter { it.value.gearySpawnOverride }
+        .sortedBy { it.value.getSize() }
+
     /** The smallest override region containing [location], which takes precedence over any other spawn rules there. */
-    fun overrideAt(location: Location): Map.Entry<String, SpawnLocationConfig>? = unified.entries
-        .filter { it.value.gearySpawnOverride && it.value.isInside(location) }
-        .minByOrNull { it.value.getSize() }
+    fun overrideAt(location: Location): Map.Entry<String, SpawnLocationConfig>? =
+        overridesBySize.firstOrNull { it.value.isInside(location) }
 }

@@ -1,20 +1,21 @@
 package com.mineinabyss.geary.papermc.spawning.readers
 
 import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
-import com.mineinabyss.idofront.location.down
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.block.BlockFace
 import org.bukkit.block.data.Waterlogged
 
 object SpawnPositionReader {
     fun spawnPositionFor(location: Location): SpawnPosition {
-        val type = location.block.type
-        val state = location.block.blockData
+        val block = location.block
+        val type = block.type
+        val state = block.blockData
         return when {
             type == Material.WATER || state is Waterlogged && state.isWaterlogged -> SpawnPosition.WATER
             type == Material.LAVA -> SpawnPosition.LAVA
-            location.clone().down(1).block. let { it.isSolid || it.type == Material.SNOW } && location.block.isPassable && !location.block.isLiquid -> SpawnPosition.GROUND
-            location.block.isEmpty -> SpawnPosition.AIR
+            block.isPassable && !block.isLiquid && block.getRelative(BlockFace.DOWN).let { it.isSolid || it.type == Material.SNOW } -> SpawnPosition.GROUND
+            type.isAir -> SpawnPosition.AIR
             else -> SpawnPosition.IN_BLOCK
         }
     }
