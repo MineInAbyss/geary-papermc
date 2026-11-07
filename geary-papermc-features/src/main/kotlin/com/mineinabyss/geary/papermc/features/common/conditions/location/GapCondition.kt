@@ -26,16 +26,23 @@ class GapCondition(
             checkAbove: Boolean = true,
             isPartOfGap: (Location) -> Boolean,
         ): Boolean {
-            val y = location.y.roundToInt().coerceIn(location.world.minHeight..location.world.maxHeight)
-            val topRange = (y + gap.max()).coerceAtMost(location.world.maxHeight)
-            val bottomRange = (y - gap.max()).coerceAtLeast(location.world.minHeight)
+            val minGap = gap.first
+            require(minGap <= gap.last) { "Gap range $gap is empty" }
+            val openEnded = gap.last == Int.MAX_VALUE
+            val minHeight = location.world.minHeight
+            val maxHeight = location.world.maxHeight
+            // Clamping to the world's height span gives the same ranges below and keeps y + maxGap from overflowing
+            val maxGap = gap.last.coerceAtMost(maxHeight - minHeight)
+            val y = location.y.roundToInt().coerceIn(minHeight..maxHeight)
+            val topRange = (y + maxGap).coerceAtMost(maxHeight)
+            val bottomRange = (y - maxGap).coerceAtLeast(minHeight)
             val topGap = if (!checkAbove) y + 1 else (y..topRange + 1).firstOrNull {
-                if (it > gap.min() && gap.max() == Int.MAX_VALUE) return true
+                if (openEnded && it - y >= minGap) return true
                 !isPartOfGap(location.apply { this.y = it.toDouble() })
             } ?: (topRange + 1)
 
             val bottomGap = if (!checkBelow) y - 1 else (y downTo bottomRange - 1).firstOrNull {
-                if (topGap + it > gap.min() && gap.max() == Int.MAX_VALUE) return true
+                if (openEnded && topGap - it - 1 >= minGap) return true
                 !isPartOfGap(location.apply { this.y = it.toDouble() })
             } ?: (bottomRange - 1)
 
