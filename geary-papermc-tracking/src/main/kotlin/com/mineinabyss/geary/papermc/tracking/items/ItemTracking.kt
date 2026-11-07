@@ -3,13 +3,13 @@ package com.mineinabyss.geary.papermc.tracking.items
 import com.mineinabyss.dependencies.*
 import com.mineinabyss.geary.addons.gearyAddon
 import com.mineinabyss.geary.modules.observe
-import com.mineinabyss.geary.observers.events.OnRemove
 import com.mineinabyss.geary.observers.events.OnSet
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.gearyWorld
 import com.mineinabyss.geary.papermc.services.GearyItemService
 import com.mineinabyss.geary.papermc.tracking.items.cache.PlayerItemCache
+import com.mineinabyss.geary.papermc.tracking.items.cache.clearItemCachesOnRemoval
 import com.mineinabyss.geary.papermc.tracking.items.migration.createItemMigrationListener
 import com.mineinabyss.geary.papermc.tracking.items.passive.PassiveItemsListener
 import com.mineinabyss.geary.papermc.tracking.items.passive.PassiveSlots
@@ -61,7 +61,5 @@ val ItemTracking = gearyAddon("item-tracking") {
         PassiveSlots.load(entity, player)
         entity.set<PlayerItemCache<*>>(itemTracking.createCache(entity))
     }
-    observe<OnRemove>().involving(query<PlayerItemCache<*>>()).exec { (cache) ->
-        cache.clear()
-    }
+    clearItemCachesOnRemoval()
 }.gets<ItemTrackingModule>()

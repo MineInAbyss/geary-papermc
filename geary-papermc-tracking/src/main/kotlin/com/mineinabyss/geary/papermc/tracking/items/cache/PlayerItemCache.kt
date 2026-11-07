@@ -28,6 +28,10 @@ abstract class PlayerItemCache<T>(
 
     private fun removeEntity(slot: Int) {
         val entity = entities[slot].takeIf { it != 0uL }?.toGeary() ?: return
+        if (!entity.exists()) {
+            entities[slot] = 0uL
+            return
+        }
         logger.v { "Removing ${entities[slot]} in slot $slot" }
         entity.get<ItemStack>()?.editPersistentDataContainer(entity::encodeComponentsTo)
         entity.removeEntity()
