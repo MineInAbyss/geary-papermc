@@ -105,7 +105,7 @@ class MobSpawner(
         return spawnedCount > 0
     }
 
-    private fun conditionsPassOrReport(spawn: SpawnEntry, location: Location, nearby: NearbyMobs): Boolean =
+    fun conditionsPassOrReport(spawn: SpawnEntry, location: Location, nearby: NearbyMobs? = null): Boolean =
         runCatching { checkSpawnConditions(spawn, location, nearby) }.getOrElse { e ->
             if (reportedConditionFailures.add(spawn.type.key)) logger.w {
                 "Conditions for spawn ${spawn.type.key} threw and will block it until fixed: ${e.stackTraceToString()}"

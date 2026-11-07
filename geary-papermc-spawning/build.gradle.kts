@@ -21,6 +21,7 @@ dependencies {
     testImplementation(miaLibs.mockk)
 
     compileOnly(libs.geary.actions)
+    testImplementation(libs.geary.actions)
     implementation(projects.gearyPapermcSqlite)
     implementation(projects.gearyPapermcTracking)
     testImplementation(miaLibs.kotlinx.coroutines.test)

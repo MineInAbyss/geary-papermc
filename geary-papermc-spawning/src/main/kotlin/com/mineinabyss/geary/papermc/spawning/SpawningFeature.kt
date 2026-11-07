@@ -20,8 +20,10 @@ import com.mineinabyss.geary.papermc.spawning.locations.LocationsFeature
 import com.mineinabyss.geary.papermc.spawning.listeners.SpreadEntityDeathListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.mythic.MythicSpawnTypeListener
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadEntityTracker
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawnRepository
 import com.mineinabyss.geary.papermc.spawning.spread_spawn.SpreadSpawner
+import com.mineinabyss.geary.papermc.spawning.spread_spawn.SurfaceIndex
 import com.mineinabyss.geary.papermc.spawning.tasks.SpawnTask
 import com.mineinabyss.geary.papermc.spawning.tasks.SpreadSpawnTask
 import com.mineinabyss.geary.papermc.sqlite.sqliteDatabase
@@ -85,6 +87,7 @@ val SpawningFeature = module("spawning") {
     val spawnDB by single<Database> {
         get<Plugin>().sqliteDatabase(Path("spawns.db")) {
             migrateSpawnDataToText()
+            dropUnkeyedSurfaceChunks()
             spawnDAO.create()
             backfillRtreeCategories()
         }
@@ -103,8 +106,8 @@ val SpawningFeature = module("spawning") {
 
     // -- Spread Spawn logic --
     val context by single { new(::SpawningContext) }
-    single { new(::InChunkLocationChooser) }
-    single { new(::SpreadChunkChooser) }
+    single { new(::SpreadEntityTracker) }
+    val surfaceIndex by single { new(::SurfaceIndex) }
     single { new(::SpreadSpawner) }
 
     single { new(::SpawnTask) }
@@ -121,11 +124,13 @@ val SpawningFeature = module("spawning") {
     // below pulls a spawn config in through its constructor
     listeners(spawnTypeListener, mythicSpawnListener)
 
-    listeners(listSpawnListener, spreadDeathListener)
+    listeners(listSpawnListener, spreadDeathListener, surfaceIndex)
 
     // -- Tasks registration --
     task(get<SpawnTask>().job)
     task(get<SpreadSpawnTask>().job)
+    task(surfaceIndex.job)
+    task(listSpawnListener.job)
 
     val logger = get<Logger>()
 
@@ -134,6 +139,8 @@ val SpawningFeature = module("spawning") {
         delay(1.ticks) // Let other plugins register components
         context // Load context (reads all spawns)
         logger.i { "Loaded ${context.spawns.size} normal spawn types and ${spreadConfig.types.size} spread spawn types" }
+        runCatching { listSpawnListener.adoptLoadedEntities() }
+            .onFailure { logger.e { "Failed to adopt loaded spread spawn entities: ${it.stackTraceToString()}" } }
 
         val spreadEntries = spreadConfig.types.values
             .flatMap { it.sectionsConfig.values }
@@ -164,6 +171,25 @@ val SpawningFeature = module("spawning") {
                         .onSuccess { sender.success("Cleared spawn locations in ${world.name} from the database") }
                         .onFailure { sender.error("Failed to clear spawn locations in ${world.name}:\n${it.message}") }
                 }
+            }
+        }
+        "spreadStatus" {
+            executes {
+                val spawner = get<SpreadSpawner>()
+                get<Plugin>().launch {
+                    runCatching { spawner.statusLines() }
+                        .onSuccess { lines ->
+                            if (lines.isEmpty()) sender.info("No spread spawn sections resolved yet")
+                            else lines.forEach { sender.info(it) }
+                        }
+                        .onFailure { sender.error("Failed to read spread spawn status:\n${it.message}") }
+                }
+            }
+        }
+        "clearSurfaceIndex" {
+            executes {
+                get<SurfaceIndex>().clear()
+                sender.success("Cleared the spread spawn surface index, loaded chunks will be rescanned")
             }
         }
 
@@ -251,6 +277,13 @@ private fun WriteTransaction.migrateSpawnDataToText() {
     exec("CREATE TABLE spawn_data (id INTEGER PRIMARY KEY, data TEXT NOT NULL) STRICT")
     exec("INSERT INTO spawn_data(id, data) SELECT id, CAST(data AS TEXT) FROM spawn_data_old")
     exec("DROP TABLE spawn_data_old")
+}
+
+// surface_chunks was first keyed by chunk alone, so rows from different worlds could not be told apart.
+// The table only caches scans, so dropping it just means those chunks are rescanned
+internal fun WriteTransaction.dropUnkeyedSurfaceChunks() {
+    val hasWorld = getOrNull("SELECT 1 FROM pragma_table_info('surface_chunks') WHERE name = 'world'") { getInt(0) }
+    if (hasWorld == null) exec("DROP TABLE IF EXISTS surface_chunks")
 }
 
 // insertRtree once left the category dimensions at 0, hiding those rows from every typed query.

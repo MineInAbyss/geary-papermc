@@ -32,7 +32,7 @@ val LocationsFeature = module("locations") {
 
     single {
         val entries = locationConfigReader.read()
-        entries.filter { it.entry.Locations.isEmpty() }.forEach {
+        entries.filter { it.entry.locations.isEmpty() }.forEach {
             get<Logger>().w { "Locations entry '${it.key}' (${it.path.fileName}) has no Locations map, check the file format" }
         }
         SpawnLocationsUnified(entries).also {

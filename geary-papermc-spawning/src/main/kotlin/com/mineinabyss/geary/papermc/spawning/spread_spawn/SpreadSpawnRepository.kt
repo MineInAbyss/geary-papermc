@@ -67,11 +67,15 @@ class SpreadSpawnRepository(
         }.firstOrNull { SpreadSpawnLocation.fromStatement(this, location.world) }
     }
 
-    suspend fun getSpawnsInBB(world: World, boundingBox: BoundingBox) = db.read {
-        val bb = boundingBox
-        spawns.getSpawnsInBB(minX = bb.minX, minY = bb.minY, minZ = bb.minZ, maxX = bb.maxX, maxY = bb.maxY, maxZ = bb.maxZ).map {
-            SpreadSpawnLocation.fromStatement(this, world)
-        }
+    suspend fun getSpawnsInBB(
+        world: World,
+        boundingBox: BoundingBox,
+        categories: List<String>? = null,
+    ): List<SpreadSpawnLocation> = db.read {
+        when (categories) {
+            null -> spawns.getSpawnsInBB(minX = boundingBox.minX, minY = boundingBox.minY, minZ = boundingBox.minZ, maxX = boundingBox.maxX, maxY = boundingBox.maxY, maxZ = boundingBox.maxZ)
+            else -> spawns.getSpawnsInBBOfType(minX = boundingBox.minX, minY = boundingBox.minY, minZ = boundingBox.minZ, maxX = boundingBox.maxX, maxY = boundingBox.maxY, maxZ = boundingBox.maxZ, categories = json(categories))
+        }.map { SpreadSpawnLocation.fromStatement(this, world) }
     }
 
     /** Gets all stored spawn positions that land in this [chunk]. */
@@ -85,13 +89,21 @@ class SpreadSpawnRepository(
         }.map { SpreadSpawnLocation.fromStatement(this, chunk.world) }
     }
 
-    suspend fun deleteSpawnsOlderThan(world: World, age: Duration) = db.write {
+    suspend fun getSpawnsWithIds(world: World, ids: Collection<Long>): List<SpreadSpawnLocation> = db.read {
+        spawns.getSpawnsWithIds(jsonIds(ids)).map { SpreadSpawnLocation.fromStatement(this, world) }
+    }
+
+    suspend fun deleteSpawnsOlderThan(world: World, age: Duration, keepIds: Collection<Long> = emptyList()) = db.write {
         val epochSeconds = (Clock.System.now() - age).epochSeconds
-        spawns.deleteSpawnsOlderThan(epochSeconds)
+        spawns.deleteSpawnsOlderThanExcept(epochSeconds, jsonIds(keepIds))
     }
 
     suspend fun deleteSpawnLocation(world: World, id: Long): Unit = db.write {
         spawns.deleteSpawn(id = id)
+    }
+
+    suspend fun deleteSpawnLocations(world: World, ids: Collection<Long>): Unit = db.write {
+        spawns.deleteSpawns(jsonIds(ids))
     }
 
     suspend fun insertSpawnLocation(location: Location, store: StoredEntity): SpreadSpawnLocation = db.write {
@@ -110,5 +122,26 @@ class SpreadSpawnRepository(
 
     suspend fun dropAll(world: World) = db.write { spawns.dropAll() }
 
+    /** Calls [onEach] on the database read thread */
+    suspend fun loadSurfaces(world: World, onEach: (chunkKey: Long, surface: ChunkSurface) -> Unit): Int = db.read {
+        var count = 0
+        spawns.loadSurfaceChunks(world.uid.toString()).forEach {
+            onEach(getLong(it.chunk), ChunkSurface.decode(getBlob(it.histogram), getBlob(it.positions), getInt(it.version), getLong(it.scanned_at)))
+            count++
+        }
+        count
+    }
+
+    suspend fun putSurfaces(world: World, surfaces: Map<Long, ChunkSurface>) = db.write {
+        val worldId = world.uid.toString()
+        surfaces.forEach { (key, surface) ->
+            spawns.putSurfaceChunk(worldId, key, surface.version, surface.scannedAt, surface.encodeHistogram(), surface.encodePositions())
+        }
+    }
+
+    suspend fun dropSurfaces(world: World) = db.write { spawns.dropSurfaceChunks(world.uid.toString()) }
+
     private fun json(filter: List<String>) = json.encodeToString(ListSerializer(String.serializer()), filter)
+
+    private fun jsonIds(ids: Collection<Long>) = json.encodeToString(ListSerializer(Long.serializer()), ids.toList())
 }

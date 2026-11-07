@@ -88,6 +88,22 @@ WHERE minX >= :minX
   AND maxY < :maxY
   AND maxZ < :maxZ;
 
+-- getSpawnsInBBOfType
+SELECT id, data, minX, minY, minZ
+FROM spawn_view
+WHERE minX >= :minX
+  AND minY >= :minY
+  AND minZ >= :minZ
+  AND maxX < :maxX
+  AND maxY < :maxY
+  AND maxZ < :maxZ
+  AND minCategory IN ( SELECT id FROM spawn_categories WHERE name IN ( SELECT value FROM json_each(:categories) ) );
+
+-- getSpawnsWithIds
+SELECT id, data, minX, minY, minZ
+FROM spawn_view
+WHERE id IN ( SELECT value FROM json_each(:ids) );
+
 -- getSpawnsInChunk
 SELECT id, data, minX, minY, minZ
 FROM spawn_view
@@ -126,16 +142,36 @@ WHERE name = :category;
 -- lastInsertedRtreeId
 SELECT last_insert_rowid() AS id;
 
--- deleteSpawnsOlderThan
+-- deleteSpawnsOlderThanExcept
 DELETE
 FROM spawn_data
-WHERE data ->> 'createdTime' < :epochSeconds;
+WHERE data ->> 'createdTime' < :epochSeconds
+  AND id NOT IN ( SELECT value FROM json_each(:keepIds) );
 
 -- deleteSpawn
 DELETE
 FROM spawn_data
 WHERE id = :id;
 
+-- deleteSpawns
+DELETE
+FROM spawn_data
+WHERE id IN ( SELECT value FROM json_each(:ids) );
+
 -- dropAll
 DELETE
 FROM spawn_data;
+
+-- loadSurfaceChunks
+SELECT chunk, version, scanned_at, histogram, positions
+FROM surface_chunks
+WHERE world = :world;
+
+-- putSurfaceChunk
+INSERT OR REPLACE INTO surface_chunks(world, chunk, version, scanned_at, histogram, positions)
+VALUES (:world, :chunk, :version, :scannedAt, :histogram, :positions);
+
+-- dropSurfaceChunks
+DELETE
+FROM surface_chunks
+WHERE world = :world;

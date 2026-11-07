@@ -1,10 +1,6 @@
 package com.mineinabyss.geary.papermc.spawning.spread_spawn
 
-import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
-import com.mineinabyss.geary.papermc.gearyPaper
-import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
 import com.mineinabyss.idofront.typealiases.BukkitEntity
-import kotlinx.coroutines.withContext
 import me.dvyy.sqlite.statement.NamedColumnSqliteStatement
 import org.bukkit.Location
 import org.bukkit.World
@@ -22,13 +18,17 @@ data class SpreadSpawnLocation(
      * Spawns the stored entity at the specified location with a random yaw.
      *
      * Caller is responsible for ensuring the entity isn't spawned multiple times and removed as needed.
+     * Must be called on the main thread
      */
-    suspend fun spawn(): BukkitEntity? = withContext(gearyPaper.minecraftDispatcher) {
+    fun spawn(): BukkitEntity? {
         val loc = location.toCenterLocation().subtract(0.0, 0.5, 0.0).setRotation(Random.nextFloat() * 360, location.pitch)
-        val bukkitEntity = stored.asSpawnType()?.spawnAt(loc) ?: return@withContext null
-        bukkitEntity.toGearyOrNull()?.set<SpreadSpawnLocation>(this@SpreadSpawnLocation)
-        bukkitEntity
+        return stored.asSpawnType()?.spawnAt(loc)
     }
+
+    val pos get() = SpreadPos(location.blockX, location.blockY, location.blockZ)
+
+    /** Epoch seconds, matching what the database stores */
+    val createdTime get() = stored.createdTime.epochSecond
 
     companion object {
         fun fromStatement(cursor: NamedColumnSqliteStatement, world: World) = with(cursor) {

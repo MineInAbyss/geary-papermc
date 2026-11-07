@@ -46,3 +46,14 @@ SELECT rtree.id  AS id,
        maxCategory
 FROM spawn_rtree rtree
          INNER JOIN spawn_data data ON rtree.id = data.id;
+
+CREATE TABLE IF NOT EXISTS surface_chunks
+(
+    world      TEXT    NOT NULL,
+    chunk      INTEGER NOT NULL,
+    version    INTEGER NOT NULL,
+    scanned_at INTEGER NOT NULL,
+    histogram  BLOB    NOT NULL,
+    positions  BLOB    NOT NULL,
+    PRIMARY KEY (world, chunk)
+) STRICT, WITHOUT ROWID;

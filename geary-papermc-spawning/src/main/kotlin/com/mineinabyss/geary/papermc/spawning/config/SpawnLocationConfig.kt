@@ -3,6 +3,7 @@ package com.mineinabyss.geary.papermc.spawning.config
 import com.mineinabyss.idofront.config.ConfigEntryWithKey
 import com.mineinabyss.idofront.serialization.LocationAltSerializer
 import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.bukkit.Location
 
@@ -34,26 +35,29 @@ class SpawnLocationConfig(
     private val maxY = maxOf(locMin.y, locMax.y)
     private val minZ = minOf(locMin.z, locMax.z)
     private val maxZ = maxOf(locMin.z, locMax.z)
+    private val xRange = minX..maxX
+    private val yRange = minY..maxY
+    private val zRange = minZ..maxZ
 
-    fun isInside(location: Location): Boolean {
+    fun isInside(location: Location): Boolean = isInside(location.x, location.y, location.z)
+
+    fun isInside(x: Double, y: Double, z: Double): Boolean {
         if (center != null && radius != null) {
-            val dx = location.x - center.x
-            val dz = location.z - center.z
+            val dx = x - center.x
+            val dz = z - center.z
 
             val horizontalDistSq = dx * dx + dz * dz
             val radiusSq = radius * radius
 
             if (radiusY != null) {
-                val dy = kotlin.math.abs(location.y - center.y)
+                val dy = kotlin.math.abs(y - center.y)
                 return horizontalDistSq <= radiusSq && dy <= radiusY
             }
 
             return horizontalDistSq <= radiusSq
         }
 
-        return location.x >= minX && location.x <= maxX &&
-                location.y >= minY && location.y <= maxY &&
-                location.z >= minZ && location.z <= maxZ
+        return x in xRange && y in yRange && z in zRange
     }
 
     fun getSize(): Double {
@@ -67,24 +71,18 @@ class SpawnLocationConfig(
 
 // definition of the spawnable custom locations
 @Serializable
-class SpawnLocationsConfig(
-    val Locations: Map<String, SpawnLocationConfig> = emptyMap(), // id to location
-) {
-
-}
+class SpawnLocationsConfig(@SerialName("Locations") val locations: Map<String, SpawnLocationConfig> = emptyMap())
 
 class SpawnLocationsUnified(configs: List<ConfigEntryWithKey<SpawnLocationsConfig>>) {
     val unified = mutableMapOf<String, SpawnLocationConfig>()
 
     init {
-        for (config in configs) {
-            for ((id, location) in config.entry.Locations) {
-                if (unified.containsKey(id)) {
-                    println("Warning: Duplicate spawn location ID '$id' found in config '${config.key}'. Skipping this entry.")
-                    continue
-                }
-                unified[id] = location
+        for ((_, key, entry) in configs) for ((id, location) in entry.locations) {
+            if (unified.containsKey(id)) {
+                println("Warning: Duplicate spawn location ID '$id' found in config '$key'. Skipping this entry.")
+                continue
             }
+            unified[id] = location
         }
     }
 
