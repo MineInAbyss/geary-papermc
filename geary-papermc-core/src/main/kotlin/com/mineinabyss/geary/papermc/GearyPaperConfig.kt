@@ -4,6 +4,7 @@ import ca.spottedleaf.moonrise.common.util.TickThread
 import co.touchlab.kermit.Severity
 import com.charleskorn.kaml.YamlComment
 import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.papermc.regions.RegionProviderType
 import com.mineinabyss.idofront.serialization.SerializableDataTypes
 import com.mineinabyss.idofront.serialization.SerializableItemStack
 import kotlinx.serialization.Serializable
@@ -28,6 +29,8 @@ class GearyPaperConfig(
     val resourcePack: ResourcePack = ResourcePack(),
     @YamlComment("Whether to enable Geary's spawning system")
     val spawning: Boolean = true,
+    @YamlComment("Region plugin for spawn regions, spread spawn sections and build checks: AUTO, CARTRIDGE or WORLDGUARD. AUTO uses Cartridge when it has regions and WorldGuard is not installed, otherwise WorldGuard if installed")
+    val regionProvider: RegionProviderType = RegionProviderType.AUTO,
     val menus: MenusConfig = MenusConfig(),
 ) {
     @Serializable

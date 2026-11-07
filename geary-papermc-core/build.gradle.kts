@@ -6,7 +6,11 @@ plugins {
     alias(miaLibs.plugins.kotlinx.serialization)
 }
 
+// Resolved on its own because cartridge-api and paper-api declare the same capability
+val cartridgeApi: Configuration by configurations.creating { isTransitive = false }
+
 dependencies {
+    cartridgeApi("com.mineinabyss.cartridge:cartridge-api:26.3-R0.1-SNAPSHOT")
     api(libs.geary.core)
     api(libs.geary.serialization)
     api(libs.geary.prefabs)
@@ -17,4 +21,5 @@ dependencies {
     compileOnly(miaLibs.kotlinx.serialization.kaml)
     compileOnly(miaLibs.minecraft.mccoroutine)
     compileOnly(miaLibs.bundles.idofront.core)
+    compileOnly(files(cartridgeApi))
 }

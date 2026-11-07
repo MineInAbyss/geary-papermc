@@ -23,7 +23,7 @@ import com.mineinabyss.geary.papermc.plugin.commands.DebugFeature
 import com.mineinabyss.geary.papermc.plugin.commands.ReloadFeature
 import com.mineinabyss.geary.papermc.plugin.commands.TestingFeature
 import com.mineinabyss.geary.papermc.spawning.SpawningFeature
-import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.SpawningWorldGuardFlags
+import com.mineinabyss.geary.papermc.regions.WorldGuardGearyRegions
 import com.mineinabyss.geary.papermc.spawning.locations.LocationsFeature
 import com.mineinabyss.geary.papermc.tracking.entities.MCEntityTracking
 import com.mineinabyss.geary.papermc.tracking.entities.toGearyOrNull
@@ -101,9 +101,9 @@ class GearyPluginImpl : JavaPlugin(), GearyPlugin, DI {
         GearyPlugin.instance = this
 
         // Register WorldGuard flags (must be done in onLoad)
-        runCatching {
+        if (server.pluginManager.getPlugin("WorldGuard") != null) runCatching {
             val registry = WorldGuard.getInstance().flagRegistry
-            registry.register(SpawningWorldGuardFlags.OVERRIDE_LOWER_PRIORITY_SPAWNS)
+            registry.register(WorldGuardGearyRegions.OVERRIDE_LOWER_PRIORITY_SPAWNS)
         }.onFailure {
             get<ComponentLogger>().w { "Failed to register WorldGuard flags for Geary spawning" }
             it.printStackTrace()

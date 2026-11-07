@@ -3,7 +3,7 @@ package com.mineinabyss.geary.papermc.spawning.choosing
 import com.mineinabyss.geary.datatypes.GearyComponent
 import com.mineinabyss.geary.papermc.spawning.SpawningContext
 import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
-import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpawning
+import com.mineinabyss.geary.papermc.spawning.choosing.regions.RegionSpawning
 import com.mineinabyss.geary.papermc.spawning.components.SpawnCategory
 import com.mineinabyss.geary.papermc.spawning.conditions.InRegionsCondition
 import com.mineinabyss.geary.papermc.spawning.conditions.IncludeSpawnTagCondition
@@ -14,7 +14,7 @@ import com.mineinabyss.geary.papermc.spawning.helpers.WeightedList
 import org.bukkit.Location
 
 class SpawnChooser(
-    val wg: WorldGuardSpawning,
+    val regionSpawning: RegionSpawning,
     val caps: MobCaps,
     val context: SpawningContext,
     val spawnLocations: SpawnLocationsUnified,
@@ -31,10 +31,9 @@ class SpawnChooser(
         position: SpawnPosition,
         categoryCounts: Lazy<MutableMap<SpawnCategory, Int>> = lazy { caps.countsNear(location) },
     ): List<SpawnEntry>? {
-        val regions = wg.getRegionsAt(location)
-        val wgSpawns = wg.getSpawnsForRegions(regions)
+        val regionSpawns = regionSpawning.getSpawnsAt(location)
         val customSpawns = customRegionSpawns.filter { it.matchesCustomRegionAt(location) }
-        val spawnsInRegion = (wgSpawns + customSpawns).filter { it.position == position }
+        val spawnsInRegion = (regionSpawns + customSpawns).filter { it.position == position }
         if (spawnsInRegion.isEmpty()) return null
 
         return caps.filterAllowed(spawnsInRegion, categoryCounts.value)

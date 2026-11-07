@@ -3,17 +3,14 @@ package com.mineinabyss.geary.papermc.spawning.spread_spawn
 import co.touchlab.kermit.Logger
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.mineinabyss.geary.papermc.gearyPaper
+import com.mineinabyss.geary.papermc.regions.GearyRegions
+import com.mineinabyss.geary.papermc.regions.RegionCuboid
 import com.mineinabyss.geary.papermc.spawning.choosing.InChunkLocationChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.SpreadChunkChooser
 import com.mineinabyss.geary.papermc.spawning.config.SpawnLocationConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpawnLocationsUnified
 import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
-import com.sk89q.worldedit.bukkit.BukkitAdapter
-import com.sk89q.worldguard.WorldGuard
-import com.sk89q.worldguard.protection.managers.RegionManager
-import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion
-import com.sk89q.worldguard.protection.regions.RegionContainer
 import kotlinx.coroutines.withContext
 import org.bukkit.Location
 import org.bukkit.World
@@ -28,25 +25,25 @@ class SpreadSpawner(
     private val posChooser: InChunkLocationChooser,
     private val logger: Logger,
     private val regConfig: SpawnLocationsUnified,
+    private val regions: GearyRegions,
 ) {
     suspend fun spawnSpreadEntities() {
-        val container: RegionContainer = WorldGuard.getInstance().platform.regionContainer
-        val regions: RegionManager? = container.get(BukkitAdapter.adapt(world))
-
         for ((type, spreadConfigs) in configs.types) {
             spawnAll@ for ((regionName, config) in spreadConfigs.sectionsConfig) {
 
-                val region = regions?.getRegion(regionName) ?: run {
-                    logger.w { "Region $regionName not found in world ${world.name}" }
-                    continue
+                val cuboid = when (val found = regions.cuboid(world, regionName)) {
+                    is RegionCuboid.Found -> found
+                    RegionCuboid.Missing -> {
+                        logger.w { "Region $regionName not found in world ${world.name} (${regions.name})" }
+                        continue
+                    }
+                    RegionCuboid.NotCuboid -> {
+                        logger.w { "Region $regionName is not a cuboid region in world ${world.name} (${regions.name})" }
+                        continue
+                    }
                 }
 
-                val cuboidRegion: ProtectedCuboidRegion = region as? ProtectedCuboidRegion ?: run {
-                    logger.w { "Region $regionName is not a cuboid region in world ${world.name}" }
-                    continue
-                }
-
-                val chunkLoc = chooseChunkInRegion(cuboidRegion, config, type) ?: continue
+                val chunkLoc = chooseChunkInRegion(cuboid, config, type) ?: continue
 
                 val spawnPos = chooseSpotInChunk(chunkLoc, config) ?: continue
 
@@ -74,18 +71,15 @@ class SpreadSpawner(
         }
     }
 
-    private suspend fun chooseChunkInRegion(worldGuardRegion: ProtectedCuboidRegion, config: SpreadSpawnConfig, type: String): Location? {
-        val boundingBox = getBBFromRegion(worldGuardRegion)
+    private suspend fun chooseChunkInRegion(cuboid: RegionCuboid.Found, config: SpreadSpawnConfig, type: String): Location? {
+        val boundingBox = BoundingBox(
+            cuboid.minX.toDouble(), cuboid.minY.toDouble(), cuboid.minZ.toDouble(),
+            cuboid.maxX.toDouble(), cuboid.maxY.toDouble(), cuboid.maxZ.toDouble(),
+        )
         return chunkChooser.chooseChunkInBB(boundingBox, config, type)
     }
 
     private suspend fun chooseSpotInChunk(chunkLoc: Location, config: SpreadSpawnConfig): Location? = withContext(gearyPaper.minecraftDispatcher) {
         posChooser.chooseSpotInChunk(chunkLoc, config)
-    }
-
-    private fun getBBFromRegion(region: ProtectedCuboidRegion): BoundingBox {
-        val minLoc = BukkitAdapter.adapt(world, region.minimumPoint)
-        val maxLoc = BukkitAdapter.adapt(world, region.maximumPoint)
-        return BoundingBox.of(minLoc, maxLoc)
     }
 }
