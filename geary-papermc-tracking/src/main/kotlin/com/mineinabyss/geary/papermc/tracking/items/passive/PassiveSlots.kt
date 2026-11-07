@@ -121,7 +121,7 @@ object PassiveSlots {
 
     // Pending delayed saves never run on shutdown
     fun saveAll() {
-        Bukkit.getOnlinePlayers().filter { it.openInventory.topInventory.holder is PassiveInventory }.forEach { it.closeInventory() }
+        Bukkit.getOnlinePlayers().filter { it.openInventory.topInventory.getHolder(false) is PassiveInventory }.forEach { it.closeInventory() }
         Bukkit.getOnlinePlayers().forEach(::save)
         detached.values.toList().forEach { save(it.passive) }
     }

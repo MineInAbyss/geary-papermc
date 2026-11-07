@@ -2,12 +2,14 @@ package com.mineinabyss.geary.papermc.features.items.passive
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
+import com.mineinabyss.geary.papermc.datastore.decodePrefabs
+import com.mineinabyss.geary.papermc.datastore.has
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.toGeary
 import com.mineinabyss.geary.papermc.tracking.items.components.PassiveItem
-import com.mineinabyss.geary.papermc.tracking.items.itemEntityContext
 import com.mineinabyss.geary.papermc.tracking.items.passive.PassiveInventory
 import com.mineinabyss.geary.papermc.tracking.items.passive.PassiveSlots
+import com.mineinabyss.geary.prefabs.entityOfOrNull
 import kotlinx.coroutines.delay
 import org.bukkit.entity.Player
 import org.bukkit.event.Cancellable
@@ -20,7 +22,10 @@ import org.bukkit.inventory.ItemStack
 object PassiveSlotRules {
     fun allowed(player: Player, item: ItemStack?): Boolean {
         if (item == null || item.isEmpty) return true
-        return player.world.toGeary().itemEntityContext { item.toGearyOrNull()?.has<PassiveItem>() == true }
+        with(player.world.toGeary()) {
+            val pdc = item.persistentDataContainer
+            return pdc.has<PassiveItem>() || pdc.decodePrefabs().any { entityOfOrNull(it)?.has<PassiveItem>() == true }
+        }
     }
 
     /** Cancels [event] when it would move a disallowed item into a passive slot, returning whether passive slots were touched */

@@ -23,7 +23,7 @@ import org.bukkit.event.player.PlayerRecipeBookSettingsChangeEvent
 class PassiveMenuListener : Listener {
     fun open(player: Player) {
         val passive = PassiveSlots.get(player) ?: return
-        player.openInventory(passive.inventory)?.takeUnless { it.topInventory.holder !== passive } ?: return
+        player.openInventory(passive.inventory)?.takeUnless { it.topInventory.getHolder(false) !== passive } ?: return
         carryCursorOver(player)
     }
 
@@ -61,7 +61,7 @@ class PassiveMenuListener : Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun InventoryClickEvent.enforceRules() {
-        val passive = view.topInventory.holder as? PassiveInventory ?: return
+        val passive = view.topInventory.getHolder(false) as? PassiveInventory ?: return
         val player = whoClicked as? Player ?: return
         if (!PassiveSlots.isActive(passive)) return run { isCancelled = true }
         if (PassiveSlotRules.handleClick(this, passive)) saveLater(passive, player)
@@ -69,7 +69,7 @@ class PassiveMenuListener : Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun InventoryDragEvent.enforceRules() {
-        val passive = view.topInventory.holder as? PassiveInventory ?: return
+        val passive = view.topInventory.getHolder(false) as? PassiveInventory ?: return
         val player = whoClicked as? Player ?: return
         if (!PassiveSlots.isActive(passive)) return run { isCancelled = true }
         if (PassiveSlotRules.handleDrag(this, passive)) saveLater(passive, player)
@@ -103,7 +103,7 @@ class PassiveMenuListener : Listener {
 
     @EventHandler
     fun InventoryCloseEvent.saveOnClose() {
-        val passive = inventory.holder as? PassiveInventory ?: return
+        val passive = inventory.getHolder(false) as? PassiveInventory ?: return
         PassiveSlots.save(passive)
         // The closing player is still listed as a viewer until the event finishes
         Bukkit.getScheduler().runTask(gearyPaper, Runnable { PassiveSlots.releaseIfUnused(passive) })

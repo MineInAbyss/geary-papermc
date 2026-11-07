@@ -30,7 +30,7 @@ internal val WorldScoped.formats get() = getAddon(SerializableComponents).format
 
 /** Returns whether this [PersistentDataContainer] has a component [T] encoded in it. */
 context(world: WorldScoped)
-inline fun <reified T : GearyComponent> PersistentDataContainer.has(): Boolean {
+inline fun <reified T : GearyComponent> PersistentDataContainerView.has(): Boolean {
     return has(world.serializers.getNamespacedKeyFor<T>() ?: return false, BYTE_ARRAY)
 }
 
@@ -127,6 +127,14 @@ fun PersistentDataContainer.encodePrefabs(
         PREFABS_KEY
     )
 }
+
+/** The bytes [encodePrefabs] writes under `geary:prefabs` for [keys] */
+context(scope: WorldScoped)
+fun encodedPrefabs(keys: Collection<PrefabKey>): ByteArray =
+    scope.world.formats.binaryFormat.encodeToByteArray(SetSerializer(PrefabKey.serializer()), keys.toSet())
+
+/** The raw `geary:prefabs` bytes, without decoding or namespace migration */
+fun PersistentDataContainerView.encodedPrefabsOrNull(): ByteArray? = get(PREFABS_KEY, BYTE_ARRAY)
 
 /** Decodes [PrefabKey]s under the key `geary:prefabs`. */
 context(scope: WorldScoped)
