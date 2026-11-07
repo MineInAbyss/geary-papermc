@@ -15,7 +15,11 @@ class SpawnLocationChooser(
     private val verticalRange = this.config.minDistance..this.config.maxVerticalDistance
     private val minDistanceSq = (this.config.minDistance * this.config.minDistance).toDouble()
 
-    fun chooseSpawnLocationNear(players: PlayerPositions, location: Location): Location? {
+    /**
+     * With [candidates], positions it rules out return null instead of being read by the caller.
+     * Only pass it when the caller would discard anything but GROUND and WATER, then the outcome is the same
+     */
+    fun chooseSpawnLocationNear(players: PlayerPositions, location: Location, candidates: SpawnCandidateIndex? = null): Location? {
         // Pick near current player
         val spawnLocation = location.clone().add(
             randomSign() * horizontalRange.randomOrMin().toDouble(),
@@ -24,11 +28,13 @@ class SpawnLocationChooser(
         )
 
         // Block reads below would otherwise sync-load the chunk
-        if (!spawnLocation.isChunkLoaded) return null
+        val lookup = candidates?.lookup(spawnLocation)
+            ?: if (spawnLocation.isChunkLoaded) SpawnCandidateIndex.Lookup.CANDIDATE else SpawnCandidateIndex.Lookup.UNLOADED
+        if (lookup == SpawnCandidateIndex.Lookup.UNLOADED) return null
 
         if (Random.nextDouble() < 0.2) {
             spawnLocation.y = tryGetHighestBlockWithinYRange(spawnLocation, config.maxVerticalDistance).y
-        }
+        } else if (lookup == SpawnCandidateIndex.Lookup.NOT_CANDIDATE) return null
 
         // Ensure not near ANY player
         if (players.anyWithin(spawnLocation, minDistanceSq)) return null

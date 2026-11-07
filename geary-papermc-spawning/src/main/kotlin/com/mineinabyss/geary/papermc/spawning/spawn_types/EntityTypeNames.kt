@@ -22,8 +22,11 @@ object EntityTypeNames {
         val uuid = entity.uniqueId
         cache.getIfPresent(uuid)?.let { return it }
         if (misses.getIfPresent(uuid) != null) return null
-        val type = GearyReadEntityTypeEvent(entity).apply { call() }.type
+        val type = resolve(entity)
         if (type == null) misses.put(uuid, Unit) else cache.put(uuid, type)
         return type
     }
+
+    /** Uncached, for callers that keep their own cache */
+    fun resolve(entity: Entity): String? = GearyReadEntityTypeEvent(entity).apply { call() }.type
 }

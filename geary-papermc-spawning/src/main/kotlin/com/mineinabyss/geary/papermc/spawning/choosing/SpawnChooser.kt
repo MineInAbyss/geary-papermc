@@ -19,15 +19,17 @@ class SpawnChooser(
     val context: SpawningContext,
     val spawnLocations: SpawnLocationsUnified,
 ) {
-    private val customRegionSpawns: List<SpawnEntry> by lazy {
+    val customRegionSpawns: List<SpawnEntry> by lazy {
         context.spawns
             .map { it.entry }
             .filter { entry -> entry.regions.isEmpty() && entry.regionConditions().any() }
     }
 
+    val allSpawnEntries: List<SpawnEntry> = context.spawns.map { it.entry }
+
     val positionsWithSpawns: Set<SpawnPosition> = context.spawns.mapTo(mutableSetOf()) { it.entry.position }
 
-    /** [nearby] is only evaluated once a spawn matches the region and position. */
+    /** [nearby] is only evaluated once a spawn matches the region and position */
     fun getAllowedSpawnsNear(
         location: Location,
         position: SpawnPosition,

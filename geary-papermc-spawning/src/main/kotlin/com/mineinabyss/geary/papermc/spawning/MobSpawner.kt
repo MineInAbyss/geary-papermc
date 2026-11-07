@@ -12,6 +12,7 @@ import com.mineinabyss.geary.papermc.spawning.conditions.InRegionsCondition
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.config.SpawnLocationsUnified
 import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
+import com.mineinabyss.geary.papermc.spawning.listeners.SpawnChurnListener
 import com.mineinabyss.idofront.util.randomOrMin
 import org.bukkit.Location
 import java.util.concurrent.ConcurrentHashMap
@@ -22,6 +23,7 @@ class MobSpawner(
     val spreadRepo: LocationSpread,
     val spawnLocations: SpawnLocationsUnified,
     val logger: Logger,
+    private val churn: SpawnChurnListener,
 ) {
     private val reportedConditionFailures = ConcurrentHashMap.newKeySet<String>()
 
@@ -85,7 +87,7 @@ class MobSpawner(
             if (expectedBox != null) {
                 val suitableLoc = spreadRepo.ensureSuitableLocationOrNull(spawnLoc, expectedBox, extraAttemptsUp = 10)
                     ?: return@repeat
-                spawn.type.spawnAt(suitableLoc)
+                churn.recordSpawn(spawn.type.spawnAt(suitableLoc))
                 nearby.value.add(spawn.type.key, spawn.type.category, suitableLoc)
                 spawnedCount++
                 return@repeat
@@ -99,6 +101,7 @@ class MobSpawner(
                     return@repeat
                 }
             if (suitableLoc != spawnLoc) spawned.teleport(suitableLoc)
+            churn.recordSpawn(spawned)
             nearby.value.add(spawn.type.key, spawn.type.category, suitableLoc)
             spawnedCount++
         }

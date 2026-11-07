@@ -17,6 +17,7 @@ import com.mineinabyss.geary.papermc.regions.GearyRegions
 import com.mineinabyss.geary.papermc.spawning.choosing.regions.RegionSpawning
 import com.mineinabyss.geary.papermc.spawning.config.*
 import com.mineinabyss.geary.papermc.spawning.listeners.ListSpawnListener
+import com.mineinabyss.geary.papermc.spawning.listeners.SpawnChurnListener
 import com.mineinabyss.geary.papermc.spawning.locations.LocationsFeature
 import com.mineinabyss.geary.papermc.spawning.listeners.SpreadEntityDeathListener
 import com.mineinabyss.geary.papermc.spawning.spawn_types.geary.GearySpawnTypeListener
@@ -107,6 +108,8 @@ val SpawningFeature = module("spawning") {
     single { LocationSpread(triesForNearbyLoc = 10) }
     single { new(::MobSpawner) }
     single { new(::SpawnLocationChooser) }
+    val candidateIndex by single { new(::SpawnCandidateIndex) }
+    val churnListener by single { SpawnChurnListener(spawning.debugCounters) }
 
     // -- Spread Spawn logic --
     val context by single { new(::SpawningContext) }
@@ -128,7 +131,9 @@ val SpawningFeature = module("spawning") {
     // below pulls a spawn config in through its constructor
     listeners(spawnTypeListener, mythicSpawnListener)
 
-    listeners(listSpawnListener, spreadDeathListener, surfaceIndex)
+    listeners(listSpawnListener, spreadDeathListener, surfaceIndex, get<SpawnTask>())
+    if (spawning.debugCounters) listeners(churnListener)
+    if (spawning.indexSpawnPositions) listeners(candidateIndex)
 
     // -- Tasks registration --
     task(get<SpawnTask>().job)
@@ -143,6 +148,7 @@ val SpawningFeature = module("spawning") {
         delay(1.ticks) // Let other plugins register components
         context // Load context (reads all spawns)
         logger.i { "Loaded ${context.spawns.size} normal spawn types and ${spreadConfig.types.size} spread spawn types, using ${regions.name} regions" }
+        if (spawning.indexSpawnPositions) logger.i { "Spawn position index ${if (candidateIndex.usesChangeStamps) "keeps unchanged sections through Cartridge change stamps" else "rebuilds sections every spawnIndexRebuildAfter"}" }
         runCatching { listSpawnListener.adoptLoadedEntities() }
             .onFailure { logger.e { "Failed to adopt loaded spread spawn entities: ${it.stackTraceToString()}" } }
 
@@ -190,8 +196,44 @@ val SpawningFeature = module("spawning") {
                 }
             }
         }
+        "capSkips" {
+            executes {
+                if (!get<SpawnConfig>().debugCounters) {
+                    sender.error("Turn on debugCounters in spawning.yml to use this command")
+                    return@executes
+                }
+                val task = get<SpawnTask>()
+                sender.info("Last spawn run skipped ${task.lastRunCappedSkips} of ${task.lastRunPlayers} players with full caps, ${task.totalCappedSkips} skips since enable")
+            }
+        }
+        "despawns" {
+            "reset" {
+                executes {
+                    if (!get<SpawnConfig>().debugCounters) {
+                        sender.error("Turn on debugCounters in spawning.yml to use this command")
+                        return@executes
+                    }
+                    get<SpawnChurnListener>().reset()
+                    sender.success("Reset spawn and despawn counters")
+                }
+            }
+            executes {
+                if (!get<SpawnConfig>().debugCounters) {
+                    sender.error("Turn on debugCounters in spawning.yml to use this command")
+                    return@executes
+                }
+                val churn = get<SpawnChurnListener>()
+                val ticks = Bukkit.getCurrentTick() - churn.sinceTick
+                val ratio = if (churn.spawned == 0L) "n/a" else "%.1f%%".format(churn.despawnedSpawned * 100.0 / churn.spawned)
+                sender.info("Over $ticks ticks: spawn task spawned ${churn.spawned}, ${churn.despawnedSpawned} of those despawned ($ratio), ${churn.despawnedMythic} MythicMobs mobs despawned in total")
+            }
+        }
         "clearSurfaceIndex" {
             executes {
+                if (!get<SpawnConfig>().debugCounters) {
+                    sender.error("Turn on debugCounters in spawning.yml to use this command")
+                    return@executes
+                }
                 get<SurfaceIndex>().clear()
                 sender.success("Cleared the spread spawn surface index, loaded chunks will be rescanned")
             }

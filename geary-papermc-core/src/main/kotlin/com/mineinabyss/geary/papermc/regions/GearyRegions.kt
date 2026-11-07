@@ -21,9 +21,15 @@ interface GearyRegions {
 
     /**
      * Ids of the regions at the location including their parents, lowest priority first.
-     * Regions below the highest priority region with a spawn override are left out.
+     * Regions below the highest priority region with a spawn override are left out
      */
     fun spawnRegionsAt(location: Location): List<String>
+
+    /**
+     * Every region [spawnRegionsAt] could return for a block in the inclusive box, possibly more.
+     * Null when the provider cannot tell
+     */
+    fun spawnRegionsOverlapping(world: World, minX: Int, minY: Int, minZ: Int, maxX: Int, maxY: Int, maxZ: Int): Set<String>? = null
 
     fun cuboid(world: World, name: String): RegionCuboid
 

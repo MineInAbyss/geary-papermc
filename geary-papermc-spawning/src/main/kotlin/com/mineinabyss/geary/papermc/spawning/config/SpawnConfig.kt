@@ -6,6 +6,7 @@ import com.mineinabyss.idofront.serialization.DurationSerializer
 import com.mineinabyss.idofront.time.ticks
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 @Serializable
 data class SpawnConfig(
@@ -26,6 +27,18 @@ data class SpawnConfig(
     val runTimes: Map<SpawnPosition, @Serializable(with = DurationSerializer::class) Duration> = mapOf(),
     @YamlComment("How many times to try and find a valid spawn position around a player before giving up.")
     val maxSpawnAttemptsPerPlayer: Int = 10,
+    @YamlComment("Rejects spawn attempts that cannot land on ground or in water from a per chunk section index instead of reading blocks. Spawn positions and rates stay the same")
+    val indexSpawnPositions: Boolean = false,
+    @YamlComment("How long an indexed chunk section is trusted before it is rebuilt. Block changes from players, explosions, fluids and pistons rebuild it sooner")
+    val spawnIndexRebuildAfter: @Serializable(DurationSerializer::class) Duration = 5.minutes,
+    @YamlComment("A player whose caps are full waits one more run time per run that found them full, up to this many run times, before the next attempt. 1 checks every run time")
+    val maxCappedBackoff: Int = 1,
+    @YamlComment("Threads that count mob caps for the players of a spawn run while the main thread spawns for the players before them. Counts and spawns stay the same. 0 counts on the main thread")
+    val capCountThreads: Int = 0,
+    @YamlComment("On Cartridge, a chunk section whose blocks did not change keeps its index when spawnIndexRebuildAfter runs out instead of being read again. Spawn positions stay the same")
+    val spawnIndexChangeStamps: Boolean = true,
+    @YamlComment("Counts spawns, despawns and capped skips for the capSkips and despawns commands, and enables clearSurfaceIndex. Used by load tests")
+    val debugCounters: Boolean = false,
 ) {
     @Serializable
     data class Range(
