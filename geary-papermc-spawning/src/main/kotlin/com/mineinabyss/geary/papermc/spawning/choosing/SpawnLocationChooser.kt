@@ -4,7 +4,6 @@ import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
 import com.mineinabyss.idofront.location.up
 import com.mineinabyss.idofront.util.randomOrMin
 import org.bukkit.Location
-import org.bukkit.entity.Player
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -12,10 +11,11 @@ class SpawnLocationChooser(
     config: SpawnConfig,
 ) {
     val config = config.range
-    fun chooseSpawnLocationNear(onlinePlayers: List<Player>, location: Location): Location? {
-        val horizontalRange = config.minDistance..config.maxDistance
-        val verticalRange = config.minDistance..config.maxVerticalDistance
+    private val horizontalRange = this.config.minDistance..this.config.maxDistance
+    private val verticalRange = this.config.minDistance..this.config.maxVerticalDistance
+    private val minDistanceSq = (this.config.minDistance * this.config.minDistance).toDouble()
 
+    fun chooseSpawnLocationNear(players: PlayerPositions, location: Location): Location? {
         // Pick near current player
         val spawnLocation = location.clone().add(
             randomSign() * horizontalRange.randomOrMin().toDouble(),
@@ -31,10 +31,7 @@ class SpawnLocationChooser(
         }
 
         // Ensure not near ANY player
-        if (onlinePlayers.any {
-                it.location.world == spawnLocation.world && it.location.distanceSquared(spawnLocation) < config.minDistance * config.minDistance
-            })
-            return null
+        if (players.anyWithin(spawnLocation, minDistanceSq)) return null
 
         return spawnLocation
     }

@@ -1,6 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.tasks
 
 import com.mineinabyss.geary.papermc.spawning.MobSpawner
+import com.mineinabyss.geary.papermc.spawning.choosing.PlayerPositions
 import com.mineinabyss.geary.papermc.spawning.choosing.SpawnLocationChooser
 import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
 import com.mineinabyss.geary.papermc.spawning.config.SpawnConfig
@@ -44,6 +45,7 @@ class SpawnTask(
         }.ifEmpty { return }
         allowedSpawnPositions.forEach { lastRunTick[it] = currTick }
         val onlinePlayers = Bukkit.getOnlinePlayers().filter { !it.isDead && it.gameMode != SPECTATOR }
+        val positions = PlayerPositions(onlinePlayers)
 
         onlinePlayers.forEach { player ->
             val attemptedPositions = allowedSpawnPositions.toMutableSet()
@@ -51,7 +53,7 @@ class SpawnTask(
             val categoryCounts = lazy { mobCaps.countsNear(player.location) }
             repeat(spawnAttempts) {
                 if (attemptedPositions.isEmpty()) return@forEach
-                val spawnLoc = locationChooser.chooseSpawnLocationNear(onlinePlayers, player.location) ?: return@repeat
+                val spawnLoc = locationChooser.chooseSpawnLocationNear(positions, player.location) ?: return@repeat
                 val type = SpawnPositionReader.spawnPositionFor(spawnLoc)
 
                 if (attemptedPositions.remove(type)) {
