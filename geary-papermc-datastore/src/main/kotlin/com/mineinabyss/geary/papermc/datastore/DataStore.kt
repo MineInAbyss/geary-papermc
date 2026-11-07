@@ -128,6 +128,14 @@ fun PersistentDataContainer.encodePrefabs(
     )
 }
 
+/** The bytes [encodePrefabs] writes under `geary:prefabs` for [keys] */
+context(scope: WorldScoped)
+fun encodedPrefabs(keys: Collection<PrefabKey>): ByteArray =
+    scope.world.formats.binaryFormat.encodeToByteArray(SetSerializer(PrefabKey.serializer()), keys.toSet())
+
+/** The raw `geary:prefabs` bytes, without decoding or namespace migration */
+fun PersistentDataContainerView.encodedPrefabsOrNull(): ByteArray? = get(PREFABS_KEY, BYTE_ARRAY)
+
 /** Decodes [PrefabKey]s under the key `geary:prefabs`. */
 context(scope: WorldScoped)
 fun PersistentDataContainerView.decodePrefabs(): Set<PrefabKey> =

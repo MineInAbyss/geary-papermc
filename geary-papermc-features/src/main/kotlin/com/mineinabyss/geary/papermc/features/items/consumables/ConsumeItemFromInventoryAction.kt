@@ -14,9 +14,11 @@ class ConsumeItemFromInventoryAction(
     val amount: Int = 1,
 ) : Action {
     override fun ActionGroupContext.execute() {
-        val player = entity?.get<Player>() ?: return
-        val matchedItem = player.inventory.filterNotNull().firstOrNull { type.matches(it) }
-            ?: player.inventory.itemInOffHand.takeIf { type.matches(it) } ?: return
+        val entity = entity ?: return
+        val player = entity.get<Player>() ?: return
+        val matcher = with(entity.world) { ConsumableMatcher.of(type) }
+        val matchedItem = player.inventory.firstOrNull { it != null && matcher.matches(it) }
+            ?: player.inventory.itemInOffHand.takeIf { matcher.matches(it) } ?: return
         matchedItem.amount -= amount
     }
 }
