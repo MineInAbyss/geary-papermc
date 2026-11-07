@@ -6,6 +6,7 @@ import com.mineinabyss.geary.actions.event_binds.EntityObservers
 import com.mineinabyss.geary.datatypes.GearyEntity
 import com.mineinabyss.geary.helpers.entity
 import com.mineinabyss.geary.modules.Geary
+import com.mineinabyss.geary.observers.entity.detachObservers
 import com.mineinabyss.geary.papermc.toEntityOrNull
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.Prefabs
@@ -55,9 +56,11 @@ object MythicEmbeddedGearyEntity {
         val observeComponent = observeNode?.let { yaml.decodeFromYamlNode(EntityObservers.serializer(), it) }
 
         // Register and return
-        val newEntity = prefabKey.toEntityOrNull() ?: entity()
-        newEntity.clear()
-        val prefabEntity = entity {
+        val prefabEntity = prefabKey.toEntityOrNull()?.apply {
+            detachObservers()
+            clear()
+        } ?: entity()
+        prefabEntity.apply {
             components?.forEach {
                 set(it, it::class)
             }
