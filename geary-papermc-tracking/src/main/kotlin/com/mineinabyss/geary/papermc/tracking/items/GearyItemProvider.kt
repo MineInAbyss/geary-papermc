@@ -11,6 +11,11 @@ import com.mineinabyss.geary.papermc.datastore.loadComponentsFrom
 import com.mineinabyss.geary.papermc.tracking.items.components.SetItem
 import com.mineinabyss.geary.prefabs.PrefabKey
 import com.mineinabyss.geary.prefabs.entityOfOrNull
+import com.mineinabyss.idofront.nms.aliases.NMSItemStack
+import com.mineinabyss.idofront.nms.nbt.WrappedPDC
+import com.mineinabyss.idofront.nms.nbt.fastPDC
+import net.minecraft.core.component.DataComponents
+import net.minecraft.world.item.component.CustomData
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 
@@ -48,5 +53,22 @@ class GearyItemProvider(world: Geary) : Geary by world {
             encodeComponentsTo(pdc)
             logger.d("Loaded new instance of prefab ${get<PrefabKey>()}")
         }
+    }
+
+    /**
+     * Like [deserializeItemStackToEntity], but re-encodes into a private copy of the item's PDC.
+     * The live tag is shared with every copy of the stack, so changes are only written back through [CustomData.update], and only when the content differs
+     */
+    fun deserializeNMSItemToEntity(item: NMSItemStack): GearyEntity? {
+        val live = item.fastPDC ?: return null
+        val scratch = WrappedPDC(live.compoundTag.copy())
+        val entity = deserializeItemStackToEntity(scratch)
+        if (scratch.compoundTag != live.compoundTag)
+            CustomData.update(DataComponents.CUSTOM_DATA, item) { it.put(PDC_KEY, scratch.compoundTag) }
+        return entity
+    }
+
+    private companion object {
+        const val PDC_KEY = "PublicBukkitValues"
     }
 }
