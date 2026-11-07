@@ -13,7 +13,8 @@ import com.mineinabyss.geary.papermc.data.SpawnsDatabase
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.spawning.choosing.*
 import com.mineinabyss.geary.papermc.spawning.choosing.mobcaps.MobCaps
-import com.mineinabyss.geary.papermc.spawning.choosing.worldguard.WorldGuardSpawning
+import com.mineinabyss.geary.papermc.regions.GearyRegions
+import com.mineinabyss.geary.papermc.spawning.choosing.regions.RegionSpawning
 import com.mineinabyss.geary.papermc.spawning.config.*
 import com.mineinabyss.geary.papermc.spawning.listeners.ListSpawnListener
 import com.mineinabyss.geary.papermc.spawning.locations.LocationsFeature
@@ -51,8 +52,11 @@ import kotlin.io.path.createParentDirectories
 import kotlin.io.path.div
 
 val SpawningFeature = module("spawning") {
-    requirePlugins("WorldGuard", "MythicMobs")
+    requirePlugins("MythicMobs")
     require(get<GearyPaperConfig>().spawning) { "Spawning must be enabled in config" }
+    val regionProvider = get<GearyPaperConfig>().regionProvider
+    val regions = requireNotNull(GearyRegions.select(regionProvider)) { "No region provider available for $regionProvider, install WorldGuard or run on Cartridge" }
+    single<GearyRegions> { regions }
 
     // -- Configs --
     val spawning by singleConfig<SpawnConfig>("spawning.yml") { default = SpawnConfig() }
@@ -97,7 +101,7 @@ val SpawningFeature = module("spawning") {
 
     // -- Regular spawning logic --
     single { new(::SpawnEntryReader) }
-    single { new(::WorldGuardSpawning) }
+    single { new(::RegionSpawning) }
     single { new(::MobCaps) }
     single { new(::SpawnChooser) }
     single { LocationSpread(triesForNearbyLoc = 10) }
@@ -138,7 +142,7 @@ val SpawningFeature = module("spawning") {
     plugin.launch {
         delay(1.ticks) // Let other plugins register components
         context // Load context (reads all spawns)
-        logger.i { "Loaded ${context.spawns.size} normal spawn types and ${spreadConfig.types.size} spread spawn types" }
+        logger.i { "Loaded ${context.spawns.size} normal spawn types and ${spreadConfig.types.size} spread spawn types, using ${regions.name} regions" }
         runCatching { listSpawnListener.adoptLoadedEntities() }
             .onFailure { logger.e { "Failed to adopt loaded spread spawn entities: ${it.stackTraceToString()}" } }
 

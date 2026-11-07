@@ -22,6 +22,8 @@ dependencies {
 
 allprojects {
     repositories {
+        // A locally published Cartridge API wins over the remote snapshot
+        mavenLocal { content { includeGroup("com.mineinabyss.cartridge") } }
         mavenCentral()
         google()
         maven("https://repo.mineinabyss.com/releases")

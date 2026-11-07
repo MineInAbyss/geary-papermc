@@ -1,5 +1,7 @@
 package com.mineinabyss.geary.papermc.spawning.spread_spawn
 
+import com.mineinabyss.geary.papermc.regions.GearyRegions
+import com.mineinabyss.geary.papermc.regions.RegionCuboid
 import co.touchlab.kermit.Logger
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.mineinabyss.geary.actions.ActionGroupContext
@@ -14,9 +16,6 @@ import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
 import com.mineinabyss.geary.papermc.spawning.config.SpreadEntityTypesConfig
 import com.mineinabyss.geary.papermc.spawning.config.SpreadSpawnConfig
 import com.mineinabyss.geary.papermc.spawning.readers.SpawnPositionReader
-import com.sk89q.worldedit.bukkit.BukkitAdapter
-import com.sk89q.worldguard.WorldGuard
-import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion
 import kotlinx.coroutines.withContext
 import org.bukkit.Location
 import org.bukkit.World
@@ -36,6 +35,7 @@ class SpreadSpawner(
     private val mobSpawner: MobSpawner,
     private val logger: Logger,
     private val regConfig: SpawnLocationsUnified,
+    private val regions: GearyRegions,
 ) {
     enum class Result { Spawned, Full, NoSurface, NoSpacing, NoValidSpot }
 
@@ -202,16 +202,18 @@ class SpreadSpawner(
         ActionGroupContext().apply { this.location = location.clone() }.execute()
 
     private fun resolveSections(): List<Section> {
-        val regions = WorldGuard.getInstance().platform.regionContainer.get(BukkitAdapter.adapt(world))
         return configs.types.flatMap { (type, sectionsConfig) ->
             sectionsConfig.sectionsConfig.mapNotNull { (regionName, config) ->
-                val region = regions?.getRegion(regionName) ?: run {
-                    warnOnce("Region $regionName not found in world ${world.name}")
-                    return@mapNotNull null
-                }
-                val cuboid = region as? ProtectedCuboidRegion ?: run {
-                    warnOnce("Region $regionName is not a cuboid region in world ${world.name}")
-                    return@mapNotNull null
+                val cuboid = when (val found = regions.cuboid(world, regionName)) {
+                    is RegionCuboid.Found -> found
+                    RegionCuboid.Missing -> {
+                        warnOnce("Region $regionName not found in world ${world.name} (${regions.name})")
+                        return@mapNotNull null
+                    }
+                    RegionCuboid.NotCuboid -> {
+                        warnOnce("Region $regionName is not a cuboid region in world ${world.name} (${regions.name})")
+                        return@mapNotNull null
+                    }
                 }
                 // The surface index only holds ground positions, so other positions would fail validation and wipe it
                 val usesAlt = sectionsConfig.enableAltSpawns && config.altSpawnChance > 0
@@ -219,12 +221,10 @@ class SpreadSpawner(
                     warnOnce("Spread section $regionName for $type must spawn on GROUND, skipping it")
                     return@mapNotNull null
                 }
-                val min = BukkitAdapter.adapt(world, cuboid.minimumPoint)
-                val max = BukkitAdapter.adapt(world, cuboid.maximumPoint)
                 Section.of(
                     type, regionName, config, sectionsConfig.enableAltSpawns,
-                    SpreadPos(min.blockX, min.blockY, min.blockZ),
-                    SpreadPos(max.blockX, max.blockY, max.blockZ),
+                    SpreadPos(cuboid.minX, cuboid.minY, cuboid.minZ),
+                    SpreadPos(cuboid.maxX, cuboid.maxY, cuboid.maxZ),
                 )
             }
         }
