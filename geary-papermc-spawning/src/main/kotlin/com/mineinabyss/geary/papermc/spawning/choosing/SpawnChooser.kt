@@ -25,6 +25,8 @@ class SpawnChooser(
             .filter { entry -> entry.regions.isEmpty() && entry.regionConditions().any() }
     }
 
+    val positionsWithSpawns: Set<SpawnPosition> = context.spawns.mapTo(mutableSetOf()) { it.entry.position }
+
     /** [categoryCounts] is only evaluated once a spawn matches the region and position. */
     fun getAllowedSpawnsNear(
         location: Location,
