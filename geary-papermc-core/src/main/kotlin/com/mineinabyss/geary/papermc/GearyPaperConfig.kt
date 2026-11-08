@@ -106,6 +106,8 @@ data class EntityTrackingConfig(
     val trackPlayers: Boolean = true,
     @YamlComment("Whether all other Minecraft entities should be tracked as entities in Geary")
     val trackOtherEntities: Boolean = true,
+    @YamlComment("Remove mobs whose saved prefabs no longer exist instead of leaving them as their vanilla base type",)
+    val removeMobsWithMissingPrefabs: Boolean = false,
 )
 
 @Serializable

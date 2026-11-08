@@ -15,6 +15,8 @@ import com.mineinabyss.geary.papermc.features.items.recipes.SetRecipes
 import com.mineinabyss.geary.papermc.gearyPaper
 import com.mineinabyss.geary.papermc.gearyWorld
 import com.mineinabyss.geary.papermc.tracking.GearyArgs
+import com.mineinabyss.geary.papermc.tracking.entities.systems.missingprefabs.MissingPrefabs
+import com.mineinabyss.geary.papermc.tracking.entities.systems.missingprefabs.MissingPrefabsListener
 import com.mineinabyss.geary.papermc.tracking.entities.systems.updatemobtype.UpdateMob
 import com.mineinabyss.geary.papermc.tracking.items.inventory.toGeary
 import com.mineinabyss.geary.prefabs.PrefabKey
@@ -26,6 +28,7 @@ import com.mineinabyss.idofront.commands.brigadier.Args
 import com.mineinabyss.idofront.commands.brigadier.suggests
 import com.mineinabyss.idofront.features.DICommandContext
 import com.mineinabyss.idofront.features.get
+import com.mineinabyss.idofront.features.listeners
 import com.mineinabyss.idofront.features.mainCommand
 import com.mineinabyss.idofront.messaging.error
 import com.mineinabyss.idofront.messaging.success
@@ -43,6 +46,7 @@ import kotlin.io.path.*
 val PrefabsFeature = module("prefabs") {
     require(get<GearyPaperConfig>().loading.prefabs) { "Prefabs must be enabled in config" }
     val plugin = get<Plugin>()
+    val config = get<GearyPaperConfig>()
 
     gearyWorld {
         val prefabs = getAddon(Prefabs)
@@ -69,8 +73,11 @@ val PrefabsFeature = module("prefabs") {
                 // A namespace throwing still ends the load, whoever waits on it must not hang
                 PrefabLoading.finished()
             }
+            MissingPrefabs.resolveStoredPrefabs(config)
         }
     }
+    // Registered only after loading is flagged as started, so it never mistakes a not yet loaded prefab for a missing one
+    listeners(MissingPrefabsListener(config))
 }.mainCommand {
     "prefab" {
         permission = "geary.admin.prefab"
