@@ -66,7 +66,7 @@ object MissingPrefabs {
 
         val firstSeen = missing.filter { warnedKeys.add(it) }
         if (firstSeen.isNotEmpty()) logger.w(
-            $$"""
+            """
                 $where has saved prefabs $firstSeen that no longer exist, so it loads as a plain ${bukkit.type}
                 Set entities.removeMobsWithMissingPrefabs to true to remove such mobs as they load
             """.trimIndent()

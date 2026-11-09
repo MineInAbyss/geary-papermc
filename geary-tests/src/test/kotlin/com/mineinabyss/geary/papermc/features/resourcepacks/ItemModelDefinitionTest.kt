@@ -113,6 +113,60 @@ class ItemModelDefinitionTest {
     }
 
     @Test
+    fun `should fill a parent's texture variables at the first variable's texture`() {
+        val pack = ResourcePack.resourcePack()
+        val model = resolve(
+            """
+            parentModel: block/cube_column
+            texture:
+              side: mineinabyss:blocks/block/carved_oak_log
+              end: mineinabyss:blocks/block/carved_oak_log_top
+              particle: mineinabyss:blocks/block/carved_oak_log_top
+            """,
+            pack,
+        )
+
+        model.reference() shouldBe Key.key("mineinabyss:blocks/block/carved_oak_log")
+        val generated = pack.model(Key.key("mineinabyss:blocks/block/carved_oak_log")).shouldNotBeNull()
+        generated.parent() shouldBe Key.key("minecraft:block/cube_column")
+        generated.textures().layers() shouldBe emptyList()
+        generated.textures().particle()?.key() shouldBe Key.key("mineinabyss:blocks/block/carved_oak_log_top")
+        generated.textures().variables().mapValues { it.value.key() } shouldBe mapOf(
+            "side" to Key.key("mineinabyss:blocks/block/carved_oak_log"),
+            "end" to Key.key("mineinabyss:blocks/block/carved_oak_log_top"),
+        )
+    }
+
+    @Test
+    fun `should build a compass range dispatch from inline texture entries`() {
+        val pack = ResourcePack.resourcePack()
+        val model = resolve(
+            """
+            type: range_dispatch
+            property: compass
+            target: lodestone
+            scale: 32
+            entries:
+            - threshold: 0
+              texture: mineinabyss:gear/utility/star_compass/16
+            - threshold: 0.5
+              texture: mineinabyss:gear/utility/star_compass/17
+            fallback:
+              texture: mineinabyss:gear/utility/star_compass
+            """,
+            pack,
+        ).shouldBeInstanceOf<RangeDispatchItemModel>()
+
+        model.scale() shouldBe 32f
+        model.entries().map { it.threshold() to it.model().reference() } shouldBe listOf(
+            0f to Key.key("mineinabyss:gear/utility/star_compass/16"),
+            0.5f to Key.key("mineinabyss:gear/utility/star_compass/17"),
+        )
+        model.fallback().shouldNotBeNull().reference() shouldBe Key.key("mineinabyss:gear/utility/star_compass")
+        pack.models().size shouldBe 3
+    }
+
+    @Test
     fun `should build a select taking single or listed case values`() {
         val model = resolve(
             decode(

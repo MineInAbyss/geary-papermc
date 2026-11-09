@@ -87,7 +87,13 @@ class ItemModelResolver(
             else -> "reference"
         }
         when (type) {
-            "texture" -> return reference(builder.fromTexture(node.key("texture")!!, node.key("parent_model") ?: Key.key("minecraft:item/generated")), node.get("tints"))
+            "texture" -> {
+                val parent = node.key("parent_model") ?: Key.key("minecraft:item/generated")
+                val texture = node.get("texture")
+                val model = if (texture.isJsonObject) builder.fromTextureVariables(texture.asJsonObject.entrySet().associate { it.key to Key.key(it.value.asString) }, parent)
+                else builder.fromTexture(Key.key(texture.asString), parent)
+                return reference(model, node.get("tints"))
+            }
             "bbmodel" -> return reference(builder.fromBBModel(node.key("bbmodel")!!), node.get("tints"))
             "reference" -> return reference(node.key("model") ?: fallbackModel, node.get("tints"))
         }

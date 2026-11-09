@@ -50,12 +50,20 @@ class ModelBuilder(
 
     /** Flat models are written at their texture's own path, the way prefabs already name the two in step */
     fun fromTexture(texture: Key, parentModel: Key): Key {
-        Model.model()
-            .key(texture)
-            .parent(parentModel)
-            .textures(ModelTextures.of(listOf(ModelTexture.ofKey(texture)), null, emptyMap()))
-            .build().addTo(pack)
+        val modelTextures = ModelTextures.of(listOf(ModelTexture.ofKey(texture)), null, emptyMap())
+        Model.model().key(texture).parent(parentModel).textures(modelTextures).build().addTo(pack)
+
         return texture
+    }
+
+    /** Models filling a parent's texture variables, like `all` for block/cube_all, are written at the first variable's texture */
+    fun fromTextureVariables(variables: Map<String, Key>, parentModel: Key): Key {
+        val key = requireNotNull(variables.values.firstOrNull()) { "texture needs at least one variable" }
+        val textures = variables.mapValues { ModelTexture.ofKey(it.value) }
+        val modelTextures = ModelTextures.of(emptyList(), textures["particle"], textures - "particle")
+        Model.model().key(key).parent(parentModel).textures(modelTextures).build().addTo(pack)
+
+        return key
     }
 
     fun fromBBModel(bbmodel: Key): Key = bbModels.generate(bbmodel)
