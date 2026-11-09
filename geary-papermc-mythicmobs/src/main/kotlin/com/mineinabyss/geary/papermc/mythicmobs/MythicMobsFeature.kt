@@ -6,6 +6,7 @@ import com.mineinabyss.dependencies.new
 import com.mineinabyss.dependencies.single
 import com.mineinabyss.geary.papermc.GearyPaperConfig
 import com.mineinabyss.geary.papermc.gearyWorld
+import com.mineinabyss.geary.papermc.mythicmobs.actions.MythicConditionReloads
 import com.mineinabyss.geary.papermc.mythicmobs.actions.runMMSkillAction
 import com.mineinabyss.geary.papermc.mythicmobs.items.MythicMobDropListener
 import com.mineinabyss.geary.papermc.mythicmobs.pvp.MythicPvpGuardListener
@@ -28,5 +29,5 @@ val MythicMobsFeature = module("mythicMobs") {
         mythicMobSpawner()
         markMMAsCustomMob()
     }
-    listeners(dropListener, prefabListener, pvpGuardListener)
+    listeners(dropListener, prefabListener, pvpGuardListener, MythicConditionReloads)
 }

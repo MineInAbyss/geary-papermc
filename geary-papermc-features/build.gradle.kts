@@ -21,6 +21,7 @@ dependencies {
     compileOnly(miaLibs.kotlinx.coroutines)
     compileOnly(miaLibs.minecraft.mccoroutine)
     compileOnly(miaLibs.idofront.nms)
+    compileOnly(miaLibs.idofront.services)
     compileOnly(miaLibs.creative.serializer.minecraft)
     compileOnly(miaLibs.creative.api)
     compileOnly(libs.jsonschema.dsl)

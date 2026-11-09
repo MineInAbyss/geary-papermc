@@ -5,7 +5,6 @@ import com.mineinabyss.geary.papermc.tracking.items.GearyItemProvider
 import com.mineinabyss.geary.papermc.tracking.items.systems.LoginListener
 import com.mineinabyss.idofront.nms.aliases.NMSItemStack
 import com.mineinabyss.idofront.nms.aliases.toBukkit
-import com.mineinabyss.idofront.nms.nbt.fastPDC
 import org.bukkit.inventory.ItemStack
 
 class NMSItemCache(
@@ -21,7 +20,7 @@ class NMSItemCache(
     }
 
     override fun deserializeItem(item: NMSItemStack): GearyEntity? {
-        return itemProvider.deserializeItemStackToEntity(item.fastPDC)
+        return itemProvider.deserializeNMSItemToEntity(item)
     }
 
     /**
