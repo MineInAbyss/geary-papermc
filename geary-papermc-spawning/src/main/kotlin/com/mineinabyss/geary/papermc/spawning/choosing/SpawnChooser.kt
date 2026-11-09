@@ -10,7 +10,7 @@ import com.mineinabyss.geary.papermc.spawning.conditions.IncludeSpawnTagConditio
 import com.mineinabyss.geary.papermc.spawning.config.SpawnEntry
 import com.mineinabyss.geary.papermc.spawning.config.SpawnLocationsUnified
 import com.mineinabyss.geary.papermc.spawning.config.SpawnPosition
-import com.mineinabyss.geary.papermc.spawning.helpers.WeightedList
+import com.mineinabyss.geary.papermc.spawning.helpers.weightedRandomOrNull
 import org.bukkit.Location
 
 class SpawnChooser(
@@ -24,6 +24,8 @@ class SpawnChooser(
             .map { it.entry }
             .filter { entry -> entry.regions.isEmpty() && entry.regionConditions().any() }
     }
+
+    val positionsWithSpawns: Set<SpawnPosition> = context.spawns.mapTo(mutableSetOf()) { it.entry.position }
 
     /** [categoryCounts] is only evaluated once a spawn matches the region and position. */
     fun getAllowedSpawnsNear(
@@ -44,8 +46,8 @@ class SpawnChooser(
         position: SpawnPosition,
         categoryCounts: Lazy<MutableMap<SpawnCategory, Int>> = lazy { caps.countsNear(location) },
     ): SpawnEntry? {
-        val allowedSpawns = getAllowedSpawnsNear(location, position, categoryCounts)?.takeUnless { it.isEmpty() } ?: return null
-        return WeightedList(allowedSpawns.associateWith { it.priority }).roll()
+        val allowedSpawns = getAllowedSpawnsNear(location, position, categoryCounts) ?: return null
+        return allowedSpawns.weightedRandomOrNull { it.priority }
     }
 
     private fun SpawnEntry.regionConditions(): Sequence<GearyComponent> {
